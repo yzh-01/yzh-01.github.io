@@ -1,0 +1,147 @@
+<style>
+    /* 基础重置 */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: #1a1a1a;
+        font-family: 'Arial', sans-serif;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    /* 游戏容器 */
+    #unity-container {
+        position: relative;
+        width: 960px;
+        height: 600px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        border-radius: 10px;
+        overflow: hidden;
+        background: #2a2a2a;
+    }
+
+    /* 游戏画布 */
+    #unity-canvas {
+        width: 100%;
+        height: 100%;
+        background: #000;
+    }
+
+    /* 加载界面 */
+    #unity-loading-bar {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        text-align: center;
+        z-index: 10;
+    }
+
+    #unity-logo {
+        width: 154px;
+        height: 140px;
+        margin: 0 auto 20px;
+        background: url('TemplateData/logo.png') no-repeat center/contain;
+        animation: pulse 2s infinite;
+    }
+
+    /* 进度条 */
+    #unity-progress-bar-empty {
+        width: 100%;
+        height: 18px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 9px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #unity-progress-bar-full {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #00ff88, #00b4ff);
+        transition: width 0.3s ease-out;
+        border-radius: 9px;
+    }
+
+    /* 全屏按钮 */
+    #unity-fullscreen-button {
+        width: 32px;
+        height: 32px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>');
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    #unity-fullscreen-button:hover {
+        transform: scale(1.1);
+    }
+
+    /* 页脚 */
+    #unity-footer {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #unity-build-title {
+        color: #fff;
+        font-size: 14px;
+        opacity: 0.8;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* 警告横幅 */
+    #unity-warning {
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+        z-index: 100;
+    }
+
+    #unity-warning div {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 4px;
+        margin: 5px;
+        font-size: 14px;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 960px) {
+        #unity-container {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        #unity-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        #unity-logo {
+            width: 100px;
+            height: 90px;
+        }
+    }
+
+    /* 动画 */
+    @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+    }
+</style>
