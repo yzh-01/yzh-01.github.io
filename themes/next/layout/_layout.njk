@@ -17,6 +17,9 @@
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage"{% if theme.motion.enable %} class="use-motion"{% endif %}>
+  <!-- 自定义背景层（HOME 用 home.jpg，其他用 post.jpg）-->
+  <div class="bg-photo" data-page="{% if is_home %}home{% else %}post{% endif %}" aria-hidden="true"></div>
+  <div class="bg-tint" aria-hidden="true"></div>
   <div class="headband"></div>
 
   <main class="main">

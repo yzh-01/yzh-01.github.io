@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>yzh 的小站 · 雨后小记</title>
+
+<!-- 国内 CDN: 字体组合
+     大标题 Liu Jian Mao Cao（草书）
+     小标题 Zhi Mang Xing（行书）
+     正文 ZCOOL XiaoWei（细黑）
+     拉丁 Caveat 手写 -->
+<link rel="preconnect" href="https://fonts.loli.net">
+<link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
+<link href="https://fonts.loli.net/css?family=Liu+Jian+Mao+Cao|Zhi+Mang+Xing|ZCOOL+XiaoWei|Caveat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ===== Tokens · 冷雾森系 ===== */
+  /* Tokens for dark BG：文字翻浅 */
+  :root{
+    --paper:     transparent;
+    --paper-2:   rgba(223,231,224,.85);
+    --ink:       #f0f4ee;       /* 文字主色：近白偏冷 */
+    --ink-soft:  #d8e0d8;
+    --ink-mute:  #a8b3a8;
+    --moss:      #b8d0b8;
+    --moss-deep: #d8e8d4;
+    --moss-bg:   rgba(140,165,140,.18);
+    --frost:     #c8d4cc;
+    --warm:      #d4c5a0;
+
+    --zh-crazy: "Liu Jian Mao Cao", "Zhi Mang Xing", "Songti SC", serif;       /* 草书 · H1 */
+    --zh-sub:   "Zhi Mang Xing", "Liu Jian Mao Cao", "Songti SC", serif;       /* 行书 · 小标题 */
+    --zh-loose: "ZCOOL XiaoWei", "Zhi Mang Xing", "Songti SC", serif;          /* 细黑 · 正文 */
+    --en:       "Caveat", "Liu Jian Mao Cao", cursive;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  html,body{
+    background:transparent;color:var(--ink);
+    font-family:var(--zh-loose);line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* ===== 动态背景层 ===== */
+
+  /* ===== 真实背景图（来自用户）====== */
+  .bg-photo{
+    position:fixed;inset:0;z-index:0;
+    background-image:url('images/home.jpg');
+    background-size:cover;background-position:center;
+    /* 色调融合：降饱和 + 冷调 + 暗化 */
+    filter:saturate(.55) brightness(.45) hue-rotate(-8deg) contrast(1.05);
+    /* 四周 mask 渐变，避免硬切 */
+    mask-image:radial-gradient(ellipse at center, #000 60%, transparent 100%);
+    -webkit-mask-image:radial-gradient(ellipse at center, #000 60%, transparent 100%);
+  }
+  /* 色调叠加层（统一到 F-rain 色板） */
+  .bg-tint{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(31,42,36,.55) 0%, rgba(91,122,102,.25) 50%, rgba(31,42,36,.65) 100%),
+      radial-gradient(ellipse 60% 40% at 50% 30%, rgba(140,165,140,.15) 0%, transparent 70%);
+  }
+
+  /* Layer 1: 雾气（径向渐变 + 缓慢漂浮） */
+  .fog{
+    position:fixed;inset:-25%;pointer-events:none;z-index:2;
+    background:
+      radial-gradient(ellipse 55% 45% at 25% 30%, rgba(140,165,140,.42) 0%, transparent 70%),
+      radial-gradient(ellipse 45% 55% at 75% 65%, rgba(91,122,102,.32) 0%, transparent 70%),
+      radial-gradient(ellipse 35% 35% at 50% 90%, rgba(160,180,160,.25) 0%, transparent 70%);
+    animation:drift1 28s ease-in-out infinite alternate;
+  }
+  .fog.b{
+    inset:-30%;opacity:.55;
+    background:
+      radial-gradient(ellipse 40% 50% at 60% 25%, rgba(91,122,102,.30) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 15% 75%, rgba(140,165,140,.35) 0%, transparent 70%);
+    animation:drift2 36s ease-in-out infinite alternate;
+  }
+  @keyframes drift1{from{transform:translate(0,0) scale(1)}to{transform:translate(50px,-40px) scale(1.08)}}
+  @keyframes drift2{from{transform:translate(0,0) scale(1.05)}to{transform:translate(-60px,45px) scale(1)}}
+
+  /* Layer 2: 雨丝（全屏多层 linear-gradient + 动画下落） */
+  .rain{
+    position:fixed;inset:0;pointer-events:none;z-index:2;
+    /* 用 repeating-linear-gradient 模拟密集雨丝（苔色）*/
+    background-image:
+      repeating-linear-gradient(100deg,
+        transparent 0,
+        transparent 8px,
+        rgba(91,122,102,.14) 8px,
+        rgba(91,122,102,.14) 9px),
+      repeating-linear-gradient(95deg,
+        transparent 0,
+        transparent 14px,
+        rgba(91,122,102,.10) 14px,
+        rgba(91,122,102,.10) 15px);
+    background-size: 100% 100%, 100% 100%;
+    animation:rain-fall 1.4s linear infinite;
+    opacity:.9;
+  }
+  @keyframes rain-fall{
+    from{background-position: 0 -50px, 0 -50px}
+    to  {background-position: 0 50px,  0 80px}
+  }
+  /* 第二层雨（更慢、更密、角度不同 → 立体感） */
+  .rain.b{
+    background-image:
+      repeating-linear-gradient(105deg,
+        transparent 0,
+        transparent 5px,
+        rgba(140,165,140,.18) 5px,
+        rgba(140,165,140,.18) 5.5px);
+    animation-duration: 2.2s;
+    opacity:.7;
+  }
+
+  /* Layer 3: 噪点纹理（纸张） */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:3;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .11 0 0 0 0 .15 0 0 0 0 .19 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.4'/></svg>");
+    mix-blend-mode:multiply;opacity:.5;
+  }
+
+  /* Layer 4: 落叶粒子（4 种叶形 × 14 片，ease-in-out 真实飘落） */
+  .leaf{
+    position:fixed;width:14px;height:14px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23e6ede3' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'><path d='M50,8 Q38,40 50,90 Q62,40 50,8 Z' fill='%23aebdc4' fill-opacity='.85'/><path d='M50,8 L50,90'/><path d='M50,30 Q42,35 38,42 M50,30 Q58,35 62,42 M50,50 Q40,55 35,62 M50,50 Q60,55 65,62 M50,70 Q44,72 40,76 M50,70 Q56,72 60,76'/></g></svg>");
+    background-repeat:no-repeat;background-size:contain;
+    opacity:.55;z-index:2;pointer-events:none;
+    will-change:transform;
+  }
+  .leaf.b{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g><path d='M50,5 Q42,30 50,95 Q58,30 50,5 Z' fill='%23c9d4cc' fill-opacity='.7' stroke='%23e6ede3' stroke-width='1' stroke-linejoin='round'/><path d='M50,5 L50,95' stroke='%23e6ede3' stroke-width='.8' fill='none'/></g></svg>")}
+  .leaf.c{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g><path d='M50,90 L20,55 Q15,35 30,25 Q45,15 50,30 Q55,15 70,25 Q85,35 80,55 Z' fill='%23d4c5a0' fill-opacity='.55' stroke='%23e6ede3' stroke-width='1' stroke-linejoin='round'/><path d='M50,90 L50,30 M50,50 L30,40 M50,50 L70,40'/></g></svg>")}
+  .leaf.d{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g><path d='M30,20 Q15,30 20,50 Q10,70 30,85 Q50,92 70,82 Q88,72 85,50 Q90,28 70,15 Q50,8 30,20 Z' fill='%23d8e0dc' fill-opacity='.7' stroke='%23e6ede3' stroke-width='1' stroke-linejoin='round'/><path d='M25,30 Q50,45 75,30 M22,55 Q50,65 78,55 M30,75 Q50,82 75,72' stroke='%23e6ede3' stroke-width='.7' fill='none' opacity='.6'/></g></svg>")}
+  .leaf:nth-child(1){top:-5%;left:8%;width:12px;height:12px;animation:fall 22s ease-in-out infinite;animation-delay:0s}
+  .leaf:nth-child(2){top:-3%;left:18%;width:16px;height:14px;animation:fall 28s ease-in-out infinite;animation-delay:-3s}
+  .leaf:nth-child(3){top:-7%;left:28%;width:10px;height:14px;animation:fall 25s ease-in-out infinite;animation-delay:-7s}
+  .leaf:nth-child(4){top:-4%;left:38%;width:18px;height:12px;animation:fall 32s ease-in-out infinite;animation-delay:-11s}
+  .leaf:nth-child(5){top:-6%;left:46%;width:14px;height:16px;animation:fall 24s ease-in-out infinite;animation-delay:-5s}
+  .leaf:nth-child(6){top:-2%;left:55%;width:12px;height:14px;animation:fall 30s ease-in-out infinite;animation-delay:-14s}
+  .leaf:nth-child(7){top:-8%;left:64%;width:16px;height:16px;animation:fall 26s ease-in-out infinite;animation-delay:-2s}
+  .leaf:nth-child(8){top:-5%;left:72%;width:10px;height:12px;animation:fall 29s ease-in-out infinite;animation-delay:-9s}
+  .leaf:nth-child(9){top:-3%;left:82%;width:14px;height:14px;animation:fall 23s ease-in-out infinite;animation-delay:-16s}
+  .leaf:nth-child(10){top:-9%;left:88%;width:18px;height:14px;animation:fall 34s ease-in-out infinite;animation-delay:-6s}
+  .leaf:nth-child(11){top:-4%;left:14%;width:12px;height:16px;animation:fall 27s ease-in-out infinite;animation-delay:-19s}
+  .leaf:nth-child(12){top:-6%;left:35%;width:14px;height:12px;animation:fall 31s ease-in-out infinite;animation-delay:-12s}
+  .leaf:nth-child(13){top:-3%;left:60%;width:16px;height:14px;animation:fall 25s ease-in-out infinite;animation-delay:-22s}
+  .leaf:nth-child(14){top:-7%;left:78%;width:10px;height:14px;animation:fall 28s ease-in-out infinite;animation-delay:-15s}
+  @keyframes fall{
+    0%{transform:translate(0,0) rotate(0deg) scaleX(1);opacity:0}
+    6%{opacity:.7}
+    25%{transform:translate(40px,28vh) rotate(140deg) scaleX(.6)}
+    50%{transform:translate(-30px,55vh) rotate(320deg) scaleX(1.1)}
+    75%{transform:translate(50px,80vh) rotate(500deg) scaleX(.8)}
+    94%{opacity:.5}
+    100%{transform:translate(-20px,115vh) rotate(720deg) scaleX(1);opacity:0}
+  }
+
+  main{position:relative;z-index:3;max-width:880px;margin:0 auto;padding:0 28px}
+
+  /* ============ 组件 1: 顶部导航 ============ */
+  nav.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:28px 0 22px;
+    border-bottom:1px solid rgba(240,244,238,.18);
+    margin-bottom:18vh;
+    font-family:var(--en);font-size:14px;
+    color:var(--ink-mute);letter-spacing:.18em;
+    text-transform:uppercase;
+    opacity:0;animation:in 1s ease .1s forwards;
+  }
+  nav.top .logo{
+    font-family:var(--zh-crazy);font-size:26px;
+    color:var(--ink);letter-spacing:.06em;
+    text-transform:none;
+  }
+  nav.top ul{display:flex;gap:24px;list-style:none}
+  nav.top a{
+    color:var(--ink-mute);text-decoration:none;
+    border-bottom:1px solid transparent;padding-bottom:1px;
+    transition:color .3s, border-color .3s;
+  }
+  nav.top a:hover{color:#d8e8d4;border-bottom-color:#d8e8d4}
+  @keyframes in{to{opacity:1}}
+
+  /* ============ 组件 2: Hero ============ */
+  .hero{
+    margin-bottom:18vh;
+    /* 整块微微歪斜（书法落款感）*/
+    transform:rotate(-1.2deg);transform-origin:left center;
+    margin-left:-10px;
+  }
+  .hero .eyebrow{
+    font-family:var(--en);font-size:13px;color:var(--moss);
+    letter-spacing:.36em;margin-bottom:28px;display:inline-block;
+  }
+  .hero h1{
+    /* 草书 H1：字形已经潦草，布局保持规整，缩小字号减少压迫感 */
+    font-family:var(--zh-crazy);font-weight:400;
+    font-size:clamp(56px,13vw,144px);
+    line-height:1;letter-spacing:.04em;
+    color:var(--ink);
+    /* 单层轻阴影（草书笔画简，不需要多层叠） */
+    text-shadow: 1px 1px 0 rgba(28,38,48,.4);
+    margin-bottom:24px;
+  }
+  .hero h1 .seal{
+    display:inline-block;width:42px;height:42px;line-height:42px;text-align:center;
+    font-family:var(--zh-sub);font-size:18px;color:var(--warm);
+    border:1.5px solid var(--warm);border-radius:4px;
+    transform:rotate(-3deg);opacity:.85;
+    margin-left:10px;vertical-align:middle;
+  }
+  .hero .stamp{
+    font-family:var(--en);font-size:13px;color:var(--ink-mute);
+    letter-spacing:.24em;margin-top:14px;
+  }
+
+  /* ============ 组件 3: 最近文章（卡片列表）============ */
+  .sec{margin-bottom:14vh;opacity:0;animation:in 1s ease .4s forwards}
+  .sec .label{
+    font-family:var(--en);font-size:12px;letter-spacing:.4em;
+    color:var(--ink-mute);text-transform:uppercase;
+    margin-bottom:36px;display:flex;align-items:center;gap:16px;
+  }
+  .sec .label::before, .sec .label::after{content:"";flex:1;border-top:1px solid rgba(240,244,238,.2)}
+
+  .post{
+    display:grid;grid-template-columns:60px 1fr auto;gap:24px;
+    align-items:baseline;
+    padding:24px 0;
+    border-bottom:1px solid rgba(240,244,238,.12);
+    cursor:pointer;
+    transition:padding .5s cubic-bezier(.2,.7,.2,1), background .4s;
+    text-decoration:none;color:inherit;
+  }
+  .post:hover{padding-left:14px;padding-right:14px;background:rgba(140,165,140,.10)}
+  .post .num{
+    font-family:var(--en);font-size:14px;color:var(--moss);
+    letter-spacing:.1em;
+  }
+  .post .body .t{
+    /* 小标题用行书 */
+    font-family:var(--zh-sub);font-size:36px;
+    color:var(--ink);letter-spacing:.04em;
+    transition:color .4s;
+    display:block;margin-bottom:4px;
+  }
+  .post:hover .body .t{color:var(--moss-deep)}
+  .post .body .ex{
+    font-family:var(--zh-loose);font-size:15px;
+    color:var(--ink-mute);font-style:italic;
+  }
+  .post .d{
+    font-family:var(--en);font-size:14px;color:var(--ink-mute);
+    letter-spacing:.06em;white-space:nowrap;
+  }
+
+  /* ============ 组件 4: 标签云 ============ */
+  .tags-wrap{margin-bottom:14vh;opacity:0;animation:in 1s ease .6s forwards}
+  .tags{
+    display:flex;flex-wrap:wrap;gap:14px 18px;
+    padding:20px 0;
+  }
+  .tag{
+      /* 统一字号，靠颜色和粗细区分权重（不再用大小） */
+      font-family:var(--zh-loose);font-size:17px;
+      color:var(--ink-soft);
+      border:1px solid rgba(240,244,238,.22);
+      padding:8px 16px;border-radius:99px;
+      cursor:pointer;
+      transition:all .3s ease;
+      background:var(--moss-bg);
+    }
+    .tag .cnt{
+      font-family:var(--en);font-size:13px;
+      color:var(--ink-mute);margin-left:6px;
+    }
+    .tag:hover{
+      color:#f0f4ee;border-color:#f0f4ee;
+      transform:translateY(-2px);
+      background:rgba(140,165,140,.25);
+    }
+    /* 权重差异：边框粗细 + 背景深浅（不再用字号） */
+    .tag.lg{
+      border:1.5px solid #d8e8d4;
+      color:#f0f4ee;
+      background:rgba(140,165,140,.28);
+    }
+    .tag.lg:hover{
+      background:#d8e8d4;color:#1c2630;
+    }
+    .tag.sm{
+      color:var(--ink-mute);
+      background:transparent;
+      border-style:dashed;
+    }
+
+  /* ============ 组件 5: 关于 ============ */
+  .about{
+    margin-bottom:14vh;
+    padding:36px 32px;
+    background:rgba(20,30,25,.45);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-left:3px solid var(--moss);
+    border-radius:0 8px 8px 0;
+    opacity:0;animation:in 1s ease .8s forwards;
+    position:relative;
+    transform:rotate(.4deg);
+    border:1px solid rgba(140,165,140,.2);
+    border-left-width:3px;
+  }
+  .about h3{
+    /* 关于区 H3 用行书（中等潦草） */
+    font-family:var(--zh-sub);font-size:38px;
+    color:var(--ink);margin-bottom:14px;letter-spacing:.04em;
+  }
+  .about p{
+    font-family:var(--zh-loose);font-size:17px;
+    color:var(--ink-soft);line-height:1.85;margin-bottom:10px;
+  }
+  .about .links{
+    margin-top:20px;display:flex;gap:18px;flex-wrap:wrap;
+    font-family:var(--en);font-size:14px;
+    letter-spacing:.12em;
+  }
+  .about .links a{
+    color:#d8e8d4;text-decoration:none;
+    border-bottom:1px solid #d8e8d4;padding-bottom:1px;
+  }
+
+  /* ============ 组件 6: Footer ============ */
+  footer{
+    margin-top:8vh;padding:24px 0 60px;
+    border-top:1px solid rgba(240,244,238,.18);
+    display:flex;justify-content:space-between;
+    font-family:var(--en);font-size:13px;color:var(--ink-mute);
+    letter-spacing:.18em;text-transform:uppercase;
+    opacity:0;animation:in 1s ease 1s forwards;
+  }
+  footer .l a{
+    color:var(--ink-soft);text-decoration:none;
+    margin-right:14px;
+    border-bottom:1px solid rgba(240,244,238,.22);padding-bottom:1px;
+  }
+
+  /* 减动效 */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+    .fog, .fog.b, .rain, .rain.b, .leaf{animation:none}
+    .hero, .sec, .tags-wrap, .about, footer, nav.top{opacity:1;transform:none}
+  }
+
+  /* 移动端 */
+  @media (max-width:600px){
+    nav.top ul{gap:14px;font-size:12px}
+    nav.top .logo{font-size:22px}
+    .post{grid-template-columns:40px 1fr;gap:14px}
+    .post .d{grid-column:1/3;font-size:12px}
+    .about{padding:24px 20px}
+  }
+</style>
+</head>
+<body>
+
+<!-- 真实背景图 + 色调融合层 -->
+<div class="bg-photo" aria-hidden="true"></div>
+<div class="bg-tint" aria-hidden="true"></div>
+
+<!-- 动态背景 -->
+<div class="fog" aria-hidden="true"></div>
+<div class="fog b" aria-hidden="true"></div>
+<div class="rain" aria-hidden="true"></div>
+<div class="rain b" aria-hidden="true"></div>
+<div class="leaf"></div><div class="leaf b"></div><div class="leaf c"></div>
+<div class="leaf d"></div><div class="leaf"></div><div class="leaf b"></div>
+<div class="leaf c"></div><div class="leaf d"></div><div class="leaf"></div>
+<div class="leaf b"></div><div class="leaf c"></div><div class="leaf d"></div>
+<div class="leaf"></div><div class="leaf b"></div>
+
+<main>
+
+  <!-- 组件 1: 顶部导航 -->
+  <nav class="top">
+    <a class="logo" href="#">yzh</a>
+    <ul>
+      <li><a href="#posts">笔记</a></li>
+      <li><a href="#tags">标签</a></li>
+      <li><a href="#about">关于</a></li>
+      <li><a href="#rss">rss</a></li>
+    </ul>
+  </nav>
+
+  <!-- 组件 2: Hero -->
+  <section class="hero">
+    <span class="eyebrow">a personal journal — since 2026</span>
+    <h1>
+      雨后<br>
+      小记<span class="seal">印</span>
+    </h1>
+    <div class="stamp">// after rain, in the bamboo grove</div>
+  </section>
+
+  <!-- 组件 3: 最近文章 -->
+  <section class="sec" id="posts">
+    <div class="label">最近 · recent</div>
+    <a class="post" href="#">
+      <span class="num">no.02</span>
+      <span class="body">
+        <span class="t">软件工程期末复习</span>
+        <span class="ex">12 章核心考点整理，选择 / 简答 / 应用题全覆盖。</span>
+      </span>
+      <span class="d">07 · 20</span>
+    </a>
+    <a class="post" href="#">
+      <span class="num">no.01</span>
+      <span class="body">
+        <span class="t">零日</span>
+        <span class="ex">二十来岁的年纪，总该做点什么了。</span>
+      </span>
+      <span class="d">07 · 20</span>
+    </a>
+  </section>
+
+  <!-- 组件 4: 标签云 -->
+  <section class="tags-wrap" id="tags">
+    <div class="sec" style="margin-bottom:0;animation:none;opacity:1">
+      <div class="label">标签 · tags</div>
+    </div>
+    <div class="tags">
+      <a class="tag lg" href="#">学习 <span class="cnt">3</span></a>
+      <a class="tag" href="#">随笔 <span class="cnt">2</span></a>
+      <a class="tag" href="#">软件工程 <span class="cnt">1</span></a>
+      <a class="tag sm" href="#">生活 <span class="cnt">1</span></a>
+      <a class="tag" href="#">笔记 <span class="cnt">1</span></a>
+      <a class="tag sm" href="#">读书 <span class="cnt">0</span></a>
+      <a class="tag sm" href="#">折腾 <span class="cnt">0</span></a>
+    </div>
+  </section>
+
+  <!-- 组件 5: 关于 -->
+  <section class="about" id="about">
+    <h3>关于此处</h3>
+    <p>一个普通的博客。写代码，也写点别的。慢一点，没有关系。</p>
+    <p>这里记录：技术学习、生活随笔、读完的书、做过的梦。</p>
+    <div class="links">
+      <a href="mailto:107386162@qq.com">email</a>
+      <a href="https://github.com/yzh-01">github</a>
+      <a href="/atom.xml">rss</a>
+    </div>
+  </section>
+
+  <!-- 组件 6: Footer -->
+  <footer id="rss">
+    <div class="l">
+      <a href="/atom.xml">rss</a>
+      <a href="#">github</a>
+      <a href="#">sitemap</a>
+    </div>
+    <div class="r">© 2026 · made in rain</div>
+  </footer>
+
+</main>
+</body>
+</html>

@@ -100,6 +100,9 @@ theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
+## 注：yzh-01.github.io 是 GitHub 用户主页站，Pages 默认从 main 分支根目录读取。
+## 部署由 .github/workflows/deploy.yml 通过 GitHub Actions 完成（构建到 gh-pages 分支，
+## 再由 Pages 设置从 gh-pages 发布）。保留 hexo-deployer-git 作为本地兜底部署手段。
 deploy:
   type: git
   repo: https://github.com/yzh-01/yzh-01.github.io.git

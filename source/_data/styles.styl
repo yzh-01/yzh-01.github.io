@@ -1,0 +1,173 @@
+/* ============================================================
+   自定义主题：冷雾森系 + 真实照片背景
+   注入位置：custom_file_path.style (源文件 .styl)
+   ============================================================ */
+
+/* ===== 1. 关闭 NexT 默认 body 背景 ===== */
+html, body{
+  background: transparent !important;
+  color: #f0f4ee;
+}
+
+/* ===== 2. 真实背景照片层 ===== */
+.bg-photo{
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  /* 主页：图 2（猫图，冷青）*/
+  background-image: url('/images/home.jpg');
+  /* 色调融合：降饱和 + 冷调 + 暗化 */
+  filter: saturate(.55) brightness(.45) hue-rotate(-8deg) contrast(1.05);
+  /* 四周 mask 软化 */
+  mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+}
+/* 文章页：图 1（玻璃窗外植物，暖色 → 推冷 + 更暗）*/
+[data-page="post"] .bg-photo{
+  background-image: url('/images/post.jpg');
+  filter: saturate(.4) brightness(.35) hue-rotate(-25deg) contrast(1.1);
+}
+
+/* ===== 3. 色调叠加层 ===== */
+.bg-tint{
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(31,42,36,.55) 0%, rgba(91,122,102,.25) 50%, rgba(31,42,36,.65) 100%),
+    radial-gradient(ellipse 60% 40% at 50% 30%, rgba(140,165,140,.15) 0%, transparent 70%);
+}
+
+/* ===== 4. 文字翻浅（NexT 默认 .ink-color 是 #1f2d3d）====== */
+.posts-expand .post-title,
+.posts-expand .post-title a,
+.post-block .post-title,
+.post-block .post-title a{
+  color: #f0f4ee;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.4);
+}
+.posts-expand .post-meta,
+.posts-expand .post-meta a,
+.post-block .post-meta,
+.post-block .post-meta a,
+.posts-expand .post-meta time,
+.post-block .post-meta time{
+  color: #a8b3a8;
+  border-bottom-color: rgba(240,244,238,.3);
+}
+.posts-expand .post-content,
+.post-block .post-content,
+.posts-expand .post-summary,
+.post-block .post-summary,
+.post-body{
+  color: #d8e0d8;
+}
+.posts-expand .post-content p,
+.posts-expand .post-body p,
+.post-block .post-content p{
+  color: #d8e0d8;
+}
+/* 文章内 h2/h3/h4 */
+.post-body h1, .post-body h2, .post-body h3, .post-body h4, .post-body h5, .post-body h6{
+  color: #f0f4ee;
+  border-bottom-color: rgba(240,244,238,.2);
+}
+.post-body strong{ color: #f0f4ee; }
+.post-body a{
+  color: #b8d0b8;
+  border-bottom-color: rgba(184,208,184,.4);
+}
+.post-body a:hover{
+  color: #f0f4ee;
+  border-bottom-color: #f0f4ee;
+}
+
+/* ===== 5. 文章内 blockquote / code / hr / table 适配 ===== */
+.post-body blockquote{
+  color: #c8d4cc;
+  border-left: 4px solid #6b8a96;
+  background-color: rgba(20,30,25,.4);
+}
+.post-body code{
+  color: #d8e8d4;
+  background: rgba(20,30,25,.5);
+  border: 1px solid rgba(140,165,140,.2);
+}
+.post-body pre{
+  background-color: rgba(15,20,18,.7) !important;
+}
+.post-body table{
+  color: #d8e0d8;
+  background: rgba(20,30,25,.3);
+  box-shadow: 0 0 1px rgba(240,244,238,.2);
+}
+.post-body table th{
+  background: rgba(74,107,79,.3);
+  color: #f0f4ee;
+  border-color: rgba(240,244,238,.2);
+}
+.post-body table td{
+  border-color: rgba(240,244,238,.15);
+}
+.post-body hr{
+  border-top-color: rgba(240,244,238,.2);
+}
+
+/* ===== 6. 按钮 / tag 适配 ===== */
+.btn{
+  color: #d8e8d4;
+  border-color: rgba(184,208,184,.4);
+  background: rgba(20,30,25,.3);
+}
+.btn:hover{
+  color: #1c2630;
+  background: #d8e8d4;
+  border-color: #d8e8d4;
+}
+
+/* ===== 7. 页面内/header/site-meta 适配 ===== */
+.subtitle, .site-description{
+  color: #d8e0d8;
+}
+.site-title, .site-title:hover{
+  color: #f0f4ee;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.4);
+}
+.site-author-name, .site-state-item-name{
+  color: #a8b3a8;
+}
+.site-state-item-count{ color: #f0f4ee; }
+
+/* ===== 8. 评论/footer/meta 适配 ===== */
+.footer, .footer a{
+  color: #a8b3a8;
+}
+.links-of-blogroll-title, .links-of-author{
+  color: #d8e0d8;
+}
+
+/* ===== 9. 减弱 hexo 默认的 body 底部渐变 ===== */
+.main{
+  background: transparent;
+}
+.posts-expand .post:first-child{
+  padding-top: 0;
+}
+
+/* ===== 10. 减弱 NexT motion 入场动画的"卡片弹出"感（背景上太突兀）====== */
+.use-motion .post-block{
+  opacity: 1 !important;
+  transform: none !important;
+}
+.use-motion .pagination{
+  opacity: 1;
+}
+
+/* ===== 11. 移动端适配 ===== */
+@media (max-width: 768px){
+  .bg-photo{ background-attachment: scroll; }
+}

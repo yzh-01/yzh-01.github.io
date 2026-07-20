@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>设计稿 A · 暗黑终端风 · yzh 的小站</title>
+<style>
+  /* ===== Tokens ===== */
+  :root{
+    --bg:        #0b0e10;       /* near-black */
+    --bg-soft:   #11161a;
+    --panel:     #161c21;
+    --border:    #1f2a32;
+    --ink:       #e6edf3;
+    --ink-mute:  #8b95a3;
+    --accent:    #7ee787;       /* terminal green */
+    --accent-2:  #ffa657;       /* amber cursor */
+    --link:      #79c0ff;
+    --selection: #1f6feb55;
+    --mono: ui-monospace, "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:15px;line-height:1.7}
+  body{min-height:100vh;
+    background:
+      radial-gradient(800px 400px at 80% -10%, #14202a 0%, transparent 60%),
+      radial-gradient(600px 300px at 0% 100%, #111a20 0%, transparent 60%),
+      var(--bg);
+  }
+  ::selection{background:var(--selection)}
+
+  /* Layout */
+  .shell{max-width:1080px;margin:0 auto;padding:48px 24px 120px}
+  .topbar{display:flex;align-items:center;gap:10px;color:var(--ink-mute);font-size:13px;border-bottom:1px dashed var(--border);padding-bottom:14px}
+  .traffic{display:inline-flex;gap:7px}
+  .traffic i{width:11px;height:11px;border-radius:50%;display:block;background:#333}
+  .traffic i:nth-child(1){background:#ff5f56}
+  .traffic i:nth-child(2){background:#ffbd2e}
+  .traffic i:nth-child(3){background:#27c93f}
+  .path{margin-left:auto;letter-spacing:.04em}
+
+  /* Hero — terminal prompt as identity */
+  .hero{padding:64px 0 56px;position:relative}
+  .hero h1{font-size:clamp(38px,6vw,72px);font-weight:600;letter-spacing:-.02em;color:var(--ink);margin-bottom:8px}
+  .hero h1 .prompt{color:var(--accent);margin-right:10px}
+  .hero h1 .cursor{display:inline-block;width:0.6ch;height:1em;background:var(--accent-2);vertical-align:-.12em;margin-left:6px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .hero .sub{color:var(--ink-mute);font-size:16px;max-width:60ch}
+
+  /* Type-in effect */
+  .typein{color:var(--accent);white-space:nowrap;overflow:hidden;border-right:2px solid var(--accent);width:0;animation:type 2.4s steps(28,end) forwards,pulse 1s 2.4s infinite}
+  @keyframes type{to{width:28ch}}
+  @keyframes pulse{50%{border-color:transparent}}
+
+  /* Sections — boot log aesthetic */
+  .section{padding:36px 0;border-top:1px dashed var(--border)}
+  .section h2{font-size:14px;font-weight:500;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;margin-bottom:18px}
+  .section h2::before{content:"[ ";color:var(--ink-mute)}
+  .section h2::after{content:" ]";color:var(--ink-mute)}
+
+  /* Post list */
+  .post-row{display:grid;grid-template-columns:120px 1fr auto;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--border);transition:background .25s, padding .25s}
+  .post-row:hover{background:#0f151a;padding-left:8px;padding-right:8px}
+  .post-row .ts{color:var(--ink-mute);font-size:13px}
+  .post-row .title{color:var(--ink);font-weight:500}
+  .post-row .title::before{content:"> ";color:var(--accent)}
+  .post-row .meta{color:var(--ink-mute);font-size:12px;letter-spacing:.08em}
+
+  /* Tags as inline code */
+  .tag{font-size:11px;color:var(--ink-mute);background:#0e1419;border:1px solid var(--border);padding:1px 6px;border-radius:3px;margin-left:6px}
+
+  /* Marquee ticker */
+  .ticker{margin-top:48px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;white-space:nowrap;color:var(--ink-mute);font-size:12px;letter-spacing:.16em}
+  .ticker span{display:inline-block;padding-right:60px;animation:slide 18s linear infinite}
+  .ticker span::before{content:"● ";color:var(--accent)}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* CTA — typed command */
+  .cmdbar{margin-top:48px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:10px}
+  .cmdbar .ps{color:var(--accent)}
+  .cmdbar .blinker{width:8px;height:18px;background:var(--accent-2);animation:blink 1s steps(1) infinite}
+
+  /* Footer */
+  footer{margin-top:80px;color:var(--ink-mute);font-size:12px;text-align:center}
+  footer a{color:var(--link);text-decoration:none;border-bottom:1px dotted var(--link)}
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce){
+    .typein, .ticker span, .cursor, .blinker{animation:none;border-color:transparent;width:auto}
+    .typein{width:28ch}
+  }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="topbar">
+    <span class="traffic"><i></i><i></i><i></i></span>
+    <span>~/yzh-01/blog</span>
+    <span class="path">on main [+]</span>
+  </div>
+
+  <section class="hero">
+    <h1><span class="prompt">$</span> whoami<span class="cursor"></span></h1>
+    <div class="sub" style="margin-top:18px">
+      <span class="typein">yzh — 写代码，也写点别的。</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>posts — latest commits</h2>
+
+    <a class="post-row" href="#">
+      <span class="ts">2026-07-20</span>
+      <span class="title">软件工程期末复习</span>
+      <span class="meta"><span class="tag">学习</span><span class="tag">笔记</span></span>
+    </a>
+    <a class="post-row" href="#">
+      <span class="ts">2026-07-20</span>
+      <span class="title">No.0 Day</span>
+      <span class="meta"><span class="tag">生活</span><span class="tag">随笔</span></span>
+    </a>
+  </section>
+
+  <div class="ticker" aria-hidden="true">
+    <span>build passing · 2 posts · 1 topic · last deploy 2026-07-20 · build passing · 2 posts · 1 topic · last deploy 2026-07-20</span>
+  </div>
+
+  <div class="cmdbar">
+    <span class="ps">$</span>
+    <span>cat about.md</span>
+    <span class="blinker"></span>
+  </div>
+
+  <footer>// EOF · <a href="#">GitHub</a> · <a href="#">RSS</a></footer>
+</main>
+</body>
+</html>
