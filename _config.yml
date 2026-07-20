@@ -66,8 +66,19 @@ index_generator:
 
 # Category & Tag
 default_category: uncategorized
-category_map:
+## 把中文标签映射为英文 slug，避免 GitHub Pages 对中文 URL 的兼容性问题
 tag_map:
+  学习: study
+  随笔: essay
+  软件工程: software-engineering
+  生活: life
+  笔记: notes
+  复习: review
+  读书: reading
+  折腾: hacking
+category_map:
+  学习笔记: study-notes
+  日记: diary
 
 # Metadata elements
 ## https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta
