@@ -1,20 +1,83 @@
 {% extends '_layout.njk' %}
-{% import '_macro/sidebar.njk' as sidebar_template with context %}
 
 {% block title %}{{ title }}{% if theme.index_with_subtitle and subtitle %} - {{ subtitle }}{% endif %}{% endblock %}
 
-{% block class %}index posts-expand{% endblock %}
+{% block class %}g-fusion-home{% endblock %}
 
-{% block content %}
+{% block fusion_main %}
+<main class="g-main">
 
-  {%- for post in page.posts.toArray() %}
-    {{ partial('_macro/post.njk', {post: post, is_index: true}) }}
-  {%- endfor %}
+  <!-- 组件 1: 顶部导航 -->
+  <nav class="top">
+    <a class="logo" href="{{ url_for('/') }}">yzh</a>
+    <ul>
+      <li><a href="#posts">笔记</a></li>
+      <li><a href="#tags">标签</a></li>
+      <li><a href="#about">关于</a></li>
+      <li><a href="/atom.xml">rss</a></li>
+    </ul>
+  </nav>
 
-  {%- include '_partials/pagination.njk' -%}
+  <!-- 组件 2: Hero -->
+  <section class="hero">
+    <span class="eyebrow">a personal journal — since 2026</span>
+    <h1>
+      雨后<br>
+      小记<span class="seal">印</span>
+    </h1>
+    <div class="stamp">// after rain, in the bamboo grove</div>
+  </section>
 
-{% endblock %}
+  <!-- 组件 3: 最近文章 -->
+  <section class="sec" id="posts">
+    <div class="label">最近 · recent</div>
+    {%- for post in page.posts.toArray() %}
+    <a class="post" href="{{ url_for(post.path) }}">
+      <span class="num">no.{% if loop.index < 10 %}0{{ loop.index }}{% else %}{{ loop.index }}{% endif %}</span>
+      <span class="body">
+        <span class="t">{{ post.title }}</span>
+        <span class="ex">{{ post.description or '' }}</span>
+      </span>
+      <span class="d">{{ post.date.format('MM · DD') }}</span>
+    </a>
+    {%- endfor %}
+  </section>
 
-{% block sidebar %}
-  {{ sidebar_template.render(false) }}
+  <!-- 组件 4: 标签云 -->
+  <section class="tags-wrap" id="tags">
+    <div class="sec" style="margin-bottom:0;animation:none;opacity:1">
+      <div class="label">标签 · tags</div>
+    </div>
+    <div class="tags">
+      {%- for tag in site.tags.toArray() %}
+      {%- set cnt = tag.posts.length %}
+      {%- if cnt >= 3 %}{%- set cls = 'lg' %}{%- elif cnt == 0 %}{%- set cls = 'sm' %}{%- else %}{%- set cls = '' %}{%- endif %}
+      <a class="tag{% if cls %} {{ cls }}{% endif %}" href="{{ url_for(tag.path) }}">{{ tag.name }} <span class="cnt">{{ cnt }}</span></a>
+      {%- endfor %}
+    </div>
+  </section>
+
+  <!-- 组件 5: 关于 -->
+  <section class="about" id="about">
+    <h3>关于此处</h3>
+    <p>一个普通的博客。写代码，也写点别的。慢一点，没有关系。</p>
+    <p>这里记录：技术学习、生活随笔、读完的书、做过的梦。</p>
+    <div class="links">
+      <a href="mailto:107386162@qq.com">email</a>
+      <a href="https://github.com/yzh-01">github</a>
+      <a href="/atom.xml">rss</a>
+    </div>
+  </section>
+
+  <!-- 组件 6: Footer -->
+  <footer id="rss">
+    <div class="l">
+      <a href="/atom.xml">rss</a>
+      <a href="https://github.com/yzh-01">github</a>
+      <a href="/sitemap.xml">sitemap</a>
+    </div>
+    <div class="r">© 2026 · made in rain</div>
+  </footer>
+
+</main>
 {% endblock %}

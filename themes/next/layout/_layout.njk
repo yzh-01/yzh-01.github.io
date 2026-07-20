@@ -3,6 +3,10 @@
 <head>
   {{ partial('_partials/head/head.njk', {}, {cache: theme.cache.enable}) }}
   {%- include '_partials/head/head-unique.njk' -%}
+  <!-- G-fusion 字体组合：草书/行书/细黑/拉丁手写 -->
+  <link rel="preconnect" href="https://fonts.loli.net">
+  <link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
+  <link href="https://fonts.loli.net/css?family=Liu+Jian+Mao+Cao|Zhi+Mang+Xing|ZCOOL+XiaoWei|Caveat:wght@400;600&display=swap" rel="stylesheet">
   <title>{% block title %}{% endblock %}</title>
   {{ partial('_third-party/analytics/index.njk', {}, {cache: theme.cache.enable}) }}
   {{ partial('_scripts/index.njk', {}, {cache: theme.cache.enable}) }}
@@ -16,12 +20,24 @@
   </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage"{% if theme.motion.enable %} class="use-motion"{% endif %}>
-  <!-- 自定义背景层（HOME 用 home.jpg，其他用 post.jpg）-->
+<body itemscope itemtype="http://schema.org/WebPage" class="g-fusion{% if is_home %} is-home{% endif %}{% if theme.motion.enable %} use-motion{% endif %}">
+  <!-- ===== G-fusion 动态背景层 ===== -->
   <div class="bg-photo" data-page="{% if is_home %}home{% else %}post{% endif %}" aria-hidden="true"></div>
   <div class="bg-tint" aria-hidden="true"></div>
+  <div class="fog" aria-hidden="true"></div>
+  <div class="fog b" aria-hidden="true"></div>
+  <div class="rain" aria-hidden="true"></div>
+  <div class="rain b" aria-hidden="true"></div>
+  <!-- 落叶粒子：14 片 × 4 叶形 -->
+  <div class="leaf"></div><div class="leaf b"></div><div class="leaf c"></div>
+  <div class="leaf d"></div><div class="leaf"></div><div class="leaf b"></div>
+  <div class="leaf c"></div><div class="leaf d"></div><div class="leaf"></div>
+  <div class="leaf b"></div><div class="leaf c"></div><div class="leaf d"></div>
+  <div class="leaf"></div><div class="leaf b"></div>
+  <!-- NexT 原有骨架（首页由 index.njk 接管，非首页走原框架） -->
   <div class="headband"></div>
 
+  {% block fusion_main %}
   <main class="main">
     <div class="column">
       <header class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -47,6 +63,7 @@
   </footer>
 
   {{ partial('_partials/widgets.njk', {}, {cache: theme.cache.enable}) }}
+  {% endblock %}
 
   {{- next_inject('bodyEnd') }}
 </body>
