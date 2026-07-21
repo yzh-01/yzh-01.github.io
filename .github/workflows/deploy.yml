@@ -5,6 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# 权限：actions/deploy-pages 需要 pages:write + id-token
 permissions:
   contents: read
   pages: write
@@ -12,16 +13,17 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false  # 不要取消进行中的部署，等它跑完
 
 jobs:
   build:
+    name: Build Hexo site
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+        # 主题是 themes/next/ 目录下的文件，不是 submodule，无需 recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,12 +32,19 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Build with Hexo
+        id: hexo_build
         run: |
+          echo "=== hexo generate 开始 ==="
           npx hexo clean
           npx hexo generate
+          echo "=== build 完成，产物大小 ==="
+          du -sh public/
+          echo "=== 关键文件存在检查 ==="
+          ls -la public/css/main.css
+          ls -la public/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -43,8 +52,10 @@ jobs:
           path: ./public
 
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -52,3 +63,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # 失败时打印诊断信息（不影响主流程）
+  debug:
+    needs: [build, deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print debug info on failure
+        run: |
+          echo "=== Debug: workflow failed ==="
+          echo "Last few commits:"
+          git log --oneline -5 || true
+          echo ""
+          echo "Public folder check:"
+          ls -la public/ 2>&1 || echo "no public folder"
