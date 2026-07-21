@@ -32,14 +32,36 @@
   <section class="sec" id="posts">
     <div class="label">最近 · recent</div>
     {%- for post in page.posts.toArray() %}
-    <a class="post" href="{{ url_for(post.path) }}">
-      <span class="num">no.{% if loop.index < 10 %}0{{ loop.index }}{% else %}{{ loop.index }}{% endif %}</span>
-      <span class="body">
-        <span class="t">{{ post.title }}</span>
-        <span class="ex">{{ post.description or '' }}</span>
-      </span>
-      <span class="d">{{ post.date.format('MM · DD') }}</span>
-    </a>
+    <article class="post-card">
+      <a class="post" href="{{ url_for(post.path) }}">
+        <span class="num">no.{% if loop.index < 10 %}0{{ loop.index }}{% else %}{{ loop.index }}{% endif %}</span>
+        <span class="body">
+          <span class="t">{{ post.title }}</span>
+          <span class="ex">{{ post.description or '' }}</span>
+        </span>
+        <span class="d">{{ post.date.format('MM · DD') }}</span>
+      </a>
+      {# 仅 "软件工程期末复习" 显示章节目录（点击直接跳到对应章节）#}
+      {%- if post.title === '软件工程期末复习' %}
+      <details class="toc-inline">
+        <summary>目录 · 12 个章节，点击直达</summary>
+        <ol class="toc-list">
+          <li><a href="{{ url_for(post.path) }}#任务一：全部知识点提取">任务一 · 全部知识点提取（70 个核心考点）</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务二：考试知识库">任务二 · 考试知识库</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务三：软件工程模型详细整理">任务三 · 软件工程模型详细整理</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务四：需求工程详细整理">任务四 · 需求工程详细整理</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务五：软件设计详细整理">任务五 · 软件设计详细整理</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务六：UML图详细整理">任务六 · UML 图详细整理</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务七：软件测试详细整理">任务七 · 软件测试详细整理</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务八：软件项目管理">任务八 · 软件项目管理</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务九：必考知识点 Top 30">任务九 · 必考知识点 Top 30</a></li>
+          <li><a href="{{ url_for(post.path) }}#任务十：预测考题">任务十 · 预测考题</a></li>
+          <li><a href="{{ url_for(post.path) }}#附录：关键人物与年份速查表">附录 · 关键人物与年份速查表</a></li>
+          <li><a href="{{ url_for(post.path) }}#附录：完整缩写对照表">附录 · 完整缩写对照表</a></li>
+        </ol>
+      </details>
+      {%- endif %}
+    </article>
     {%- endfor %}
   </section>
 
@@ -57,15 +79,35 @@
     </div>
   </section>
 
-  <!-- 组件 5: 关于 -->
+  <!-- 组件 5: 关于（带 GitHub 头像 + 关注） -->
   <section class="about" id="about">
-    <h3>关于此处</h3>
-    <p>一个普通的博客。写代码，也写点别的。慢一点，没有关系。</p>
-    <p>这里记录：技术学习、生活随笔、读完的书、做过的梦。</p>
-    <div class="links">
-      <a href="mailto:107386162@qq.com">email</a>
-      <a href="https://github.com/yzh-01">github</a>
-      <a href="/atom.xml">rss</a>
+    <div class="about-card">
+      <a class="avatar" href="https://github.com/yzh-01" target="_blank" rel="noopener">
+        <img src="https://github.com/yzh-01.png?size=160" alt="yzh-01" loading="lazy" />
+      </a>
+      <div class="about-text">
+        <h3>关于此处</h3>
+        <p>一个普通的博客。写代码，也写点别的。慢一点，没有关系。</p>
+        <p>这里记录：技术学习、生活随笔、读完的书、做过的梦。</p>
+        <div class="links">
+          <a class="link-btn gh" href="https://github.com/yzh-01" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.45.11-3.03 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.74.11 3.03.74.81 1.18 1.84 1.18 3.1 0 4.42-2.7 5.39-5.27 5.68.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5Z"/></svg>
+            <span>github</span>
+          </a>
+          <a class="link-btn follow" href="https://github.com/yzh-01" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.25.25 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+            <span>follow</span>
+          </a>
+          <a class="link-btn" href="mailto:107386162@qq.com">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7M3 7l2-2h14l2 2"/></svg>
+            <span>email</span>
+          </a>
+          <a class="link-btn" href="/atom.xml">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M6.18 17.82a2.18 2.18 0 1 1-4.36 0 2.18 2.18 0 0 1 4.36 0ZM2 9.05V12c4.97 0 9 4.03 9 9h2.95C13.95 14.5 8.5 9.05 2 9.05Zm0-4V8c7.18 0 13 5.82 13 13h2.95C17.95 12.74 11.26 6.05 2 6.05Z"/></svg>
+            <span>rss</span>
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 
