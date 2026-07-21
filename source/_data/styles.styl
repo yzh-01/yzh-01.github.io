@@ -268,13 +268,14 @@ body::after{
   font-family: var(--en); font-size: 14px; color: var(--moss);
   letter-spacing: 0.1em;
 }
-.g-main > .sec > .post .body .t{
+/* 文章标题：用 Zhi Mang Xing（行书） */
+.post .body .t{
   font-family: var(--zh-sub); font-size: 36px;
   color: var(--ink); letter-spacing: 0.04em;
   transition: color 0.4s;
   display: block; margin-bottom: 4px;
 }
-.g-main > .sec > .post:hover .body .t{ color: var(--moss-deep); }
+.post:hover .body .t{ color: var(--moss-deep); }
 .g-main > .sec > .post .body .ex{
   font-family: var(--zh-loose); font-size: 15px;
   color: var(--ink-mute); font-style: italic;
@@ -456,12 +457,13 @@ body::after{
     svg{ flex-shrink: 0; }
   }
   /* follow 按钮：实色主按钮 */
-  .link-btn.follow{
-    background: var(--moss-deep); color: var(--paper);
-    &:hover{
-      background: var(--ink); border-color: var(--ink);
+    .link-btn.follow{
+      background: var(--moss-deep); color: var(--ink);
+      &:hover{
+        background: var(--ink); border-color: var(--ink);
+        color: var(--paper);
+      }
     }
-  }
   /* GitHub 按钮：深色 */
   .link-btn.gh{
     background: #1c2630; color: #e6ede3; border-color: #1c2630;
