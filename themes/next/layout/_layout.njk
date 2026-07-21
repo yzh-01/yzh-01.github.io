@@ -20,7 +20,7 @@
   </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" class="g-fusion{% if is_home() %} is-home{% endif %}{% if theme.motion.enable %} use-motion{% endif %}{% block body_class %}{% endblock %}">
+<body itemscope itemtype="http://schema.org/WebPage" class="g-fusion{% if is_home() %} is-home{% endif %}{% if theme.motion.enable %} use-motion{% endif %} {% block body_class %}{% endblock %}">
   <!-- ===== G-fusion 动态背景层 ===== -->
   <div class="bg-photo" data-page="{% if is_home() %}home{% else %}post{% endif %}" aria-hidden="true"></div>
   <div class="bg-tint" aria-hidden="true"></div>
