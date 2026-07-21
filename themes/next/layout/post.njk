@@ -3,6 +3,9 @@
 
 {% block title %}{{ page.title }} | {{ title }}{% endblock %}
 
+{# 强制打开 sidebar（Muse 默认折叠，文章页用户期望看到 toc 侧边栏）#}
+{% block body_class %}sidebar-active{% endblock %}
+
 {% block class %}post posts-expand{% endblock %}
 
 {% block content %}

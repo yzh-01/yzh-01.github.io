@@ -32,36 +32,14 @@
   <section class="sec" id="posts">
     <div class="label">最近 · recent</div>
     {%- for post in page.posts.toArray() %}
-    <article class="post-card">
-      <a class="post" href="{{ url_for(post.path) }}">
-        <span class="num">no.{% if loop.index < 10 %}0{{ loop.index }}{% else %}{{ loop.index }}{% endif %}</span>
-        <span class="body">
-          <span class="t">{{ post.title }}</span>
-          <span class="ex">{{ post.description or '' }}</span>
-        </span>
-        <span class="d">{{ post.date.format('MM · DD') }}</span>
-      </a>
-      {# 仅 "软件工程期末复习" 显示章节目录（点击直接跳到对应章节）#}
-      {%- if post.title === '软件工程期末复习' %}
-      <details class="toc-inline">
-        <summary>目录 · 12 个章节，点击直达</summary>
-        <ol class="toc-list">
-          <li><a href="{{ url_for(post.path) }}#任务一：全部知识点提取">任务一 · 全部知识点提取（70 个核心考点）</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务二：考试知识库">任务二 · 考试知识库</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务三：软件工程模型详细整理">任务三 · 软件工程模型详细整理</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务四：需求工程详细整理">任务四 · 需求工程详细整理</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务五：软件设计详细整理">任务五 · 软件设计详细整理</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务六：UML图详细整理">任务六 · UML 图详细整理</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务七：软件测试详细整理">任务七 · 软件测试详细整理</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务八：软件项目管理">任务八 · 软件项目管理</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务九：必考知识点-Top-30">任务九 · 必考知识点 Top 30</a></li>
-          <li><a href="{{ url_for(post.path) }}#任务十：预测考题">任务十 · 预测考题</a></li>
-          <li><a href="{{ url_for(post.path) }}#附录：关键人物与年份速查表">附录 · 关键人物与年份速查表</a></li>
-          <li><a href="{{ url_for(post.path) }}#附录：完整缩写对照表">附录 · 完整缩写对照表</a></li>
-        </ol>
-      </details>
-      {%- endif %}
-    </article>
+    <a class="post" href="{{ url_for(post.path) }}">
+      <span class="num">no.{% if loop.index < 10 %}0{{ loop.index }}{% else %}{{ loop.index }}{% endif %}</span>
+      <span class="body">
+        <span class="t">{{ post.title }}</span>
+        <span class="ex">{{ post.description or '' }}</span>
+      </span>
+      <span class="d">{{ post.date.format('MM · DD') }}</span>
+    </a>
     {%- endfor %}
   </section>
 
