@@ -193,13 +193,13 @@ body::after{
   border-bottom: 1px solid rgba(240,244,238,.18);
   margin-bottom: 18vh;
   font-family: var(--en); font-size: 14px;
-  color: var(--ink-mute); letter-spacing: .18em;
+  color: var(--ink-mute); letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0; animation: g-fade-in 1s ease .1s forwards;
+  opacity: 0; animation: g-fade-in 1s ease 0.1s forwards;
 }
 .g-main > nav.top .logo{
   font-family: var(--zh-crazy); font-size: 26px;
-  color: var(--ink); letter-spacing: .06em;
+  color: var(--ink); letter-spacing: 0.06em;
   text-transform: none;
   text-decoration: none;
 }
@@ -207,7 +207,7 @@ body::after{
 .g-main > nav.top a{
   color: var(--ink-mute); text-decoration: none;
   border-bottom: 1px solid transparent; padding-bottom: 1px;
-  transition: color .3s, border-color .3s;
+  transition: color 0.3s, border-color 0.3s;
 }
 .g-main > nav.top a:hover{ color: #d8e8d4; border-bottom-color: #d8e8d4; }
 @keyframes g-fade-in{
@@ -222,12 +222,12 @@ body::after{
 }
 .g-main > .hero .eyebrow{
   font-family: var(--en); font-size: 13px; color: var(--moss);
-  letter-spacing: .36em; margin-bottom: 28px; display: inline-block;
+  letter-spacing: 0.36em; margin-bottom: 28px; display: inline-block;
 }
 .g-main > .hero h1{
   font-family: var(--zh-crazy); font-weight: 400;
   font-size: clamp(56px,13vw,144px);
-  line-height: 1; letter-spacing: .04em;
+  line-height: 1; letter-spacing: 0.04em;
   color: var(--ink);
   text-shadow: 1px 1px 0 rgba(28,38,48,.4);
   margin-bottom: 24px;
@@ -241,13 +241,13 @@ body::after{
 }
 .g-main > .hero .stamp{
   font-family: var(--en); font-size: 13px; color: var(--ink-mute);
-  letter-spacing: .24em; margin-top: 14px;
+  letter-spacing: 0.24em; margin-top: 14px;
 }
 
 /* ===== 组件 3: 最近文章（卡片列表） ===== */
-.g-main > .sec{ margin-bottom: 14vh; opacity: 0; animation: g-fade-in 1s ease .4s forwards; }
+.g-main > .sec{ margin-bottom: 14vh; opacity: 0; animation: g-fade-in 1s ease 0.4s forwards; }
 .g-main > .sec > .label{
-  font-family: var(--en); font-size: 12px; letter-spacing: .4em;
+  font-family: var(--en); font-size: 12px; letter-spacing: 0.4em;
   color: var(--ink-mute); text-transform: uppercase;
   margin-bottom: 36px; display: flex; align-items: center; gap: 16px;
 }
@@ -260,18 +260,18 @@ body::after{
   padding: 24px 0;
   border-bottom: 1px solid rgba(240,244,238,.12);
   cursor: pointer;
-  transition: padding .5s cubic-bezier(.2,.7,.2,1), background .4s;
+  transition: padding 0.5s cubic-bezier(.2,.7,.2,1), background 0.4s;
   text-decoration: none; color: inherit;
 }
 .g-main > .sec > .post:hover{ padding-left: 14px; padding-right: 14px; background: rgba(140,165,140,.10); }
 .g-main > .sec > .post .num{
   font-family: var(--en); font-size: 14px; color: var(--moss);
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
 }
 .g-main > .sec > .post .body .t{
   font-family: var(--zh-sub); font-size: 36px;
-  color: var(--ink); letter-spacing: .04em;
-  transition: color .4s;
+  color: var(--ink); letter-spacing: 0.04em;
+  transition: color 0.4s;
   display: block; margin-bottom: 4px;
 }
 .g-main > .sec > .post:hover .body .t{ color: var(--moss-deep); }
@@ -281,7 +281,7 @@ body::after{
 }
 .g-main > .sec > .post .d{
   font-family: var(--en); font-size: 14px; color: var(--ink-mute);
-  letter-spacing: .06em; white-space: nowrap;
+  letter-spacing: 0.06em; white-space: nowrap;
 }
 
 /* 文章卡片容器（让目录紧贴其下） */
@@ -301,9 +301,9 @@ body::after{
   position: relative;
   font-family: var(--en); font-size: 13px;
   color: var(--moss-deep);
-  letter-spacing: .12em; text-transform: uppercase;
+  letter-spacing: 0.12em; text-transform: uppercase;
   user-select: none;
-  transition: color .25s;
+  transition: color 0.25s;
 }
 .g-main .toc-inline > summary:hover{ color: var(--ink); }
 .g-main .toc-inline > summary::-webkit-details-marker{ display: none; }
@@ -316,7 +316,7 @@ body::after{
   font-family: var(--mono); font-size: 16px;
   border: 1px solid var(--moss-deep);
   border-radius: 3px;
-  transition: transform .25s, background .25s, color .25s;
+  transition: transform 0.25s, background 0.25s, color 0.25s;
 }
 .g-main .toc-inline[open] > summary::before{
   content: "−";
@@ -341,13 +341,13 @@ body::after{
   font-family: var(--en); font-size: 11px;
   color: var(--moss);
   margin-right: 8px;
-  letter-spacing: .06em;
+  letter-spacing: 0.06em;
 }
 .g-main .toc-inline .toc-list a{
   color: var(--ink-soft);
   text-decoration: none;
   border-bottom: 1px dashed transparent;
-  transition: color .25s, border-color .25s;
+  transition: color 0.25s, border-color 0.25s;
 }
 .g-main .toc-inline .toc-list a:hover{
   color: var(--moss-deep);
@@ -358,7 +358,7 @@ body::after{
 }
 
 /* ===== 组件 4: 标签云 ===== */
-.g-main > .tags-wrap{ margin-bottom: 14vh; opacity: 0; animation: g-fade-in 1s ease .6s forwards; }
+.g-main > .tags-wrap{ margin-bottom: 14vh; opacity: 0; animation: g-fade-in 1s ease 0.6s forwards; }
 .g-main > .tags-wrap .tags{
   display: flex; flex-wrap: wrap; gap: 14px 18px;
   padding: 20px 0;
@@ -369,7 +369,7 @@ body::after{
   border: 1px solid rgba(240,244,238,.22);
   padding: 8px 16px; border-radius: 99px;
   cursor: pointer;
-  transition: all .3s ease;
+  transition: all 0.3s ease;
   background: var(--moss-bg);
   text-decoration: none;
 }
@@ -396,80 +396,78 @@ body::after{
   border-style: dashed;
 }
 
-/* ===== 组件 5: 关于 ===== */
+/* ===== 组件 5: 关于（带 GitHub 头像 + 关注按钮） ===== */
 .g-main > .about{
   margin-bottom: 14vh;
-  /* ===== 组件 5: 关于（带 GitHub 头像 + 关注按钮） ===== */
-  .g-main > .about{
-    margin-bottom: 14vh;
-    padding: 36px 32px;
-    background: rgba(214,222,225,.35);
-    border-left: 3px solid var(--moss);
-    border-radius: 0 8px 8px 0;
-    opacity: 0; animation: in 1s ease .8s forwards;
-    position: relative;
-    transform: rotate(.4deg);
-  }
-  .g-main > .about .about-card{
+  padding: 36px 32px;
+  background: rgba(214,222,225,.35);
+  border-left: 3px solid var(--moss);
+  border-radius: 0 8px 8px 0;
+  opacity: 0; animation: fadeIn 1s ease 0.8s forwards;
+  position: relative;
+  transform: rotate(0.4deg);
+
+  .about-card{
     display: flex; gap: 28px; align-items: flex-start;
   }
-  .g-main > .about .avatar{
+  .avatar{
     flex-shrink: 0; display: block;
     width: 88px; height: 88px;
     border-radius: 50%; overflow: hidden;
     border: 2px solid var(--moss-deep);
     box-shadow: 0 4px 14px rgba(28,38,48,.12);
-    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s;
+    transition: transform 0.35s cubic-bezier(.2,.7,.2,1), box-shadow 0.35s;
     background: var(--paper-2);
+    &:hover{
+      transform: translateY(-3px) rotate(-2deg);
+      box-shadow: 0 8px 20px rgba(28,38,48,.18);
+    }
+    img{
+      width: 100%; height: 100%; display: block; object-fit: cover;
+    }
   }
-  .g-main > .about .avatar:hover{
-    transform: translateY(-3px) rotate(-2deg);
-    box-shadow: 0 8px 20px rgba(28,38,48,.18);
-  }
-  .g-main > .about .avatar img{
-    width: 100%; height: 100%; display: block; object-fit: cover;
-  }
-  .g-main > .about .about-text{ flex: 1; min-width: 0; }
-  .g-main > .about h3{
+  .about-text{ flex: 1; min-width: 0; }
+  h3{
     font-family: var(--zh-sub); font-size: 38px;
-    color: var(--ink); margin-bottom: 14px; letter-spacing: .04em;
+    color: var(--ink); margin-bottom: 14px; letter-spacing: 0.04em;
   }
-  .g-main > .about p{
+  p{
     font-family: var(--zh-loose); font-size: 17px;
     color: var(--ink-soft); line-height: 1.85; margin-bottom: 10px;
   }
-  .g-main > .about .links{
+  .links{
     margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;
   }
-  .g-main > .about .link-btn{
+  .link-btn{
     display: inline-flex; align-items: center; gap: 8px;
     padding: 8px 16px;
     font-family: var(--en); font-size: 14px;
-    letter-spacing: .12em; text-transform: uppercase;
+    letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--moss-deep);
     background: rgba(255,255,255,.55);
     border: 1px solid var(--moss-deep);
     border-radius: 99px;
     text-decoration: none;
-    transition: background .3s, color .3s, transform .2s;
+    transition: background 0.3s, color 0.3s, transform 0.2s;
+    &:hover{
+      background: var(--moss-deep); color: var(--paper);
+      transform: translateY(-2px);
+    }
+    svg{ flex-shrink: 0; }
   }
-  .g-main > .about .link-btn:hover{
-    background: var(--moss-deep); color: var(--paper);
-    transform: translateY(-2px);
-  }
-  .g-main > .about .link-btn svg{ flex-shrink: 0; }
   /* follow 按钮：实色主按钮 */
-  .g-main > .about .link-btn.follow{
+  .link-btn.follow{
     background: var(--moss-deep); color: var(--paper);
-  }
-  .g-main > .about .link-btn.follow:hover{
-    background: var(--ink); border-color: var(--ink);
+    &:hover{
+      background: var(--ink); border-color: var(--ink);
+    }
   }
   /* GitHub 按钮：深色 */
-  .g-main > .about .link-btn.gh{
+  .link-btn.gh{
     background: #1c2630; color: #e6ede3; border-color: #1c2630;
+    &:hover{ background: #36434c; border-color: #36434c; }
   }
-  .g-main > .about .link-btn.gh:hover{ background: #36434c; border-color: #36434c; }
+}
 
 /* ===== 组件 6: Footer ===== */
 .g-main > footer{
@@ -477,7 +475,7 @@ body::after{
   border-top: 1px solid rgba(240,244,238,.18);
   display: flex; justify-content: space-between;
   font-family: var(--en); font-size: 13px; color: var(--ink-mute);
-  letter-spacing: .18em; text-transform: uppercase;
+  letter-spacing: 0.18em; text-transform: uppercase;
   opacity: 0; animation: g-fade-in 1s ease 1s forwards;
 }
 .g-main > footer .l a{
@@ -601,9 +599,9 @@ body::after{
    ============================================================ */
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{
-    animation-duration: .01ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
+    transition-duration: 0.01ms !important;
   }
   .fog, .fog.b, .rain, .rain.b, .leaf{ animation: none; }
   .g-main > nav.top,
