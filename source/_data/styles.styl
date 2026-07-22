@@ -35,8 +35,9 @@ html, body{
 .g-fusion .headband{ display: none; }
 .g-fusion .main,
 .g-fusion .footer{ display: none; }   /* 首页走 .g-main，不显示 NexT 原骨架 */
-.g-fusion .sidebar-toggle,
-.g-fusion .sidebar{ display: none !important; }
+/* 边栏：仅首页隐藏（文章页/归档/标签页都显示，方便导航 toc） */
+.g-fusion.is-home .sidebar-toggle,
+.g-fusion.is-home aside.sidebar{ display: none !important; }
 
 /* 非首页（文章/归档/分类/标签）继续用 NexT 布局，但走冷雾配色 */
 .g-fusion:not(.is-home) .main{
@@ -48,6 +49,50 @@ html, body{
 .g-fusion:not(.is-home) .footer{
   display: block;
   background: transparent;
+}
+
+/* ===== sidebar 适配（非首页才显示）===== */
+.g-fusion:not(.is-home) aside.sidebar{
+  display: block;
+  background: rgba(214,222,225,.45);
+  border-radius: 8px;
+  padding: 18px 14px;
+  margin: 28px 18px 28px 0;
+  color: var(--ink);
+}
+.g-fusion:not(.is-home) .sidebar-nav{ display: flex; }
+.g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-toc,
+.g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-overview{
+  color: var(--ink-soft);
+  border-bottom-color: transparent;
+}
+.g-fusion:not(.is-home) .sidebar-nav-toc.active,
+.g-fusion:not(.is-home) .sidebar-nav-overview.active{
+  color: var(--moss-deep);
+  border-bottom-color: var(--moss-deep);
+}
+.g-fusion:not(.is-home) .post-toc .nav{
+  list-style: none; padding: 0; margin: 0;
+}
+.g-fusion:not(.is-home) .post-toc .nav a,
+.g-fusion:not(.is-home) .post-toc .nav .toc-text{
+  color: var(--ink-soft);
+  text-decoration: none;
+  display: block;
+  padding: 4px 0 4px 12px;
+  border-left: 2px solid transparent;
+  transition: color .25s, border-color .25s, padding .25s;
+}
+.g-fusion:not(.is-home) .post-toc .nav a:hover{
+  color: var(--moss-deep);
+  border-left-color: var(--moss-deep);
+  padding-left: 16px;
+}
+.g-fusion:not(.is-home) .post-toc .nav .active,
+.g-fusion:not(.is-home) .post-toc .nav .active a{
+  color: var(--moss-deep);
+  border-left-color: var(--moss-deep);
+  font-weight: 600;
 }
 
 /* ===== 1. 真实背景照片层 ===== */
@@ -424,8 +469,21 @@ body::after{
 .posts-expand .post-title a,
 .post-block .post-title,
 .post-block .post-title a{
+  font-family: var(--zh-sub);  /* Zhi Mang Xing（行书） */
+  font-size: 34px;
+  font-weight: 400;
   color: #f0f4ee;
   text-shadow: 1px 1px 2px rgba(0,0,0,.4);
+  display: block;             /* 强制 block 排版，不被压缩 */
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+.posts-expand .post-title-link{
+  display: block;
+  color: inherit;
 }
 .posts-expand .post-meta,
 .posts-expand .post-meta a,
