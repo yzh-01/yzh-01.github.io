@@ -91,10 +91,6 @@ html, body{
 .g-fusion:not(.is-home) .post-toc .nav{
   list-style: none; padding: 0; margin: 0;
 }
-/* sidebar-active 时正文让出 sidebar 宽度（NexT sidebar 默认 320px） */
-.g-fusion:not(.is-home).sidebar-active .main-inner{
-  margin-left: 320px;
-}
 /* sidebar-toggle 浮按钮在文章页可见（首页才藏） */
 .g-fusion:not(.is-home) .sidebar-toggle{
   display: block;
@@ -648,6 +644,4 @@ body::after{
 }
 @media (max-width: 768px){
   .bg-photo{ background-attachment: scroll; }
-  /* 窄屏 sidebar 覆盖式浮出，正文不再让出 320px margin */
-  .g-fusion:not(.is-home).sidebar-active .main-inner{ margin-left: 0; }
 }
