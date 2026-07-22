@@ -97,18 +97,34 @@ html, body{
   background: rgba(20,30,25,.6);
   color: var(--ink-soft);
 }
-/* 文章页由正文容器统一计算 sidebar 占位，避免 NexT 的 body padding
-   与固定宽度 main-inner 叠加后把正文压成窄列。 */
+/* 文章页由正文容器统一计算 sidebar 占位，强制覆盖 NexT 的 body padding-left: 320px
+   此规则放在文件最末以确保 cascade 后赢（NexT 的 .sidebar-active{padding-left:320px} 在前 52400 字节）
+   关键：必须比 NexT 的 specificity 高（.g-fusion:not() 三个 class）且 !important */
+.g-fusion:not(.is-home).sidebar-active{
+  padding-left: 0 !important;
+}
 @media (min-width: 769px){
-  .g-fusion:not(.is-home).sidebar-active{
-    padding-left: 0 !important;
-  }
   .g-fusion:not(.is-home).sidebar-active .main-inner{
     box-sizing: border-box;
-    margin-left: 320px;
-    margin-right: 40px;
-    width: auto;
-    max-width: 900px;
+    margin-left: 320px !important;
+    margin-right: 40px !important;
+    width: auto !important;
+    max-width: 900px !important;
+    /* 关键：清除 NexT 700px 固定宽度限制 */
+  }
+}
+@media (max-width: 768px){
+  /* 窄屏 sidebar 改为 fixed overlay，不占位 */
+  .g-fusion:not(.is-home) aside.sidebar{
+    position: fixed !important;
+    left: -320px;
+  }
+  .g-fusion:not(.is-home).sidebar-active aside.sidebar{
+    left: 0 !important;
+  }
+  .g-fusion:not(.is-home).sidebar-active .main-inner{
+    margin-left: 0 !important;
+    max-width: 100% !important;
   }
 }
 
