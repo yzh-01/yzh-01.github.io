@@ -97,6 +97,21 @@ html, body{
   background: rgba(20,30,25,.6);
   color: var(--ink-soft);
 }
+/* 文章页由正文容器统一计算 sidebar 占位，避免 NexT 的 body padding
+   与固定宽度 main-inner 叠加后把正文压成窄列。 */
+@media (min-width: 769px){
+  .g-fusion:not(.is-home).sidebar-active{
+    padding-left: 0 !important;
+  }
+  .g-fusion:not(.is-home).sidebar-active .main-inner{
+    box-sizing: border-box;
+    margin-left: 320px;
+    margin-right: 40px;
+    width: auto;
+    max-width: 900px;
+  }
+}
+
 .g-fusion:not(.is-home) .post-toc .nav a,
 .g-fusion:not(.is-home) .post-toc .nav .toc-text{
   color: var(--ink-soft);
