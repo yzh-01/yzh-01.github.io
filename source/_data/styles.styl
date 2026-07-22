@@ -131,14 +131,24 @@ html, body{
 }
 .g-fusion:not(.is-home).sidebar-active .main-inner{
   /* 全宽显示，不再让位 sidebar */
-  background: red !important;          /* 调试：标记 main-inner 边界 */
-  outline: 2px dashed yellow !important; /* 调试：标记 main-inner 边界 */
   max-width: 920px !important;
   width: calc(100% - 80px) !important;
   margin: 40px auto !important;
   padding: 0 20px 60px !important;
   box-sizing: border-box;
-  min-height: 1000px !important;       /* 调试：确保看到 */
+  min-height: 1000px !important;
+  position: relative !important;
+  z-index: 5 !important;
+  background: rgba(20,30,25,.4) !important;
+}
+/* 关键修复：article 必须显示在 main-inner 内，不能被 sidebar 遮挡 */
+.g-fusion:not(.is-home).sidebar-active .main-inner .post,
+.g-fusion:not(.is-home).sidebar-active .main-inner article{
+  display: block !important;
+  width: 100% !important;
+  visibility: visible !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 /* 窄屏：sidebar 默认收起，点 toggle 浮出 */
 .g-fusion:not(.is-home) .sidebar-toggle{
