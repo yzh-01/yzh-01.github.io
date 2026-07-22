@@ -41,10 +41,16 @@ html, body{
 
 /* 非首页（文章/归档/分类/标签）继续用 NexT 布局，但走冷雾配色 */
 .g-fusion:not(.is-home) .main{
-  display: block;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   background: transparent;
   position: relative;
   z-index: 3;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+  gap: 28px;
 }
 .g-fusion:not(.is-home) .footer{
   display: block;
@@ -54,12 +60,29 @@ html, body{
 /* ===== sidebar 适配（非首页才显示）===== */
 .g-fusion:not(.is-home) aside.sidebar{
   display: block;
+  flex-shrink: 0;
+  width: 280px;
+  max-width: 280px;
   background: rgba(214,222,225,.45);
   border-radius: 8px;
   padding: 18px 14px;
-  margin: 28px 18px 28px 0;
+  margin: 28px 0;
   color: var(--ink);
+  position: sticky;
+  top: 28px;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
+.g-fusion:not(.is-home) .main-inner{
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  padding-bottom: 60px;
+}
+/* sidebar 占空间后，post 标题左对齐（不让它在窄列里折行） */
+.g-fusion:not(.is-home) .posts-expand .post-header{ text-align: left; }
 .g-fusion:not(.is-home) .sidebar-nav{ display: flex; }
 .g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-toc,
 .g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-overview{
@@ -577,15 +600,26 @@ body::after{
 .links-of-blogroll-title, .links-of-author{ color: #d8e0d8; }
 
 /* 减弱 NexT motion 入场动画的"卡片弹出"感 */
-.use-motion .post-block{
+.g-fusion:not(.is-home) .use-motion .post-block{
   opacity: 1 !important;
   transform: none !important;
 }
-.use-motion .pagination{ opacity: 1; }
+.g-fusion:not(.is-home) .use-motion .pagination{ opacity: 1; }
 
-/* ============================================================
-   减动效 + 移动端
-   ============================================================ */
+/* 文章页：sidebar toc 点击锚点跳转（smooth scroll + sticky 偏移补偿） */
+.g-fusion:not(.is-home){
+  scroll-behavior: smooth;
+}
+.g-fusion:not(.is-home) .post-body :target,
+.g-fusion:not(.is-home) :target{
+  scroll-margin-top: 24px;
+}
+/* h2/h3 锚点显示得清楚：补一点 padding 让点击跳转后能看到标题 */
+.g-fusion:not(.is-home) h2[id], .g-fusion:not(.is-home) h3[id]{
+  scroll-margin-top: 24px;
+}
+
+/* 减动效 + 移动端 */
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{
     animation-duration: 0.01ms !important;
