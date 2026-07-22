@@ -39,63 +39,67 @@ html, body{
 .g-fusion.is-home .sidebar-toggle,
 .g-fusion.is-home aside.sidebar{ display: none !important; }
 
-/* 非首页（文章/归档/分类/标签）继续用 NexT 布局，但走冷雾配色 */
+/* 非首页（文章/归档/分类/标签）继续用 NexT 原布局，但走冷雾配色 */
 .g-fusion:not(.is-home) .main{
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  display: block;
   background: transparent;
   position: relative;
   z-index: 3;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 24px;
-  gap: 28px;
 }
 .g-fusion:not(.is-home) .footer{
   display: block;
   background: transparent;
 }
 
-/* ===== sidebar 适配（非首页才显示）===== */
+/* ===== sidebar 适配（非首页才显示，回归 NexT fixed 模式）===== */
+/* NexT 原设计：sidebar 是 position:fixed + left:-320px（藏屏外），
+   sidebar-active 时 left:0 浮在屏幕左侧。正文靠 margin-left 让出空间。 */
 .g-fusion:not(.is-home) aside.sidebar{
   display: block;
-  flex-shrink: 0;
-  width: 280px;
-  max-width: 280px;
-  background: rgba(214,222,225,.45);
-  border-radius: 8px;
-  padding: 18px 14px;
-  margin: 28px 0;
-  color: var(--ink);
-  position: sticky;
-  top: 28px;
-  max-height: calc(100vh - 56px);
-  overflow-y: auto;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.g-fusion:not(.is-home) .main-inner{
-  flex: 1;
-  min-width: 0;
-  width: auto;
-  padding-bottom: 60px;
-}
-/* sidebar 占空间后，post 标题左对齐（不让它在窄列里折行） */
-.g-fusion:not(.is-home) .posts-expand .post-header{ text-align: left; }
-.g-fusion:not(.is-home) .sidebar-nav{ display: flex; }
-.g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-toc,
-.g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-overview{
+  background: rgba(20,30,25,.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--ink-soft);
-  border-bottom-color: transparent;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.4);
+}
+/* sidebar 内文字配色 */
+.g-fusion:not(.is-home) .sidebar-inner,
+.g-fusion:not(.is-home) .site-state,
+.g-fusion:not(.is-home) .site-state-item-name,
+.g-fusion:not(.is-home) .links-of-author-name,
+.g-fusion:not(.is-home) .links-of-blogroll-title{
+  color: var(--ink-soft);
+}
+.g-fusion:not(.is-home) .site-state-item-count,
+.g-fusion:not(.is-home) .sidebar-nav-toc,
+.g-fusion:not(.is-home) .sidebar-nav-overview{
+  color: var(--ink-mute);
 }
 .g-fusion:not(.is-home) .sidebar-nav-toc.active,
 .g-fusion:not(.is-home) .sidebar-nav-overview.active{
   color: var(--moss-deep);
   border-bottom-color: var(--moss-deep);
 }
+.g-fusion:not(.is-home) .sidebar-nav{
+  display: flex;
+  border-bottom-color: rgba(240,244,238,.18);
+}
+.g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-toc,
+.g-fusion:not(.is-home) .sidebar-nav .sidebar-nav-overview{
+  border-bottom-color: transparent;
+}
 .g-fusion:not(.is-home) .post-toc .nav{
   list-style: none; padding: 0; margin: 0;
+}
+/* sidebar-active 时正文让出 sidebar 宽度（NexT sidebar 默认 320px） */
+.g-fusion:not(.is-home).sidebar-active .main-inner{
+  margin-left: 320px;
+}
+/* sidebar-toggle 浮按钮在文章页可见（首页才藏） */
+.g-fusion:not(.is-home) .sidebar-toggle{
+  display: block;
+  background: rgba(20,30,25,.6);
+  color: var(--ink-soft);
 }
 .g-fusion:not(.is-home) .post-toc .nav a,
 .g-fusion:not(.is-home) .post-toc .nav .toc-text{
@@ -644,4 +648,6 @@ body::after{
 }
 @media (max-width: 768px){
   .bg-photo{ background-attachment: scroll; }
+  /* 窄屏 sidebar 覆盖式浮出，正文不再让出 320px margin */
+  .g-fusion:not(.is-home).sidebar-active .main-inner{ margin-left: 0; }
 }
