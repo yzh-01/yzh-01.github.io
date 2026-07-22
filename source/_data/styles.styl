@@ -131,11 +131,14 @@ html, body{
 }
 .g-fusion:not(.is-home).sidebar-active .main-inner{
   /* 全宽显示，不再让位 sidebar */
+  background: red !important;          /* 调试：标记 main-inner 边界 */
+  outline: 2px dashed yellow !important; /* 调试：标记 main-inner 边界 */
   max-width: 920px !important;
   width: calc(100% - 80px) !important;
   margin: 40px auto !important;
   padding: 0 20px 60px !important;
   box-sizing: border-box;
+  min-height: 1000px !important;       /* 调试：确保看到 */
 }
 /* 窄屏：sidebar 默认收起，点 toggle 浮出 */
 .g-fusion:not(.is-home) .sidebar-toggle{
