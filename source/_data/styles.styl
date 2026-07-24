@@ -124,8 +124,10 @@ html, body{
   position: fixed !important;
   top: 0;
   left: 0;
-  width: 300px;
+  /* --gf-sidebar-w 由 body-end.njk 的拖拽脚本设置并写入 localStorage */
+  width: var(--gf-sidebar-w, 360px);
   max-width: 80vw;
+  min-width: 220px;
   height: 100vh;
   overflow-y: auto;
   background: rgba(20,30,25,.65);
@@ -138,6 +140,46 @@ html, body{
   display: block;
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.2,0.7,0.2,1);
+}
+
+/* 拖拽手柄：放在 sidebar 右边沿一条 6px 的可点击条；hover 时亮 moss 色 */
+.g-fusion:not(.is-home) .gf-sidebar-resizer{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  touch-action: none;
+  z-index: 11;
+}
+.g-fusion:not(.is-home) .gf-sidebar-resizer::after{
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  width: 2px;
+  height: 28px;
+  margin-top: -14px;
+  border-radius: 2px;
+  background: rgba(216,232,212,.25);
+  transition: background .2s, height .2s;
+}
+.g-fusion:not(.is-home) .gf-sidebar-resizer:hover::after,
+.g-fusion:not(.is-home) .gf-sidebar-resizer.dragging::after{
+  background: var(--moss-deep);
+  height: 56px;
+}
+/* 拖拽中：全局禁用文本选中 + 改 cursor */
+.g-fusion:not(.is-home).gf-resizing,
+.g-fusion:not(.is-home).gf-resizing *{
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+/* 触屏/窄屏：不显示手柄（侧栏仍是滑入/滑出浮层） */
+@media (hover: none), (max-width: 768px){
+  .g-fusion:not(.is-home) .gf-sidebar-resizer{ display: none; }
 }
 .g-fusion:not(.is-home).sidebar-active aside.sidebar{
   transform: translateX(0) !important;

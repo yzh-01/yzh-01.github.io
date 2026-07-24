@@ -1,0 +1,79 @@
+{# 文章页 TOC 侧栏宽度可拖拽 + localStorage 持久化。
+   仅在桌面 (>768px + hover-capable 设备) 启用，移动端 sidebar 走滑入浮层。 #}
+<script>
+(function () {
+  'use strict';
+  var LS_KEY = 'gf-sidebar-w';
+  var MIN_W = 220;
+  var MAX_W_RATIO = 0.5;          // 不超过视口 50%
+  var DEFAULT_W = 360;
+
+  // 仅在文章页 + 桌面环境运行
+  var doc = document.documentElement;
+  var body = document.body;
+  if (!body || !body.classList.contains('g-fusion') || body.classList.contains('is-home')) return;
+  if (!window.matchMedia('(hover: hover) and (min-width: 769px)').matches) return;
+
+  var sidebar = document.querySelector('aside.sidebar');
+  if (!sidebar) return;
+
+  // 恢复上次的宽度（clamp 到合理范围）
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  try {
+    var saved = parseInt(localStorage.getItem(LS_KEY) || '', 10);
+    if (saved && saved >= MIN_W) {
+      var maxW = Math.floor(window.innerWidth * MAX_W_RATIO);
+      sidebar.style.setProperty('--gf-sidebar-w', clamp(saved, MIN_W, maxW) + 'px');
+    } else {
+      sidebar.style.setProperty('--gf-sidebar-w', DEFAULT_W + 'px');
+    }
+  } catch (e) {
+    sidebar.style.setProperty('--gf-sidebar-w', DEFAULT_W + 'px');
+  }
+
+  // 注入拖拽手柄
+  var handle = document.createElement('div');
+  handle.className = 'gf-sidebar-resizer';
+  handle.setAttribute('role', 'separator');
+  handle.setAttribute('aria-label', '拖动调整目录宽度');
+  sidebar.appendChild(handle);
+
+  var dragging = false;
+  var startX = 0;
+  var startW = 0;
+
+  function onDown(e) {
+    dragging = true;
+    handle.classList.add('dragging');
+    body.classList.add('gf-resizing');
+    startX = e.clientX != null ? e.clientX : (e.touches && e.touches[0].clientX);
+    var rect = sidebar.getBoundingClientRect();
+    startW = rect.width;
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    var x = e.clientX != null ? e.clientX : (e.touches && e.touches[0].clientX);
+    if (x == null) return;
+    var maxW = Math.floor(window.innerWidth * MAX_W_RATIO);
+    var newW = clamp(startW + (x - startX), MIN_W, maxW);
+    sidebar.style.setProperty('--gf-sidebar-w', newW + 'px');
+  }
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    body.classList.remove('gf-resizing');
+    try {
+      var rect = sidebar.getBoundingClientRect();
+      localStorage.setItem(LS_KEY, String(Math.round(rect.width)));
+    } catch (e) {}
+  }
+
+  handle.addEventListener('pointerdown', onDown);
+  // pointermove/up 绑到 window，鼠标出 sidebar 也能继续拖
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+})();
+</script>
