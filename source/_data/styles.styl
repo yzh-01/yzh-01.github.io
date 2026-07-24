@@ -611,13 +611,16 @@ body::after{
     }
     svg{ flex-shrink: 0; }
   }
-  /* follow 按钮：实色主按钮 */
+  /* follow 按钮：实色主按钮 — 浅 moss 底配深字，避免和 ink 同色撞色 */
     .link-btn.follow{
-      background: var(--moss-deep); color: var(--ink);
+      background: var(--moss-deep);
+      color: #1c2630;
       border-color: var(--moss-deep);
+      font-weight: 600;
       &:hover{
-        background: var(--ink); border-color: var(--ink);
-        color: var(--paper);
+        background: #1c2630;
+        border-color: #1c2630;
+        color: var(--moss-deep);
       }
     }
   /* GitHub 按钮：深灰，与 ash 主色对齐 */
