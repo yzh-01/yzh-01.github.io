@@ -24,6 +24,10 @@
 }
 
 /* ===== 0. 关闭 NexT 默认背景/布局干扰 ===== */
+/* 关键修复：NexT 基线 `html, body { height: 100% }` + `body { min-height: 100% }`
+   会把 body 锁死在 viewport 高度，导致长文章溢出 body 但 html 看不到溢出，
+   整页没法滚动 —— TOC 点击锚点 / anime.js 滚动 都失效。
+   这里改成 min-height：body 跟随内容长高，html 出现溢出后正常出滚动条。 */
 html, body{
   background: transparent !important;
   color: var(--ink);
@@ -31,6 +35,8 @@ html, body{
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  height: auto !important;
+  min-height: 100% !important;
 }
 .g-fusion .headband{ display: none; }
 .g-fusion .main,
@@ -136,7 +142,6 @@ html, body{
   margin: 40px auto !important;
   padding: 0 20px 60px !important;
   box-sizing: border-box;
-  min-height: 1000px !important;
   position: relative !important;
   z-index: 5 !important;
   background: rgba(20,30,25,.4) !important;
