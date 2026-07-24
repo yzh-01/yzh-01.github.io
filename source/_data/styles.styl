@@ -384,7 +384,9 @@ body::after{
 .g-main > .sec > .label::before,
 .g-main > .sec > .label::after{ content: ""; flex: 1; border-top: 1px solid rgba(240,244,238,.2); }
 
-.post{
+/* 卡片样式只在首页 .g-main 内生效 —— 否则会和 NexT 文章页 .main-inner.post 的 class 名冲突，
+   把文章正文挤成 60px 宽（一行只装得下 3 个汉字）。 */
+.g-main .post{
   display: grid; grid-template-columns: 60px 1fr auto; gap: 24px;
   align-items: baseline;
   padding: 24px 0;
@@ -393,26 +395,26 @@ body::after{
   transition: padding 0.5s cubic-bezier(0.2,0.7,0.2,1), background 0.4s;
   text-decoration: none; color: inherit;
 }
-.post:hover{
+.g-main .post:hover{
   padding-left: 14px; padding-right: 14px; background: rgba(140,165,140,.10);
 }
-.post .num{
+.g-main .post .num{
   font-family: var(--en); font-size: 14px; color: var(--moss);
   letter-spacing: 0.1em;
 }
 /* 文章标题：用 Zhi Mang Xing（行书） */
-.post .body .t{
+.g-main .post .body .t{
   font-family: var(--zh-sub); font-size: 36px;
   color: var(--ink); letter-spacing: 0.04em;
   transition: color 0.4s;
   display: block; margin-bottom: 4px;
 }
-.post:hover .body .t{ color: var(--moss-deep); }
-.post .body .ex{
+.g-main .post:hover .body .t{ color: var(--moss-deep); }
+.g-main .post .body .ex{
   font-family: var(--zh-loose); font-size: 15px;
   color: var(--ink-mute); font-style: italic;
 }
-.post .d{
+.g-main .post .d{
   font-family: var(--en); font-size: 14px; color: var(--ink-mute);
   letter-spacing: 0.06em; white-space: nowrap;
 }
@@ -700,8 +702,8 @@ body::after{
 @media (max-width: 600px){
   .g-main > nav.top ul{ gap: 14px; font-size: 12px; }
   .g-main > nav.top .logo{ font-size: 22px; }
-  .post{ grid-template-columns: 40px 1fr; gap: 14px; }
-  .post .d{ grid-column: 1/3; font-size: 12px; }
+  .g-main .post{ grid-template-columns: 40px 1fr; gap: 14px; }
+  .g-main .post .d{ grid-column: 1/3; font-size: 12px; }
   .g-main > .about{ padding: 24px 20px; }
 }
 @media (max-width: 768px){
