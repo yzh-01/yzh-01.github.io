@@ -398,13 +398,13 @@ back2top:
 
 # Reading progress bar
 reading_progress:
-  enable: false
+  enable: true
   # Available values: left | right
   start_at: left
   # Available values: top | bottom
   position: top
   reversed: false
-  color: "#37c6c0"
+  color: "#d8e8d4"
   height: 3px
 
 # Bookmark Support

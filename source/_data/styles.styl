@@ -23,6 +23,13 @@
   --en:       "Caveat", "Liu Jian Mao Cao", cursive;
 }
 
+/* ===== 0.5 文字选中色：与冷雾森系配色统一 ===== */
+.g-fusion ::selection{
+  background: rgba(184,208,184,.35);
+  color: var(--ink);
+  text-shadow: none;
+}
+
 /* ===== 0. 关闭 NexT 默认背景/布局干扰 ===== */
 /* 关键修复：NexT 基线 `html, body { height: 100% }` + `body { min-height: 100% }`
    会把 body 锁死在 viewport 高度，导致长文章溢出 body 但 html 看不到溢出，
@@ -180,9 +187,25 @@ html, body{
 }
 .g-fusion:not(.is-home) .post-toc .nav .active,
 .g-fusion:not(.is-home) .post-toc .nav .active a{
-  color: var(--moss-deep);
+  color: var(--ink) !important;
+  background: rgba(216,232,212,.10);
   border-left-color: var(--moss-deep);
   font-weight: 600;
+  border-radius: 0 4px 4px 0;
+}
+.g-fusion:not(.is-home) .post-toc .nav .active a{
+  position: relative;
+}
+.g-fusion:not(.is-home) .post-toc .nav .active a::before{
+  content: "▸";
+  position: absolute;
+  left: -2px;
+  color: var(--moss-deep);
+  animation: tocPulse 1.6s ease-in-out infinite;
+}
+@keyframes tocPulse{
+  0%,100%{ opacity: .55; transform: translateX(0); }
+  50%{ opacity: 1; transform: translateX(2px); }
 }
 
 /* ===== 1. 真实背景照片层 ===== */
@@ -198,7 +221,7 @@ html, body{
   mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
 }
-[data-page="post"] .bg-photo{
+[data-page="post"].bg-photo{
   background-image: url('/images/post.jpg');
   filter: saturate(.4) brightness(.35) hue-rotate(-25deg) contrast(1.1);
 }
@@ -605,11 +628,16 @@ body::after{
 .post-body strong{ color: #f0f4ee; }
 .post-body a{
   color: #b8d0b8;
-  border-bottom-color: rgba(184,208,184,.4);
+  border-bottom: 0;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size .35s cubic-bezier(.2,.7,.2,1), color .25s;
 }
 .post-body a:hover{
   color: #f0f4ee;
-  border-bottom-color: #f0f4ee;
+  background-size: 100% 1px;
 }
 
 /* blockquote / code / hr / table 适配 */
@@ -713,4 +741,13 @@ body::after{
 }
 @media (max-width: 768px){
   .bg-photo{ background-attachment: scroll; }
+}
+
+/* ===== 阅读进度条：moss → warm 渐变，与冷雾森系一致 ===== */
+.g-fusion:not(.is-home) .reading-progress-bar{
+  background: linear-gradient(90deg, var(--moss-deep), var(--warm)) !important;
+  box-shadow: 0 0 6px rgba(216,232,212,.5);
+}
+@media (max-width: 600px){
+  .reading-progress-bar{ height: 2px !important; }
 }
