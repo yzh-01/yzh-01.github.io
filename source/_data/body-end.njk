@@ -26,10 +26,12 @@
   }
 
   // ---- B. countUp · 数字滚动入场 ----
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
   function countUp(el) {
     var target = parseInt(el.getAttribute('data-target') || el.textContent || '0', 10);
     if (!target || target < 1) { el.textContent = target; return; }
+    if (reduceMotion) { el.textContent = target.toLocaleString(); return; }
     var dur = 900;
     var start = performance.now();
     function step(now) {
