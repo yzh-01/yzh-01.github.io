@@ -190,3 +190,153 @@
   window.addEventListener('pointercancel', onUp);
 })();
 </script>
+{# ============================================================
+   2) 主页动效升级:鼠标视差 + hero 拆字入场 + 各区段 IO 触发
+   ============================================================ #}
+<script>
+(function () {
+  'use strict';
+  var body = document.body;
+  if (!body || !body.classList.contains('g-fusion') || !body.classList.contains('is-home')) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // --- A. 全局鼠标视差 · 写 --mx / --my 到 <html> ---
+  (function () {
+    var root = document.documentElement;
+    var raf = null;
+    function onMove(e) {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        var x = (e.clientX / window.innerWidth) * 100;
+        var y = (e.clientY / window.innerHeight) * 100;
+        root.style.setProperty('--mx', x.toFixed(2) + '%');
+        root.style.setProperty('--my', y.toFixed(2) + '%');
+        raf = null;
+      });
+    }
+    window.addEventListener('mousemove', onMove, { passive: true });
+  })();
+
+  // --- B. Hero line-by-line reveal · eyebrow → h1 → stamp ---
+  (function () {
+    var hero = document.querySelector('.g-main > .hero');
+    if (!hero) return;
+    var els = [
+      hero.querySelector('.eyebrow'),
+      hero.querySelector('.hero h1'),
+      hero.querySelector('.stamp')
+    ].filter(Boolean);
+    if (!els.length) return;
+    if (reduce) {
+      els.forEach(function (el) { el.style.opacity = '1'; el.style.transform = 'none'; });
+      return;
+    }
+    els.forEach(function (el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(12px)';
+    });
+    var delays = [120, 320, 880];
+    requestAnimationFrame(function () {
+      els.forEach(function (el, i) {
+        el.style.transition = 'opacity .8s cubic-bezier(.2,.7,.2,1) ' + delays[i] + 'ms, transform .8s cubic-bezier(.2,.7,.2,1) ' + delays[i] + 'ms';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+    });
+  })();
+
+  // --- C. Posts list stagger-fade-in on scroll-in ---
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    var rows = document.querySelectorAll('.g-main > .sec#posts > a.post, .g-main > .sec .featured');
+    if (!rows.length) return;
+    if (reduce) return;
+    rows.forEach(function (r, i) {
+      r.style.opacity = '0';
+      r.style.transform = 'translateY(10px)';
+      r.style.transition = 'opacity .55s cubic-bezier(.2,.7,.2,1) ' + (i * 80) + 'ms, transform .55s cubic-bezier(.2,.7,.2,1) ' + (i * 80) + 'ms';
+    });
+    var io = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    rows.forEach(function (r) { io.observe(r); });
+  })();
+
+  // --- D. Featured 大卡 .in 触发(C 内部已包含 featured,这里只补强) ---
+  // 已合并到 C 中由 rows 选择器覆盖。
+
+  // --- E. Footer slide-up on scroll-in ---
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    var f = document.querySelector('.g-main > footer');
+    if (!f) return;
+    if (reduce) { f.classList.add('in'); return; }
+    new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.3 }).observe(f);
+  })();
+
+  // --- F. Tag-board 比例条 IO 触发 ---
+  // 比例条的 inline style 是 build 时写入的 width;IO 触发前由 JS 把 inline 写入 data-w 并临时设为 0
+  (function () {
+    var tb = document.querySelector('.g-main > .tag-board');
+    if (!tb) return;
+    var fills = tb.querySelectorAll('.bar .fill');
+    if (reduce) {
+      tb.classList.add('in');
+      return;
+    }
+    fills.forEach(function (f) {
+      // 提取原始 inline 宽度(px / % / 计算值),作为 data-w
+      var cs = getComputedStyle(f);
+      f.dataset.targetW = f.style.width || cs.width;
+      f.style.width = '0';
+    });
+    var io = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          e.target.querySelectorAll('.bar .fill').forEach(function (f) {
+            // 写回原始宽度 → 触发 transition 1s
+            f.style.width = f.dataset.targetW;
+          });
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    io.observe(tb);
+  })();
+
+  // --- G. Heatmap 列向 stagger paint-in(按列延迟,53 列 × 6ms ≈ 320ms) ---
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    var hm = document.querySelector('.g-main > .dashboard .heatmap');
+    if (!hm) return;
+    var cells = hm.querySelectorAll('.h-cell');
+    if (reduce) {
+      cells.forEach(function (c) { c.classList.add('in'); });
+      return;
+    }
+    new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          var list = e.target.querySelectorAll('.h-cell');
+          list.forEach(function (c, i) {
+            var colDelay = Math.floor(i / 7) * 6;  // 按列 stagger
+            setTimeout(function () { c.classList.add('in'); }, colDelay);
+          });
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 }).observe(hm);
+  })();
+})();
+</script>
