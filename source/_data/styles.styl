@@ -28,6 +28,14 @@
   --ash-500:   #7c7c78;          /* 深灰 · 远山 */
   --ash-bg:    rgba(160,160,155,.10);
   --ash-line:  rgba(180,180,175,.45);
+  --ash-line-2: rgba(180,180,175,.6);
+
+  /* 数据可视化专属 · 单色阶梯,严格沿 ash 系,避免引入新色相 */
+  --viz-track:  rgba(216,232,212,.08);   /* 图表空轨道 / 无帖格 */
+  --viz-l1:     #d4d4cf;                 /* 1 帖 · 浅墨 */
+  --viz-l2:     #a8a8a3;                 /* 2 帖 · 中墨 */
+  --viz-l3:     #7c7c78;                 /* 3+ 帖 · 浓墨 */
+  --viz-grid:   rgba(216,232,212,.12);   /* 热力图分隔线 */
 }
 
 /* ===== 0.5 文字选中色：与冷雾森系配色统一 ===== */
@@ -396,9 +404,13 @@ body::after{
 /* ===== 组件 1: 顶部导航 ===== */
 .g-main > nav.top{
   display: flex; align-items: center; justify-content: space-between;
-  padding: 28px 0 22px;
-  border-bottom: 1px solid rgba(240,244,238,.18);
-  margin-bottom: 18vh;
+  padding: 22px 28px;
+  /* sticky + backdrop blur + 半透 — 滚动时浮在内容之上,不挡视野 */
+  position: sticky; top: 0; z-index: 50;
+  margin: 0 -28px 18vh;
+  background: rgba(20,30,25,.55);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(240,244,238,.12);
   font-family: var(--en); font-size: 14px;
   color: var(--ink-mute); letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -410,13 +422,21 @@ body::after{
   text-transform: none;
   text-decoration: none;
 }
-.g-main > nav.top ul{ display: flex; gap: 24px; list-style: none; }
+.g-main > nav.top ul{ display: flex; gap: 24px; list-style: none; margin: 0; padding: 0; }
 .g-main > nav.top a{
   color: var(--ink-mute); text-decoration: none;
-  border-bottom: 1px solid transparent; padding-bottom: 1px;
+  border-bottom: 1px solid transparent; padding-bottom: 2px;
   transition: color 0.3s, border-color 0.3s;
 }
-.g-main > nav.top a:hover{ color: #d8e8d4; border-bottom-color: #d8e8d4; }
+.g-main > nav.top a:hover{ color: var(--moss-deep); border-bottom-color: var(--moss-deep); }
+/* scroll-spy: body[data-active="xxx"] 由 body-end.njk 写入 */
+body[data-active="dashboard"] .top a[href="#dashboard"],
+body[data-active="posts"]     .top a[href="#posts"],
+body[data-active="tags"]      .top a[href="#tags"],
+body[data-active="about"]     .top a[href="#about"]{
+  color: var(--moss-deep);
+  border-bottom-color: var(--moss-deep);
+}
 @keyframes g-fade-in{
   to{opacity:1}
 }
@@ -637,6 +657,338 @@ body::after{
     background: #2a2e30; color: var(--ash-100); border-color: #3a3e40;
     &:hover{ background: #1c2022; border-color: var(--ash-300); }
   }
+}
+
+/* ============================================================
+   组件 A: Dashboard — 综合数据看板(stats + year-progress + heatmap)
+   ============================================================ */
+.g-main > .dashboard{
+  margin-bottom: 14vh;
+  opacity: 0; animation: g-fade-in 1s ease 0.3s forwards;
+}
+.g-main > .dashboard > .label{
+  font-family: var(--en); font-size: 12px; letter-spacing: 0.4em;
+  color: var(--ink-mute); text-transform: uppercase;
+  margin-bottom: 28px; display: flex; align-items: center; gap: 16px;
+}
+.g-main > .dashboard > .label::before,
+.g-main > .dashboard > .label::after{
+  content: ""; flex: 1; border-top: 1px solid rgba(240,244,238,.2);
+}
+
+/* A1. stats-strip · 4 块 KPI 磁贴 */
+.g-main > .dashboard .stats-strip{
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 28px;
+}
+.g-main > .dashboard .stat-tile{
+  position: relative;
+  padding: 22px 18px 18px;
+  background: var(--ash-bg);
+  border: 1px solid var(--ash-line);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), border-color .35s, background .35s;
+}
+.g-main > .dashboard .stat-tile:hover{
+  transform: translateY(-3px);
+  border-color: var(--ash-line-2);
+  background: rgba(160,160,155,.16);
+}
+.g-main > .dashboard .stat-tile .ico{
+  position: absolute; top: 14px; right: 14px;
+  color: var(--ash-300);
+  opacity: .55;
+}
+.g-main > .dashboard .stat-tile .num{
+  display: block;
+  font-family: var(--zh-loose);
+  font-size: 44px; font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.g-main > .dashboard .stat-tile .num .unit{
+  font-size: 18px; color: var(--ink-mute); margin-left: 2px;
+}
+.g-main > .dashboard .stat-tile .lbl{
+  font-family: var(--en); font-size: 11px; letter-spacing: 0.28em;
+  color: var(--ink-mute); text-transform: uppercase;
+}
+
+/* A2. year-progress · 单档水平条 */
+.g-main > .dashboard .year-progress{
+  display: flex; align-items: center; gap: 18px;
+  padding: 18px 20px;
+  background: var(--ash-bg);
+  border: 1px solid var(--ash-line);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.g-main > .dashboard .year-progress .y-head{
+  font-family: var(--zh-sub);
+  font-size: 22px; color: var(--ink);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.g-main > .dashboard .year-progress .y-bar{
+  flex: 1; position: relative;
+  height: 6px;
+  background: var(--viz-track);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.g-main > .dashboard .year-progress .y-fill{
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--ash-300), var(--moss-deep));
+  border-radius: 3px;
+  transition: width 1.2s cubic-bezier(.2,.7,.2,1) .2s;
+}
+.g-main > .dashboard .year-progress.in .y-fill{ /* class 由 JS 添加 */
+  width: var(--y-target, 56%);
+}
+.g-main > .dashboard .year-progress .y-meta{
+  font-family: var(--en); font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.g-main > .dashboard .year-progress .y-meta b{
+  color: var(--moss-deep); font-weight: 600; font-family: var(--zh-sub);
+  font-size: 16px; margin-right: 4px;
+}
+
+/* A3. heatmap · GitHub 风格年度热力图 */
+.g-main > .dashboard .heatmap{
+  padding: 18px 20px;
+  background: var(--ash-bg);
+  border: 1px solid var(--ash-line);
+  border-radius: 8px;
+}
+.g-main > .dashboard .heatmap .h-head{
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--en); font-size: 11px; letter-spacing: 0.24em;
+  color: var(--ink-mute); text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.g-main > .dashboard .heatmap .h-head b{
+  color: var(--ash-100); font-weight: 600;
+}
+.g-main > .dashboard .heatmap .h-body{
+  display: flex; gap: 6px;
+}
+.g-main > .dashboard .heatmap .h-grid{
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  grid-auto-flow: column;
+  grid-auto-columns: 12px;
+  gap: 2px;
+  flex: 1;
+}
+.g-main > .dashboard .heatmap .h-cell{
+  width: 12px; height: 12px;
+  background: var(--viz-track);
+  border-radius: 2px;
+  transition: transform .15s, box-shadow .15s;
+}
+.g-main > .dashboard .heatmap .h-cell.l1{ background: var(--viz-l1); }
+.g-main > .dashboard .heatmap .h-cell.l2{ background: var(--viz-l2); }
+.g-main > .dashboard .heatmap .h-cell.l3{ background: var(--viz-l3); }
+.g-main > .dashboard .heatmap .h-cell:hover{
+  transform: scale(1.4);
+  box-shadow: 0 0 6px rgba(212,212,207,.5);
+}
+.g-main > .dashboard .heatmap .h-legend{
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--en); font-size: 10px;
+  color: var(--ink-mute); letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+.g-main > .dashboard .heatmap .h-legend .swatch{
+  width: 11px; height: 11px;
+  border-radius: 2px;
+  background: var(--viz-track);
+}
+.g-main > .dashboard .heatmap .h-legend .swatch.l1{ background: var(--viz-l1); }
+.g-main > .dashboard .heatmap .h-legend .swatch.l2{ background: var(--viz-l2); }
+.g-main > .dashboard .heatmap .h-legend .swatch.l3{ background: var(--viz-l3); }
+
+/* heatmap tooltip — 跟随鼠标,JS 写入 */
+.gf-heatmap-tip{
+  position: fixed; z-index: 100;
+  padding: 5px 10px;
+  background: rgba(20,30,25,.92);
+  color: var(--ash-100);
+  font-family: var(--en); font-size: 12px;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--ash-line);
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  white-space: nowrap;
+  transform: translate(-50%, -130%);
+}
+.gf-heatmap-tip.show{ opacity: 1; }
+.gf-heatmap-tip .t-date{ color: var(--moss-deep); margin-right: 6px; }
+
+/* ============================================================
+   组件 B: Featured Post 大卡(在 posts 区顶部)
+   ============================================================ */
+.g-main > .sec .featured{
+  display: grid; grid-template-columns: 60px 1fr auto; gap: 24px;
+  align-items: baseline;
+  padding: 28px 24px;
+  margin-bottom: 18px;
+  background: var(--ash-bg);
+  border: 1px solid var(--ash-line);
+  border-radius: 8px;
+  text-decoration: none; color: inherit;
+  transition: transform .35s cubic-bezier(.2,.7,.2,1),
+              border-color .35s, box-shadow .35s, background .35s;
+}
+.g-main > .sec .featured:hover{
+  transform: translateY(-3px);
+  border-color: var(--ash-line-2);
+  background: rgba(160,160,155,.14);
+  box-shadow: 0 8px 22px rgba(20,30,25,.35);
+}
+.g-main > .sec .featured .num{
+  font-family: var(--en); font-size: 14px; color: var(--moss-deep);
+  letter-spacing: 0.1em;
+}
+.g-main > .sec .featured .t{
+  font-family: var(--zh-sub);
+  font-size: 32px; color: var(--ash-100);
+  letter-spacing: 0.04em; display: block;
+  margin-bottom: 6px;
+  text-shadow: 1px 1px 0 rgba(28,38,48,.4);
+}
+.g-main > .sec .featured .ex{
+  font-family: var(--zh-loose);
+  font-size: 15px; color: var(--ink-mute);
+  font-style: italic;
+  display: block;
+  margin-bottom: 12px;
+}
+.g-main > .sec .featured .meta-row{
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.g-main > .sec .featured .meta-row .mp{
+  font-family: var(--en); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--moss-deep);
+  padding: 3px 10px;
+  background: rgba(140,165,140,.10);
+  border: 1px solid rgba(184,208,184,.25);
+  border-radius: 99px;
+}
+.g-main > .sec .featured .meta-row .mp.muted{ color: var(--ink-mute); }
+.g-main > .sec .featured .badge-feat{
+  font-family: var(--en); font-size: 10px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--warm);
+  padding: 4px 10px;
+  border: 1px solid var(--warm);
+  border-radius: 99px;
+  align-self: start;
+}
+
+/* ============================================================
+   组件 C: Tag Board — 标签墙(替换原 .tags-wrap)
+   ============================================================ */
+.g-main > .tag-board{
+  margin-bottom: 14vh;
+  opacity: 0; animation: g-fade-in 1s ease 0.6s forwards;
+}
+.g-main > .tag-board > .label{
+  font-family: var(--en); font-size: 12px; letter-spacing: 0.4em;
+  color: var(--ink-mute); text-transform: uppercase;
+  margin-bottom: 28px; display: flex; align-items: center; gap: 16px;
+}
+.g-main > .tag-board > .label::before,
+.g-main > .tag-board > .label::after{
+  content: ""; flex: 1; border-top: 1px solid rgba(240,244,238,.2);
+}
+.g-main > .tag-board .tag-list{
+  display: flex; flex-direction: column; gap: 10px;
+}
+.g-main > .tag-board .tag-pill{
+  display: grid;
+  grid-template-columns: 120px 1fr 40px;
+  align-items: center; gap: 14px;
+  padding: 10px 16px;
+  background: rgba(160,160,155,.06);
+  border: 1px solid var(--ash-line);
+  border-radius: 6px;
+  text-decoration: none; color: inherit;
+  transition: transform .25s, border-color .25s, background .25s;
+}
+.g-main > .tag-board .tag-pill:hover{
+  transform: translateY(-2px);
+  border-color: var(--ash-line-2);
+  background: rgba(160,160,155,.12);
+}
+.g-main > .tag-board .tag-pill .name{
+  font-family: var(--zh-sub); font-size: 17px;
+  color: var(--ash-100); letter-spacing: 0.04em;
+}
+.g-main > .tag-board .tag-pill .bar{
+  height: 4px;
+  background: var(--viz-track);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.g-main > .tag-board .tag-pill .bar .fill{
+  height: 100%;
+  background: var(--ash-300);
+  border-radius: 2px;
+  transition: background .25s, height .25s, width 1s cubic-bezier(.2,.7,.2,1);
+}
+.g-main > .tag-board .tag-pill:hover .bar .fill{
+  background: var(--moss-deep);
+  height: 6px;
+}
+.g-main > .tag-board .tag-pill .cnt{
+  font-family: var(--en); font-size: 13px;
+  color: var(--ink-mute); font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ============================================================
+   响应式 + reduced-motion 兼容
+   ============================================================ */
+@media (max-width: 768px){
+  .g-main > .dashboard .stats-strip{ grid-template-columns: repeat(2, 1fr); }
+  .g-main > .dashboard .year-progress{ flex-wrap: wrap; }
+  .g-main > .dashboard .year-progress .y-bar{ order: 3; flex: 0 0 100%; }
+  .g-main > .sec .featured{ grid-template-columns: 40px 1fr; }
+  .g-main > .sec .featured .badge-feat{ grid-column: 1/3; justify-self: start; }
+  .g-main > .tag-board .tag-pill{ grid-template-columns: 80px 1fr 32px; gap: 10px; padding: 8px 12px; }
+  .g-main > .tag-board .tag-pill .name{ font-size: 15px; }
+}
+@media (max-width: 600px){
+  .g-main > nav.top{
+    margin: 0 -20px 14vh;
+    padding: 16px 20px;
+    font-size: 12px;
+  }
+  .g-main > nav.top ul{ gap: 14px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .g-main > .dashboard .stat-tile,
+  .g-main > .sec .featured,
+  .g-main > .tag-board .tag-pill,
+  .g-main > .dashboard .heatmap .h-cell{ transition: none !important; }
+  .g-main > .dashboard .year-progress .y-fill{ transition: none !important; }
+  .g-main > .dashboard .year-progress .y-fill{ width: var(--y-target, 56%) !important; }
 }
 
 /* ===== 组件 6: Footer ===== */

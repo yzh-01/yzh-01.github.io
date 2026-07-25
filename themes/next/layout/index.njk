@@ -4,13 +4,31 @@
 
 {% block class %}g-fusion-home{% endblock %}
 
+{# 计算全站数据(用 site.* 全集,不走 page.posts 分页) #}
+{%- set wc = 0 -%}
+{%- for p in site.posts.toArray() -%}
+  {%- set wc = wc + (p.content | striptags).length -%}
+{%- endfor -%}
+
+{# 文章级数据(为 featured 大卡挑最长一篇) #}
+{%- set featured = null -%}
+{%- set _featured_len = 0 -%}
+{%- for p in site.posts.toArray() -%}
+  {%- set l = (p.content | striptags).length -%}
+  {%- if l > _featured_len -%}
+    {%- set featured = p -%}
+    {%- set _featured_len = l -%}
+  {%- endif -%}
+{%- endfor -%}
+
 {% block fusion_main %}
 <main class="g-main">
 
-  <!-- 组件 1: 顶部导航 -->
+  <!-- 1. 顶部导航 · sticky + scroll-spy active -->
   <nav class="top">
     <a class="logo" href="{{ url_for('/') }}">yzh</a>
     <ul>
+      <li><a href="#dashboard">数据</a></li>
       <li><a href="#posts">笔记</a></li>
       <li><a href="#tags">标签</a></li>
       <li><a href="#about">关于</a></li>
@@ -18,7 +36,7 @@
     </ul>
   </nav>
 
-  <!-- 组件 2: Hero -->
+  <!-- 2. Hero · 雨止 / 灰茫 / 雪梅 -->
   <section class="hero">
     <span class="eyebrow">a personal journal — since 2026</span>
     <h1>
@@ -54,10 +72,118 @@
     <div class="stamp">// 眼存灰 · eyes hold grey</div>
   </section>
 
-  <!-- 组件 3: 最近文章 -->
+  <!-- 3. 数据看板 · stats + year-progress + heatmap -->
+  <section class="dashboard" id="dashboard">
+    <div class="label">数据 · dashboard</div>
+
+    <div class="stats-strip">
+      <div class="stat-tile" data-target="{{ site.posts.length }}">
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h12M2 8h12M2 13h8"/></svg>
+        </span>
+        <span class="num" data-target="{{ site.posts.length }}">0</span>
+        <span class="lbl">文章 · posts</span>
+      </div>
+      <div class="stat-tile" data-target="{{ wc }}">
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h10M3 8h10M3 13h6"/></svg>
+        </span>
+        <span class="num" data-target="{{ wc }}">0</span>
+        <span class="lbl">字数 · chars</span>
+      </div>
+      <div class="stat-tile" data-target="{{ site.tags.length }}">
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3l6 5 6-5M2 13l6-5 6 5"/></svg>
+        </span>
+        <span class="num" data-target="{{ site.tags.length }}">0</span>
+        <span class="lbl">标签 · tags</span>
+      </div>
+      <div class="stat-tile" data-target="{{ site.categories.length }}">
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11"/></svg>
+        </span>
+        <span class="num" data-target="{{ site.categories.length }}">0</span>
+        <span class="lbl">分类 · cats</span>
+      </div>
+    </div>
+
+    <div class="year-progress" data-year="2026">
+      <span class="y-head">2026</span>
+      <div class="y-bar"><div class="y-fill"></div></div>
+      <span class="y-meta">
+        <b class="y-pct">0%</b><span class="y-day">· 第 0 / 365 天</span>
+      </span>
+    </div>
+
+    {# 热力图 · 53 列 × 7 行 · 365 格 · 直接内层循环查 count,避开 dict.update #}
+    {%- set base = moment('2026-01-01') -%}
+    {%- set start_dow = base.format('d') | int -%}
+    {%- set all_posts = site.posts.toArray() -%}
+    <div class="heatmap" aria-label="2026 年发文热力图">
+      <div class="h-head">
+        <span class="h-title">2026 · <b>在每一格里</b></span>
+        <span class="h-sub">浅 · 墨 · 深</span>
+      </div>
+      <div class="h-body">
+        <div class="h-grid">
+          {%- for pad in range(0, start_dow) -%}
+            <span class="h-cell" style="visibility:hidden"></span>
+          {%- endfor -%}
+          {%- for d in range(0, 365) -%}
+            {%- set date_str = base.clone().add(d, 'days').format('YYYY-MM-DD') -%}
+            {%- set cnt = 0 -%}
+            {%- for p in all_posts -%}
+              {%- if p.date.format('YYYY-MM-DD') == date_str -%}
+                {%- set cnt = cnt + 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if cnt == 0 -%}
+              {%- set lvl = '' -%}
+            {%- elif cnt == 1 -%}
+              {%- set lvl = 'l1' -%}
+            {%- elif cnt == 2 -%}
+              {%- set lvl = 'l2' -%}
+            {%- else -%}
+              {%- set lvl = 'l3' -%}
+            {%- endif -%}
+            <span class="h-cell {{ lvl }}" data-date="{{ date_str }}" data-count="{{ cnt }}" title="{{ date_str }} · {{ cnt }} 篇"></span>
+          {%- endfor -%}
+        </div>
+      </div>
+      <div class="h-legend">
+        <span>少</span>
+        <span class="swatch"></span>
+        <span class="swatch l1"></span>
+        <span class="swatch l2"></span>
+        <span class="swatch l3"></span>
+        <span>多</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 最近文章 · featured 大卡 + 列表 -->
   <section class="sec" id="posts">
     <div class="label">最近 · recent</div>
-    {%- for post in page.posts.toArray() %}
+
+    {%- if featured -%}
+    {%- set feat_len = (featured.content | striptags).length -%}
+    <a class="featured" href="{{ url_for(featured.path) }}">
+      <span class="num">no.01</span>
+      <span class="body">
+        <span class="t">{{ featured.title }}</span>
+        <span class="ex">{{ featured.description or '' }}</span>
+        <span class="meta-row">
+          <span class="mp">{{ feat_len }} 字</span>
+          <span class="mp muted">12 节 · 70 小节 · 19 表</span>
+          <span class="mp muted">{{ featured.date.format('YYYY · MM') }}</span>
+        </span>
+      </span>
+      <span class="badge-feat">featured</span>
+    </a>
+    {%- endif -%}
+
+    {%- for post in page.posts.toArray() -%}
+    {%- if not featured or post.path != featured.path -%}
     <a class="post" href="{{ url_for(post.path) }}">
       <span class="num">no.{% if loop.index < 10 %}0{{ loop.index }}{% else %}{{ loop.index }}{% endif %}</span>
       <span class="body">
@@ -66,24 +192,35 @@
       </span>
       <span class="d">{{ post.date.format('MM · DD') }}</span>
     </a>
+    {%- endif -%}
     {%- endfor %}
   </section>
 
-  <!-- 组件 4: 标签云 -->
-  <section class="tags-wrap" id="tags">
-    <div class="sec" style="margin-bottom:0;animation:none;opacity:1">
-      <div class="label">标签 · tags</div>
-    </div>
-    <div class="tags">
-      {%- for tag in site.tags.toArray() %}
-      {%- set cnt = tag.posts.length %}
-      {%- if cnt >= 3 %}{%- set cls = 'lg' %}{%- elif cnt == 0 %}{%- set cls = 'sm' %}{%- else %}{%- set cls = '' %}{%- endif %}
-      <a class="tag{% if cls %} {{ cls }}{% endif %}" href="{{ url_for(tag.path) }}">{{ tag.name }} <span class="cnt">{{ cnt }}</span></a>
-      {%- endfor %}
+  <!-- 5. 标签墙 · 胶囊 + 内嵌比例条 -->
+  <section class="tag-board" id="tags">
+    <div class="label">标签 · tags</div>
+    {%- set tag_max = 0 -%}
+    {%- for t in site.tags.toArray() -%}
+      {%- if t.posts.length > tag_max -%}
+        {%- set tag_max = t.posts.length -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- set tag_arr = [] -%}
+    {%- for t in site.tags.toArray() -%}
+      {%- set _ = tag_arr.push({name: t.name, path: t.path, cnt: t.posts.length}) -%}
+    {%- endfor -%}
+    <div class="tag-list">
+      {%- for t in tag_arr -%}
+      <a class="tag-pill" href="{{ url_for(t.path) }}">
+        <span class="name">{{ t.name }}</span>
+        <span class="bar"><span class="fill" style="width:{% if tag_max > 0 %}{{ (t.cnt / tag_max * 100) | round(0, 'floor') }}{% else %}0{% endif %}%"></span></span>
+        <span class="cnt">{{ t.cnt }}</span>
+      </a>
+      {%- endfor -%}
     </div>
   </section>
 
-  <!-- 组件 5: 关于（带 GitHub 头像 + 关注） -->
+  <!-- 6. 关于（带 GitHub 头像 + 关注按钮） -->
   <section class="about" id="about">
     <div class="about-card">
       <a class="avatar" href="https://github.com/yzh-01" target="_blank" rel="noopener">
@@ -111,7 +248,7 @@
     </div>
   </section>
 
-  <!-- 组件 6: Footer -->
+  <!-- 7. Footer -->
   <footer id="rss">
     <div class="l">
       <a href="/atom.xml">rss</a>

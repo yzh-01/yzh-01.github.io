@@ -1,3 +1,114 @@
+{# ============================================================
+   1) 主页 dashboard 交互:scroll-spy + countUp + year-progress + heatmap tooltip
+   ============================================================ #}
+<script>
+(function () {
+  'use strict';
+  var body = document.body;
+  if (!body || !body.classList.contains('g-fusion') || !body.classList.contains('is-home')) return;
+  if (!('IntersectionObserver' in window)) return;
+
+  // ---- A. scroll-spy · 当前区段 ID 写到 body[data-active] ----
+  var sections = ['dashboard', 'posts', 'tags', 'about']
+    .map(function (id) { return document.getElementById(id); })
+    .filter(Boolean);
+  if (sections.length) {
+    var spy = new IntersectionObserver(function (entries) {
+      // 选最近一个 intersecting 区段
+      var visible = entries.filter(function (e) { return e.isIntersecting; });
+      if (visible.length) {
+        // 取离顶部最近的 intersecting
+        visible.sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+        body.setAttribute('data-active', visible[0].target.id);
+      }
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
+    sections.forEach(function (s) { spy.observe(s); });
+  }
+
+  // ---- B. countUp · 数字滚动入场 ----
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function countUp(el) {
+    var target = parseInt(el.getAttribute('data-target') || el.textContent || '0', 10);
+    if (!target || target < 1) { el.textContent = target; return; }
+    var dur = 900;
+    var start = performance.now();
+    function step(now) {
+      var p = Math.min(1, (now - start) / dur);
+      el.textContent = Math.round(target * easeOutCubic(p)).toLocaleString();
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target.toLocaleString();
+    }
+    requestAnimationFrame(step);
+  }
+  var tiles = document.querySelectorAll('.g-main > .dashboard .stat-tile .num[data-target]');
+  if (tiles.length) {
+    var tileObs = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          countUp(e.target);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    tiles.forEach(function (t) { tileObs.observe(t); });
+  }
+
+  // ---- C. year-progress · 运行时计算 + 入场填充 ----
+  var yp = document.querySelector('.g-main > .dashboard .year-progress');
+  if (yp) {
+    var now = new Date();
+    var year = parseInt(yp.getAttribute('data-year') || now.getFullYear(), 10);
+    var startOfYear = new Date(year, 0, 1);
+    var endOfYear = new Date(year + 1, 0, 1);
+    var day = Math.floor((now - startOfYear) / 86400000) + 1;
+    var total = Math.floor((endOfYear - startOfYear) / 86400000);
+    var pct = Math.min(100, Math.max(0, (day / total) * 100));
+    yp.style.setProperty('--y-target', pct.toFixed(2) + '%');
+    var pctEl = yp.querySelector('.y-pct');
+    var dayEl = yp.querySelector('.y-day');
+    if (pctEl) pctEl.textContent = pct.toFixed(1) + '%';
+    if (dayEl) dayEl.textContent = '· 第 ' + day + ' / ' + total + ' 天';
+    var yObs = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          yp.classList.add('in');
+          obs.unobserve(yp);
+        }
+      });
+    }, { threshold: 0.3 });
+    yObs.observe(yp);
+  }
+
+  // ---- D. heatmap tooltip · 跟随鼠标,显示 日期 · N 篇 ----
+  var heatmap = document.querySelector('.g-main > .dashboard .heatmap');
+  if (heatmap) {
+    var tip = document.createElement('div');
+    tip.className = 'gf-heatmap-tip';
+    tip.innerHTML = '<span class="t-date"></span><span class="t-cnt"></span>';
+    document.body.appendChild(tip);
+    var dateEl = tip.querySelector('.t-date');
+    var cntEl = tip.querySelector('.t-cnt');
+    heatmap.addEventListener('mouseover', function (e) {
+      var cell = e.target.closest('.h-cell');
+      if (!cell || cell.style.visibility === 'hidden') return;
+      var d = cell.getAttribute('data-date');
+      var c = cell.getAttribute('data-count');
+      if (!d) return;
+      dateEl.textContent = d;
+      cntEl.textContent = c === '0' ? '· 无' : '· ' + c + ' 篇';
+      tip.classList.add('show');
+    });
+    heatmap.addEventListener('mousemove', function (e) {
+      tip.style.left = e.clientX + 'px';
+      tip.style.top = e.clientY + 'px';
+    });
+    heatmap.addEventListener('mouseleave', function () {
+      tip.classList.remove('show');
+    });
+  }
+})();
+</script>
+
 {# 文章页 TOC 侧栏宽度可拖拽 + localStorage 持久化。
    仅在桌面 (>768px + hover-capable 设备) 启用，移动端 sidebar 走滑入浮层。 #}
 <script>
