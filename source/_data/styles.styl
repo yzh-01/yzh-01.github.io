@@ -35,7 +35,6 @@
   --viz-l1:     #d4d4cf;                 /* 1 帖 · 浅墨 */
   --viz-l2:     #a8a8a3;                 /* 2 帖 · 中墨 */
   --viz-l3:     #7c7c78;                 /* 3+ 帖 · 浓墨 */
-  --viz-grid:   rgba(216,232,212,.12);   /* 热力图分隔线 */
 }
 
 /* ===== 0.5 文字选中色：与冷雾森系配色统一 ===== */
@@ -441,7 +440,7 @@ body[data-active="about"]     .top a[href="#about"]{
   to{opacity:1}
 }
 
-/* ===== 组件 2: Hero ===== */
+/* ===== 组件 2: Hero =====  雨止灰茫 / 雪梅 */
 .g-main > .hero{
   margin-bottom: 18vh;
   transform: rotate(-1.2deg); transform-origin: left center;
@@ -480,7 +479,7 @@ body[data-active="about"]     .top a[href="#about"]{
   letter-spacing: 0.24em; margin-top: 14px;
 }
 
-/* ===== 组件 3: 最近文章（卡片列表） ===== */
+/* ===== 组件 3: 最近文章（卡片列表） + featured 大卡 ===== */
 .g-main > .sec{ margin-bottom: 14vh; opacity: 0; animation: g-fade-in 1s ease 0.4s forwards; }
 .g-main > .sec > .label{
   font-family: var(--en); font-size: 12px; letter-spacing: 0.4em;
@@ -525,52 +524,15 @@ body[data-active="about"]     .top a[href="#about"]{
   letter-spacing: 0.06em; white-space: nowrap;
 }
 
-/* 组件 4: 标签云 */
-.g-main > .tags-wrap{ margin-bottom: 14vh; opacity: 0; animation: g-fade-in 1s ease 0.6s forwards; }
-.g-main > .tags-wrap .tags{
-  display: flex; flex-wrap: wrap; gap: 14px 18px;
-  padding: 20px 0;
-}
-.g-main > .tags-wrap .tag{
-  font-family: var(--zh-loose); font-size: 17px;
-  color: var(--ink-soft);
-  border: 1px solid rgba(240,244,238,.22);
-  padding: 8px 16px; border-radius: 99px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: var(--moss-bg);
-  text-decoration: none;
-}
-.g-main > .tags-wrap .tag .cnt{
-  font-family: var(--en); font-size: 13px;
-  color: var(--ink-mute); margin-left: 6px;
-}
-.g-main > .tags-wrap .tag:hover{
-  color: #f0f4ee; border-color: #f0f4ee;
-  transform: translateY(-2px);
-  background: rgba(140,165,140,.25);
-}
-.g-main > .tags-wrap .tag.lg{
-  border: 1.5px solid #d8e8d4;
-  color: #f0f4ee;
-  background: rgba(140,165,140,.28);
-}
-.g-main > .tags-wrap .tag.lg:hover{
-  background: #d8e8d4; color: #1c2630;
-}
-.g-main > .tags-wrap .tag.sm{
-  color: var(--ink-mute);
-  background: transparent;
-  border-style: dashed;
-}
+/* 组件 4: 标签墙 (.tag-board) —— 取代旧 .tags-wrap;样式见下方"组件 C"。 */
 
 /* ===== 组件 5: 关于（带 GitHub 头像 + 关注按钮） =====
-   配色：冷灰基调，呼应 hero "雨止灰茫"；
+   配色:冷灰基调,呼应 hero "雨止灰茫";
    按钮保留 moss 绿作单点强调色。 */
 .g-main > .about{
   margin-bottom: 14vh;
   padding: 36px 32px;
-  /* 浅墨灰底，叠一条极淡的纵向灰渐变模拟"雨止后湿纸"的层次 */
+  /* 浅墨灰底,叠一条极淡的纵向灰渐变模拟"雨止后湿纸"的层次 */
   background:
     linear-gradient(180deg, rgba(190,190,185,.10) 0%, rgba(160,160,155,.05) 100%),
     rgba(124,124,120,.08);
@@ -1157,8 +1119,9 @@ body[data-active="about"]     .top a[href="#about"]{
   .fog, .fog.b, .rain, .rain.b, .leaf{ animation: none; }
   .g-main > nav.top,
   .g-main > .hero,
+  .g-main > .dashboard,
   .g-main > .sec,
-  .g-main > .tags-wrap,
+  .g-main > .tag-board,
   .g-main > .about,
   .g-main > footer{ opacity: 1; transform: none; }
 }
