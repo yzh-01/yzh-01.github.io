@@ -261,6 +261,8 @@
         if (e.isIntersecting) {
           e.target.style.opacity = '1';
           e.target.style.transform = 'translateY(0)';
+          // featured 同时加 .in 触发其 scale 终态
+          if (e.target.classList.contains('featured')) e.target.classList.add('in');
           obs.unobserve(e.target);
         }
       });
