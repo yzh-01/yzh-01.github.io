@@ -344,7 +344,7 @@
 </script>
 
 {# ============================================================
-   3) 进入动画 · 雾散(仅首次访问,非首次 + reduce-motion 直接 remove)
+   3) 进入动画 · 雾散 + 雪梅绽雾心(2.2s 三幕,仅首次访问)
    ============================================================ #}
 <script>
 (function () {
@@ -357,16 +357,36 @@
   var seen = false;
   try { seen = localStorage.getItem('gf-entry-mist') === '1'; } catch (e) {}
   if (reduce || seen) {
-    mist.parentNode && mist.parentNode.removeChild(mist);
+    if (mist.parentNode) mist.parentNode.removeChild(mist);
     return;
   }
-  // 首访:1 帧后加 .go,触发 1.4s opacity transition;1.7s 后 remove + 写 flag
+  // 三幕入场(总 2.2s,顺序)
+  //   t=300  · 雪梅 bloom-in · 弹性放大 0 → 1.08
+  //   t=500  · line-1 "雨止" 抹下
+  //   t=600  · 雾加 .go · 开始 1.4s opacity 缓出
+  //   t=650  · line-2 "灰茫" 抹下
+  //   t=800  · eyebrow 抹下
+  //   t=1100 · 雪梅 bloom-done · 1.08 → 1.0 定格
+  //   t=1600 · stamp "眼存灰" 抹下
+  //   t=2200 · 移除雾 DOM 节点 + 写 flag
+  var seal  = document.querySelector('.hero h1 .seal.seal-bloom');
+  var line1 = document.querySelector('.g-main > .hero .hero-line-1');
+  var line2 = document.querySelector('.g-main > .hero .hero-line-2');
+  var eye   = document.querySelector('.g-main > .hero .eyebrow');
+  var stamp = document.querySelector('.g-main > .hero .stamp');
+
   requestAnimationFrame(function () {
-    setTimeout(function () { mist.classList.add('go'); }, 180);
+    setTimeout(function () { seal && seal.classList.add('bloom-in'); }, 300);
+    setTimeout(function () { seal && seal.classList.add('bloom-done'); }, 1100);
+    setTimeout(function () { line1 && line1.classList.add('line-in'); }, 500);
+    setTimeout(function () { line2 && line2.classList.add('line-in'); }, 650);
+    setTimeout(function () { eye   && eye.classList.add('line-in'); }, 800);
+    setTimeout(function () { stamp && stamp.classList.add('line-in'); }, 1600);
+    setTimeout(function () { mist.classList.add('go'); }, 600);
     setTimeout(function () {
       if (mist.parentNode) mist.parentNode.removeChild(mist);
       try { localStorage.setItem('gf-entry-mist', '1'); } catch (e) {}
-    }, 1750);
+    }, 2200);
   });
 })();
 </script>

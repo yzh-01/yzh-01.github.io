@@ -22,22 +22,35 @@
 {%- endfor -%}
 
 {% block fusion_main %}
-{# 进入动画 · 雾散 · 仅首次访问;reduce-motion / 后续 reload 由 body-end.njk 立即 remove #}
+{# 进入动画 · 雾散 + 雪梅绽雾心 · 仅首次访问;reduce-motion / 后续 reload 由 body-end.njk 立即 remove #}
 <div class="entry-mist" aria-hidden="true">
-  <svg class="mist-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <svg class="mist-svg layer-1" viewBox="0 0 100 100" preserveAspectRatio="none">
     <defs>
       <radialGradient id="gf-mist-core" cx="50%" cy="45%" r="55%">
-        <stop offset="0%" stop-color="rgba(212,212,207,.18)"/>
-        <stop offset="60%" stop-color="rgba(212,212,207,.04)"/>
+        <stop offset="0%" stop-color="rgba(212,212,207,.22)"/>
+        <stop offset="60%" stop-color="rgba(212,212,207,.05)"/>
         <stop offset="100%" stop-color="rgba(212,212,207,0)"/>
-      </radialGradient>
-      <radialGradient id="gf-mist-edge" cx="80%" cy="80%" r="40%">
-        <stop offset="0%" stop-color="rgba(168,168,163,.18)"/>
-        <stop offset="100%" stop-color="rgba(168,168,163,0)"/>
       </radialGradient>
     </defs>
     <rect width="100%" height="100%" fill="url(#gf-mist-core)"/>
+  </svg>
+  <svg class="mist-svg layer-2" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <radialGradient id="gf-mist-edge" cx="20%" cy="80%" r="50%">
+        <stop offset="0%" stop-color="rgba(168,168,163,.20)"/>
+        <stop offset="100%" stop-color="rgba(168,168,163,0)"/>
+      </radialGradient>
+    </defs>
     <rect width="100%" height="100%" fill="url(#gf-mist-edge)"/>
+  </svg>
+  <svg class="mist-svg layer-3" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <radialGradient id="gf-mist-top" cx="60%" cy="15%" r="45%">
+        <stop offset="0%" stop-color="rgba(216,232,212,.16)"/>
+        <stop offset="100%" stop-color="rgba(216,232,212,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#gf-mist-top)"/>
   </svg>
 </div>
 <main class="g-main">
@@ -54,12 +67,12 @@
     </ul>
   </nav>
 
-  <!-- 2. Hero · 雨止 / 灰茫 / 雪梅 -->
+  <!-- 2. Hero · 雨止 / 灰茫 / 雪梅 · 三幕入场用 .hero-line-1/2 + .seal-bloom -->
   <section class="hero">
     <span class="eyebrow">a personal journal — since 2026</span>
     <h1>
-      雨止<br>
-      灰茫<span class="seal" aria-hidden="true">
+      <span class="hero-line-1">雨止</span><br>
+      <span class="hero-line-2">灰茫</span><span class="seal seal-bloom" aria-hidden="true">
         <svg viewBox="0 0 42 42" width="42" height="42" class="seal-svg">
           <path d="M 5 37 Q 14 31 22 25 T 38 11" fill="none" stroke="#d4d4cf" stroke-width="1.4" stroke-linecap="round"/>
           <path d="M 16 30 L 12 34" fill="none" stroke="#d4d4cf" stroke-width="1" stroke-linecap="round"/>

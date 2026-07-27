@@ -958,31 +958,72 @@ body[data-active="about"]     .top a[href="#about"]{
 }
 
 /* ============================================================
-   进入动画 · 雾散(full-screen mist overlay,首次访问)
+   进入动画 · 雾散 + 雪梅绽雾心(2.2s 三幕,首次访问)
    ============================================================ */
 .entry-mist{
   position: fixed; inset: 0; z-index: 9999;
   pointer-events: none;
-  /* 雾心:与 .fog 同款 ash 灰绿; 边缘:略冷 */
   background: linear-gradient(180deg, rgba(31,42,36,.97) 0%, rgba(50,65,68,.95) 50%, rgba(31,42,36,.97) 100%);
   opacity: 1;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity 1.4s cubic-bezier(.4,0,.2,1) .15s;
+  transition: opacity 1.4s cubic-bezier(.4,0,.2,1) .4s;
 }
 .entry-mist.go{ opacity: 0; }
 .entry-mist .mist-svg{
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   pointer-events: none;
-  animation: gf-mist-drift 9s ease-in-out infinite;
   mix-blend-mode: screen;
 }
+.entry-mist .mist-svg.layer-1{ animation: gf-mist-drift 9s  ease-in-out infinite; }
+.entry-mist .mist-svg.layer-2{ animation: gf-mist-drift 11s ease-in-out infinite reverse; }
+.entry-mist .mist-svg.layer-3{ animation: gf-mist-drift 13s ease-in-out infinite; opacity: .65; }
 @keyframes gf-mist-drift{
   0%,100%{ transform: translate(0,0) scale(1); }
   50%{ transform: translate(-2.5%, -1.5%) scale(1.05); }
 }
+
+/* 雪梅绽 · 整组 seal 弹性放大 + 轻微旋转 */
+.hero h1 .seal.seal-bloom{
+  display: inline-block;
+  transform: scale(0) rotate(-8deg);
+  transform-origin: 50% 60%;
+  opacity: 0;
+  transition: transform .8s cubic-bezier(.34,1.56,.64,1) .3s,
+              opacity .5s ease .3s;
+}
+.hero h1 .seal.seal-bloom.bloom-in{
+  transform: scale(1.08) rotate(0deg);
+  opacity: 1;
+}
+.hero h1 .seal.seal-bloom.bloom-done{
+  transform: scale(1) rotate(0deg);
+  transition: transform .35s ease;
+}
+/* 雪梅入位后转交 sealSway(沿用现有 keyframe) */
+.hero h1 .seal{ animation: sealSway 5s ease-in-out infinite 1.4s; }
+
+/* 巨字抹下 · h1 拆行 + eyebrow + stamp */
+.hero-line-1, .hero-line-2{
+  display: block;
+  transform: translateY(40px);
+  opacity: 0;
+  transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s ease;
+}
+.hero-line-1.line-in{ transform: translateY(0); opacity: 1; transition-delay: .5s; }
+.hero-line-2.line-in{ transform: translateY(0); opacity: 1; transition-delay: .65s; }
+.hero .eyebrow,
+.hero .stamp{
+  opacity: 0; transform: translateY(20px);
+  transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s ease;
+}
+.hero .eyebrow.line-in{ transform: translateY(0); opacity: 1; transition-delay: .8s; }
+.hero .stamp.line-in{    transform: translateY(0); opacity: 1; transition-delay: 1.6s; }
+
 @media (prefers-reduced-motion: reduce){
-  .entry-mist{ display: none; }
+  .entry-mist,
+  .hero h1 .seal.seal-bloom,
+  .hero-line-1, .hero-line-2,
+  .hero .eyebrow, .hero .stamp{ display: none; }
 }
 
 /* ============================================================
