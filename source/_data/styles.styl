@@ -1002,28 +1002,60 @@ body[data-active="about"]     .top a[href="#about"]{
 /* 雪梅入位后转交 sealSway(沿用现有 keyframe) */
 .hero h1 .seal{ animation: sealSway 5s ease-in-out infinite 1.4s; }
 
-/* 巨字抹下 · h1 拆行 + eyebrow + stamp */
-.hero-line-1, .hero-line-2{
-  display: block;
-  transform: translateY(40px);
-  opacity: 0;
-  transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s ease;
-}
-.hero-line-1.line-in{ transform: translateY(0); opacity: 1; transition-delay: .5s; }
-.hero-line-2.line-in{ transform: translateY(0); opacity: 1; transition-delay: .65s; }
+/* ============================================================
+   进入动画 · 默认就可见 · body.entry-play 才播 keyframe
+   关键:默认 opacity 1,任何 JS 失败 / 二次访问 / 阻塞都不影响可见性
+   ============================================================ */
+.hero-line-1, .hero-line-2,
 .g-main > .hero .eyebrow,
 .g-main > .hero .stamp{
-  opacity: 0; transform: translateY(20px);
-  transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s ease;
+  display: block;
+  opacity: 1;
+  transform: none;
 }
-.g-main > .hero .eyebrow.line-in{ transform: translateY(0); opacity: 1; transition-delay: .8s; }
-.g-main > .hero .stamp.line-in{    transform: translateY(0); opacity: 1; transition-delay: 1.6s; }
 
+/* 仅首次访问(body.entry-play)播 keyframe 入场 */
+body.g-fusion.is-home.entry-play .hero-line-1,
+body.g-fusion.is-home.entry-play .hero-line-2,
+body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow,
+body.g-fusion.is-home.entry-play .g-main > .hero .stamp{
+  animation: hero-line-in .65s cubic-bezier(.2,.7,.2,1) both;
+}
+body.g-fusion.is-home.entry-play .hero-line-1{ animation-delay: .25s; }
+body.g-fusion.is-home.entry-play .hero-line-2{ animation-delay: .35s; }
+body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow{ animation-delay: .5s; }
+body.g-fusion.is-home.entry-play .g-main > .hero .stamp{ animation-delay: .9s; }
+
+@keyframes hero-line-in{
+  from{ opacity: 0; transform: translateY(28px); }
+  to  { opacity: 1; transform: translateY(0); }
+}
+
+/* 雪梅绽 keyframe 化:不再依赖 .bloom-in 类 */
+body.g-fusion.is-home.entry-play .hero h1 .seal.seal-bloom{
+  animation: seal-bloom .9s cubic-bezier(.34,1.56,.64,1) .15s both;
+}
+@keyframes seal-bloom{
+  0%   { transform: scale(0) rotate(-8deg); opacity: 0; }
+  60%  { transform: scale(1.08) rotate(0deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* 雾散 keyframe 化 */
+body.g-fusion.is-home.entry-play .entry-mist{
+  animation: entry-mist-out 1.0s ease .2s forwards;
+}
+@keyframes entry-mist-out{ to{ opacity: 0; } }
+
+/* reduced-motion · JS 早返回不会加 .entry-play,所以 chars 默认可见,mist 立即隐藏 */
 @media (prefers-reduced-motion: reduce){
-  .entry-mist,
-  .hero h1 .seal.seal-bloom,
-  .hero-line-1, .hero-line-2,
-  .hero .eyebrow, .hero .stamp{ display: none; }
+  .entry-mist{ display: none; }
+  body.g-fusion.is-home.entry-play .entry-mist,
+  body.g-fusion.is-home.entry-play .hero-line-1,
+  body.g-fusion.is-home.entry-play .hero-line-2,
+  body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow,
+  body.g-fusion.is-home.entry-play .g-main > .hero .stamp,
+  body.g-fusion.is-home.entry-play .hero h1 .seal.seal-bloom{ animation: none; }
 }
 
 /* ============================================================
