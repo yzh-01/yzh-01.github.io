@@ -958,6 +958,34 @@ body[data-active="about"]     .top a[href="#about"]{
 }
 
 /* ============================================================
+   进入动画 · 雾散(full-screen mist overlay,首次访问)
+   ============================================================ */
+.entry-mist{
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none;
+  /* 雾心:与 .fog 同款 ash 灰绿; 边缘:略冷 */
+  background: linear-gradient(180deg, rgba(31,42,36,.97) 0%, rgba(50,65,68,.95) 50%, rgba(31,42,36,.97) 100%);
+  opacity: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 1.4s cubic-bezier(.4,0,.2,1) .15s;
+}
+.entry-mist.go{ opacity: 0; }
+.entry-mist .mist-svg{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  animation: gf-mist-drift 9s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes gf-mist-drift{
+  0%,100%{ transform: translate(0,0) scale(1); }
+  50%{ transform: translate(-2.5%, -1.5%) scale(1.05); }
+}
+@media (prefers-reduced-motion: reduce){
+  .entry-mist{ display: none; }
+}
+
+/* ============================================================
    响应式 + reduced-motion 兼容
    ============================================================ */
 @media (max-width: 768px){

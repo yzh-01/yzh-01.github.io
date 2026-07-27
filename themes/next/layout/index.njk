@@ -22,6 +22,24 @@
 {%- endfor -%}
 
 {% block fusion_main %}
+{# 进入动画 · 雾散 · 仅首次访问;reduce-motion / 后续 reload 由 body-end.njk 立即 remove #}
+<div class="entry-mist" aria-hidden="true">
+  <svg class="mist-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <radialGradient id="gf-mist-core" cx="50%" cy="45%" r="55%">
+        <stop offset="0%" stop-color="rgba(212,212,207,.18)"/>
+        <stop offset="60%" stop-color="rgba(212,212,207,.04)"/>
+        <stop offset="100%" stop-color="rgba(212,212,207,0)"/>
+      </radialGradient>
+      <radialGradient id="gf-mist-edge" cx="80%" cy="80%" r="40%">
+        <stop offset="0%" stop-color="rgba(168,168,163,.18)"/>
+        <stop offset="100%" stop-color="rgba(168,168,163,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#gf-mist-core)"/>
+    <rect width="100%" height="100%" fill="url(#gf-mist-edge)"/>
+  </svg>
+</div>
 <main class="g-main">
 
   <!-- 1. 顶部导航 · sticky + scroll-spy active -->

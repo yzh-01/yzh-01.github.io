@@ -342,3 +342,31 @@
   })();
 })();
 </script>
+
+{# ============================================================
+   3) 进入动画 · 雾散(仅首次访问,非首次 + reduce-motion 直接 remove)
+   ============================================================ #}
+<script>
+(function () {
+  'use strict';
+  var body = document.body;
+  if (!body || !body.classList.contains('g-fusion') || !body.classList.contains('is-home')) return;
+  var mist = document.querySelector('.entry-mist');
+  if (!mist) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var seen = false;
+  try { seen = localStorage.getItem('gf-entry-mist') === '1'; } catch (e) {}
+  if (reduce || seen) {
+    mist.parentNode && mist.parentNode.removeChild(mist);
+    return;
+  }
+  // 首访:1 帧后加 .go,触发 1.4s opacity transition;1.7s 后 remove + 写 flag
+  requestAnimationFrame(function () {
+    setTimeout(function () { mist.classList.add('go'); }, 180);
+    setTimeout(function () {
+      if (mist.parentNode) mist.parentNode.removeChild(mist);
+      try { localStorage.setItem('gf-entry-mist', '1'); } catch (e) {}
+    }, 1750);
+  });
+})();
+</script>
