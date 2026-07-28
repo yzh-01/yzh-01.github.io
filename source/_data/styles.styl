@@ -48,6 +48,19 @@
   text-shadow: none;
 }
 
+/* ===== 组件 0: 文章页返回首页链接 ===== */
+.g-back-home{
+  position: relative; z-index: 5;
+  padding: 14px 20px 0;
+  margin: 0;
+  font-family: var(--zh-loose); font-size: 14px;
+}
+.g-back-home a{
+  color: var(--ink-mute); text-decoration: none;
+  transition: color .25s;
+}
+.g-back-home a:hover{ color: var(--moss-deep); }
+
 /* ===== 0. 关闭 NexT 默认背景/布局干扰 ===== */
 /* 关键修复：NexT 基线 `html, body { height: 100% }` + `body { min-height: 100% }`
    会把 body 锁死在 viewport 高度，导致长文章溢出 body 但 html 看不到溢出，
@@ -268,25 +281,25 @@ html, body{
   50%{ opacity: 1; transform: translateX(2px); }
 }
 
-/* ===== 1. 真实背景照片层 ===== */
+/* ===== 1. 纯 CSS 背景层（替代缺失的照片）===== */
 .bg-photo{
   position: fixed;
   inset: 0;
   z-index: 0;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-image: url('/images/home.jpg');
-  /* 鼠标视差 · 与 background-attachment:fixed 共存,不抢 transform 通道 */
-  background-position-x: calc(50% + (var(--mx) - 50%) * 1%);
-  background-position-y: calc(50% + (var(--my) - 50%) * 1%);
-  filter: saturate(.55) brightness(.45) hue-rotate(-8deg) contrast(1.05);
-  mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+  background:
+    radial-gradient(ellipse 65% 55% at 40% 35%, rgba(140,165,140,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 65% 60%, rgba(91,122,102,.10) 0%, transparent 55%),
+    linear-gradient(175deg, #1f2a24 0%, #2a352e 40%, #1c2620 100%);
+  /* 鼠标视差 · 通过伪元素 transform 实现 */
+  transform: translate3d(
+    calc((var(--mx) - 50%) * .004),
+    calc((var(--my) - 50%) * .003),
+    0);
 }
 [data-page="post"].bg-photo{
-  background-image: url('/images/post.jpg');
-  filter: saturate(.4) brightness(.35) hue-rotate(-25deg) contrast(1.1);
+  background:
+    radial-gradient(ellipse 60% 50% at 35% 30%, rgba(140,165,140,.10) 0%, transparent 55%),
+    linear-gradient(170deg, #1c2620 0%, #253028 50%, #1a241e 100%);
 }
 
 /* ===== 2. 色调叠加层 ===== */
@@ -1001,7 +1014,14 @@ body[data-active="about"]     .top a[href="#about"]{
 }
 .g-main > .dashboard .heatmap .h-body{
   display: flex; gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ash-line-2) transparent;
+  padding-bottom: 4px;
 }
+.g-main > .dashboard .heatmap .h-body::-webkit-scrollbar{ height: 4px; }
+.g-main > .dashboard .heatmap .h-body::-webkit-scrollbar-thumb{ background: var(--ash-line-2); border-radius: 2px; }
 .g-main > .dashboard .heatmap .h-grid{
   display: grid;
   grid-template-rows: repeat(7, 12px);

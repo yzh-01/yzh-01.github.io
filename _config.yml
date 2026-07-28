@@ -91,7 +91,7 @@ meta_generator: true
 date_format: YYYY-MM-DD
 time_format: HH:mm:ss
 ## updated_option supports 'mtime', 'date', 'empty'
-updated_option: 'mtime'
+updated_option: 'date'
 
 # Pagination
 ## Set per_page to 0 to disable pagination
@@ -109,11 +109,24 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: next
 
+# Feed (hexo-generator-feed)
+feed:
+  enable: true
+  type: atom
+  path: atom.xml
+  limit: 20
+  content: true
+  content_limit:
+
+# Sitemap (hexo-generator-sitemap)
+sitemap:
+  path: sitemap.xml
+
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
-## 注：yzh-01.github.io 是 GitHub 用户主页站，Pages 默认从 main 分支根目录读取。
-## 部署由 .github/workflows/deploy.yml 通过 GitHub Actions 完成（构建到 gh-pages 分支，
-## 再由 Pages 设置从 gh-pages 发布）。保留 hexo-deployer-git 作为本地兜底部署手段。
+## 部署通过 .github/workflows/deploy.yml（GitHub Actions + upload-pages-artifact）完成。
+## 以下 hexo-deployer-git 配置仅作为本地兜底，线上部署由 Actions 全权接管。
+## 如需本地手动部署到 gh-pages：npm run deploy
 deploy:
   type: git
   repo: https://github.com/yzh-01/yzh-01.github.io.git

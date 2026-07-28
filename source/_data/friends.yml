@@ -3,9 +3,9 @@
 #   name · 显示名
 #   url  · 链接(必填)
 #   desc · 可选,一句话说明
-- name: 示例站点 A
-  url: https://example.com
-  desc: 一个例子
-- name: 示例站点 B
-  url: https://example.com
-  desc: 另一个例子
+#
+# 暂无友链——等认识新朋友后补充。
+# 模板:
+# - name: 站点名
+#   url: https://example.com
+#   desc: 一句话介绍

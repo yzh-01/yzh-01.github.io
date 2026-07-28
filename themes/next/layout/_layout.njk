@@ -39,6 +39,11 @@
 
   {% block fusion_main %}
   <main class="main">
+    {%- if not is_home() %}
+    <nav class="g-back-home" aria-label="返回首页">
+      <a href="{{ url_for('/') }}">← yzh 的小站</a>
+    </nav>
+    {%- endif %}
     <div class="column">
       <header class="header" itemscope itemtype="http://schema.org/WPHeader">
         {%- include '_partials/header/index.njk' -%}

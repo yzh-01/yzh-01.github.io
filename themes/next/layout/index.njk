@@ -4,6 +4,10 @@
 
 {% block class %}g-fusion-home{% endblock %}
 
+{# 动态年份，构建时取当前时间 #}
+{%- set cy = moment().format('YYYY') -%}
+{%- set base = moment(cy + '-01-01') -%}
+
 {# 计算全站数据(用 site.* 全集,不走 page.posts 分页) #}
 {%- set wc = 0 -%}
 {%- for p in site.posts.toArray() -%}
@@ -40,7 +44,7 @@
 
   <!-- 2. Hero · 雨止 / 灰茫 / 雪梅 · 三幕入场用 .hero-line-1/2 + .seal-bloom -->
   <section class="hero">
-    <span class="eyebrow">a personal journal — since 2026</span>
+    <span class="eyebrow">a personal journal — since {{ cy }}</span>
     <h1>
       <span class="hero-line-1">雨止</span><br>
       <span class="hero-line-2">灰茫</span><span class="seal seal-bloom" aria-hidden="true">
@@ -111,7 +115,7 @@
       </div>
     </div>
 
-    <div class="year-progress" data-year="2026">
+    <div class="year-progress" data-year="{{ cy }}">
       <span class="y-head">2026</span>
       <div class="y-bar"><div class="y-fill"></div></div>
       <span class="y-meta">
@@ -119,13 +123,13 @@
       </span>
     </div>
 
-    {# 热力图 · 53 列 × 7 行 · 365 格 · 直接内层循环查 count,避开 dict.update #}
-    {%- set base = moment('2026-01-01') -%}
+    {# 热力图 · 53 列 × 7 行 · 365/366 格 · 闰年自适应 #}
     {%- set start_dow = base.format('d') | int -%}
+    {%- set days_in_year = base.clone().endOf('year').diff(base, 'days') + 1 -%}
     {%- set all_posts = site.posts.toArray() -%}
     <div class="heatmap" aria-label="2026 年发文热力图">
       <div class="h-head">
-        <span class="h-title">2026 · <b>在每一格里</b></span>
+        <span class="h-title">{{ cy }} · <b>在每一格里</b></span>
         <span class="h-sub">浅 · 墨 · 深</span>
       </div>
       <div class="h-body">
@@ -133,7 +137,7 @@
           {%- for pad in range(0, start_dow) -%}
             <span class="h-cell" style="visibility:hidden"></span>
           {%- endfor -%}
-          {%- for d in range(0, 365) -%}
+          {%- for d in range(0, days_in_year) -%}
             {%- set date_str = base.clone().add(d, 'days').format('YYYY-MM-DD') -%}
             {%- set cnt = 0 -%}
             {%- for p in all_posts -%}
@@ -178,8 +182,10 @@
         <span class="ex">{{ featured.description or '' }}</span>
         <span class="meta-row">
           <span class="mp">{{ feat_len }} 字</span>
-          <span class="mp muted">12 节 · 70 小节 · 19 表</span>
-          <span class="mp muted">{{ featured.date.format('YYYY · MM') }}</span>
+          {%- for cat in featured.categories.toArray() -%}
+          <span class="mp muted">{{ cat.name }}</span>
+          {%- endfor -%}
+          <span class="mp muted">{{ featured.date.format('YYYY · MM · DD') }}</span>
         </span>
       </span>
       <span class="badge-feat">featured</span>
@@ -259,7 +265,7 @@
       <a href="https://github.com/yzh-01">github</a>
       <a href="/sitemap.xml">sitemap</a>
     </div>
-    <div class="r">© 2026 · made in rain</div>
+    <div class="r">© {{ cy }} · made in rain</div>
   </footer>
 
   <!-- 8. 侧栏 · 4 个 widget:搜索 / 最近更新 / 标签云 / 友链 -->
@@ -287,7 +293,11 @@
       {%- endfor -%}
       <div class="chips">
         {%- for t in site.tags.toArray() -%}
-          {%- set _size = (12 + (26 - 12) * (t.posts.length - 1) / (_tag_max_cnt - 1)) | round(0) -%}
+          {%- if _tag_max_cnt > 1 -%}
+            {%- set _size = (12 + (26 - 12) * (t.posts.length - 1) / (_tag_max_cnt - 1)) | round(0) -%}
+          {%- else -%}
+            {%- set _size = 12 -%}
+          {%- endif -%}
           <a class="chip" href="{{ url_for(t.path) }}" style="font-size:{{ _size }}px">{{ t.name }}<span class="cnt">{{ t.posts.length }}</span></a>
         {%- endfor -%}
       </div>
