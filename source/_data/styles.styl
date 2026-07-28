@@ -282,15 +282,19 @@ html, body{
 }
 
 /* ===== 1. 纯 CSS 背景层（替代缺失的照片）===== */
+/* 暗角用 body::after（下已有噪点层），这里只做底色 + 微视差 */
 .bg-photo{
   position: fixed;
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 65% 55% at 40% 35%, rgba(140,165,140,.12) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 65% 60%, rgba(91,122,102,.10) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at 40% 35%, rgba(140,165,140,.10) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 65% 60%, rgba(91,122,102,.08) 0%, transparent 55%),
     linear-gradient(175deg, #1f2a24 0%, #2a352e 40%, #1c2620 100%);
-  /* 鼠标视差 · 通过伪元素 transform 实现 */
+  /* 暗角：四个边角渐暗 */
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 55%, transparent 100%);
+  /* 鼠标视差 · translate3d 只影响自身，bg-photo 无子元素所以安全 */
   transform: translate3d(
     calc((var(--mx) - 50%) * .004),
     calc((var(--my) - 50%) * .003),
@@ -298,8 +302,10 @@ html, body{
 }
 [data-page="post"].bg-photo{
   background:
-    radial-gradient(ellipse 60% 50% at 35% 30%, rgba(140,165,140,.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 35% 30%, rgba(140,165,140,.08) 0%, transparent 55%),
     linear-gradient(170deg, #1c2620 0%, #253028 50%, #1a241e 100%);
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, #000 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, #000 60%, transparent 100%);
 }
 
 /* ===== 2. 色调叠加层 ===== */
@@ -682,8 +688,8 @@ body[data-active="about"]     .top a[href="#about"]{
   letter-spacing: 0.36em; margin-bottom: 28px; display: inline-block;
 }
 .g-main > .hero h1{
-  font-family: var(--zh-crazy); font-weight: 400;
-  font-size: clamp(56px,11vw,128px);
+  font-family: "Liu Jian Mao Cao", var(--zh-crazy); font-weight: 400;
+  font-size: clamp(64px,12vw,140px);
   line-height: 1; letter-spacing: 0.06em;
   color: var(--ink);
   text-shadow: 1px 1px 0 rgba(28,38,48,.4);
