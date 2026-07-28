@@ -400,11 +400,205 @@ body::after{
 }
 
 /* ============================================================
-   首页容器（完全复刻 G-fusion 的 main）
+   首页容器 · 主+侧栏 grid 布局(经典博主风)
    ============================================================ */
 .g-main{
   position: relative; z-index: 3;
-  max-width: 880px; margin: 0 auto; padding: 0 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 56px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+/* 顶部导航 + footer 跨两列 */
+.g-main > nav.top,
+.g-main > footer{ grid-column: 1 / -1; }
+
+/* ===== 侧栏 sticky 容器 ===== */
+.g-side{
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ash-line-2) transparent;
+  padding-right: 4px;
+}
+.g-side::-webkit-scrollbar{ width: 4px; }
+.g-side::-webkit-scrollbar-thumb{ background: var(--ash-line-2); border-radius: 2px; }
+.g-side > * + *{ margin-top: 28px; }
+.g-side .label{
+  font-family: var(--en); font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* ===== Widget 1: 搜索 ===== */
+.g-search{ position: relative; }
+.g-search input{
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  font-family: var(--zh-loose); font-size: 14px;
+  color: var(--ink);
+  background: var(--ash-bg);
+  border: 1px solid var(--ash-line);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color .25s, background .25s, box-shadow .25s;
+  box-sizing: border-box;
+}
+.g-search input::placeholder{ color: var(--ink-mute); }
+.g-search input:focus{
+  border-color: var(--ash-line-2);
+  background: rgba(160,160,155,.12);
+  box-shadow: 0 0 0 3px rgba(216,232,212,.08);
+}
+.g-search::before{
+  content: ""; position: absolute;
+  left: 12px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23a8b3a8' stroke-width='1.4'><circle cx='7' cy='7' r='5'/><path d='M11 11l3 3'/></svg>");
+  background-repeat: no-repeat; background-size: contain;
+  pointer-events: none;
+}
+.g-search-results{
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  margin: 0; padding: 6px 0;
+  list-style: none;
+  background: rgba(20,30,25,.95);
+  border: 1px solid var(--ash-line);
+  border-radius: 6px;
+  max-height: 320px; overflow-y: auto;
+  z-index: 60;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.g-search-results li{ padding: 0; }
+.g-search-results li a{
+  display: block;
+  padding: 8px 14px;
+  font-family: var(--zh-loose); font-size: 14px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.g-search-results li a:hover{
+  color: var(--ink);
+  background: rgba(216,232,212,.08);
+  border-left-color: var(--moss-deep);
+}
+.g-search-results li.empty{
+  padding: 10px 14px;
+  font-family: var(--zh-loose); font-size: 13px;
+  color: var(--ink-mute); font-style: italic;
+}
+
+/* ===== Widget 2: 最近更新 ===== */
+.g-recent{ display: flex; flex-direction: column; gap: 10px; }
+.g-recent-item{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 0;
+  text-decoration: none; color: inherit;
+  border-bottom: 1px dashed var(--ash-line);
+  transition: padding-left .25s, border-color .25s;
+}
+.g-recent-item:hover{
+  padding-left: 6px;
+  border-bottom-color: var(--moss-deep);
+}
+.g-recent-item .t{
+  font-family: var(--zh-sub); font-size: 15px;
+  color: var(--ash-100);
+  letter-spacing: 0.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.g-recent-item .d{
+  font-family: var(--en); font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ===== Widget 3: 标签云 ===== */
+.g-tagcloud .chips{
+  display: flex; flex-wrap: wrap;
+  gap: 8px 10px;
+  align-items: baseline;
+}
+.g-tagcloud .chip{
+  display: inline-flex; align-items: baseline; gap: 4px;
+  font-family: var(--zh-sub);
+  color: var(--ash-100);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: color .25s, background .25s;
+  line-height: 1.2;
+}
+.g-tagcloud .chip:hover{
+  color: var(--moss-deep);
+  background: rgba(140,165,140,.10);
+}
+.g-tagcloud .chip .cnt{
+  font-family: var(--en); font-size: 10px;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  vertical-align: super;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Widget 4: 友链 ===== */
+.g-friends{ display: flex; flex-direction: column; gap: 8px; }
+.g-friend{
+  display: flex; flex-direction: column;
+  padding: 8px 12px;
+  background: var(--ash-bg);
+  border: 1px solid var(--ash-line);
+  border-radius: 6px;
+  text-decoration: none; color: inherit;
+  transition: transform .2s, border-color .2s, background .2s;
+}
+.g-friend:hover{
+  transform: translateX(2px);
+  border-color: var(--moss-deep);
+  background: rgba(160,160,155,.14);
+}
+.g-friend .n{
+  font-family: var(--zh-sub); font-size: 14px;
+  color: var(--ash-100);
+  letter-spacing: 0.04em;
+}
+.g-friend .d{
+  font-family: var(--zh-loose); font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+/* ===== 1024 以下:单列堆叠 ===== */
+@media (max-width: 1023px){
+  .g-main{
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+  .g-side{
+    position: static;
+    max-height: none;
+    border-top: 1px solid var(--ash-line);
+    padding-top: 32px;
+  }
+}
+@media (max-width: 600px){
+  .g-main{ padding: 0 20px; gap: 32px; }
 }
 
 /* ===== 组件 1: 顶部导航 ===== */
@@ -958,54 +1152,28 @@ body[data-active="about"]     .top a[href="#about"]{
 }
 
 /* ============================================================
-   进入动画 · 雾散 + 雪梅绽雾心(2.2s 三幕,首次访问)
+   进入动画 · 纸翻(单层左翻幕,0.7s)· 首次访问
+   关键:默认就可见 · JS 失败 / 二次访问 / 阻塞都不影响可见性
    ============================================================ */
-.entry-mist{
+.page-flip{
   position: fixed; inset: 0; z-index: 9999;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(31,42,36,.97) 0%, rgba(50,65,68,.95) 50%, rgba(31,42,36,.97) 100%);
-  opacity: 1;
-  transition: opacity 1.4s cubic-bezier(.4,0,.2,1) .4s;
-}
-.entry-mist.go{ opacity: 0; }
-.entry-mist .mist-svg{
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-.entry-mist .mist-svg.layer-1{ animation: gf-mist-drift 9s  ease-in-out infinite; }
-.entry-mist .mist-svg.layer-2{ animation: gf-mist-drift 11s ease-in-out infinite reverse; }
-.entry-mist .mist-svg.layer-3{ animation: gf-mist-drift 13s ease-in-out infinite; opacity: .65; }
-@keyframes gf-mist-drift{
-  0%,100%{ transform: translate(0,0) scale(1); }
-  50%{ transform: translate(-2.5%, -1.5%) scale(1.05); }
+  background:
+    linear-gradient(180deg, rgba(31,42,36,.97) 0%, rgba(50,65,68,.95) 50%, rgba(31,42,36,.97) 100%),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(240,244,238,.02) 2px 3px);
+  transform-origin: left center;
+  transform: scaleX(1);
 }
 
-/* 雪梅绽 · 整组 seal 弹性放大 + 轻微旋转 */
-.hero h1 .seal.seal-bloom{
-  display: inline-block;
-  transform: scale(0) rotate(-8deg);
-  transform-origin: 50% 60%;
-  opacity: 0;
-  transition: transform .8s cubic-bezier(.34,1.56,.64,1) .3s,
-              opacity .5s ease .3s;
+/* 仅首次访问(body.entry-play)才播翻幕 */
+body.g-fusion.is-home.entry-play .page-flip{
+  animation: page-flip-out .7s cubic-bezier(.6,0,.2,1) .15s forwards;
 }
-.hero h1 .seal.seal-bloom.bloom-in{
-  transform: scale(1.08) rotate(0deg);
-  opacity: 1;
+@keyframes page-flip-out{
+  to{ transform: scaleX(0); }
 }
-.hero h1 .seal.seal-bloom.bloom-done{
-  transform: scale(1) rotate(0deg);
-  transition: transform .35s ease;
-}
-/* 雪梅入位后转交 sealSway(沿用现有 keyframe) */
-.hero h1 .seal{ animation: sealSway 5s ease-in-out infinite 1.4s; }
 
-/* ============================================================
-   进入动画 · 默认就可见 · body.entry-play 才播 keyframe
-   关键:默认 opacity 1,任何 JS 失败 / 二次访问 / 阻塞都不影响可见性
-   ============================================================ */
+/* 纸翻同时,hero 行做轻量 fade-up */
 .hero-line-1, .hero-line-2,
 .g-main > .hero .eyebrow,
 .g-main > .hero .stamp{
@@ -1013,44 +1181,35 @@ body[data-active="about"]     .top a[href="#about"]{
   opacity: 1;
   transform: none;
 }
-
-/* 仅首次访问(body.entry-play)播 keyframe 入场 */
 body.g-fusion.is-home.entry-play .hero-line-1,
 body.g-fusion.is-home.entry-play .hero-line-2,
 body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow,
 body.g-fusion.is-home.entry-play .g-main > .hero .stamp{
-  animation: hero-line-in .65s cubic-bezier(.2,.7,.2,1) both;
+  animation: hero-line-in .55s cubic-bezier(.2,.7,.2,1) both;
 }
-body.g-fusion.is-home.entry-play .hero-line-1{ animation-delay: .25s; }
-body.g-fusion.is-home.entry-play .hero-line-2{ animation-delay: .35s; }
-body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow{ animation-delay: .5s; }
-body.g-fusion.is-home.entry-play .g-main > .hero .stamp{ animation-delay: .9s; }
+body.g-fusion.is-home.entry-play .hero-line-1{ animation-delay: .55s; }
+body.g-fusion.is-home.entry-play .hero-line-2{ animation-delay: .65s; }
+body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow{ animation-delay: .75s; }
+body.g-fusion.is-home.entry-play .g-main > .hero .stamp{ animation-delay: .85s; }
 
 @keyframes hero-line-in{
-  from{ opacity: 0; transform: translateY(28px); }
+  from{ opacity: 0; transform: translateY(18px); }
   to  { opacity: 1; transform: translateY(0); }
 }
 
-/* 雪梅绽 keyframe 化:不再依赖 .bloom-in 类 */
+/* 雪梅:克制的 fade + 微缩放(去掉 spring 弹性) */
 body.g-fusion.is-home.entry-play .hero h1 .seal.seal-bloom{
-  animation: seal-bloom .9s cubic-bezier(.34,1.56,.64,1) .15s both;
+  animation: seal-pop .5s cubic-bezier(.2,.7,.2,1) .4s both;
 }
-@keyframes seal-bloom{
-  0%   { transform: scale(0) rotate(-8deg); opacity: 0; }
-  60%  { transform: scale(1.08) rotate(0deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+@keyframes seal-pop{
+  from{ transform: scale(.6); opacity: 0; }
+  to  { transform: scale(1);  opacity: 1; }
 }
 
-/* 雾散 keyframe 化 */
-body.g-fusion.is-home.entry-play .entry-mist{
-  animation: entry-mist-out 1.0s ease .2s forwards;
-}
-@keyframes entry-mist-out{ to{ opacity: 0; } }
-
-/* reduced-motion · JS 早返回不会加 .entry-play,所以 chars 默认可见,mist 立即隐藏 */
+/* reduced-motion:无翻幕,无 hero 入场 */
 @media (prefers-reduced-motion: reduce){
-  .entry-mist{ display: none; }
-  body.g-fusion.is-home.entry-play .entry-mist,
+  .page-flip{ display: none; }
+  body.g-fusion.is-home.entry-play .page-flip,
   body.g-fusion.is-home.entry-play .hero-line-1,
   body.g-fusion.is-home.entry-play .hero-line-2,
   body.g-fusion.is-home.entry-play .g-main > .hero .eyebrow,

@@ -344,8 +344,8 @@
 </script>
 
 {# ============================================================
-   3) 进入动画 · 雾散 + 雪梅绽雾心(1.5s,仅首次访问)
-      CSS 接管 reveal;JS 只负责:首次加 .entry-play,1.5s 后清雾 + 写 flag
+   3) 进入动画 · 纸翻(0.9s,仅首次访问)
+      CSS 接管翻幕;JS 只负责:首访加 .entry-play,900ms 后清幕 + 写 flag
       关键:chars 默认就可见,任何 JS 失败 / 二次访问 / reduced-motion
            都不会让"雨止/灰茫"消失
    ============================================================ #}
@@ -354,25 +354,76 @@
   'use strict';
   var body = document.body;
   if (!body || !body.classList.contains('g-fusion') || !body.classList.contains('is-home')) return;
-  var mist = document.querySelector('.entry-mist');
+  var flip = document.querySelector('.page-flip');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var seen = false;
-  try { seen = localStorage.getItem('gf-entry-mist') === '1'; } catch (e) {}
+  try { seen = localStorage.getItem('gf-entry-flip') === '1'; } catch (e) {}
 
   if (reduce || seen) {
-    // 跳过入场:mist 立即清掉,chars 已在默认 visible 状态
-    if (mist && mist.parentNode) mist.parentNode.removeChild(mist);
+    // 跳过入场:翻幕立即清掉,chars 已在默认 visible 状态
+    if (flip && flip.parentNode) flip.parentNode.removeChild(flip);
     return;
   }
 
   // 首访:加 .entry-play → CSS keyframe 自动接管所有 reveal
   body.classList.add('entry-play');
-  if (!mist) return;
+  if (!flip) return;
 
-  // 1.5s 后清雾 + 写 flag
+  // 900ms 后清幕 + 写 flag
   setTimeout(function () {
-    if (mist.parentNode) mist.parentNode.removeChild(mist);
-    try { localStorage.setItem('gf-entry-mist', '1'); } catch (e) {}
-  }, 1500);
+    if (flip.parentNode) flip.parentNode.removeChild(flip);
+    try { localStorage.setItem('gf-entry-flip', '1'); } catch (e) {}
+  }, 900);
+})();
+</script>
+
+{# ============================================================
+   4) 侧栏搜索 · 客户端过滤 #g-search-index li 到 #g-search-results 下拉
+   零依赖:索引由 NJK 模板在 build 时渲染,JS 只做 substring 匹配
+   ============================================================ #}
+<script>
+(function () {
+  'use strict';
+  var body = document.body;
+  if (!body || !body.classList.contains('g-fusion') || !body.classList.contains('is-home')) return;
+  var input = document.getElementById('g-search-input');
+  var out = document.getElementById('g-search-results');
+  var idx = document.getElementById('g-search-index');
+  if (!input || !out || !idx) return;
+  var items = Array.prototype.slice.call(idx.querySelectorAll('li'));
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+  function render(q) {
+    q = q.trim().toLowerCase();
+    if (!q) { out.hidden = true; out.innerHTML = ''; return; }
+    var hits = [];
+    for (var i = 0; i < items.length && hits.length < 8; i++) {
+      var li = items[i];
+      if (li.dataset.title.indexOf(q) >= 0
+          || li.dataset.tags.indexOf(q) >= 0
+          || li.dataset.desc.indexOf(q) >= 0) {
+        hits.push(li);
+      }
+    }
+    if (!hits.length) {
+      out.innerHTML = '<li class="empty">无匹配</li>';
+    } else {
+      out.innerHTML = hits.map(function (li) {
+        return '<li><a href="' + esc(li.dataset.href) + '">' + esc(li.textContent.trim()) + '</a></li>';
+      }).join('');
+    }
+    out.hidden = false;
+  }
+
+  input.addEventListener('input', function () { render(input.value); });
+  input.addEventListener('focus', function () { if (input.value.trim()) render(input.value); });
+  input.addEventListener('blur', function () { setTimeout(function () { out.hidden = true; }, 150); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { input.value = ''; render(''); input.blur(); }
+  });
 })();
 </script>
