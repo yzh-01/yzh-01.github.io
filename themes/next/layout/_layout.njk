@@ -3,10 +3,10 @@
 <head>
   {{ partial('_partials/head/head.njk', {}, {cache: theme.cache.enable}) }}
   {%- include '_partials/head/head-unique.njk' -%}
-  <!-- G-fusion 字体组合：草书/行书/细黑/拉丁手写 -->
+  <!-- G-fusion 字体组合：刷笔楷/行书/衬线/拉丁手写 -->
   <link rel="preconnect" href="https://fonts.loli.net">
   <link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
-  <link href="https://fonts.loli.net/css?family=Liu+Jian+Mao+Cao|Zhi+Mang+Xing|ZCOOL+XiaoWei|Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.loli.net/css?family=Ma+Shan+Zheng|Liu+Jian+Mao+Cao|Zhi+Mang+Xing|Noto+Serif+SC|ZCOOL+XiaoWei|Caveat:wght@400;600&display=swap" rel="stylesheet">
   <title>{% block title %}{% endblock %}</title>
   {{ partial('_third-party/analytics/index.njk', {}, {cache: theme.cache.enable}) }}
   {{ partial('_scripts/index.njk', {}, {cache: theme.cache.enable}) }}
