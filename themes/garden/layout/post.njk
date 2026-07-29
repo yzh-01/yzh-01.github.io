@@ -1,50 +1,186 @@
 {% extends '_layout.njk' %}
 
 {% block title %}{{ page.title }} — {{ config.title }}{% endblock %}
-{% if page.description %}{% block description %}{{ page.description }}{% endblock %}{% endif %}
+{% block og_title %}{{ page.title }}{% endblock %}
+{% if page.description %}
+{% block description %}{{ page.description }}{% endblock %}
+{% block og_description %}{{ page.description }}{% endblock %}
+{% endif %}
 
 {% block content %}
-<article class="article g-container">
-  <header class="article-header">
-    <h1>{{ page.title }}</h1>
-    <div class="article-meta">
-      <time>{{ page.date.format('YYYY-MM-DD') }}</time>
-      <span class="sep">·</span>
-      <span>{{ (page.content | striptags).length }} 字</span>
-      {%- if page.categories.length -%}
-      <span class="sep">·</span>
-      {%- for cat in page.categories.toArray() -%}
-      <a href="{{ url_for(cat.path) }}">{{ cat.name }}</a>{% if not loop.last %}, {% endif %}
-      {%- endfor -%}
-      {%- endif -%}
-      {%- if page.tags.length -%}
-      <span class="sep">·</span>
-      {%- for tag in page.tags.toArray() -%}
-      <a href="{{ url_for(tag.path) }}">#{{ tag.name }}</a>{% if not loop.last %} {% endif %}
-      {%- endfor -%}
-      {%- endif -%}
+<div class="article-wrap">
+  <aside class="article-toc" id="article-toc" aria-label="目录">
+    <div class="toc-title">目录</div>
+    <nav id="toc-nav"></nav>
+  </aside>
+
+  <article class="article">
+    <header class="article-header">
+      <h1>{{ page.title }}</h1>
+      <div class="article-meta">
+        <time>{{ page.date.format('YYYY-MM-DD') }}</time>
+        <span class="sep">·</span>
+        <span>{{ (page.content | striptags).length }} 字</span>
+        {%- if page.categories.length -%}
+        <span class="sep">·</span>
+        {%- for cat in page.categories.toArray() -%}
+        <a href="{{ url_for(cat.path) }}">{{ cat.name }}</a>{% if not loop.last %}, {% endif %}
+        {%- endfor -%}
+        {%- endif -%}
+        {%- if page.tags.length -%}
+        <span class="sep">·</span>
+        {%- for tag in page.tags.toArray() -%}
+        <a href="{{ url_for(tag.path) }}">#{{ tag.name }}</a>{% if not loop.last %} {% endif %}
+        {%- endfor -%}
+        {%- endif -%}
+      </div>
+    </header>
+
+    <div class="article-body">
+      {{ page.content | safe }}
     </div>
-  </header>
 
-  <div class="article-body">
-    {{ page.content | safe }}
-  </div>
+    {%- if page.prev or page.next %}
+    <nav class="post-nav" aria-label="文章导航">
+      {%- if page.prev %}
+      <a class="prev" href="{{ url_for(page.prev.path) }}">
+        <div class="dir">← prev</div>
+        <div class="t">{{ page.prev.title }}</div>
+      </a>
+      {%- endif %}
+      {%- if page.next %}
+      <a class="next" href="{{ url_for(page.next.path) }}">
+        <div class="dir">next →</div>
+        <div class="t">{{ page.next.title }}</div>
+      </a>
+      {%- endif %}
+    </nav>
+    {%- endif %}
+  </article>
+</div>
+{% endblock %}
 
-  {%- if page.prev or page.next %}
-  <nav class="post-nav" aria-label="文章导航">
-    {%- if page.prev %}
-    <a class="prev" href="{{ url_for(page.prev.path) }}">
-      <div class="dir">← prev</div>
-      <div class="t">{{ page.prev.title }}</div>
-    </a>
-    {%- endif %}
-    {%- if page.next %}
-    <a class="next" href="{{ url_for(page.next.path) }}">
-      <div class="dir">next →</div>
-      <div class="t">{{ page.next.title }}</div>
-    </a>
-    {%- endif %}
-  </nav>
-  {%- endif %}
-</article>
+{% block scripts %}
+{# ===== TOC + Anchor + Code Copy ===== #}
+<script>
+(function(){
+  'use strict';
+  var body = document.querySelector('.article-body');
+  if (!body) return;
+  var tocNav = document.getElementById('toc-nav');
+  var tocSide = document.getElementById('article-toc');
+  var headings = body.querySelectorAll('h2, h3');
+  if (!headings.length) { if (tocSide) tocSide.style.display = 'none'; return; }
+
+  var items = [];
+
+  // 1. 给每个标题注入 # 锚点链接 并记录 TOC 条目
+  headings.forEach(function(h, i) {
+    // ensure id
+    if (!h.id) {
+      var slug = h.textContent.trim().replace(/\s+/g, '-').replace(/[^\w一-鿿\-]/g, '').toLowerCase();
+      if (!slug) slug = 'h-' + i;
+      h.id = slug;
+    }
+    // inject anchor link
+    var a = document.createElement('a');
+    a.className = 'h-anchor';
+    a.href = '#' + h.id;
+    a.setAttribute('aria-hidden', 'true');
+    a.textContent = '#';
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.getElementById(this.getAttribute('href').slice(1));
+      if (target) {
+        history.replaceState(null, '', '#' + target.id);
+        target.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+    });
+    h.appendChild(a);
+
+    // build TOC entry
+    items.push({ level: h.tagName.toLowerCase(), id: h.id, text: h.textContent.replace('#', '').trim() });
+  });
+
+  // 2. 生成 TOC
+  if (tocNav && items.length) {
+    items.forEach(function(item) {
+      var link = document.createElement('a');
+      link.href = '#' + item.id;
+      link.textContent = item.text;
+      if (item.level === 'h3') link.className = 'toc-h3';
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = document.getElementById(this.getAttribute('href').slice(1));
+        if (target) {
+          history.replaceState(null, '', '#' + target.id);
+          target.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+      });
+      tocNav.appendChild(link);
+    });
+
+    // TOC scroll-spy
+    var tocLinks = tocNav.querySelectorAll('a');
+    var tocObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          tocLinks.forEach(function(l) { l.classList.remove('active'); });
+          var id = e.target.id;
+          var match = tocNav.querySelector('a[href="#' + CSS.escape(id) + '"]');
+          if (match) match.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    headings.forEach(function(h) { tocObserver.observe(h); });
+  }
+
+  // 3. 代码块增强: 语言标签 + 复制按钮
+  var pres = body.querySelectorAll('pre');
+  pres.forEach(function(pre) {
+    var code = pre.querySelector('code');
+    if (!code) return;
+
+    // extract language from highlight.js class
+    var lang = '';
+    var cls = code.className || '';
+    var m = cls.match(/language-(\w+)/);
+    if (m) lang = m[1];
+
+    // copy button
+    var btn = document.createElement('button');
+    btn.className = 'code-copy';
+    btn.setAttribute('aria-label', '复制代码');
+    btn.textContent = '⎘';
+    btn.addEventListener('click', function() {
+      var text = code.textContent || '';
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = '⎘'; btn.classList.remove('copied'); }, 1800);
+      }).catch(function() {
+        btn.textContent = '✗';
+        setTimeout(function() { btn.textContent = '⎘'; }, 1200);
+      });
+    });
+    pre.appendChild(btn);
+
+    // language label
+    if (lang) {
+      var lbl = document.createElement('span');
+      lbl.className = 'code-lang';
+      lbl.textContent = lang;
+      pre.appendChild(lbl);
+    }
+  });
+
+  // 4. 确保所有 h2/h3 有足够的 left padding 容下锚点
+  headings.forEach(function(h) {
+    var cs = getComputedStyle(h);
+    if (parseInt(cs.paddingLeft) < 24 && window.innerWidth > 768) {
+      h.style.paddingLeft = '24px';
+    }
+  });
+})();
+</script>
 {% endblock %}
