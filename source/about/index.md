@@ -2,7 +2,7 @@
 title: 关于这个花园
 layout: about
 permalink: about/
-description: 这里不是一份面向招聘的作品集，而是一块长期维护的个人数字空间。代码、学习与生活在这里并排生长。
+description: 这里是一块长期维护的个人数字空间。代码、学习与生活在这里并排生长。
 garden_paths:
   - label: 技术探索
     meta: code
@@ -20,7 +20,6 @@ garden_paths:
     href: /categories/diary/
     action: 看看生活记录
 principles:
-  - 先写清楚，再写漂亮。
   - 记录变化，不伪装完成。
   - 让旧内容可以被重新发现。
 contact_links:
