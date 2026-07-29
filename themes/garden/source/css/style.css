@@ -208,7 +208,7 @@ hr {
 
 /* ===== Module 1: Hero ===== */
 .hero {
-  padding: 80px 0 64px;
+  padding: 96px 0 72px;
   text-align: center;
 }
 .hero h1 {
@@ -230,26 +230,47 @@ hr {
   font-size: 14px;
   color: var(--g-ash);
   letter-spacing: 0.06em;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.hero .signature::before,
+.hero .signature::after {
+  content: "·";
+  color: var(--g-border-hover);
+  font-size: 16px;
 }
 
 /* ===== Module 2: Latest Posts ===== */
 .posts-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
 }
 .post-card {
   display: block;
-  padding: 20px 0;
+  position: relative;
+  padding: 20px 0 20px 0;
   border-bottom: 1px solid var(--g-border);
   text-decoration: none;
   color: inherit;
-  transition: padding 0.3s, background 0.2s;
+  transition: padding 0.25s, background 0.2s, border-color 0.2s;
 }
 .post-card:first-of-type {
   border-top: 1px solid var(--g-border);
 }
+.post-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: -1px;
+  width: 0;
+  background: var(--g-accent);
+  transition: width 0.25s ease;
+  border-radius: 0 2px 2px 0;
+}
 .post-card:hover {
-  padding-left: 12px;
+  padding-left: 16px;
   background: var(--g-ash-soft);
+  border-bottom-color: var(--g-accent-soft);
+}
+.post-card:hover::before {
+  width: 3px;
 }
 .post-card-title {
   font-size: 18px; font-weight: 600;
@@ -275,7 +296,7 @@ hr {
 
 /* ===== Module 3: Now ===== */
 .now-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
 }
 .now-grid {
   display: grid;
@@ -303,7 +324,7 @@ hr {
 
 /* ===== Module 4: Featured Projects ===== */
 .featured-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
 }
 .featured-card {
   display: grid;
@@ -350,7 +371,7 @@ hr {
 
 /* ===== Module 5: Tech Stack ===== */
 .stack-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
 }
 .stack-groups {
   display: grid;
@@ -379,7 +400,7 @@ hr {
 
 /* ===== Module 6: Journey ===== */
 .journey-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
 }
 .journey-years {
   display: flex; flex-wrap: wrap; gap: 12px;
@@ -405,12 +426,12 @@ hr {
 
 /* ===== Module 7: Life ===== */
 .life-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
 }
 
 /* ===== Module 8: About ===== */
 .about-sec {
-  margin-bottom: 64px;
+  margin-bottom: 80px;
   padding: 32px;
   background: var(--g-bg-elevated);
   border: 1px solid var(--g-border);
@@ -516,6 +537,47 @@ hr {
 /* Article spacing refinements */
 .article-body > *:first-child { margin-top: 0; }
 .article-body > *:last-child { margin-bottom: 0; }
+
+/* Article prev/next navigation */
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--g-border);
+}
+.post-nav a {
+  display: block;
+  padding: 16px 18px;
+  background: var(--g-bg-elevated);
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius);
+  text-decoration: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.post-nav a:hover {
+  border-color: var(--g-accent);
+  box-shadow: var(--g-shadow);
+}
+.post-nav .dir {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--g-text-mute);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.post-nav .t {
+  font-size: 15px; font-weight: 500;
+  color: var(--g-text);
+  line-height: 1.4;
+}
+.post-nav .next { text-align: right; grid-column: 2; }
+.post-nav .prev { text-align: left;  grid-column: 1; }
+@media (max-width: 480px) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-nav .next { grid-column: 1; }
+}
 
 /* ===== Archive Page ===== */
 .archive { padding: 48px 0 64px; }

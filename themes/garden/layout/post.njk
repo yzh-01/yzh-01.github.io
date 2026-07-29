@@ -29,5 +29,22 @@
   <div class="article-body">
     {{ page.content | safe }}
   </div>
+
+  {%- if page.prev or page.next %}
+  <nav class="post-nav" aria-label="文章导航">
+    {%- if page.prev %}
+    <a class="prev" href="{{ url_for(page.prev.path) }}">
+      <div class="dir">← prev</div>
+      <div class="t">{{ page.prev.title }}</div>
+    </a>
+    {%- endif %}
+    {%- if page.next %}
+    <a class="next" href="{{ url_for(page.next.path) }}">
+      <div class="dir">next →</div>
+      <div class="t">{{ page.next.title }}</div>
+    </a>
+    {%- endif %}
+  </nav>
+  {%- endif %}
 </article>
 {% endblock %}
