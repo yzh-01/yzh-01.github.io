@@ -63,7 +63,10 @@
   {# ===== 2. Latest Posts ===== #}
   {%- if theme.modules.latest_posts %}
   <section class="posts-sec">
-    <div class="g-sec-label">recent posts</div>
+    <div class="g-sec-heading">
+      <div class="g-sec-label">recent posts</div>
+      <a href="{{ url_for('archives/') }}">查看全部 <span aria-hidden="true">→</span></a>
+    </div>
     {%- for post in page.posts.toArray().slice(0, 6) -%}
     <a class="post-card" href="{{ url_for(post.path) }}">
       <div class="post-card-title">{{ post.title }}</div>
@@ -160,7 +163,10 @@
   {# ===== 7. Life ===== #}
   {%- if theme.modules.life and life_posts.length %}
   <section class="life-sec">
-    <div class="g-sec-label">life</div>
+    <div class="g-sec-heading">
+      <div class="g-sec-label">life</div>
+      <a href="{{ url_for('categories/diary/') }}">更多生活记录 <span aria-hidden="true">→</span></a>
+    </div>
     {%- for post in life_posts -%}
     <a class="post-card" href="{{ url_for(post.path) }}">
       <div class="post-card-title">{{ post.title }}</div>
@@ -184,7 +190,7 @@
     <div class="about-mark" aria-hidden="true">y</div>
     <div class="about-summary">
       <h2>关于这个花园</h2>
-      <p>这里不是一份面向招聘的作品集，而是一块长期维护的个人数字空间。</p>
+      <p>这里是一块长期维护的个人数字空间。</p>
       <p>代码、学习与生活并排生长，慢一点，没有关系。</p>
       <div class="links">
         <a class="link-btn primary" href="{{ url_for('about/') }}">继续了解 <span aria-hidden="true">→</span></a>

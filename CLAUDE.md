@@ -59,6 +59,7 @@ themes/garden/        # 自有极简主题
 - 所有数据在**构建时**用 Nunjucks 预计算（`site.posts` 遍历），客户端 JavaScript 零依赖、只做交互增强
 - 页面 title/description/OG/canonical 统一由 `_partial/head.njk` 根据页面类型解析
 - 标签、分类和时间归档共用 `archive.njk`，但必须使用 `page.posts`，不能遍历全站文章
+- 总归档页承担内容索引：构建时生成分类/标签入口，`site.js` 只在当前页做标题/标签/分类筛选
 - 桌面 TOC 用 Pointer Events + 键盘调宽；移动端使用底部抽屉，不使用右侧 drawer
 - Nunjucks 模板引擎**不支持 `set` filter**，字典/分组用 tracking 变量 + 线性迭代实现
 - 设计方向：Apple/Linear/Vercel 式极简，微交互（hover 过渡），禁用 flashy 动画

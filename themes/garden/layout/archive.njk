@@ -1,5 +1,6 @@
 {% extends '_layout.njk' %}
 
+{%- set is_root_archive = not is_tag() and not is_category() and not page.year -%}
 {%- if is_tag() %}
   {%- set archive_title = '标签：' + page.tag -%}
 {%- elif is_category() %}
@@ -9,31 +10,117 @@
 {%- elif page.year %}
   {%- set archive_title = page.year + ' 年' -%}
 {%- else %}
-  {%- set archive_title = '归档' -%}
+  {%- set archive_title = '内容索引' -%}
 {%- endif %}
 
 {% block content %}
-<div class="archive g-container">
-  <h1>{{ archive_title }}</h1>
-  {%- set archive_posts = page.posts.toArray() if page.posts else site.posts.toArray() %}
-  <p class="sub">{{ archive_posts.length }} 篇文章</p>
+<div class="archive g-wide">
+  <header class="archive-header">
+    {%- if not is_root_archive %}
+    <a class="archive-back" href="{{ url_for('archives/') }}">← 全部内容</a>
+    {%- endif %}
+    <h1>{{ archive_title }}</h1>
+    {%- set archive_posts = page.posts.toArray() if page.posts else site.posts.toArray() %}
+    <p class="sub">
+      {{ archive_posts.length }} 篇文章
+      {%- if is_root_archive %} · {{ site.categories.length }} 个分类 · {{ site.tags.length }} 个标签{% endif %}
+    </p>
+  </header>
 
-  {%- set current_year = '' -%}
-  {%- for post in archive_posts -%}
-    {%- set year = post.date.format('YYYY') -%}
-    {%- if year != current_year -%}
-      {%- set current_year = year -%}
-      {%- if not loop.first %}</section>{%- endif -%}
-      <section class="archive-year">
-        <h2>{{ year }}</h2>
-    {%- endif -%}
-    <a class="archive-post" href="{{ url_for(post.path) }}">
-      <time datetime="{{ post.date.format('YYYY-MM-DD') }}">{{ post.date.format('MM · DD') }}</time>
-      <span class="title">{{ post.title }}</span>
-    </a>
-    {%- if loop.last %}</section>{%- endif -%}
-  {%- else -%}
-    <p class="archive-empty">这里暂时还没有文章。</p>
-  {%- endfor -%}
+  {%- if is_root_archive and (site.categories.length or site.tags.length) %}
+  <section class="archive-taxonomy" aria-labelledby="archive-taxonomy-title">
+    <h2 class="sr-only" id="archive-taxonomy-title">按分类和标签浏览</h2>
+    {%- if site.categories.length %}
+    <div class="taxonomy-group">
+      <div class="taxonomy-label">categories</div>
+      <div class="taxonomy-links">
+        {%- for category in site.categories.toArray() %}
+        <a href="{{ url_for(category.path) }}">
+          <span>{{ category.name }}</span>
+          <small>{{ category.posts.length }}</small>
+        </a>
+        {%- endfor %}
+      </div>
+    </div>
+    {%- endif %}
+    {%- if site.tags.length %}
+    <div class="taxonomy-group">
+      <div class="taxonomy-label">tags</div>
+      <div class="taxonomy-links">
+        {%- for tag in site.tags.toArray() %}
+        <a href="{{ url_for(tag.path) }}">
+          <span>#{{ tag.name }}</span>
+          <small>{{ tag.posts.length }}</small>
+        </a>
+        {%- endfor %}
+      </div>
+    </div>
+    {%- endif %}
+  </section>
+  {%- endif %}
+
+  {%- if is_root_archive and archive_posts.length %}
+  <div class="archive-filter">
+    <label class="sr-only" for="archive-filter-input">筛选归档文章</label>
+    <div class="archive-filter-field">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.7"/>
+        <path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+      <input
+        id="archive-filter-input"
+        type="search"
+        placeholder="按标题、标签或分类筛选"
+        autocomplete="off"
+        spellcheck="false"
+        aria-describedby="archive-filter-status"
+      >
+    </div>
+    <p class="archive-filter-status" id="archive-filter-status" aria-live="polite">
+      显示全部 {{ archive_posts.length }} 篇文章
+    </p>
+  </div>
+  {%- endif %}
+
+  <div class="archive-list" id="archive-list">
+    {%- set current_year = '' -%}
+    {%- for post in archive_posts -%}
+      {%- set year = post.date.format('YYYY') -%}
+      {%- if year != current_year -%}
+        {%- set current_year = year -%}
+        {%- if not loop.first %}</section>{%- endif -%}
+        <section class="archive-year">
+          <h2>{{ year }}</h2>
+      {%- endif %}
+      <div
+        class="archive-post"
+        data-search="{{ post.title }} {{ post.description or '' }} {% for category in post.categories.toArray() %}{{ category.name }} {% endfor %}{% for tag in post.tags.toArray() %}{{ tag.name }} {% endfor %}"
+      >
+        <time datetime="{{ post.date.format('YYYY-MM-DD') }}">{{ post.date.format('MM · DD') }}</time>
+        <a class="archive-post-title" href="{{ url_for(post.path) }}">{{ post.title }}</a>
+        <div class="archive-post-terms">
+          {%- for category in post.categories.toArray().slice(0, 1) %}
+          <a href="{{ url_for(category.path) }}">{{ category.name }}</a>
+          {%- endfor %}
+          {%- for tag in post.tags.toArray().slice(0, 2) %}
+          <a href="{{ url_for(tag.path) }}">#{{ tag.name }}</a>
+          {%- endfor %}
+        </div>
+      </div>
+      {%- if loop.last %}</section>{%- endif -%}
+    {%- else -%}
+      <div class="archive-empty">
+        <p>这里暂时还没有文章。</p>
+        <a href="{{ url_for('/') }}">返回首页</a>
+      </div>
+    {%- endfor %}
+  </div>
+
+  {%- if is_root_archive and archive_posts.length %}
+  <div class="archive-filter-empty" id="archive-filter-empty" hidden>
+    <p>没有找到匹配的文章。</p>
+    <span>换一个标题、标签或分类试试。</span>
+  </div>
+  {%- endif %}
 </div>
 {% endblock %}
