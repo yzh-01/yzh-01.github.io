@@ -9,11 +9,6 @@
 
 {% block content %}
 <div class="article-wrap">
-  <aside class="article-toc" id="article-toc" aria-label="目录">
-    <div class="toc-title">目录</div>
-    <nav id="toc-nav"></nav>
-  </aside>
-
   <article class="article">
     <header class="article-header">
       <h1>{{ page.title }}</h1>
@@ -57,14 +52,64 @@
     </nav>
     {%- endif %}
   </article>
+
+  <aside class="article-toc" id="article-toc" aria-label="目录">
+    <div class="toc-resize-handle" id="toc-resize-handle" aria-hidden="true"></div>
+    <div class="toc-title">目录</div>
+    <nav id="toc-nav"></nav>
+  </aside>
 </div>
 {% endblock %}
 
 {% block scripts %}
-{# ===== TOC + Anchor + Code Copy ===== #}
+{# ===== TOC Resize + TOC + Anchor + Code Copy ===== #}
 <script>
 (function(){
   'use strict';
+
+  // 0. TOC 宽度拖拽调整
+  var wrap = document.querySelector('.article-wrap');
+  var handle = document.getElementById('toc-resize-handle');
+  if (wrap && handle) {
+    // 从 localStorage 恢复宽度
+    try {
+      var saved = localStorage.getItem('toc-width');
+      if (saved) { var w = parseInt(saved); if (w >= 140 && w <= 450) wrap.style.setProperty('--toc-w', w + 'px'); }
+    } catch(_) {}
+
+    var dragging = false, startX = 0, startW = 0;
+
+    function onDown(e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      startW = parseInt(getComputedStyle(wrap).getPropertyValue('--toc-w').trim()) || 200;
+      document.body.classList.add('toc-resizing');
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+      var dx = startX - e.clientX;
+      var newW = startW + dx;
+      newW = Math.max(140, Math.min(450, newW));
+      wrap.style.setProperty('--toc-w', newW + 'px');
+    }
+
+    function onUp() {
+      if (!dragging) return;
+      dragging = false;
+      document.body.classList.remove('toc-resizing');
+      try {
+        var finalW = parseInt(getComputedStyle(wrap).getPropertyValue('--toc-w').trim()) || 200;
+        localStorage.setItem('toc-width', finalW);
+      } catch(_) {}
+    }
+
+    handle.addEventListener('mousedown', onDown);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+
   var body = document.querySelector('.article-body');
   if (!body) return;
   var tocNav = document.getElementById('toc-nav');
