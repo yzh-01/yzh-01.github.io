@@ -1,5 +1,8 @@
 # Garden — 自有极简主题
-# yzh-01.github.io 专用，与 NexT 并行存在，一行配置即可切换
+# yzh-01.github.io 专用
+
+# 建站年份（不会随当前年份变化）
+since: 2026
 
 # 首页模块开关（模块未完成时可先关闭）
 modules:

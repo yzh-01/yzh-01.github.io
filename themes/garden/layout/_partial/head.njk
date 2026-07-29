@@ -1,7 +1,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}{{ config.title }}{% endblock %}</title>
-<meta name="description" content="{% block description %}{{ config.description }}{% endblock %}">
+{%- if is_home() -%}
+  {%- set resolved_title = config.title + ' — ' + config.subtitle -%}
+{%- elif is_post() or is_page() -%}
+  {%- set resolved_title = page.title + ' — ' + config.title -%}
+{%- elif is_tag() -%}
+  {%- set resolved_title = '标签：' + page.tag + ' — ' + config.title -%}
+{%- elif is_category() -%}
+  {%- set resolved_title = '分类：' + page.category + ' — ' + config.title -%}
+{%- elif page.year and page.month -%}
+  {%- set resolved_title = page.year + ' 年 ' + page.month + ' 月 — ' + config.title -%}
+{%- elif page.year -%}
+  {%- set resolved_title = page.year + ' 年归档 — ' + config.title -%}
+{%- else -%}
+  {%- set resolved_title = '归档 — ' + config.title -%}
+{%- endif -%}
+{%- if page.description -%}
+  {%- set resolved_description = page.description -%}
+{%- elif is_tag() -%}
+  {%- set resolved_description = '浏览标签“' + page.tag + '”下的文章' -%}
+{%- elif is_category() -%}
+  {%- set resolved_description = '浏览分类“' + page.category + '”下的文章' -%}
+{%- elif is_archive() -%}
+  {%- set resolved_description = '按时间浏览' + config.title + '的文章归档' -%}
+{%- else -%}
+  {%- set resolved_description = config.description -%}
+{%- endif -%}
+{%- set resolved_type = 'article' if is_post() else 'website' -%}
+{%- set canonical_url = config.url + (url_for('/') if is_home() else url_for(page.path)) -%}
+<title>{{ resolved_title }}</title>
+<meta name="description" content="{{ resolved_description }}">
 <meta name="author" content="{{ config.author }}">
 <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
@@ -9,17 +37,25 @@
 <link rel="icon" href="{{ url_for('images/logo.svg') }}" type="image/svg+xml">
 <link rel="stylesheet" href="{{ url_for('css/style.css') }}">
 <link rel="alternate" href="{{ url_for('atom.xml') }}" type="application/atom+xml" title="{{ config.title }}">
-<link rel="canonical" href="{{ config.url }}{{ url_for(page.path) }}">
-{%- if config.feed %}
-<link rel="alternate" href="{{ url_for(config.feed.path) }}" type="application/atom+xml" title="{{ config.title }}">
-{%- endif %}
-{%- if page.tags %}
-<meta name="keywords" content="{% for t in page.tags %}{{ t.name }}{% if not loop.last %},{% endif %}{% endfor %}">
+<link rel="canonical" href="{{ canonical_url }}">
+{%- if page.tags and page.tags.length %}
+{%- set tag_names = [] -%}
+{%- for tag in page.tags.toArray() -%}
+  {%- set _ = tag_names.push(tag.name) -%}
+{%- endfor %}
+<meta name="keywords" content="{{ tag_names | join(',') }}">
+{%- elif config.keywords %}
+<meta name="keywords" content="{{ config.keywords }}">
 {%- endif %}
 {%- if page.og_image or config.og_image %}
 <meta property="og:image" content="{{ page.og_image or config.og_image }}">
 {%- endif %}
-<meta property="og:title" content="{% block og_title %}{{ config.title }}{% endblock %}">
-<meta property="og:description" content="{% block og_description %}{{ config.description }}{% endblock %}">
-<meta property="og:type" content="{% if is_post() %}article{% else %}website{% endif %}">
-<meta property="og:url" content="{{ config.url }}{{ url_for(page.path) }}">
+<meta property="og:title" content="{{ resolved_title }}">
+<meta property="og:description" content="{{ resolved_description }}">
+<meta property="og:type" content="{{ resolved_type }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:site_name" content="{{ config.title }}">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="{% if page.og_image or config.og_image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ resolved_title }}">
+<meta name="twitter:description" content="{{ resolved_description }}">

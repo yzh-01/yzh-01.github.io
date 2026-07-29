@@ -3,7 +3,7 @@
     <a href="{{ url_for('/') }}" class="g-nav-logo">{{ config.author }}</a>
     <ul class="g-nav-links">
       <li><a href="{{ url_for('/') }}" {% if is_home() %}class="active"{% endif %}>home</a></li>
-      <li><a href="{{ url_for('archives/') }}">archive</a></li>
+      <li><a href="{{ url_for('archives/') }}" {% if is_archive() or is_tag() or is_category() %}class="active"{% endif %}>archive</a></li>
       <li><a href="{{ url_for('atom.xml') }}">rss</a></li>
     </ul>
   </div>

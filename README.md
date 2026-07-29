@@ -30,7 +30,11 @@
 │   │   ├── page.njk         # 独立页面
 │   │   ├── archive.njk      # 归档页
 │   │   └── _partial/        # 组件（head/nav/footer）
-│   └── source/css/style.css # 全部样式（设计系统 + 模块 + 响应式 + 暗色）
+│   └── source/
+│       ├── css/style.css    # 设计系统 + 页面样式 + 响应式
+│       └── js/
+│           ├── site.js      # 全站导航与回到顶部
+│           └── post.js      # TOC、标题锚点、代码复制、表格增强
 ├── scaffolds/               # 写作模板
 ├── .github/workflows/       # CI/CD
 └── package.json
@@ -77,7 +81,8 @@ featured: true    # 可选，标记后出现在首页 Featured 模块
 - 浅色为主 + `prefers-color-scheme: dark` 自动暗色
 - 系统字体栈，零外部字体依赖
 - 灰 + moss 绿品牌配色
-- 模块化 CSS，单文件 `style.css` 约 450 行
+- 首页模块由 `themes/garden/_config.yml` 控制
+- 移动端目录使用底部抽屉；桌面目录支持鼠标、触控笔和键盘调宽
 
 ## 部署
 
