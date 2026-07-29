@@ -696,7 +696,7 @@ body.toc-resizing * { cursor: col-resize !important; }
   display: none;
 }
 @media (max-width: 1023px) {
-  .article-wrap.has-toc .toc-toggle {
+  body.has-toc-page .toc-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
