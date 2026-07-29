@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        # 主题是 themes/next/ 目录下的文件，不是 submodule，无需 recursive
+        # 主题 themes/garden/ (自有主题)，非 submodule，无需 recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,7 +43,7 @@ jobs:
           echo "=== build 完成，产物大小 ==="
           du -sh public/
           echo "=== 关键文件存在检查 ==="
-          ls -la public/css/main.css
+          ls -la public/css/style.css
           ls -la public/index.html
 
       - name: Upload Pages artifact
