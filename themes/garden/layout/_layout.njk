@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  {{ partial('_partial/head.njk') }}
+</head>
+<body>
+  {{ partial('_partial/nav.njk') }}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {{ partial('_partial/footer.njk') }}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

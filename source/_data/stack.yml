@@ -1,0 +1,10 @@
+# 技术栈 · 按领域分组展示
+# 编辑此文件即可更新首页 Tech Stack 模块
+- group: 语言
+  items: [TypeScript, Python, Java, C]
+- group: 前端
+  items: [React, Next.js, Tailwind CSS, Vite]
+- group: 后端
+  items: [Node.js, Express, MySQL, Docker]
+- group: 工具
+  items: [Git, VS Code, Figma, GitHub Actions]

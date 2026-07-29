@@ -1,0 +1,13 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ config.title }}{% endblock %}</title>
+<meta name="description" content="{% block description %}{{ config.description }}{% endblock %}">
+<meta name="author" content="{{ config.author }}">
+<link rel="stylesheet" href="{{ url_for('css/style.css') }}">
+<link rel="alternate" href="{{ url_for('atom.xml') }}" type="application/atom+xml" title="{{ config.title }}">
+{%- if config.feed %}
+<link rel="alternate" href="{{ url_for(config.feed.path) }}" type="application/atom+xml" title="{{ config.title }}">
+{%- endif %}
+{%- if page.tags %}
+<meta name="keywords" content="{% for t in page.tags %}{{ t.name }}{% if not loop.last %},{% endif %}{% endfor %}">
+{%- endif %}

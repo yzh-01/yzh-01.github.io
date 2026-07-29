@@ -1,0 +1,19 @@
+# Garden — 自有极简主题
+# yzh-01.github.io 专用，与 NexT 并行存在，一行配置即可切换
+
+# 首页模块开关（模块未完成时可先关闭）
+modules:
+  hero: true
+  latest_posts: true
+  now: true
+  featured_projects: true
+  tech_stack: true
+  journey: true
+  life: true
+  about: true
+
+# 文章页面
+post:
+  toc: true        # 目录
+  reading_time: true
+  back_to_top: true

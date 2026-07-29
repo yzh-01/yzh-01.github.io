@@ -1,0 +1,33 @@
+{% extends '_layout.njk' %}
+
+{% block title %}{{ page.title }} — {{ config.title }}{% endblock %}
+{% if page.description %}{% block description %}{{ page.description }}{% endblock %}{% endif %}
+
+{% block content %}
+<article class="article g-container">
+  <header class="article-header">
+    <h1>{{ page.title }}</h1>
+    <div class="article-meta">
+      <time>{{ page.date.format('YYYY-MM-DD') }}</time>
+      <span class="sep">·</span>
+      <span>{{ (page.content | striptags).length }} 字</span>
+      {%- if page.categories.length -%}
+      <span class="sep">·</span>
+      {%- for cat in page.categories.toArray() -%}
+      <a href="{{ url_for(cat.path) }}">{{ cat.name }}</a>{% if not loop.last %}, {% endif %}
+      {%- endfor -%}
+      {%- endif -%}
+      {%- if page.tags.length -%}
+      <span class="sep">·</span>
+      {%- for tag in page.tags.toArray() -%}
+      <a href="{{ url_for(tag.path) }}">#{{ tag.name }}</a>{% if not loop.last %} {% endif %}
+      {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </header>
+
+  <div class="article-body">
+    {{ page.content | safe }}
+  </div>
+</article>
+{% endblock %}
