@@ -6,3 +6,13 @@ node_modules/
 public/
 .deploy*/
 _multiconfig.yml
+
+# Obsidian: track shared vault settings, ignore machine-local state
+source/.obsidian/workspace.json
+source/.obsidian/workspace-mobile.json
+source/.obsidian/cache/
+source/.obsidian/plugins/
+source/.trash/
+
+# Legacy vault created inside _posts (kept locally, not committed)
+source/_posts/.obsidian/

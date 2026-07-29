@@ -6,6 +6,9 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
+    "draft:new": "hexo new draft",
+    "draft:preview": "hexo server --draft",
+    "draft:publish": "hexo publish",
     "server": "hexo server"
   },
   "hexo": {

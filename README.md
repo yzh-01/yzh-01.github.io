@@ -73,6 +73,42 @@ featured: true    # 可选，标记后出现在首页 Featured 模块
 ---
 ```
 
+### 使用 Obsidian
+
+将以下目录作为 Obsidian Vault 打开（不要只打开 `_posts`）：
+
+```text
+D:\code\yzh-01.github.io\source
+```
+
+推荐流程：
+
+1. 在 Obsidian 中新建笔记。配置会自动把新文件放入 `_drafts/`。
+2. 按 `Ctrl/Cmd + Shift + T`，选择「Hexo 文章」模板。
+3. 填写 `title`、`tags`、`categories`、`description`，发布前补充稳定的英文 `permalink`。
+4. 草稿预览：
+
+   ```bash
+   npm run draft:preview
+   ```
+
+5. 发布草稿（文件名不含 `.md`）：
+
+   ```bash
+   npm run draft:publish -- "文章文件名"
+   ```
+
+6. 运行 `npm run build` 检查，然后提交并推送到 `main`。
+
+图片统一放到 `source/images/posts/<文章-slug>/`，文章中使用站点根路径：
+
+```markdown
+![图片说明](/images/posts/my-article-slug/example.webp)
+```
+
+Obsidian 已配置为优先创建标准 Markdown 链接。文章之间也应使用普通 Markdown 链接，例如
+`[相关文章](/another-article/)`；不要使用 Hexo 无法直接解析的 `[[双链语法]]`。
+
 ## 更新首页数据
 
 - **Now** → 编辑 `source/_data/now.yml`
