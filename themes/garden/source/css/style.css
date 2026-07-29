@@ -621,18 +621,56 @@ hr {
 .article-wrap {
   --toc-w: 200px;
   display: grid;
-  grid-template-columns: minmax(0, 720px) var(--toc-w);
+  grid-template-columns: minmax(0, 720px) 8px var(--toc-w);
   gap: 0;
   justify-content: center;
   max-width: 1060px;
   margin: 0 auto;
   padding: 48px 24px 64px;
 }
+
+/* no headings → collapse to single column */
+.article-wrap.no-toc {
+  grid-template-columns: minmax(0, 720px);
+}
+.article-wrap.no-toc .toc-handle,
+.article-wrap.no-toc .article-toc {
+  display: none;
+}
+
 @media (max-width: 1023px) {
   .article-wrap {
     grid-template-columns: minmax(0, 1fr);
     --toc-w: 0px;
   }
+  .article-wrap .toc-handle,
+  .article-wrap .article-toc {
+    display: none;
+  }
+}
+
+/* TOC resize handle (grid col 2: 8px) */
+.toc-handle {
+  cursor: col-resize;
+  position: relative;
+  z-index: 10;
+}
+.toc-handle::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--g-border);
+  border-radius: 1px;
+  transition: background 0.2s, width 0.15s, left 0.15s;
+}
+.toc-handle:hover::after,
+body.toc-resizing .toc-handle::after {
+  background: var(--g-accent);
+  width: 2px;
+  left: 2px;
 }
 
 .article-toc {
@@ -643,27 +681,7 @@ hr {
   overflow-y: auto;
   font-size: 13px;
   line-height: 1.6;
-  margin-left: 48px;
-  padding-left: 16px;
-  border-left: 1px solid var(--g-border);
-}
-
-/* TOC resize handle */
-.toc-resize-handle {
-  position: absolute;
-  left: -4px;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  cursor: col-resize;
-  z-index: 10;
-  border-radius: 2px;
-  transition: background 0.2s;
-}
-.toc-resize-handle:hover,
-body.toc-resizing .toc-resize-handle {
-  background: var(--g-accent);
-  opacity: 0.4;
+  padding-left: 20px;
 }
 
 /* prevent text selection while resizing */

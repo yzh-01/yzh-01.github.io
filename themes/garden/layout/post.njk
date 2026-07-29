@@ -53,8 +53,9 @@
     {%- endif %}
   </article>
 
+  <div class="toc-handle" id="toc-handle" aria-hidden="true"></div>
+
   <aside class="article-toc" id="article-toc" aria-label="目录">
-    <div class="toc-resize-handle" id="toc-resize-handle" aria-hidden="true"></div>
     <div class="toc-title">目录</div>
     <nav id="toc-nav"></nav>
   </aside>
@@ -69,7 +70,7 @@
 
   // 0. TOC 宽度拖拽调整
   var wrap = document.querySelector('.article-wrap');
-  var handle = document.getElementById('toc-resize-handle');
+  var handle = document.getElementById('toc-handle');
   if (wrap && handle) {
     // 从 localStorage 恢复宽度
     try {
@@ -114,8 +115,12 @@
   if (!body) return;
   var tocNav = document.getElementById('toc-nav');
   var tocSide = document.getElementById('article-toc');
+  var tocHandle = document.getElementById('toc-handle');
   var headings = body.querySelectorAll('h2, h3');
-  if (!headings.length) { if (tocSide) tocSide.style.display = 'none'; return; }
+  if (!headings.length) {
+    if (wrap) wrap.classList.add('no-toc');
+    return;
+  }
 
   var items = [];
 
