@@ -122,5 +122,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('js/post.js') }}" defer></script>
+<script src="{{ url_for('js/post.js') }}?v={{ theme.asset_version }}" defer></script>
 {% endblock %}

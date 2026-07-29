@@ -22,7 +22,7 @@
   </button>
   {%- endif %}
 
-  <script src="{{ url_for('js/site.js') }}" defer></script>
+  <script src="{{ url_for('js/site.js') }}?v={{ theme.asset_version }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

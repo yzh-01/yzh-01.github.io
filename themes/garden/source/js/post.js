@@ -27,9 +27,20 @@
     });
   }
 
+  function getHeadingText(heading) {
+    var clone = heading.cloneNode(true);
+    clone.querySelectorAll('.headerlink, .h-anchor').forEach(function (anchor) {
+      anchor.remove();
+    });
+    return clone.textContent.trim();
+  }
+
   headings.forEach(function (heading, index) {
+    var headingText = getHeadingText(heading);
+    heading.dataset.tocText = headingText;
+
     if (!heading.id) {
-      var slug = heading.textContent
+      var slug = headingText
         .trim()
         .replace(/\s+/g, '-')
         .replace(/[^\w\u4e00-\u9fff-]/g, '')
@@ -37,16 +48,16 @@
       heading.id = slug || 'section-' + (index + 1);
     }
 
-    var anchor = document.createElement('a');
+    var anchor = heading.querySelector('.headerlink') || document.createElement('a');
     anchor.className = 'h-anchor';
     anchor.href = '#' + heading.id;
-    anchor.setAttribute('aria-label', '跳转到“' + heading.textContent.trim() + '”');
+    anchor.setAttribute('aria-label', '跳转到“' + headingText + '”');
     anchor.textContent = '#';
     anchor.addEventListener('click', function (event) {
       event.preventDefault();
       scrollToHeading(heading.id);
     });
-    heading.appendChild(anchor);
+    if (!anchor.parentElement) heading.appendChild(anchor);
   });
 
   function closeToc(options) {
@@ -89,7 +100,7 @@
     headings.forEach(function (heading) {
       var link = document.createElement('a');
       link.href = '#' + heading.id;
-      link.textContent = heading.firstChild ? heading.firstChild.textContent.trim() : heading.textContent.trim();
+      link.textContent = heading.dataset.tocText || getHeadingText(heading);
       if (heading.tagName.toLowerCase() === 'h3') link.className = 'toc-h3';
       link.addEventListener('click', function (event) {
         event.preventDefault();

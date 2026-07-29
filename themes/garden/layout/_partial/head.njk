@@ -35,7 +35,7 @@
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="{{ url_for('images/logo.svg') }}" type="image/svg+xml">
-<link rel="stylesheet" href="{{ url_for('css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('css/style.css') }}?v={{ theme.asset_version }}">
 <link rel="alternate" href="{{ url_for('atom.xml') }}" type="application/atom+xml" title="{{ config.title }}">
 <link rel="canonical" href="{{ canonical_url }}">
 {%- if page.tags and page.tags.length %}
