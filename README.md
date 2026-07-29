@@ -14,6 +14,7 @@
 ├── _config.yml              # Hexo 站点配置
 ├── source/
 │   ├── _posts/              # Markdown 文章
+│   ├── about/index.md       # About/Contact 页面内容
 │   ├── _data/
 │   │   ├── now.yml          # 首页「Now」模块数据
 │   │   ├── stack.yml        # 首页「Tech Stack」模块数据
@@ -26,6 +27,7 @@
 │   ├── layout/
 │   │   ├── _layout.njk      # HTML 骨架
 │   │   ├── index.njk        # 首页（8 模块）
+│   │   ├── about.njk        # About/Contact 专用页面
 │   │   ├── post.njk         # 文章页
 │   │   ├── page.njk         # 独立页面
 │   │   ├── archive.njk      # 归档页
@@ -75,6 +77,7 @@ featured: true    # 可选，标记后出现在首页 Featured 模块
 
 - **Now** → 编辑 `source/_data/now.yml`
 - **Tech Stack** → 编辑 `source/_data/stack.yml`
+- **About/Contact** → 编辑 `source/about/index.md` 的 front matter
 
 ## 主题设计
 

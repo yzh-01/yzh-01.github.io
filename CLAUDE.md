@@ -19,6 +19,7 @@ npx hexo new "标题"  # 新建文章
 _config.yml           # Hexo 站点配置（theme: garden, permalink, feed, sitemap）
 source/
   _posts/             # Markdown 文章
+  about/index.md      # About/Contact 页面内容与入口配置
   _data/
     now.yml           # 首页 Now 模块数据
     stack.yml         # 首页 Tech Stack 数据
@@ -31,9 +32,10 @@ themes/garden/        # 自有极简主题
     _layout.njk       # HTML 骨架（doctype + head + nav + main + footer）
     _partial/
       head.njk        # meta 标签、OG、favicon、CSS 引用、canonical
-      nav.njk         # sticky 导航栏（logo + home/archive/rss）
-      footer.njk      # 页脚（动态年份、RSS/sitemap/github 链接）
+      nav.njk         # sticky 导航栏（logo + home/archive/about）
+      footer.njk      # 页脚（动态年份、About/RSS/sitemap/github 链接）
     index.njk         # 首页 8 模块（Hero → Latest → Now → Featured → Stack → Journey → Life → About）
+    about.njk         # About/Contact 页面（内容脉络、Now、原则与联系方式）
     post.njk          # 文章页（article + TOC 侧栏 + 锚点 + 代码复制）
     archive.njk       # 归档页（按年分组）
     page.njk          # 独立页面

@@ -1,0 +1,86 @@
+{% extends '_layout.njk' %}
+
+{% block content %}
+<div class="about-page g-wide">
+  <header class="about-page-hero">
+    <div class="about-page-kicker">garden note · since {{ theme.since }}</div>
+    <h1>{{ page.title }}</h1>
+    <p class="about-page-lede">{{ page.description }}</p>
+    <div class="about-maintained">
+      <span class="about-maintained-dot" aria-hidden="true"></span>
+      持续维护中的个人数字空间
+    </div>
+  </header>
+
+  {%- if page.garden_paths and page.garden_paths.length %}
+  <section class="about-chapter" aria-labelledby="about-paths-title">
+    <div class="about-chapter-heading">
+      <div class="g-sec-label" id="about-paths-title">这里生长什么</div>
+      <p>三条内容脉络彼此交叉，也各自保留入口。</p>
+    </div>
+    <div class="garden-paths">
+      {%- for item in page.garden_paths %}
+      <article class="garden-path">
+        <div class="garden-path-meta">{{ item.meta }}</div>
+        <h2>{{ item.label }}</h2>
+        <p>{{ item.description }}</p>
+        <a href="{{ url_for(item.href) }}">{{ item.action }} <span aria-hidden="true">→</span></a>
+      </article>
+      {%- endfor %}
+    </div>
+  </section>
+  {%- endif %}
+
+  {%- if site.data.now and site.data.now.length %}
+  <section class="about-chapter" aria-labelledby="about-now-title">
+    <div class="about-chapter-heading">
+      <div class="g-sec-label" id="about-now-title">此刻</div>
+      <p>会随阶段变化的小型状态页。</p>
+    </div>
+    <div class="about-now-list">
+      {%- for item in site.data.now %}
+      <div class="about-now-item">
+        <span>{{ item.label }}</span>
+        <p>{{ item.text }}</p>
+      </div>
+      {%- endfor %}
+    </div>
+  </section>
+  {%- endif %}
+
+  {%- if page.principles and page.principles.length %}
+  <section class="about-chapter" aria-labelledby="about-principles-title">
+    <div class="about-chapter-heading">
+      <div class="g-sec-label" id="about-principles-title">维护原则</div>
+      <p>为未来五到十年的内容积累留出余地。</p>
+    </div>
+    <ul class="about-principles">
+      {%- for principle in page.principles %}
+      <li>{{ principle }}</li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endif %}
+
+  {%- if page.contact_links and page.contact_links.length %}
+  <section class="about-contact" aria-labelledby="about-contact-title">
+    <div>
+      <div class="about-page-kicker">contact</div>
+      <h2 id="about-contact-title">保持联系</h2>
+      <p>如果某篇记录对你有帮助，或者你也在探索相似的问题，欢迎来聊。</p>
+    </div>
+    <div class="about-contact-links">
+      {%- for link in page.contact_links %}
+      <a href="{{ link.href }}"{% if link.external %} target="_blank" rel="noopener"{% endif %}>
+        <span>
+          <small>{{ link.label }}</small>
+          {{ link.value }}
+        </span>
+        <span aria-hidden="true">{{ '↗' if link.external else '→' }}</span>
+      </a>
+      {%- endfor %}
+    </div>
+  </section>
+  {%- endif %}
+</div>
+{% endblock %}
