@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
   {{ partial('_partial/head.njk') }}
+  {% block head_extra %}{% endblock %}
 </head>
 <body>
   {{ partial('_partial/nav.njk') }}

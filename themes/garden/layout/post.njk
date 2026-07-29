@@ -7,6 +7,24 @@
 {% block og_description %}{{ page.description }}{% endblock %}
 {% endif %}
 
+{% block head_extra %}
+{%- set ld_desc = page.description or '' -%}
+{%- if not ld_desc -%}{%- set ld_desc = page.content | striptags -%}{%- endif -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ page.title }}",
+  "datePublished": "{{ page.date.toISOString() }}",
+  "dateModified": "{{ page.updated.toISOString() if page.updated else page.date.toISOString() }}",
+  "author": { "@type": "Person", "name": "{{ config.author }}" },
+  "description": "{{ ld_desc }}",
+  "url": "{{ config.url }}{{ url_for(page.path) }}",
+  "wordCount": {{ (page.content | striptags).length }}
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="article-wrap">
   <article class="article">
@@ -121,6 +139,48 @@
     if (wrap) wrap.classList.add('no-toc');
     return;
   }
+
+  // 标记有 TOC，用于移动端 toggle 按钮
+  if (wrap) wrap.classList.add('has-toc');
+
+  // 移动端 TOC 切换按钮 + 遮罩
+  var toggleBtn = document.createElement('button');
+  toggleBtn.className = 'toc-toggle';
+  toggleBtn.setAttribute('aria-label', '显示目录');
+  toggleBtn.textContent = '☰';
+  document.body.appendChild(toggleBtn);
+
+  var overlay = document.createElement('div');
+  overlay.className = 'toc-overlay';
+  document.body.appendChild(overlay);
+
+  function openToc() {
+    tocSide.classList.add('mobile-open');
+    overlay.classList.add('open');
+    toggleBtn.setAttribute('aria-label', '关闭目录');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeToc() {
+    tocSide.classList.remove('mobile-open');
+    overlay.classList.remove('open');
+    toggleBtn.setAttribute('aria-label', '显示目录');
+    document.body.style.overflow = '';
+  }
+
+  toggleBtn.addEventListener('click', function() {
+    tocSide.classList.contains('mobile-open') ? closeToc() : openToc();
+  });
+  overlay.addEventListener('click', closeToc);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && tocSide.classList.contains('mobile-open')) closeToc();
+  });
+
+  // TOC 链接点击后自动关闭侧栏
+  tocSide.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' && tocSide.classList.contains('mobile-open')) {
+      setTimeout(closeToc, 200);
+    }
+  });
 
   var items = [];
 
