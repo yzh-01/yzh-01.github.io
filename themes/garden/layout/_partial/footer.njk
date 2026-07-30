@@ -1,6 +1,6 @@
 <footer class="g-footer">
   <div class="g-footer-inner">
-    <span>&copy; {{ moment().format('YYYY') }} {{ config.author }}</span>
+    <span>&copy; {{ moment().format('YYYY') }} <span class="g-footer-author">{{ config.author }}</span></span>
     <div class="links">
       <a href="{{ url_for('about/') }}">about</a>
       <a href="{{ url_for('atom.xml') }}">rss</a>
