@@ -28,7 +28,7 @@
   </header>
 
   {%- if is_root_archive and (site.categories.length or site.tags.length) %}
-  <section class="archive-taxonomy" aria-labelledby="archive-taxonomy-title">
+  <section class="archive-taxonomy" aria-labelledby="archive-taxonomy-title" data-reveal>
     <h2 class="sr-only" id="archive-taxonomy-title">按分类和标签浏览</h2>
     {%- if site.categories.length %}
     <div class="taxonomy-group">
@@ -60,7 +60,7 @@
   {%- endif %}
 
   {%- if is_root_archive and archive_posts.length %}
-  <div class="archive-filter">
+  <div class="archive-filter" data-reveal>
     <label class="sr-only" for="archive-filter-input">筛选归档文章</label>
     <div class="archive-filter-field">
       <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
@@ -89,7 +89,7 @@
       {%- if year != current_year -%}
         {%- set current_year = year -%}
         {%- if not loop.first %}</section>{%- endif -%}
-        <section class="archive-year">
+        <section class="archive-year" data-reveal>
           <h2>{{ year }}</h2>
       {%- endif %}
       <div

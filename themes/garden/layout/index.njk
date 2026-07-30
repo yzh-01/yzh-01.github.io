@@ -57,19 +57,20 @@
     <h1>{{ config.title }}</h1>
     <p class="tagline">{{ config.subtitle }}</p>
     <p class="signature">// a digital garden · since {{ theme.since or cy }}</p>
+    <div class="hero-trace" aria-hidden="true"></div>
   </section>
   {%- endif %}
 
   {# ===== 2. Latest Posts ===== #}
   {%- if theme.modules.latest_posts %}
-  <section class="posts-sec">
+  <section class="posts-sec" data-reveal>
     <div class="g-sec-heading">
-      <div class="g-sec-label">recent posts</div>
+      <h2 class="g-sec-label">recent posts</h2>
       <a href="{{ url_for('archives/') }}">查看全部 <span aria-hidden="true">→</span></a>
     </div>
     {%- for post in page.posts.toArray().slice(0, 6) -%}
     <a class="post-card" href="{{ url_for(post.path) }}">
-      <div class="post-card-title">{{ post.title }}</div>
+      <h3 class="post-card-title">{{ post.title }}</h3>
       <div class="post-card-meta">
         <time>{{ post.date.format('YYYY-MM-DD') }}</time>
         {%- for tag in post.tags.toArray().slice(0, 2) -%}
@@ -87,12 +88,12 @@
 
   {# ===== 3. Now ===== #}
   {%- if theme.modules.now and site.data.now and site.data.now.length %}
-  <section class="now-sec">
-    <div class="g-sec-label">now</div>
+  <section class="now-sec" data-reveal>
+    <h2 class="g-sec-label">now</h2>
     <div class="now-grid">
       {%- for item in site.data.now -%}
       <div class="now-card">
-        <h4>{{ item.label }}</h4>
+        <h3>{{ item.label }}</h3>
         <p>{{ item.text }}</p>
       </div>
       {%- endfor -%}
@@ -102,8 +103,8 @@
 
   {# ===== 4. Featured Projects ===== #}
   {%- if theme.modules.featured_projects and featured_posts.length %}
-  <section class="featured-sec">
-    <div class="g-sec-label">featured</div>
+  <section class="featured-sec" data-reveal>
+    <h2 class="g-sec-label">featured</h2>
     {%- for fp in featured_posts.slice(0, 2) -%}
     <a class="featured-card" href="{{ url_for(fp.path) }}"{% if loop.index > 1 %} style="margin-top:14px"{% endif %}>
       <div>
@@ -124,12 +125,12 @@
 
   {# ===== 5. Tech Stack ===== #}
   {%- if theme.modules.tech_stack and site.data.stack and site.data.stack.length %}
-  <section class="stack-sec">
-    <div class="g-sec-label">tech stack</div>
+  <section class="stack-sec" data-reveal>
+    <h2 class="g-sec-label">tech stack</h2>
     <div class="stack-groups">
       {%- for g in site.data.stack -%}
       <div class="stack-group">
-        <h4>{{ g.group }}</h4>
+        <h3>{{ g.group }}</h3>
         <div class="tags">
           {%- for item in g.items -%}
           <span class="stack-tag">{{ item }}</span>
@@ -143,8 +144,8 @@
 
   {# ===== 6. Journey ===== #}
   {%- if theme.modules.journey and year_list.length %}
-  <section class="journey-sec">
-    <div class="g-sec-label">journey</div>
+  <section class="journey-sec" data-reveal>
+    <h2 class="g-sec-label">journey</h2>
     <div class="journey-years">
       {%- for y in year_list -%}
         {%- set cnt = 0 -%}
@@ -162,14 +163,14 @@
 
   {# ===== 7. Life ===== #}
   {%- if theme.modules.life and life_posts.length %}
-  <section class="life-sec">
+  <section class="life-sec" data-reveal>
     <div class="g-sec-heading">
-      <div class="g-sec-label">life</div>
+      <h2 class="g-sec-label">life</h2>
       <a href="{{ url_for('categories/diary/') }}">更多生活记录 <span aria-hidden="true">→</span></a>
     </div>
     {%- for post in life_posts -%}
     <a class="post-card" href="{{ url_for(post.path) }}">
-      <div class="post-card-title">{{ post.title }}</div>
+      <h3 class="post-card-title">{{ post.title }}</h3>
       <div class="post-card-meta">
         <time>{{ post.date.format('YYYY-MM-DD') }}</time>
         {%- for tag in post.tags.toArray() -%}
@@ -186,7 +187,7 @@
 
   {# ===== 8. About ===== #}
   {%- if theme.modules.about %}
-  <section class="about-sec">
+  <section class="about-sec" data-reveal>
     <div class="about-mark" aria-hidden="true">y</div>
     <div class="about-summary">
       <h2>关于这个花园</h2>

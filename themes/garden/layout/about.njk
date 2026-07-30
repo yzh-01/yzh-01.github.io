@@ -13,7 +13,7 @@
   </header>
 
   {%- if page.garden_paths and page.garden_paths.length %}
-  <section class="about-chapter" aria-labelledby="about-paths-title">
+  <section class="about-chapter" aria-labelledby="about-paths-title" data-reveal>
     <div class="about-chapter-heading">
       <div class="g-sec-label" id="about-paths-title">这里生长什么</div>
       <p>三条内容脉络彼此交叉，也各自保留入口。</p>
@@ -32,7 +32,7 @@
   {%- endif %}
 
   {%- if site.data.now and site.data.now.length %}
-  <section class="about-chapter" aria-labelledby="about-now-title">
+  <section class="about-chapter" aria-labelledby="about-now-title" data-reveal>
     <div class="about-chapter-heading">
       <div class="g-sec-label" id="about-now-title">此刻</div>
       <p>会随阶段变化的小型状态页。</p>
@@ -49,7 +49,7 @@
   {%- endif %}
 
   {%- if page.principles and page.principles.length %}
-  <section class="about-chapter" aria-labelledby="about-principles-title">
+  <section class="about-chapter" aria-labelledby="about-principles-title" data-reveal>
     <div class="about-chapter-heading">
       <div class="g-sec-label" id="about-principles-title">维护原则</div>
       <p>为未来五到十年的内容积累留出余地。</p>
@@ -63,7 +63,7 @@
   {%- endif %}
 
   {%- if page.contact_links and page.contact_links.length %}
-  <section class="about-contact" aria-labelledby="about-contact-title">
+  <section class="about-contact" aria-labelledby="about-contact-title" data-reveal>
     <div>
       <div class="about-page-kicker">contact</div>
       <h2 id="about-contact-title">保持联系</h2>

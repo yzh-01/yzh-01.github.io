@@ -1,0 +1,15 @@
+{% extends '_layout.njk' %}
+
+{% block content %}
+<section class="error-page g-wide" aria-labelledby="error-title">
+  <div class="error-page-inner">
+    <div class="error-code" aria-hidden="true">404</div>
+    <div class="error-kicker">path not found</div>
+    <h1 id="error-title">{{ page.title }}</h1>
+    <p>这条路径没有继续生长。你可以回到首页，从仍在维护的内容重新出发。</p>
+    <a class="error-home" href="{{ url_for('/') }}">
+      返回首页 <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+{% endblock %}
