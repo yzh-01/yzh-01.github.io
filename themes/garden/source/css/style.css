@@ -30,7 +30,8 @@
   /* 字级 */
   --g-font:       -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
   --g-font-mono:  "SF Mono", "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", ui-monospace, monospace;
-  --g-font-script:"Segoe Script", "Snell Roundhand", "STXingkai", "华文行楷", "FZKai-Z03", "KaiTi", cursive;
+  --g-font-script:"Liu Jian Mao Cao", "Segoe Script", "STXingkai", "华文行楷", "KaiTi", cursive;
+  --g-font-title: "Zhi Mang Xing", "STXingkai", "KaiTi", cursive;
 
   /* 间距 */
   --g-gap: 24px;
@@ -237,7 +238,7 @@ hr {
 
 .g-nav-logo {
   font-family: var(--g-font-script);
-  font-size: 21px; font-weight: 600;
+  font-size: 24px; font-weight: 400;
   color: var(--g-text);
   letter-spacing: 0;
   text-decoration: none;
@@ -376,10 +377,11 @@ hr {
 }
 .hero-name {
   display: inline-block;
+  white-space: nowrap;
   color: var(--g-text);
   font-family: var(--g-font-script);
-  font-size: .92em;
-  font-weight: 600;
+  font-size: 1.04em;
+  font-weight: 400;
   letter-spacing: 0;
   transform: rotate(-2deg);
   transform-origin: center;
@@ -495,7 +497,7 @@ hr {
   margin: 0 0 8px;
   color: var(--g-text);
   font-family: var(--g-font-script);
-  font-size: 38px;
+  font-size: 42px;
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: .04em;
@@ -705,10 +707,12 @@ hr {
   width: 3px;
 }
 .post-card-title {
-  font-size: 18px; font-weight: 600;
+  font-family: var(--g-font-title);
+  font-size: 24px; font-weight: 400;
+  line-height: 1.35;
   color: var(--g-text);
-  letter-spacing: -0.01em;
-  margin-bottom: 4px;
+  letter-spacing: .035em;
+  margin-bottom: 6px;
   transition: color 0.2s;
 }
 .post-card:hover .post-card-title { color: var(--g-accent); }
@@ -804,7 +808,12 @@ hr {
 .featured-card:hover::before { opacity: 1; }
 .featured-card > * { position: relative; z-index: 1; }
 .featured-card h3 {
-  font-size: 20px; color: var(--g-text);
+  font-family: var(--g-font-title);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: .035em;
+  color: var(--g-text);
   margin-bottom: 6px;
 }
 .featured-card .desc {
@@ -1255,8 +1264,8 @@ hr {
 .g-footer-author {
   color: var(--g-text-soft);
   font-family: var(--g-font-script);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 400;
 }
 .g-footer a { color: var(--g-text-soft); }
 .g-footer a:hover { color: var(--g-accent-text); }
@@ -1964,7 +1973,7 @@ body.toc-open { overflow: hidden; }
   .hero-actions { margin-top: 24px; }
   .hero-action { justify-content: center; }
   .hero-identity { padding: 25px 22px 21px; }
-  .hero-hand { font-size: 34px; }
+  .hero-hand { font-size: 38px; }
   .hero-companion {
     top: 19px;
     right: 19px;
