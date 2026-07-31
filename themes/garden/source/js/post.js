@@ -213,37 +213,97 @@
   }
 
   function setupCodeBlocks() {
-    articleBody.querySelectorAll('pre').forEach(function (pre) {
-      var code = pre.querySelector('code');
-      if (!code) return;
-
-      var languageMatch = (code.className || '').match(/language-([\w-]+)/);
-      if (languageMatch) {
-        var language = document.createElement('span');
-        language.className = 'code-lang';
-        language.textContent = languageMatch[1];
-        pre.appendChild(language);
+    function copyCodeText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text).catch(function () {
+          return fallbackCopy(text);
+        });
       }
+      return fallbackCopy(text);
+    }
+
+    function fallbackCopy(text) {
+      return new Promise(function (resolve, reject) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        textarea.style.pointerEvents = 'none';
+        document.body.appendChild(textarea);
+        textarea.select();
+        var copied = document.execCommand('copy');
+        textarea.remove();
+        if (copied) resolve();
+        else reject(new Error('Copy command failed'));
+      });
+    }
+
+    function addWindowControls(container, languageName, getCodeText) {
+      if (container.classList.contains('mac-code-block')) return;
+      container.classList.add('mac-code-block');
+
+      var controls = document.createElement('span');
+      controls.className = 'code-window-controls';
+      controls.setAttribute('aria-hidden', 'true');
+      controls.innerHTML = '<i></i><i></i><i></i>';
+      container.appendChild(controls);
+
+      var language = document.createElement('span');
+      language.className = 'code-lang';
+      language.textContent = languageName || 'text';
+      container.appendChild(language);
 
       var button = document.createElement('button');
       button.className = 'code-copy';
       button.type = 'button';
       button.setAttribute('aria-label', '复制代码');
+      button.title = '复制代码';
       button.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
       button.addEventListener('click', function () {
-        navigator.clipboard.writeText(code.textContent || '').then(function () {
+        copyCodeText(getCodeText()).then(function () {
           button.classList.add('copied');
           button.setAttribute('aria-label', '代码已复制');
+          button.title = '代码已复制';
           window.setTimeout(function () {
             button.classList.remove('copied');
             button.setAttribute('aria-label', '复制代码');
+            button.title = '复制代码';
           }, 1800);
         });
       });
-      pre.appendChild(button);
+      container.appendChild(button);
+    }
+
+    articleBody.querySelectorAll('figure.highlight').forEach(function (figure) {
+      var languageName = Array.prototype.find.call(figure.classList, function (className) {
+        return className !== 'highlight';
+      }) || 'text';
+      var codeCell = figure.querySelector('td.code') || figure.querySelector('.code');
+      if (!codeCell) return;
+
+      addWindowControls(figure, languageName, function () {
+        var lines = codeCell.querySelectorAll('.line');
+        if (!lines.length) return codeCell.textContent || '';
+        return Array.prototype.map.call(lines, function (line) {
+          return line.textContent || '';
+        }).join('\n');
+      });
+    });
+
+    articleBody.querySelectorAll('pre').forEach(function (pre) {
+      if (pre.closest('figure.highlight')) return;
+      var code = pre.querySelector('code');
+      if (!code) return;
+
+      var languageMatch = (code.className || '').match(/language-([\w-]+)/);
+      addWindowControls(pre, languageMatch ? languageMatch[1] : 'text', function () {
+        return code.textContent || '';
+      });
     });
 
     articleBody.querySelectorAll('table').forEach(function (table) {
+      if (table.closest('figure.highlight')) return;
       if (table.parentElement && table.parentElement.classList.contains('table-scroll')) return;
       var wrapper = document.createElement('div');
       wrapper.className = 'table-scroll';

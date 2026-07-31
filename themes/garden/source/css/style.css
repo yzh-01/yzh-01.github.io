@@ -4,6 +4,14 @@
    灰 + moss 绿品牌色延续
    ================================================================ */
 
+@font-face {
+  font-family: "Maple Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/maple-mono-latin-400-normal.woff2") format("woff2");
+}
+
 /* ===== Tokens ===== */
 :root {
   /* 浅色模式 */
@@ -26,10 +34,19 @@
   --g-shadow:      0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02);
   --g-shadow-lg:   0 4px 16px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.03);
   --g-ease-out:    cubic-bezier(.22, 1, .36, 1);
+  --g-code-bg:     rgba(248,249,247,.97);
+  --g-code-chrome: #eff0ed;
+  --g-code-border: #d7d9d4;
+  --g-code-text:   #26312a;
+  --g-code-gutter: #8a938c;
+  --g-code-comment:#78827b;
+  --g-code-string: #4f7f5b;
+  --g-code-keyword:#8a5d35;
+  --g-code-value:  #8a6545;
 
   /* 字级 */
   --g-font:       -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
-  --g-font-mono:  "SF Mono", "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", ui-monospace, monospace;
+  --g-font-mono:  "Maple Mono", "SF Mono", "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", ui-monospace, monospace;
   --g-font-script:"Caveat", "Liu Jian Mao Cao", "Segoe Script", "STXingkai", "华文行楷", "KaiTi", cursive;
   --g-font-title: "Kalam", "Zhi Mang Xing", "STXingkai", "KaiTi", cursive;
 
@@ -59,6 +76,15 @@
     --g-ash-soft:    rgba(168,168,163,0.08);
     --g-shadow:      0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.15);
     --g-shadow-lg:   0 4px 16px rgba(0,0,0,.3), 0 1px 4px rgba(0,0,0,.2);
+    --g-code-bg:     rgba(15,20,17,.97);
+    --g-code-chrome: #171d19;
+    --g-code-border: #2b352e;
+    --g-code-text:   #dbe5de;
+    --g-code-gutter: #657069;
+    --g-code-comment:#7d8b82;
+    --g-code-string: #91bd9b;
+    --g-code-keyword:#d6ad7c;
+    --g-code-value:  #d3a47f;
   }
 }
 
@@ -1847,10 +1873,7 @@ body.toc-open { overflow: hidden; }
   }
 }
 
-/* ===== Code Block: copy button + lang label ===== */
-.article-body pre {
-  position: relative;
-}
+/* ===== Code Block: macOS chrome + Maple Mono ===== */
 .table-scroll {
   width: 100%;
   margin: 1.5em 0;
@@ -1862,35 +1885,173 @@ body.toc-open { overflow: hidden; }
   min-width: 560px;
   margin: 0;
 }
+
+.article-body .mac-code-block {
+  position: relative;
+  margin: 1.7em 0;
+  color: var(--g-code-text);
+  background: var(--g-code-bg);
+  border: 1px solid var(--g-code-border);
+  border-radius: 10px;
+  box-shadow: var(--g-shadow-lg);
+}
+.article-body .mac-code-block::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  z-index: 2;
+  height: 42px;
+  background: var(--g-code-chrome);
+  border-bottom: 1px solid var(--g-code-border);
+  pointer-events: none;
+}
+.article-body pre.mac-code-block {
+  max-width: 100%;
+  padding: 59px 20px 20px;
+  overflow-x: auto;
+  font-family: var(--g-font-mono);
+  font-size: 14px;
+  font-variant-ligatures: contextual;
+  font-feature-settings: "calt" 1, "liga" 1;
+  line-height: 1.68;
+  white-space: pre;
+}
+.article-body figure.highlight.mac-code-block {
+  overflow: hidden;
+  padding-top: 42px;
+}
+.article-body figure.highlight table {
+  display: block;
+  width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--g-font-mono);
+  font-size: 14px;
+  font-variant-ligatures: contextual;
+  font-feature-settings: "calt" 1, "liga" 1;
+}
+.article-body figure.highlight tbody {
+  display: table;
+  min-width: 100%;
+}
+.article-body figure.highlight tr {
+  display: table-row;
+}
+.article-body figure.highlight td {
+  padding: 0;
+  color: var(--g-code-text);
+  background: transparent;
+  border: 0;
+  vertical-align: top;
+}
+.article-body figure.highlight td.gutter {
+  width: 1%;
+  background: color-mix(in srgb, var(--g-code-chrome) 58%, transparent);
+  border-right: 1px solid var(--g-code-border);
+  user-select: none;
+}
+.article-body figure.highlight pre {
+  min-width: max-content;
+  margin: 0;
+  padding: 18px 20px;
+  overflow: visible;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.68;
+}
+.article-body figure.highlight .gutter pre {
+  padding-right: 12px;
+  padding-left: 12px;
+  color: var(--g-code-gutter);
+  text-align: right;
+}
+.code-window-controls {
+  position: absolute;
+  top: 15px;
+  left: 16px;
+  z-index: 4;
+  display: flex;
+  gap: 7px;
+  pointer-events: none;
+}
+.code-window-controls i {
+  width: 11px;
+  height: 11px;
+  display: block;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.5px rgba(0,0,0,.16);
+}
+.code-window-controls i:nth-child(1) { background: #ff5f57; }
+.code-window-controls i:nth-child(2) { background: #febc2e; }
+.code-window-controls i:nth-child(3) { background: #28c840; }
 .code-lang {
   position: absolute;
-  top: 0; right: 48px;
+  top: 10px;
+  right: 50px;
+  z-index: 4;
   font-family: var(--g-font-mono);
-  font-size: 11px; font-weight: 600;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 22px;
   letter-spacing: 0.06em;
-  color: var(--g-text-mute);
+  color: var(--g-code-gutter);
   text-transform: uppercase;
-  padding: 6px 0;
   pointer-events: none;
 }
 .code-copy {
   position: absolute;
-  top: 8px; right: 8px;
-  width: 32px; height: 32px;
+  top: 7px;
+  right: 9px;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--g-bg-elevated);
-  border: 1px solid var(--g-border);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 5px;
   font-size: 14px;
-  color: var(--g-text-mute);
+  color: var(--g-code-gutter);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s, border-color 0.2s, color 0.2s;
-  z-index: 5;
+  opacity: .72;
+  transition: opacity .2s, background .2s, border-color .2s, color .2s;
 }
-.article-body pre:hover .code-copy { opacity: 1; }
-.code-copy:hover { border-color: var(--g-accent); color: var(--g-accent-text); }
-.code-copy.copied { color: var(--g-accent); border-color: var(--g-accent); }
+.mac-code-block:hover .code-copy { opacity: 1; }
+.code-copy:hover {
+  color: var(--g-code-text);
+  background: var(--g-accent-soft);
+  border-color: var(--g-accent-border);
+}
+.code-copy.copied {
+  color: var(--g-accent);
+  background: var(--g-accent-soft);
+  border-color: var(--g-accent-border);
+}
+
+.highlight .comment,
+.highlight .quote { color: var(--g-code-comment); font-style: italic; }
+.highlight .string,
+.highlight .regexp,
+.highlight .addition { color: var(--g-code-string); }
+.highlight .keyword,
+.highlight .selector-tag,
+.highlight .section,
+.highlight .name,
+.highlight .built_in { color: var(--g-code-keyword); }
+.highlight .number,
+.highlight .literal,
+.highlight .variable,
+.highlight .template-variable { color: var(--g-code-value); }
+.highlight .attr,
+.highlight .attribute,
+.highlight .title,
+.highlight .type { color: var(--g-accent-text); }
+.highlight .deletion { color: #c85f5f; }
 
 @media (hover: none) {
   .code-copy { opacity: 1; }
