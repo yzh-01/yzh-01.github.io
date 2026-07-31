@@ -30,8 +30,8 @@
   /* 字级 */
   --g-font:       -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
   --g-font-mono:  "SF Mono", "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", ui-monospace, monospace;
-  --g-font-script:"Liu Jian Mao Cao", "Segoe Script", "STXingkai", "华文行楷", "KaiTi", cursive;
-  --g-font-title: "Zhi Mang Xing", "STXingkai", "KaiTi", cursive;
+  --g-font-script:"Caveat", "Liu Jian Mao Cao", "Segoe Script", "STXingkai", "华文行楷", "KaiTi", cursive;
+  --g-font-title: "Kalam", "Zhi Mang Xing", "STXingkai", "KaiTi", cursive;
 
   /* 间距 */
   --g-gap: 24px;
