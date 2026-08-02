@@ -5,7 +5,40 @@
   var backTop = document.querySelector('.g-back-top');
   var scrollProgress = document.getElementById('g-scroll-progress');
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  var gardenRoute = document.querySelector('.garden-route');
+  var gardenRouteItems = [];
+  var gardenRouteStart = 0;
+  var gardenRouteEnd = 1;
   var ticking = false;
+
+  function updateGardenRoute() {
+    if (!gardenRoute || !gardenRouteItems.length) return;
+    var marker = window.scrollY + window.innerHeight * 0.44;
+    var progress = Math.min(1, Math.max(0, (marker - gardenRouteStart) / (gardenRouteEnd - gardenRouteStart || 1)));
+    var activeIndex = 0;
+
+    gardenRouteItems.forEach(function (item, index) {
+      if (marker >= item.top) activeIndex = index;
+    });
+
+    gardenRoute.style.setProperty('--garden-route-progress', progress.toFixed(4));
+    gardenRouteItems.forEach(function (item, index) {
+      var active = index === activeIndex;
+      item.link.classList.toggle('active', active);
+      if (active) item.link.setAttribute('aria-current', 'location');
+      else item.link.removeAttribute('aria-current');
+    });
+  }
+
+  function refreshGardenRoute() {
+    if (!gardenRouteItems.length) return;
+    gardenRouteItems.forEach(function (item) {
+      item.top = item.target.getBoundingClientRect().top + window.scrollY;
+    });
+    gardenRouteStart = gardenRouteItems[0].top;
+    gardenRouteEnd = gardenRouteItems[gardenRouteItems.length - 1].top;
+  }
 
   function updateScrollState() {
     if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
@@ -16,6 +49,7 @@
       scrollProgress.style.transform = 'scaleX(' + progress + ')';
       scrollProgress.parentElement.classList.toggle('is-visible', maxScroll > 80);
     }
+    updateGardenRoute();
     ticking = false;
   }
 
@@ -25,8 +59,14 @@
     ticking = true;
     window.requestAnimationFrame(updateScrollState);
   }, { passive: true });
-  window.addEventListener('resize', updateScrollState, { passive: true });
-  window.addEventListener('load', updateScrollState, { once: true });
+  window.addEventListener('resize', function () {
+    refreshGardenRoute();
+    updateScrollState();
+  }, { passive: true });
+  window.addEventListener('load', function () {
+    refreshGardenRoute();
+    updateScrollState();
+  }, { once: true });
 
   if (backTop) {
     backTop.addEventListener('click', function () {
@@ -42,7 +82,6 @@
     var backdrop = document.querySelector('.site-backdrop');
     if (!hero || !backdrop) return;
 
-    var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
     var pointerX = window.innerWidth * 0.62;
     var pointerY = window.innerHeight * 0.34;
     var sceneX = 0;
@@ -106,6 +145,61 @@
     }
 
     syncMotionCapability();
+  }
+
+  function setupGardenRoute() {
+    if (!gardenRoute) return;
+    var links = Array.prototype.slice.call(gardenRoute.querySelectorAll('[data-route-link]'));
+    gardenRouteItems = links.map(function (link) {
+      var target = document.querySelector(link.getAttribute('href'));
+      return target ? { link: link, target: target, top: 0 } : null;
+    }).filter(Boolean);
+
+    if (gardenRouteItems.length < 2) {
+      gardenRoute.hidden = true;
+      return;
+    }
+
+    refreshGardenRoute();
+    updateScrollState();
+  }
+
+  function setupCardSpotlights() {
+    var cards = Array.prototype.slice.call(document.querySelectorAll('[data-spotlight]'));
+    if (!cards.length) return;
+
+    function spotlightEnabled() {
+      return finePointer.matches && !reduceMotion.matches;
+    }
+
+    function syncSpotlights() {
+      var enabled = spotlightEnabled();
+      document.body.classList.toggle('card-motion-ready', enabled);
+      if (enabled) return;
+      cards.forEach(function (card) {
+        card.style.removeProperty('--spot-x');
+        card.style.removeProperty('--spot-y');
+      });
+    }
+
+    cards.forEach(function (card) {
+      card.addEventListener('pointermove', function (event) {
+        if (!spotlightEnabled()) return;
+        var rect = card.getBoundingClientRect();
+        card.style.setProperty('--spot-x', (event.clientX - rect.left).toFixed(1) + 'px');
+        card.style.setProperty('--spot-y', (event.clientY - rect.top).toFixed(1) + 'px');
+      }, { passive: true });
+    });
+
+    if (typeof finePointer.addEventListener === 'function') {
+      finePointer.addEventListener('change', syncSpotlights);
+      reduceMotion.addEventListener('change', syncSpotlights);
+    } else if (typeof finePointer.addListener === 'function') {
+      finePointer.addListener(syncSpotlights);
+      reduceMotion.addListener(syncSpotlights);
+    }
+
+    syncSpotlights();
   }
 
   function setupArchiveFilter() {
@@ -188,7 +282,9 @@
     }
   }
 
+  setupGardenRoute();
   setupHeroFog();
+  setupCardSpotlights();
   setupArchiveFilter();
   setupReveal();
 })();

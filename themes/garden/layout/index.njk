@@ -51,9 +51,25 @@
 {% block content %}
 <div class="g-wide">
 
+  <nav class="garden-route" aria-label="首页花园路径">
+    <span class="garden-route-track" aria-hidden="true"><i></i></span>
+    {%- if theme.modules.hero %}<a href="#garden-home" data-route-link><span>首页</span></a>{%- endif %}
+    <a href="#garden-map" data-route-link><span>入口</span></a>
+    {%- if theme.modules.latest_posts %}<a href="#latest-posts" data-route-link><span>文章</span></a>{%- endif %}
+    {%- if theme.modules.now and site.data.now and site.data.now.length %}<a href="#now" data-route-link><span>此刻</span></a>{%- endif %}
+    {%- if theme.modules.featured_projects and featured_posts.length %}<a href="#featured" data-route-link><span>精选</span></a>{%- endif %}
+    {%- if theme.modules.tech_stack and site.data.stack and site.data.stack.length %}<a href="#stack" data-route-link><span>技术</span></a>{%- endif %}
+    {%- if theme.modules.journey and year_list.length %}<a href="#journey" data-route-link><span>旅程</span></a>{%- endif %}
+    {%- if theme.modules.life and life_posts.length %}<a href="#life" data-route-link><span>生活</span></a>{%- endif %}
+    {%- if theme.modules.about %}<a href="#garden-about" data-route-link><span>关于</span></a>{%- endif %}
+  </nav>
+
   {# ===== 1. Personal Hero ===== #}
   {%- if theme.modules.hero %}
-  <section class="hero">
+  <section class="hero" id="garden-home">
+    <div class="hero-fireflies" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
     <div class="hero-copy">
       <p class="hero-eyebrow"><span aria-hidden="true"></span>个人数字花园 · 持续生长中</p>
       <h1>HELLO，我是 <span class="hero-name">{{ config.author }}。</span></h1>
@@ -91,25 +107,25 @@
   {%- endif %}
 
   {# ===== 2. Garden Map ===== #}
-  <section class="garden-map" data-reveal aria-labelledby="garden-map-title">
+  <section class="garden-map" id="garden-map" data-reveal aria-labelledby="garden-map-title">
     <div class="g-sec-heading">
       <h2 class="g-sec-label" id="garden-map-title">从这里开始</h2>
       <span class="garden-map-note">按兴趣走进这座花园</span>
     </div>
     <div class="garden-map-grid">
-      <a class="garden-map-card" href="{{ url_for('categories/study-notes/') }}">
+      <a class="garden-map-card" href="{{ url_for('categories/study-notes/') }}" data-spotlight>
         <span class="garden-map-index">01</span>
         <h3>技术探索</h3>
         <p>代码实践、课程知识与工具使用，记录从理解到动手的过程。</p>
         <span class="garden-map-link">进入技术区 <b aria-hidden="true">→</b></span>
       </a>
-      <a class="garden-map-card" href="{{ url_for('tags/notes/') }}">
+      <a class="garden-map-card" href="{{ url_for('tags/notes/') }}" data-spotlight>
         <span class="garden-map-index">02</span>
         <h3>学习记录</h3>
         <p>尚未成熟的想法、复习笔记和问题清单，允许内容持续修订。</p>
         <span class="garden-map-link">浏览学习笔记 <b aria-hidden="true">→</b></span>
       </a>
-      <a class="garden-map-card" href="{{ url_for('categories/diary/') }}">
+      <a class="garden-map-card" href="{{ url_for('categories/diary/') }}" data-spotlight>
         <span class="garden-map-index">03</span>
         <h3>日常生活</h3>
         <p>书、音乐、情绪和普通日子，让技术之外的生活也被看见。</p>
@@ -149,7 +165,7 @@
     <h2 class="g-sec-label">now</h2>
     <div class="now-grid">
       {%- for item in site.data.now -%}
-      <div class="now-card">
+      <div class="now-card" data-spotlight>
         <h3>{{ item.label }}</h3>
         <p>{{ item.text }}</p>
       </div>
@@ -160,10 +176,10 @@
 
   {# ===== 5. Featured Projects ===== #}
   {%- if theme.modules.featured_projects and featured_posts.length %}
-  <section class="featured-sec" data-reveal>
+  <section class="featured-sec" id="featured" data-reveal>
     <h2 class="g-sec-label">featured</h2>
     {%- for fp in featured_posts.slice(0, 2) -%}
-    <a class="featured-card" href="{{ url_for(fp.path) }}"{% if loop.index > 1 %} style="margin-top:14px"{% endif %}>
+    <a class="featured-card" href="{{ url_for(fp.path) }}" data-spotlight{% if loop.index > 1 %} style="margin-top:14px"{% endif %}>
       <div>
         <h3>{{ fp.title }}</h3>
         {%- if fp.description -%}
@@ -182,7 +198,7 @@
 
   {# ===== 6. Tech Stack ===== #}
   {%- if theme.modules.tech_stack and site.data.stack and site.data.stack.length %}
-  <section class="stack-sec" data-reveal>
+  <section class="stack-sec" id="stack" data-reveal>
     <h2 class="g-sec-label">tech stack</h2>
     <div class="stack-groups">
       {%- for g in site.data.stack -%}
@@ -201,7 +217,7 @@
 
   {# ===== 7. Journey ===== #}
   {%- if theme.modules.journey and year_list.length %}
-  <section class="journey-sec" data-reveal>
+  <section class="journey-sec" id="journey" data-reveal>
     <h2 class="g-sec-label">journey</h2>
     <div class="journey-years">
       {%- for y in year_list -%}
@@ -220,7 +236,7 @@
 
   {# ===== 8. Life ===== #}
   {%- if theme.modules.life and life_posts.length %}
-  <section class="life-sec" data-reveal>
+  <section class="life-sec" id="life" data-reveal>
     <div class="g-sec-heading">
       <h2 class="g-sec-label">life</h2>
       <a href="{{ url_for('categories/diary/') }}">更多生活记录 <span aria-hidden="true">→</span></a>
@@ -244,7 +260,7 @@
 
   {# ===== 9. About ===== #}
   {%- if theme.modules.about %}
-  <section class="about-sec" data-reveal>
+  <section class="about-sec" id="garden-about" data-reveal>
     <figure class="about-photo">
       <img src="{{ url_for('images/garden-night-window.jpg') }}" width="735" height="551" alt="夜色中透过玻璃窗看见的植物与灯光" loading="lazy" decoding="async">
       <figcaption>窗内写字，窗外生长。</figcaption>

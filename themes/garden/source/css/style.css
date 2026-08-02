@@ -29,6 +29,7 @@
   --g-accent-text: #3d5c43;
   --g-accent-border: rgba(92,138,99,.2);
   --g-ambient:      rgba(92,138,99,0.075);
+  --g-glow:         rgba(92,138,99,.17);
   --g-ash:         #787874;
   --g-ash-soft:    rgba(120,120,116,0.08);
   --g-shadow:      0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02);
@@ -81,6 +82,7 @@
     --g-accent-text: #a3c9ac;
     --g-accent-border: rgba(140,184,150,.22);
     --g-ambient:      rgba(140,184,150,0.055);
+    --g-glow:         rgba(140,184,150,.16);
     --g-ash:         #a8a8a3;
     --g-ash-soft:    rgba(168,168,163,0.08);
     --g-shadow:      0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.15);
@@ -421,6 +423,106 @@ hr {
   color: var(--g-accent-text);
 }
 
+/* ===== Home Garden Route ===== */
+.garden-route {
+  --garden-route-progress: 0;
+  position: fixed;
+  top: 50%;
+  left: max(24px, calc(50vw - 536px));
+  z-index: 28;
+  display: grid;
+  gap: 2px;
+  width: 12px;
+  padding: 7px 0;
+  opacity: .72;
+  transform: translateY(-50%);
+  transition: opacity var(--g-motion-ui);
+}
+.garden-route:hover,
+.garden-route:focus-within { opacity: 1; }
+.garden-route-track {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 5px;
+  width: 1px;
+  overflow: hidden;
+  background: var(--g-border);
+  pointer-events: none;
+}
+.garden-route-track i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(var(--g-accent-hover), var(--g-accent));
+  box-shadow: 0 0 8px var(--g-glow);
+  transform: scaleY(var(--garden-route-progress));
+  transform-origin: top;
+  transition: transform var(--g-motion-fast) var(--g-ease-standard);
+}
+.garden-route a {
+  position: relative;
+  display: block;
+  width: 12px;
+  height: 27px;
+  color: var(--g-text-mute);
+}
+.garden-route a::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  background: var(--g-bg-elevated);
+  border: 1px solid var(--g-border-hover);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition:
+    background var(--g-motion-fast),
+    border-color var(--g-motion-fast),
+    box-shadow var(--g-motion-fast),
+    transform var(--g-motion-fast) var(--g-ease-out);
+}
+.garden-route a span {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  padding: 3px 7px;
+  color: var(--g-text-soft);
+  background: color-mix(in srgb, var(--g-bg-elevated) 88%, transparent);
+  border: 1px solid var(--g-border);
+  border-radius: 4px;
+  box-shadow: var(--g-shadow);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(4px, -50%);
+  transition: opacity var(--g-motion-fast), transform var(--g-motion-fast) var(--g-ease-out);
+  white-space: nowrap;
+}
+.garden-route a:hover::before,
+.garden-route a:focus-visible::before,
+.garden-route a.active::before {
+  background: var(--g-accent);
+  border-color: var(--g-accent);
+  box-shadow: 0 0 0 4px var(--g-accent-soft), 0 0 14px var(--g-glow);
+  transform: translateY(-50%) scale(1.2);
+}
+.garden-route a:hover span,
+.garden-route a:focus-visible span,
+.garden-route a.active span {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+.garden-route a:focus-visible {
+  outline-offset: 6px;
+}
+
 /* ===== Module 1: Personal Hero ===== */
 .hero {
   position: relative;
@@ -432,8 +534,37 @@ hr {
   text-align: left;
 }
 .hero-copy {
+  position: relative;
+  z-index: 1;
   min-width: 0;
 }
+.hero-fireflies {
+  position: absolute;
+  inset: 5% -5% 12%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-fireflies i {
+  --fly-x: 24px;
+  --fly-y: -32px;
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--g-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 5px var(--g-accent), 0 0 16px var(--g-glow);
+  opacity: 0;
+}
+.hero-fireflies i:nth-child(1) { top: 18%; left: 8%; --fly-x: 38px; --fly-y: -24px; animation-duration: 8.7s; animation-delay: -2.1s; }
+.hero-fireflies i:nth-child(2) { top: 64%; left: 16%; --fly-x: -26px; --fly-y: -42px; animation-duration: 10.4s; animation-delay: -6.8s; }
+.hero-fireflies i:nth-child(3) { top: 34%; left: 32%; --fly-x: 31px; --fly-y: 28px; animation-duration: 9.3s; animation-delay: -4.2s; }
+.hero-fireflies i:nth-child(4) { top: 76%; left: 43%; --fly-x: -18px; --fly-y: -36px; animation-duration: 11.2s; animation-delay: -7.4s; }
+.hero-fireflies i:nth-child(5) { top: 15%; left: 57%; --fly-x: 22px; --fly-y: 34px; animation-duration: 8.2s; animation-delay: -5.6s; }
+.hero-fireflies i:nth-child(6) { top: 58%; left: 68%; --fly-x: -32px; --fly-y: 24px; animation-duration: 10.8s; animation-delay: -1.8s; }
+.hero-fireflies i:nth-child(7) { top: 28%; left: 79%; --fly-x: 26px; --fly-y: -38px; animation-duration: 9.8s; animation-delay: -8.1s; }
+.hero-fireflies i:nth-child(8) { top: 72%; left: 88%; --fly-x: -35px; --fly-y: -25px; animation-duration: 11.5s; animation-delay: -4.9s; }
+.hero-fireflies i:nth-child(9) { top: 45%; left: 96%; --fly-x: -28px; --fly-y: 30px; animation-duration: 9.1s; animation-delay: -3.3s; }
 .hero-eyebrow {
   display: flex;
   align-items: center;
@@ -535,8 +666,14 @@ hr {
   transform: translateY(0) scale(.97);
   transition-duration: var(--g-motion-press);
 }
+.hero-action span {
+  transition: transform var(--g-motion-fast) var(--g-ease-out);
+}
+.hero-action.primary:hover span { transform: translateY(2px); }
+.hero-action:not(.primary):hover span { transform: translateX(3px); }
 .hero-identity {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   padding: 30px 28px 24px;
   background:
@@ -646,6 +783,7 @@ hr {
 }
 .hero-trace {
   position: relative;
+  z-index: 1;
   grid-column: 1 / -1;
   width: 148px;
   height: 13px;
@@ -690,6 +828,8 @@ hr {
   gap: 14px;
 }
 .garden-map-card {
+  --spot-x: 50%;
+  --spot-y: 50%;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -705,6 +845,20 @@ hr {
     transform .24s var(--g-ease-out),
     border-color .2s,
     box-shadow .2s;
+}
+.garden-map-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(250px circle at var(--spot-x) var(--spot-y), var(--g-glow), transparent 68%);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity var(--g-motion-ui);
+}
+.garden-map-card > * {
+  position: relative;
+  z-index: 1;
 }
 .garden-map-card::before {
   content: "";
@@ -725,6 +879,7 @@ hr {
 .garden-map-card:hover::before {
   width: calc(100% - 48px);
 }
+body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
 .garden-map-index {
   margin-bottom: 26px;
   color: var(--g-accent);
@@ -829,6 +984,8 @@ hr {
   gap: 16px;
 }
 .now-card {
+  --spot-x: 50%;
+  --spot-y: 50%;
   position: relative;
   overflow: hidden;
   padding: 20px;
@@ -837,6 +994,16 @@ hr {
   border-radius: var(--g-radius);
   box-shadow: var(--g-shadow);
   transition: transform .24s var(--g-ease-out), border-color .2s, box-shadow .2s;
+}
+.now-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(230px circle at var(--spot-x) var(--spot-y), var(--g-glow), transparent 70%);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity var(--g-motion-ui);
 }
 .now-card::after {
   content: "";
@@ -848,7 +1015,13 @@ hr {
   background: var(--g-accent);
   border-radius: 50%;
   box-shadow: 0 0 0 4px var(--g-accent-soft);
+  z-index: 2;
 }
+.now-card > * {
+  position: relative;
+  z-index: 1;
+}
+body.card-motion-ready .now-card:hover::before { opacity: 1; }
 .now-card h3 {
   font-size: 13px; font-weight: 600;
   letter-spacing: 0.06em;
@@ -866,6 +1039,8 @@ hr {
   margin-bottom: 80px;
 }
 .featured-card {
+  --spot-x: 50%;
+  --spot-y: 50%;
   position: relative;
   overflow: hidden;
   display: grid;
@@ -884,7 +1059,9 @@ hr {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(125deg, transparent 58%, var(--g-accent-soft));
+  background:
+    radial-gradient(380px circle at var(--spot-x) var(--spot-y), var(--g-glow), transparent 68%),
+    linear-gradient(125deg, transparent 58%, var(--g-accent-soft));
   opacity: 0;
   pointer-events: none;
   transition: opacity .24s;
@@ -2129,13 +2306,20 @@ body.toc-open { overflow: hidden; }
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 1180px) {
+  .garden-route { display: none; }
+}
 @media (max-width: 768px) {
   .site-backdrop {
     inset: -16px;
-    background-position: 48% center;
-    filter: blur(8px) saturate(.72);
     transform: scale(1.025);
   }
+  .site-backdrop::before,
+  .site-backdrop::after {
+    background-position: 48% center;
+    filter: blur(8px) saturate(.72);
+  }
+  .hero-fireflies { display: none; }
   .hero {
     grid-template-columns: 1fr;
     gap: 30px;
@@ -2249,9 +2433,28 @@ body.toc-open { overflow: hidden; }
   opacity: 1;
   transform: translateY(0);
 }
+.reveal-ready .g-sec-label::after {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.reveal-ready.reveal-visible .g-sec-label::after {
+  transform: scaleX(1);
+  transition: transform var(--g-motion-scene) .12s var(--g-ease-out);
+}
 
 /* ===== Animations ===== */
 @media (prefers-reduced-motion: no-preference) {
+  .hero-fireflies i {
+    animation-name: g-firefly;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  .hero-eyebrow span,
+  .now-card::after {
+    animation: g-status-pulse 4.2s ease-in-out infinite;
+  }
+  .now-card:nth-child(2)::after { animation-delay: -1.4s; }
+  .now-card:nth-child(3)::after { animation-delay: -2.8s; }
   .hero-copy > *,
   .hero-identity {
     animation: g-fade-up var(--g-motion-enter) var(--g-ease-out) both;
@@ -2267,6 +2470,25 @@ body.toc-open { overflow: hidden; }
   .hero-trace::after {
     animation: g-trace-dot .35s .72s ease both;
   }
+}
+
+@keyframes g-firefly {
+  0%, 100% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(.6);
+  }
+  20% { opacity: .28; }
+  43% { opacity: .9; }
+  72% {
+    opacity: .2;
+    transform: translate3d(var(--fly-x), var(--fly-y), 0) scale(1.25);
+  }
+  86% { opacity: .62; }
+}
+
+@keyframes g-status-pulse {
+  0%, 58%, 100% { box-shadow: 0 0 0 4px var(--g-accent-soft); }
+  68% { box-shadow: 0 0 0 7px transparent, 0 0 13px var(--g-glow); }
 }
 
 @keyframes g-fade-up {
@@ -2292,6 +2514,7 @@ body.toc-open { overflow: hidden; }
     --g-scene-y: 0px !important;
   }
   .site-backdrop::after { display: none !important; }
+  .hero-fireflies { display: none !important; }
 
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
