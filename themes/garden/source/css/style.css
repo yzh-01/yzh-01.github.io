@@ -2113,6 +2113,18 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
   gap: 9px;
   justify-content: flex-end;
 }
+.article-back-top {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+.article-back-top.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
 .garden-home-button { text-decoration: none; }
 .garden-settings-toggle[aria-expanded="true"] {
   color: var(--g-accent-text);

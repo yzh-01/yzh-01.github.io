@@ -54,6 +54,11 @@
       <p class="garden-theme-status" data-theme-status aria-live="polite"></p>
     </section>
     <div class="garden-control-actions">
+      {%- if is_post() and theme.post.back_to_top %}
+      <button class="article-back-top garden-control-button" type="button" aria-label="回到文章顶部">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+      </button>
+      {%- endif %}
       <a class="garden-home-button garden-control-button" href="{% if is_home() %}#garden-home{% else %}{{ url_for('/') }}#garden-home{% endif %}" aria-label="返回首页介绍区">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg>
       </a>
