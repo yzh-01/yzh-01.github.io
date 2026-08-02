@@ -4,7 +4,7 @@
   {{ partial('_partial/head.njk') }}
   {% block head_extra %}{% endblock %}
 </head>
-<body>
+<body{% if is_home() %} class="is-home"{% endif %}>
   <div class="site-backdrop" aria-hidden="true"></div>
   <a class="skip-link" href="#main-content">跳到正文</a>
   {{ partial('_partial/nav.njk') }}

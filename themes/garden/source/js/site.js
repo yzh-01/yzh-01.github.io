@@ -37,6 +37,77 @@
     });
   }
 
+  function setupHeroFog() {
+    var hero = document.querySelector('.hero');
+    var backdrop = document.querySelector('.site-backdrop');
+    if (!hero || !backdrop) return;
+
+    var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    var pointerX = window.innerWidth * 0.62;
+    var pointerY = window.innerHeight * 0.34;
+    var sceneX = 0;
+    var sceneY = 0;
+    var pointerFrame = 0;
+
+    function motionEnabled() {
+      return finePointer.matches && !reduceMotion.matches;
+    }
+
+    function renderPointer() {
+      pointerFrame = 0;
+      backdrop.style.setProperty('--g-fog-x', (pointerX + 24).toFixed(1) + 'px');
+      backdrop.style.setProperty('--g-fog-y', (pointerY + 24).toFixed(1) + 'px');
+      backdrop.style.setProperty('--g-scene-x', sceneX.toFixed(2) + 'px');
+      backdrop.style.setProperty('--g-scene-y', sceneY.toFixed(2) + 'px');
+    }
+
+    function schedulePointer(event) {
+      if (!motionEnabled()) return;
+      var rect = hero.getBoundingClientRect();
+      var relativeX = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      var relativeY = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      sceneX = (0.5 - relativeX) * 8;
+      sceneY = (0.5 - relativeY) * 5;
+      if (!pointerFrame) pointerFrame = window.requestAnimationFrame(renderPointer);
+    }
+
+    function deactivateFog() {
+      if (pointerFrame) {
+        window.cancelAnimationFrame(pointerFrame);
+        pointerFrame = 0;
+      }
+      document.body.classList.remove('hero-fog-active');
+      backdrop.style.removeProperty('--g-scene-x');
+      backdrop.style.removeProperty('--g-scene-y');
+    }
+
+    function syncMotionCapability() {
+      var enabled = motionEnabled();
+      document.body.classList.toggle('hero-motion-ready', enabled);
+      if (!enabled) deactivateFog();
+    }
+
+    hero.addEventListener('pointerenter', function (event) {
+      if (!motionEnabled()) return;
+      document.body.classList.add('hero-fog-active');
+      schedulePointer(event);
+    }, { passive: true });
+    hero.addEventListener('pointermove', schedulePointer, { passive: true });
+    hero.addEventListener('pointerleave', deactivateFog, { passive: true });
+
+    if (typeof finePointer.addEventListener === 'function') {
+      finePointer.addEventListener('change', syncMotionCapability);
+      reduceMotion.addEventListener('change', syncMotionCapability);
+    } else if (typeof finePointer.addListener === 'function') {
+      finePointer.addListener(syncMotionCapability);
+      reduceMotion.addListener(syncMotionCapability);
+    }
+
+    syncMotionCapability();
+  }
+
   function setupArchiveFilter() {
     var input = document.getElementById('archive-filter-input');
     var list = document.getElementById('archive-list');
@@ -117,6 +188,7 @@
     }
   }
 
+  setupHeroFog();
   setupArchiveFilter();
   setupReveal();
 })();
