@@ -40,6 +40,7 @@
   --g-motion-ui:     240ms;
   --g-motion-enter:  560ms;
   --g-motion-scene:  720ms;
+  --g-motion-intro:  1750ms;
   --g-ease-linear:   linear;
   --g-ease-standard: cubic-bezier(.2, .8, .2, 1);
   --g-ease-out:      cubic-bezier(.22, 1, .36, 1);
@@ -193,6 +194,90 @@ body {
         url("/images/garden-window-bg.jpg");
     }
   }
+}
+
+/* ===== Home Entry: four panes of the rainy window open outward ===== */
+.garden-entry {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  color: #eef5ef;
+  background: #0d130f;
+  pointer-events: none;
+  animation: g-entry-shell var(--g-motion-intro) var(--g-ease-soft) both;
+}
+.garden-entry.entry-skip,
+.garden-entry-seen .garden-entry { display: none; }
+.garden-entry::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(circle at center, rgba(140,184,150,.19), transparent 34%);
+  opacity: 0;
+  animation: g-entry-glow var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry-panes {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1px;
+  background: transparent;
+  perspective: 900px;
+}
+.garden-entry-panes i {
+  display: block;
+  background-image:
+    linear-gradient(rgba(8,13,10,.42), rgba(8,13,10,.6)),
+    url("/images/garden-window-bg.jpg");
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  box-shadow: inset 0 0 0 .5px rgba(140,184,150,.28);
+  filter: blur(5px) saturate(.92) contrast(1.05);
+  will-change: transform, opacity;
+  animation: g-entry-pane var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry-panes i:nth-child(1) { --pane-x: -104%; --pane-y: -104%; background-position: left top; transform-origin: right bottom; }
+.garden-entry-panes i:nth-child(2) { --pane-x: 104%; --pane-y: -104%; background-position: right top; transform-origin: left bottom; }
+.garden-entry-panes i:nth-child(3) { --pane-x: -104%; --pane-y: 104%; background-position: left bottom; transform-origin: right top; }
+.garden-entry-panes i:nth-child(4) { --pane-x: 104%; --pane-y: 104%; background-position: right bottom; transform-origin: left top; }
+.garden-entry-mark {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  text-shadow: 0 2px 20px rgba(0,0,0,.5);
+  animation: g-entry-mark var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry-mark span {
+  margin-bottom: 8px;
+  font-family: var(--g-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  opacity: .68;
+}
+.garden-entry-mark strong {
+  font-family: var(--g-font-script);
+  font-size: clamp(48px, 8vw, 84px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: .06em;
+}
+.garden-entry-mark i {
+  width: 116px;
+  height: 1px;
+  margin-top: 16px;
+  background: linear-gradient(90deg, transparent, #8cb896, transparent);
+  box-shadow: 0 0 12px rgba(140,184,150,.48);
+  transform-origin: center;
+  animation: g-entry-line var(--g-motion-intro) var(--g-ease-out) both;
 }
 
 [hidden] { display: none !important; }
@@ -1005,24 +1090,33 @@ body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
   pointer-events: none;
   transition: opacity var(--g-motion-ui);
 }
-.now-card::after {
-  content: "";
+.now-signal {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 6px;
-  height: 6px;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
   background: var(--g-accent);
   border-radius: 50%;
-  box-shadow: 0 0 0 4px var(--g-accent-soft);
-  z-index: 2;
+  box-shadow: 0 0 0 4px var(--g-accent-soft), 0 0 12px var(--g-glow);
 }
-.now-card > * {
+.now-signal::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--g-accent);
+  border-radius: inherit;
+  opacity: 0;
+  transform: scale(1);
+}
+.now-card > :not(.now-signal) {
   position: relative;
   z-index: 1;
 }
 body.card-motion-ready .now-card:hover::before { opacity: 1; }
 .now-card h3 {
+  padding-right: 22px;
   font-size: 13px; font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--g-text-mute);
@@ -2310,6 +2404,12 @@ body.toc-open { overflow: hidden; }
   .garden-route { display: none; }
 }
 @media (max-width: 768px) {
+  .garden-entry { --g-motion-intro: 1250ms; }
+  .garden-entry-panes i {
+    filter: blur(3px) saturate(.88);
+    animation-name: g-entry-pane-mobile;
+  }
+  .garden-entry-mark strong { font-size: clamp(46px, 15vw, 64px); }
   .site-backdrop {
     inset: -16px;
     transform: scale(1.025);
@@ -2449,12 +2549,19 @@ body.toc-open { overflow: hidden; }
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
   }
-  .hero-eyebrow span,
-  .now-card::after {
+  .hero-eyebrow span {
     animation: g-status-pulse 4.2s ease-in-out infinite;
   }
-  .now-card:nth-child(2)::after { animation-delay: -1.4s; }
-  .now-card:nth-child(3)::after { animation-delay: -2.8s; }
+  .now-signal {
+    animation: g-now-core 2.8s var(--g-ease-soft) infinite;
+  }
+  .now-signal::after {
+    animation: g-now-wave 2.8s var(--g-ease-out) infinite;
+  }
+  .now-card:nth-child(2) .now-signal,
+  .now-card:nth-child(2) .now-signal::after { animation-delay: -.93s; }
+  .now-card:nth-child(3) .now-signal,
+  .now-card:nth-child(3) .now-signal::after { animation-delay: -1.86s; }
   .hero-copy > *,
   .hero-identity {
     animation: g-fade-up var(--g-motion-enter) var(--g-ease-out) both;
@@ -2470,6 +2577,46 @@ body.toc-open { overflow: hidden; }
   .hero-trace::after {
     animation: g-trace-dot .35s .72s ease both;
   }
+}
+
+@keyframes g-entry-shell {
+  0%, 33% { opacity: 1; visibility: visible; background-color: #0d130f; }
+  36%, 76% { opacity: 1; visibility: visible; background-color: transparent; }
+  100% { opacity: 0; visibility: hidden; background-color: transparent; }
+}
+
+@keyframes g-entry-glow {
+  0%, 14% { opacity: 0; transform: scale(.45); }
+  40% { opacity: 1; }
+  78%, 100% { opacity: 0; transform: scale(1.45); }
+}
+
+@keyframes g-entry-pane {
+  0%, 34% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.035);
+  }
+  100% {
+    opacity: .08;
+    transform: translate3d(var(--pane-x), var(--pane-y), 0) scale(1.08);
+  }
+}
+
+@keyframes g-entry-pane-mobile {
+  0%, 34% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.025); }
+  100% { opacity: 0; transform: translate3d(0, var(--pane-y), 0) scale(1.04); }
+}
+
+@keyframes g-entry-mark {
+  0%, 8% { opacity: 0; filter: blur(8px); transform: translateY(8px) scale(.96); }
+  24%, 52% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+  72%, 100% { opacity: 0; filter: blur(4px); transform: translateY(-5px) scale(1.035); }
+}
+
+@keyframes g-entry-line {
+  0%, 18% { opacity: 0; transform: scaleX(0); }
+  36%, 56% { opacity: 1; transform: scaleX(1); }
+  76%, 100% { opacity: 0; transform: scaleX(.45); }
 }
 
 @keyframes g-firefly {
@@ -2489,6 +2636,25 @@ body.toc-open { overflow: hidden; }
 @keyframes g-status-pulse {
   0%, 58%, 100% { box-shadow: 0 0 0 4px var(--g-accent-soft); }
   68% { box-shadow: 0 0 0 7px transparent, 0 0 13px var(--g-glow); }
+}
+
+@keyframes g-now-core {
+  0%, 100% {
+    opacity: .72;
+    box-shadow: 0 0 0 3px var(--g-accent-soft), 0 0 7px transparent;
+    transform: scale(.82);
+  }
+  22% {
+    opacity: 1;
+    box-shadow: 0 0 0 5px var(--g-accent-soft), 0 0 18px var(--g-glow);
+    transform: scale(1.16);
+  }
+  42% { opacity: .9; transform: scale(.96); }
+}
+
+@keyframes g-now-wave {
+  0% { opacity: .78; transform: scale(.8); }
+  38%, 100% { opacity: 0; transform: scale(3.15); }
 }
 
 @keyframes g-fade-up {
@@ -2515,6 +2681,9 @@ body.toc-open { overflow: hidden; }
   }
   .site-backdrop::after { display: none !important; }
   .hero-fireflies { display: none !important; }
+  .garden-entry { display: none !important; }
+  .now-signal { animation: none !important; opacity: 1; transform: none; }
+  .now-signal::after { display: none; }
 
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

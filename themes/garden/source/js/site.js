@@ -77,6 +77,42 @@
     });
   }
 
+  function setupGardenEntry() {
+    var entry = document.querySelector('[data-garden-entry]');
+    if (!entry) return;
+
+    var storageKey = document.documentElement.dataset.entryKey || 'garden-entry';
+    var alreadySeen = false;
+    try {
+      alreadySeen = window.sessionStorage.getItem(storageKey) === '1';
+    } catch (error) {
+      alreadySeen = false;
+    }
+
+    if (alreadySeen || reduceMotion.matches) {
+      entry.classList.add('entry-skip');
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem(storageKey, '1');
+    } catch (error) {
+      /* Storage can be unavailable in strict privacy modes; the animation still works. */
+    }
+
+    var removed = false;
+    function removeEntry(event) {
+      if (event && (event.target !== entry || event.animationName !== 'g-entry-shell')) return;
+      if (removed) return;
+      removed = true;
+      entry.removeEventListener('animationend', removeEntry);
+      entry.remove();
+    }
+
+    entry.addEventListener('animationend', removeEntry);
+    window.setTimeout(removeEntry, 2300);
+  }
+
   function setupHeroFog() {
     var hero = document.querySelector('.hero');
     var backdrop = document.querySelector('.site-backdrop');
@@ -282,6 +318,7 @@
     }
   }
 
+  setupGardenEntry();
   setupGardenRoute();
   setupHeroFog();
   setupCardSpotlights();

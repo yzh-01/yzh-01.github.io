@@ -1,11 +1,32 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-entry-key="garden-entry-{{ theme.asset_version }}">
 <head>
   {{ partial('_partial/head.njk') }}
   {% block head_extra %}{% endblock %}
+  {%- if is_home() %}
+  <script>
+    try {
+      if (sessionStorage.getItem(document.documentElement.dataset.entryKey) === '1') {
+        document.documentElement.classList.add('garden-entry-seen');
+      }
+    } catch (error) {}
+  </script>
+  {%- endif %}
 </head>
 <body{% if is_home() %} class="is-home"{% endif %}>
   <div class="site-backdrop" aria-hidden="true"></div>
+  {%- if is_home() %}
+  <div class="garden-entry" data-garden-entry aria-hidden="true">
+    <div class="garden-entry-panes">
+      <i></i><i></i><i></i><i></i>
+    </div>
+    <div class="garden-entry-mark">
+      <span>PERSONAL DIGITAL GARDEN</span>
+      <strong>雨止灰茫</strong>
+      <i></i>
+    </div>
+  </div>
+  {%- endif %}
   <a class="skip-link" href="#main-content">跳到正文</a>
   {{ partial('_partial/nav.njk') }}
 

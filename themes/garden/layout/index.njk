@@ -166,6 +166,7 @@
     <div class="now-grid">
       {%- for item in site.data.now -%}
       <div class="now-card" data-spotlight>
+        <span class="now-signal" aria-hidden="true"></span>
         <h3>{{ item.label }}</h3>
         <p>{{ item.text }}</p>
       </div>
