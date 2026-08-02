@@ -81,36 +81,26 @@
     var entry = document.querySelector('[data-garden-entry]');
     if (!entry) return;
 
-    var storageKey = document.documentElement.dataset.entryKey || 'garden-entry';
-    var alreadySeen = false;
-    try {
-      alreadySeen = window.sessionStorage.getItem(storageKey) === '1';
-    } catch (error) {
-      alreadySeen = false;
-    }
+    if (reduceMotion.matches) return;
 
-    if (alreadySeen || reduceMotion.matches) {
-      entry.classList.add('entry-skip');
+    entry.classList.add('entry-motion-ready');
+
+    if (!('IntersectionObserver' in window)) {
+      entry.classList.add('is-active');
       return;
     }
 
-    try {
-      window.sessionStorage.setItem(storageKey, '1');
-    } catch (error) {
-      /* Storage can be unavailable in strict privacy modes; the animation still works. */
-    }
+    var observer = new IntersectionObserver(function (records) {
+      records.forEach(function (record) {
+        if (record.isIntersecting && record.intersectionRatio >= 0.42) {
+          entry.classList.add('is-active');
+        } else if (!record.isIntersecting || record.intersectionRatio <= 0.12) {
+          entry.classList.remove('is-active');
+        }
+      });
+    }, { threshold: [0, 0.12, 0.42, 0.75] });
 
-    var removed = false;
-    function removeEntry(event) {
-      if (event && (event.target !== entry || event.animationName !== 'g-entry-shell')) return;
-      if (removed) return;
-      removed = true;
-      entry.removeEventListener('animationend', removeEntry);
-      entry.remove();
-    }
-
-    entry.addEventListener('animationend', removeEntry);
-    window.setTimeout(removeEntry, 2300);
+    observer.observe(entry);
   }
 
   function setupHeroFog() {

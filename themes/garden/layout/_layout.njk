@@ -1,23 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-entry-key="garden-entry-{{ theme.asset_version }}">
+<html lang="zh-CN">
 <head>
   {{ partial('_partial/head.njk') }}
   {% block head_extra %}{% endblock %}
-  {%- if is_home() %}
-  <script>
-    try {
-      if (sessionStorage.getItem(document.documentElement.dataset.entryKey) === '1') {
-        document.documentElement.classList.add('garden-entry-seen');
-      }
-    } catch (error) {}
-  </script>
-  {%- endif %}
 </head>
 <body{% if is_home() %} class="is-home"{% endif %}>
+  <a class="skip-link" href="#main-content">跳到正文</a>
   <div class="site-backdrop" aria-hidden="true"></div>
   {%- if is_home() %}
-  <div class="garden-entry" data-garden-entry aria-hidden="true">
-    <div class="garden-entry-panes">
+  <section class="garden-entry" data-garden-entry aria-label="雨止灰茫，个人数字花园序章">
+    <div class="garden-entry-panes" aria-hidden="true">
       <i></i><i></i><i></i><i></i>
     </div>
     <div class="garden-entry-mark">
@@ -25,9 +17,12 @@
       <strong>雨止灰茫</strong>
       <i></i>
     </div>
-  </div>
+    <a class="garden-entry-scroll" href="#main-content">
+      <span>SCROLL TO ENTER</span>
+      <i aria-hidden="true"></i>
+    </a>
+  </section>
   {%- endif %}
-  <a class="skip-link" href="#main-content">跳到正文</a>
   {{ partial('_partial/nav.njk') }}
 
   <main id="main-content">

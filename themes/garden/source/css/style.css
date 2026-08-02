@@ -196,33 +196,46 @@ body {
   }
 }
 
-/* ===== Home Entry: four panes of the rainy window open outward ===== */
+/* ===== Home Entry: a replayable rainy-window overture above the garden ===== */
 .garden-entry {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
+  position: relative;
+  z-index: 2;
   display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   place-items: center;
+  isolation: isolate;
   color: #eef5ef;
   background: #0d130f;
-  pointer-events: none;
-  animation: g-entry-shell var(--g-motion-intro) var(--g-ease-soft) both;
 }
-.garden-entry.entry-skip,
-.garden-entry-seen .garden-entry { display: none; }
+.garden-entry::before,
 .garden-entry::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -12px;
+  pointer-events: none;
+}
+.garden-entry::before {
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(8,13,10,.28), rgba(8,13,10,.5)),
+    url("/images/garden-window-bg.jpg");
+  background-position: center;
+  background-size: cover;
+  filter: blur(2.5px) saturate(.88) contrast(1.04);
+  transform: scale(1.025);
+}
+.garden-entry::after {
   z-index: 1;
-  background: radial-gradient(circle at center, rgba(140,184,150,.19), transparent 34%);
-  opacity: 0;
-  animation: g-entry-glow var(--g-motion-intro) var(--g-ease-out) both;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(140,184,150,.19), transparent 31%),
+    linear-gradient(180deg, rgba(5,9,7,.16), transparent 34%, rgba(5,9,7,.58));
 }
 .garden-entry-panes {
   position: absolute;
-  inset: 0;
+  inset: -3px;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -239,7 +252,9 @@ body {
   background-size: 200% 200%;
   box-shadow: inset 0 0 0 .5px rgba(140,184,150,.28);
   filter: blur(5px) saturate(.92) contrast(1.05);
-  will-change: transform, opacity;
+}
+.garden-entry.entry-motion-ready .garden-entry-panes i { will-change: transform, opacity; }
+.garden-entry.entry-motion-ready.is-active .garden-entry-panes i {
   animation: g-entry-pane var(--g-motion-intro) var(--g-ease-out) both;
 }
 .garden-entry-panes i:nth-child(1) { --pane-x: -104%; --pane-y: -104%; background-position: left top; transform-origin: right bottom; }
@@ -253,6 +268,12 @@ body {
   justify-items: center;
   text-align: center;
   text-shadow: 0 2px 20px rgba(0,0,0,.5);
+}
+.garden-entry.entry-motion-ready .garden-entry-mark {
+  opacity: 0;
+  transform: translateY(8px) scale(.96);
+}
+.garden-entry.entry-motion-ready.is-active .garden-entry-mark {
   animation: g-entry-mark var(--g-motion-intro) var(--g-ease-out) both;
 }
 .garden-entry-mark span {
@@ -277,7 +298,55 @@ body {
   background: linear-gradient(90deg, transparent, #8cb896, transparent);
   box-shadow: 0 0 12px rgba(140,184,150,.48);
   transform-origin: center;
+}
+.garden-entry.entry-motion-ready .garden-entry-mark i { transform: scaleX(0); }
+.garden-entry.entry-motion-ready.is-active .garden-entry-mark i {
   animation: g-entry-line var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry-scroll {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 3;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  color: rgba(238,245,239,.72);
+  text-decoration: none;
+  transform: translateX(-50%);
+  transition: color var(--g-motion-ui), opacity var(--g-motion-ui);
+}
+.garden-entry-scroll:hover { color: #fff; }
+.garden-entry-scroll:focus-visible {
+  color: #fff;
+  outline: 1px solid rgba(140,184,150,.72);
+  outline-offset: 8px;
+}
+.garden-entry-scroll span {
+  font-family: var(--g-font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  white-space: nowrap;
+}
+.garden-entry-scroll i {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 34px;
+  overflow: hidden;
+  background: rgba(238,245,239,.22);
+}
+.garden-entry-scroll i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, #8cb896, transparent);
+  transform: translateY(-100%);
+}
+.garden-entry.entry-motion-ready .garden-entry-scroll { opacity: 0; }
+.garden-entry.entry-motion-ready.is-active .garden-entry-scroll {
+  animation: g-entry-scroll-reveal var(--g-motion-intro) var(--g-ease-out) both;
 }
 
 [hidden] { display: none !important; }
@@ -2407,8 +2476,9 @@ body.toc-open { overflow: hidden; }
   .garden-entry { --g-motion-intro: 1250ms; }
   .garden-entry-panes i {
     filter: blur(3px) saturate(.88);
-    animation-name: g-entry-pane-mobile;
   }
+  .garden-entry.entry-motion-ready.is-active .garden-entry-panes i { animation-name: g-entry-pane-mobile; }
+  .garden-entry::before { background-position: 47% center; }
   .garden-entry-mark strong { font-size: clamp(46px, 15vw, 64px); }
   .site-backdrop {
     inset: -16px;
@@ -2577,46 +2647,46 @@ body.toc-open { overflow: hidden; }
   .hero-trace::after {
     animation: g-trace-dot .35s .72s ease both;
   }
-}
-
-@keyframes g-entry-shell {
-  0%, 33% { opacity: 1; visibility: visible; background-color: #0d130f; }
-  36%, 76% { opacity: 1; visibility: visible; background-color: transparent; }
-  100% { opacity: 0; visibility: hidden; background-color: transparent; }
-}
-
-@keyframes g-entry-glow {
-  0%, 14% { opacity: 0; transform: scale(.45); }
-  40% { opacity: 1; }
-  78%, 100% { opacity: 0; transform: scale(1.45); }
+  .garden-entry.is-active .garden-entry-scroll i::after {
+    animation: g-entry-scroll-line 2.2s 1.25s var(--g-ease-soft) infinite;
+  }
 }
 
 @keyframes g-entry-pane {
-  0%, 34% {
+  0%, 28% {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1.035);
   }
   100% {
-    opacity: .08;
+    opacity: 0;
     transform: translate3d(var(--pane-x), var(--pane-y), 0) scale(1.08);
   }
 }
 
 @keyframes g-entry-pane-mobile {
-  0%, 34% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.025); }
+  0%, 28% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.025); }
   100% { opacity: 0; transform: translate3d(0, var(--pane-y), 0) scale(1.04); }
 }
 
 @keyframes g-entry-mark {
-  0%, 8% { opacity: 0; filter: blur(8px); transform: translateY(8px) scale(.96); }
-  24%, 52% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
-  72%, 100% { opacity: 0; filter: blur(4px); transform: translateY(-5px) scale(1.035); }
+  0%, 20% { opacity: 0; filter: blur(8px); transform: translateY(8px) scale(.96); }
+  46%, 100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
 }
 
 @keyframes g-entry-line {
-  0%, 18% { opacity: 0; transform: scaleX(0); }
-  36%, 56% { opacity: 1; transform: scaleX(1); }
-  76%, 100% { opacity: 0; transform: scaleX(.45); }
+  0%, 30% { opacity: 0; transform: scaleX(0); }
+  52%, 100% { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes g-entry-scroll-reveal {
+  0%, 58% { opacity: 0; transform: translate(-50%, 8px); }
+  82%, 100% { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes g-entry-scroll-line {
+  0% { opacity: 0; transform: translateY(-100%); }
+  24% { opacity: 1; }
+  72%, 100% { opacity: 0; transform: translateY(100%); }
 }
 
 @keyframes g-firefly {
@@ -2681,7 +2751,12 @@ body.toc-open { overflow: hidden; }
   }
   .site-backdrop::after { display: none !important; }
   .hero-fireflies { display: none !important; }
-  .garden-entry { display: none !important; }
+  .garden-entry-panes { display: none; }
+  .garden-entry-mark,
+  .garden-entry-scroll { opacity: 1 !important; transform: translateX(-50%); }
+  .garden-entry-mark { transform: none; }
+  .garden-entry-mark i { transform: scaleX(1) !important; }
+  .garden-entry-scroll i::after { display: none; }
   .now-signal { animation: none !important; opacity: 1; transform: none; }
   .now-signal::after { display: none; }
 
