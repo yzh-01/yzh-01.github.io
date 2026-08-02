@@ -138,8 +138,26 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  scrollbar-color: color-mix(in srgb, var(--g-accent) 42%, var(--g-border-hover)) var(--g-bg);
+  scrollbar-width: thin;
   background: var(--g-bg);
 }
+
+html::-webkit-scrollbar { width: 10px; }
+html::-webkit-scrollbar-track { background: var(--g-bg); }
+html::-webkit-scrollbar-thumb {
+  min-height: 52px;
+  background: color-mix(in srgb, var(--g-accent) 42%, var(--g-border-hover));
+  background-clip: padding-box;
+  border: 3px solid var(--g-bg);
+  border-radius: 999px;
+}
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--g-accent);
+  background-clip: padding-box;
+  border-width: 2px;
+}
+html::-webkit-scrollbar-corner { background: var(--g-bg); }
 
 body {
   position: relative;
