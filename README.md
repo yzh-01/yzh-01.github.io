@@ -9,7 +9,7 @@
 - 自有 Garden 主题，不依赖第三方 Hexo 主题
 - 首页顶部为可回看的雾窗序章，离开视口后复位，返回顶部时重新播放
 - Hero、Garden Map、Latest Posts、Now、Featured、Tech Stack、Journey、Life、About 九个内容模块
-- 浅色为主，跟随 `prefers-color-scheme` 自动切换深色模式
+- 浅色为主，可在首页设置中选择浅色、深色或跟随 `prefers-color-scheme`
 - 灰色与 moss 绿品牌配色，结合雨雾、森林和黑猫视觉元素
 - 响应式布局，覆盖桌面、平板与移动端
 - 文章页提供 TOC、标题锚点、阅读时间、代码复制和回到顶部
@@ -165,6 +165,7 @@ D:\code\yzh-01.github.io\source
 - 动效：集中于雾窗序章、视差雾气、内容渐入、卡片聚光和状态呼吸
 - 响应式断点：桌面、平板和移动端分层适配
 - 无障碍：跳转正文、键盘焦点、语义化标签和减少动态效果支持
+- 阅读偏好：主页右下角提供回到序章与外观设置，主题选择保存在浏览器中并跨页面生效
 
 修改静态资源后，需要同步更新 `themes/garden/_config.yml` 中的 `asset_version`，以刷新浏览器缓存。
 

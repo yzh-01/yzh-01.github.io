@@ -31,9 +31,19 @@
 <title>{{ resolved_title }}</title>
 <meta name="description" content="{{ resolved_description }}">
 <meta name="author" content="{{ config.author }}">
-<meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="g-theme-color" content="#fafaf9">
 <meta name="color-scheme" content="light dark">
+<script>
+  (function () {
+    var mode = 'system';
+    try { mode = localStorage.getItem('garden-theme') || 'system'; } catch (error) {}
+    if (mode !== 'light' && mode !== 'dark') mode = 'system';
+    if (mode !== 'system') document.documentElement.dataset.theme = mode;
+    var dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    document.getElementById('g-theme-color').setAttribute('content', dark ? '#121212' : '#fafaf9');
+  })();
+</script>
 <link rel="icon" href="{{ url_for('images/logo.svg') }}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -66,9 +66,39 @@
   --g-radius: 8px;
 }
 
-/* 深色模式 */
+/* 深色模式：手动选择，或未指定时跟随系统。 */
+:root[data-theme="dark"] {
+  --g-bg:          #121212;
+  --g-bg-elevated: #1e1e1e;
+  --g-bg-soft:     #1a1a1a;
+  --g-border:      #2a2a2a;
+  --g-border-hover:#3e3e3e;
+  --g-text:        #e8e8e6;
+  --g-text-soft:   #b0b0b0;
+  --g-text-mute:   #a0a09a;
+  --g-accent:      #8cb896;
+  --g-accent-hover:#a3c9ac;
+  --g-accent-soft: rgba(140,184,150,0.1);
+  --g-accent-text: #a3c9ac;
+  --g-accent-border: rgba(140,184,150,.22);
+  --g-ambient:      rgba(140,184,150,0.055);
+  --g-glow:         rgba(140,184,150,.16);
+  --g-ash:         #a8a8a3;
+  --g-ash-soft:    rgba(168,168,163,0.08);
+  --g-shadow:      0 1px 3px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.15);
+  --g-shadow-lg:   0 4px 16px rgba(0,0,0,.3), 0 1px 4px rgba(0,0,0,.2);
+  --g-code-bg:     rgba(15,20,17,.97);
+  --g-code-chrome: #171d19;
+  --g-code-border: #2b352e;
+  --g-code-text:   #dbe5de;
+  --g-code-gutter: #657069;
+  --g-code-comment:#7d8b82;
+  --g-code-string: #91bd9b;
+  --g-code-keyword:#d6ad7c;
+  --g-code-value:  #d3a47f;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --g-bg:          #121212;
     --g-bg-elevated: #1e1e1e;
     --g-bg-soft:     #1a1a1a;
@@ -155,9 +185,16 @@ body {
   display: none;
 }
 
+:root[data-theme="dark"] .site-backdrop::before,
+:root[data-theme="dark"] .site-backdrop::after {
+  background-image:
+    linear-gradient(rgba(18,18,18,.6), rgba(18,18,18,.76)),
+    url("/images/garden-window-bg.jpg");
+  filter: blur(10px) saturate(.76);
+}
 @media (prefers-color-scheme: dark) {
-  .site-backdrop::before,
-  .site-backdrop::after {
+  :root:not([data-theme]) .site-backdrop::before,
+  :root:not([data-theme]) .site-backdrop::after {
     background-image:
       linear-gradient(rgba(18,18,18,.6), rgba(18,18,18,.76)),
       url("/images/garden-window-bg.jpg");
@@ -186,8 +223,15 @@ body {
     opacity: .94;
   }
 
+  :root[data-theme="dark"] body.is-home.hero-motion-ready .site-backdrop::after {
+    background-image:
+      linear-gradient(rgba(18,18,18,.42), rgba(18,18,18,.58)),
+      radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(140,184,150,.13), transparent 34%),
+      url("/images/garden-window-bg.jpg");
+  }
+
   @media (prefers-color-scheme: dark) {
-    body.is-home.hero-motion-ready .site-backdrop::after {
+    :root:not([data-theme]) body.is-home.hero-motion-ready .site-backdrop::after {
       background-image:
         linear-gradient(rgba(18,18,18,.42), rgba(18,18,18,.58)),
         radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(140,184,150,.13), transparent 34%),
@@ -465,10 +509,9 @@ hr {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+:root[data-theme="dark"] .g-nav.scrolled { background: rgba(18,18,18,0.85); }
 @media (prefers-color-scheme: dark) {
-  .g-nav.scrolled {
-    background: rgba(18,18,18,0.85);
-  }
+  :root:not([data-theme]) .g-nav.scrolled { background: rgba(18,18,18,0.85); }
 }
 
 .g-nav-inner {
@@ -2001,22 +2044,59 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
   font-size: 13px;
 }
 
-/* Back to top */
+/* Floating garden controls */
+.garden-control-button,
 .g-back-top {
-  position: fixed; bottom: 28px; right: 28px;
-  width: 40px; height: 40px;
+  display: flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  color: var(--g-text-soft);
   background: var(--g-bg-elevated);
   border: 1px solid var(--g-border);
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; color: var(--g-text-soft);
+  box-shadow: var(--g-shadow-lg);
   cursor: pointer;
-  opacity: 0; transform: translateY(8px);
+  transition:
+    color var(--g-motion-fast),
+    border-color var(--g-motion-fast),
+    background var(--g-motion-fast),
+    box-shadow var(--g-motion-fast),
+    opacity var(--g-motion-ui),
+    transform var(--g-motion-ui) var(--g-ease-out);
+}
+.garden-control-button svg,
+.g-back-top svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.garden-control-button:hover,
+.g-back-top:hover {
+  color: var(--g-accent-text);
+  background: color-mix(in srgb, var(--g-bg-elevated) 92%, var(--g-accent-soft));
+  border-color: var(--g-accent-border);
+  box-shadow: 0 8px 24px var(--g-glow), var(--g-shadow);
+}
+.garden-control-button:focus-visible,
+.g-back-top:focus-visible {
+  outline: 2px solid var(--g-accent);
+  outline-offset: 3px;
+}
+.g-back-top {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  opacity: 0;
+  transform: translateY(8px);
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.3s, transform 0.3s;
-  z-index: 40;
-  text-decoration: none;
 }
 .g-back-top.visible {
   opacity: 1;
@@ -2024,7 +2104,122 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
   visibility: visible;
   pointer-events: auto;
 }
-.g-back-top:hover { border-color: var(--g-accent); color: var(--g-accent); }
+.garden-controls {
+  position: fixed;
+  right: 28px;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  z-index: 70;
+}
+.garden-control-actions {
+  display: flex;
+  gap: 9px;
+  justify-content: flex-end;
+}
+.garden-controls .g-back-top {
+  position: static;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+}
+.garden-settings-toggle[aria-expanded="true"] {
+  color: var(--g-accent-text);
+  background: var(--g-accent-soft);
+  border-color: var(--g-accent-border);
+}
+.garden-settings-toggle svg { transition: transform var(--g-motion-ui) var(--g-ease-out); }
+.garden-settings-toggle[aria-expanded="true"] svg { transform: rotate(32deg); }
+.garden-settings {
+  position: absolute;
+  right: 0;
+  bottom: 56px;
+  width: min(304px, calc(100vw - 32px));
+  padding: 20px;
+  color: var(--g-text);
+  background: color-mix(in srgb, var(--g-bg-elevated) 91%, transparent);
+  border: 1px solid var(--g-border);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(18,24,20,.15), var(--g-shadow-lg);
+  backdrop-filter: blur(18px) saturate(1.12);
+  -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  transform-origin: right bottom;
+  animation: g-settings-in var(--g-motion-ui) var(--g-ease-out) both;
+}
+.garden-settings-kicker {
+  margin-bottom: 5px;
+  color: var(--g-accent-text);
+  font-family: var(--g-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .18em;
+}
+.garden-settings h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -.015em;
+}
+.garden-settings-copy {
+  margin: 4px 0 16px;
+  color: var(--g-text-mute);
+  font-size: 12px;
+}
+.garden-theme-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.garden-theme-options button {
+  display: grid;
+  min-width: 0;
+  padding: 10px 5px 9px;
+  gap: 6px;
+  place-items: center;
+  color: var(--g-text-mute);
+  background: var(--g-bg-soft);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color var(--g-motion-fast), border-color var(--g-motion-fast), background var(--g-motion-fast), transform var(--g-motion-fast) var(--g-ease-out);
+}
+.garden-theme-options button:hover {
+  color: var(--g-text);
+  border-color: var(--g-border-hover);
+  transform: translateY(-1px);
+}
+.garden-theme-options button[aria-pressed="true"] {
+  color: var(--g-accent-text);
+  background: var(--g-accent-soft);
+  border-color: var(--g-accent-border);
+}
+.garden-theme-options button:focus-visible {
+  outline: 2px solid var(--g-accent);
+  outline-offset: 2px;
+}
+.garden-theme-options svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.garden-theme-options span {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.garden-theme-status {
+  min-height: 18px;
+  margin-top: 12px;
+  color: var(--g-text-mute);
+  font-family: var(--g-font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+}
 
 /* ===== TOC Sidebar ===== */
 .article-wrap {
@@ -2238,8 +2433,9 @@ body.toc-open { overflow: hidden; }
     white-space: pre;
   }
 }
+:root[data-theme="dark"] .toc-overlay.open { background: rgba(0,0,0,0.5); }
 @media (max-width: 1023px) and (prefers-color-scheme: dark) {
-  .toc-overlay.open { background: rgba(0,0,0,0.5); }
+  :root:not([data-theme]) .toc-overlay.open { background: rgba(0,0,0,0.5); }
 }
 
 /* ===== Heading Anchor Links ===== */
@@ -2544,6 +2740,16 @@ body.toc-open { overflow: hidden; }
   .g-container, .g-wide { padding: 0 16px; }
   .article-wrap { padding: 36px 16px 56px; }
   .g-nav-inner { padding: 14px 16px; }
+  .g-back-top { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
+  .garden-controls {
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .garden-settings {
+    right: 0;
+    bottom: 54px;
+    padding: 18px;
+  }
   .hero { gap: 26px; padding: 40px 0 38px; }
   .hero h1 { font-size: clamp(38px, 12vw, 48px); }
   .hero-thesis { font-size: 21px; }
@@ -2650,6 +2856,11 @@ body.toc-open { overflow: hidden; }
   .garden-entry.is-active .garden-entry-scroll i::after {
     animation: g-entry-scroll-line 2.2s 1.25s var(--g-ease-soft) infinite;
   }
+}
+
+@keyframes g-settings-in {
+  from { opacity: 0; transform: translateY(8px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes g-entry-pane {

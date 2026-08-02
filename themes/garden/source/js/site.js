@@ -42,7 +42,10 @@
 
   function updateScrollState() {
     if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
-    if (backTop) backTop.classList.toggle('visible', window.scrollY > 400);
+    if (backTop) {
+      var backTopThreshold = document.body.classList.contains('is-home') ? window.innerHeight * 0.72 : 400;
+      backTop.classList.toggle('visible', window.scrollY > backTopThreshold);
+    }
     if (scrollProgress) {
       var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       var progress = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
@@ -74,6 +77,84 @@
         top: 0,
         behavior: reduceMotion.matches ? 'auto' : 'smooth'
       });
+    });
+  }
+
+  function setupGardenTheme() {
+    var root = document.documentElement;
+    var controls = document.querySelector('[data-garden-controls]');
+    var panel = document.getElementById('garden-settings');
+    var toggle = document.querySelector('.garden-settings-toggle');
+    var themeColor = document.getElementById('g-theme-color');
+    var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    var buttons = controls ? Array.prototype.slice.call(controls.querySelectorAll('[data-theme-choice]')) : [];
+    var status = controls ? controls.querySelector('[data-theme-status]') : null;
+    var currentMode = 'system';
+
+    try { currentMode = window.localStorage.getItem('garden-theme') || 'system'; } catch (error) {}
+    if (['system', 'light', 'dark'].indexOf(currentMode) === -1) currentMode = 'system';
+
+    function resolvedTheme() {
+      return currentMode === 'system' ? (systemDark.matches ? 'dark' : 'light') : currentMode;
+    }
+
+    function updateControls() {
+      buttons.forEach(function (button) {
+        button.setAttribute('aria-pressed', String(button.dataset.themeChoice === currentMode));
+      });
+      if (!status) return;
+      var resolvedLabel = resolvedTheme() === 'dark' ? '深色' : '浅色';
+      status.textContent = currentMode === 'system' ? '跟随系统 · 当前为' + resolvedLabel : '已固定为' + resolvedLabel + '模式';
+    }
+
+    function applyTheme(mode, persist) {
+      currentMode = mode;
+      if (mode === 'system') root.removeAttribute('data-theme');
+      else root.dataset.theme = mode;
+
+      var resolved = resolvedTheme();
+      root.style.colorScheme = resolved;
+      if (themeColor) themeColor.setAttribute('content', resolved === 'dark' ? '#121212' : '#fafaf9');
+
+      if (persist) {
+        try { window.localStorage.setItem('garden-theme', mode); } catch (error) {}
+      }
+      updateControls();
+    }
+
+    applyTheme(currentMode, false);
+
+    function syncSystemTheme() {
+      if (currentMode === 'system') applyTheme('system', false);
+    }
+    if (typeof systemDark.addEventListener === 'function') systemDark.addEventListener('change', syncSystemTheme);
+    else if (typeof systemDark.addListener === 'function') systemDark.addListener(syncSystemTheme);
+
+    if (!controls || !panel || !toggle) return;
+
+    function setPanel(open) {
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? '关闭花园设置' : '打开花园设置');
+    }
+
+    toggle.addEventListener('click', function () {
+      setPanel(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        applyTheme(button.dataset.themeChoice, true);
+      });
+    });
+
+    document.addEventListener('pointerdown', function (event) {
+      if (!panel.hidden && !controls.contains(event.target)) setPanel(false);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== 'Escape' || panel.hidden) return;
+      setPanel(false);
+      toggle.focus();
     });
   }
 
@@ -308,6 +389,7 @@
     }
   }
 
+  setupGardenTheme();
   setupGardenEntry();
   setupGardenRoute();
   setupHeroFog();
