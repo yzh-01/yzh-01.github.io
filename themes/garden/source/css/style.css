@@ -137,6 +137,8 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scroll-behavior: smooth;
   scrollbar-color: color-mix(in srgb, var(--g-accent) 42%, var(--g-border-hover)) var(--g-bg);
   scrollbar-width: thin;
@@ -2394,27 +2396,33 @@ body.toc-open { overflow: hidden; }
     to   { transform: translateY(0); }
   }
 
-  /* floating toggle button */
+  /* Inline TOC trigger: avoids competing with the bottom-right controls. */
   body.has-toc-page .toc-toggle {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
-    bottom: max(20px, env(safe-area-inset-bottom));
-    right: max(18px, env(safe-area-inset-right));
-    width: 44px;
-    height: 44px;
-    background: var(--g-bg-elevated);
+    position: static;
+    width: auto;
+    height: 34px;
+    margin-top: 14px;
+    padding: 0 12px;
+    gap: 7px;
+    background: var(--g-bg-soft);
     border: 1px solid var(--g-border);
-    border-radius: 50%;
-    font-size: 15px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--g-text-soft);
     cursor: pointer;
-    z-index: 50;
-    box-shadow: var(--g-shadow-lg);
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    box-shadow: none;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform .2s var(--g-ease-out);
   }
-  .toc-toggle:hover { border-color: var(--g-accent); color: var(--g-accent-text); }
+  .toc-toggle:hover {
+    color: var(--g-accent-text);
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent-border);
+    transform: translateY(-1px);
+  }
 
   /* overlay backdrop */
   .toc-overlay { display: none; }
@@ -2754,6 +2762,48 @@ body.toc-open { overflow: hidden; }
     bottom: 54px;
     padding: 18px;
   }
+  .article-body .mac-code-block { max-width: 100%; }
+  .article-body pre.mac-code-block {
+    padding: 55px 14px 16px;
+    font-size: 12px;
+    line-height: 1.55;
+    tab-size: 2;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+  .article-body figure.highlight.mac-code-block { padding-top: 38px; }
+  .article-body figure.highlight.mac-code-block::before { height: 38px; }
+  .article-body figure.highlight table {
+    max-width: 100%;
+    font-size: 12px;
+    line-height: 1.55;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+  .article-body figure.highlight td.gutter { display: none; }
+  .article-body figure.highlight pre {
+    padding: 14px 12px;
+    line-height: 1.55;
+    tab-size: 2;
+  }
+  .article-body pre.mac-code-block::-webkit-scrollbar,
+  .article-body figure.highlight table::-webkit-scrollbar { height: 6px; }
+  .article-body pre.mac-code-block::-webkit-scrollbar-thumb,
+  .article-body figure.highlight table::-webkit-scrollbar-thumb {
+    background: var(--g-border-hover);
+    border-radius: 999px;
+  }
+  .code-window-controls { top: 13px; left: 14px; gap: 6px; }
+  .code-window-controls i { width: 10px; height: 10px; }
+  .code-lang {
+    top: 8px;
+    right: 46px;
+    max-width: 42%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .code-copy { top: 5px; right: 7px; }
   .hero { gap: 26px; padding: 40px 0 38px; }
   .hero h1 { font-size: clamp(38px, 12vw, 48px); }
   .hero-thesis { font-size: 21px; }

@@ -54,6 +54,22 @@
         {%- endfor -%}
         {%- endif -%}
       </div>
+      {%- if toc_available %}
+      <button
+        class="toc-toggle"
+        id="toc-toggle"
+        type="button"
+        aria-controls="article-toc"
+        aria-expanded="false"
+        aria-label="打开文章目录"
+        hidden
+      >
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+          <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span>目录</span>
+      </button>
+      {%- endif %}
     </header>
 
     <div class="article-body">
@@ -103,19 +119,6 @@
     <nav id="toc-nav"></nav>
   </aside>
 
-  <button
-    class="toc-toggle"
-    id="toc-toggle"
-    type="button"
-    aria-controls="article-toc"
-    aria-expanded="false"
-    aria-label="打开文章目录"
-    hidden
-  >
-    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
-      <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
   <div class="toc-overlay" id="toc-overlay" hidden></div>
   {%- endif %}
 </div>
