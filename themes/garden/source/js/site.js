@@ -2,7 +2,6 @@
   'use strict';
 
   var nav = document.getElementById('g-nav');
-  var backTop = document.querySelector('.g-back-top');
   var scrollProgress = document.getElementById('g-scroll-progress');
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -42,10 +41,6 @@
 
   function updateScrollState() {
     if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
-    if (backTop) {
-      var backTopThreshold = document.body.classList.contains('is-home') ? window.innerHeight * 0.72 : 400;
-      backTop.classList.toggle('visible', window.scrollY > backTopThreshold);
-    }
     if (scrollProgress) {
       var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       var progress = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
@@ -70,15 +65,6 @@
     refreshGardenRoute();
     updateScrollState();
   }, { once: true });
-
-  if (backTop) {
-    backTop.addEventListener('click', function () {
-      window.scrollTo({
-        top: 0,
-        behavior: reduceMotion.matches ? 'auto' : 'smooth'
-      });
-    });
-  }
 
   function setupGardenTheme() {
     var root = document.documentElement;

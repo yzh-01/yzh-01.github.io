@@ -2045,8 +2045,7 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
 }
 
 /* Floating garden controls */
-.garden-control-button,
-.g-back-top {
+.garden-control-button {
   display: flex;
   width: 42px;
   height: 42px;
@@ -2066,8 +2065,7 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
     opacity var(--g-motion-ui),
     transform var(--g-motion-ui) var(--g-ease-out);
 }
-.garden-control-button svg,
-.g-back-top svg {
+.garden-control-button svg {
   width: 18px;
   height: 18px;
   fill: none;
@@ -2076,33 +2074,15 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.garden-control-button:hover,
-.g-back-top:hover {
+.garden-control-button:hover {
   color: var(--g-accent-text);
   background: color-mix(in srgb, var(--g-bg-elevated) 92%, var(--g-accent-soft));
   border-color: var(--g-accent-border);
   box-shadow: 0 8px 24px var(--g-glow), var(--g-shadow);
 }
-.garden-control-button:focus-visible,
-.g-back-top:focus-visible {
+.garden-control-button:focus-visible {
   outline: 2px solid var(--g-accent);
   outline-offset: 3px;
-}
-.g-back-top {
-  position: fixed;
-  right: 28px;
-  bottom: 28px;
-  z-index: 40;
-  opacity: 0;
-  transform: translateY(8px);
-  visibility: hidden;
-  pointer-events: none;
-}
-.g-back-top.visible {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
-  pointer-events: auto;
 }
 .garden-controls {
   position: fixed;
@@ -2115,12 +2095,7 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
   gap: 9px;
   justify-content: flex-end;
 }
-.garden-controls .g-back-top {
-  position: static;
-  right: auto;
-  bottom: auto;
-  z-index: auto;
-}
+.garden-home-button { text-decoration: none; }
 .garden-settings-toggle[aria-expanded="true"] {
   color: var(--g-accent-text);
   background: var(--g-accent-soft);
@@ -2740,7 +2715,6 @@ body.toc-open { overflow: hidden; }
   .g-container, .g-wide { padding: 0 16px; }
   .article-wrap { padding: 36px 16px 56px; }
   .g-nav-inner { padding: 14px 16px; }
-  .g-back-top { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
   .garden-controls {
     right: 16px;
     bottom: max(16px, env(safe-area-inset-bottom));

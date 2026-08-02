@@ -31,7 +31,7 @@
 
   {{ partial('_partial/footer.njk') }}
 
-  {%- if is_home() %}
+  {%- if is_home() or is_post() %}
   <div class="garden-controls" data-garden-controls>
     <section class="garden-settings" id="garden-settings" aria-labelledby="garden-settings-title" hidden>
       <p class="garden-settings-kicker">GARDEN SETTINGS</p>
@@ -54,20 +54,14 @@
       <p class="garden-theme-status" data-theme-status aria-live="polite"></p>
     </section>
     <div class="garden-control-actions">
-      <button class="g-back-top garden-control-button" type="button" aria-label="返回序章">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
-      </button>
+      <a class="garden-home-button garden-control-button" href="{% if is_home() %}#garden-intro{% else %}{{ url_for('/') }}{% endif %}" aria-label="{% if is_home() %}返回首页序章{% else %}返回首页{% endif %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg>
+      </a>
       <button class="garden-settings-toggle garden-control-button" type="button" aria-label="打开花园设置" aria-expanded="false" aria-controls="garden-settings">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.12.38.33.72.6 1 .3.28.68.42 1.1.4H21v4h-.09A1.7 1.7 0 0 0 19.4 15Z"/></svg>
       </button>
     </div>
   </div>
-  {%- elif is_post() and theme.post.back_to_top %}
-  <button class="g-back-top" type="button" aria-label="回到顶部">
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path d="M12 19V5m-6 6 6-6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </button>
   {%- endif %}
 
   <script src="{{ url_for('js/site.js') }}?v={{ theme.asset_version }}" defer></script>
