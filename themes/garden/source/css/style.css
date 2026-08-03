@@ -15,21 +15,21 @@
 /* ===== Tokens ===== */
 :root {
   /* 浅色模式 */
-  --g-bg:          #e7ece4;
-  --g-bg-elevated: #f0f3ed;
-  --g-bg-soft:     #dde5da;
-  --g-border:      #c9d3c6;
-  --g-border-hover:#aebcab;
+  --g-bg:          #dde4da;
+  --g-bg-elevated: #e9ede6;
+  --g-bg-soft:     #d3ddd0;
+  --g-border:      #c0ccbd;
+  --g-border-hover:#a4b4a1;
   --g-text:        #222821;
   --g-text-soft:   #535c53;
-  --g-text-mute:   #687168;
-  --g-accent:      #4f7656;
-  --g-accent-hover:#416849;
-  --g-accent-soft: rgba(79,118,86,0.1);
+  --g-text-mute:   #626b62;
+  --g-accent:      #4b704f;
+  --g-accent-hover:#3e6344;
+  --g-accent-soft: rgba(75,112,79,0.1);
   --g-accent-text: #35533b;
-  --g-accent-border: rgba(79,118,86,.24);
-  --g-ambient:      rgba(79,118,86,0.09);
-  --g-glow:         rgba(79,118,86,.2);
+  --g-accent-border: rgba(75,112,79,.24);
+  --g-ambient:      rgba(75,112,79,0.09);
+  --g-glow:         rgba(75,112,79,.2);
   --g-ash:         #787874;
   --g-ash-soft:    rgba(120,120,116,0.08);
   --g-shadow:      0 1px 3px rgba(34,54,38,.06), 0 1px 2px rgba(34,54,38,.03);
@@ -45,9 +45,9 @@
   --g-ease-standard: cubic-bezier(.2, .8, .2, 1);
   --g-ease-out:      cubic-bezier(.22, 1, .36, 1);
   --g-ease-soft:     cubic-bezier(.4, 0, .2, 1);
-  --g-code-bg:     rgba(232,237,229,.98);
-  --g-code-chrome: #dfe5dc;
-  --g-code-border: #c8d1c5;
+  --g-code-bg:     rgba(222,228,219,.98);
+  --g-code-chrome: #d5ddd2;
+  --g-code-border: #bec9bb;
   --g-code-text:   #26312a;
   --g-code-gutter: #8a938c;
   --g-code-comment:#78827b;
@@ -185,8 +185,13 @@ body {
   pointer-events: none;
   transform: scale(1.035) translate3d(var(--g-scene-x), var(--g-scene-y), 0);
   transform-origin: center;
-  transition: transform var(--g-motion-fast) var(--g-ease-standard);
+  opacity: 1;
+  transition:
+    transform var(--g-motion-fast) var(--g-ease-standard),
+    opacity var(--g-motion-ui) var(--g-ease-soft);
 }
+
+html.theme-switching .site-backdrop { opacity: .16; }
 
 .site-backdrop::before,
 .site-backdrop::after {
@@ -194,12 +199,12 @@ body {
   position: absolute;
   inset: -18px;
   background-image:
-    linear-gradient(180deg, rgba(220,227,217,.52), rgba(220,227,217,.72)),
-    radial-gradient(circle at 72% 46%, rgba(241,244,238,.06), rgba(204,216,201,.24) 68%, rgba(220,227,217,.4)),
+    linear-gradient(180deg, rgba(191,203,189,.38), rgba(191,203,189,.56)),
+    radial-gradient(circle at 72% 46%, rgba(196,207,193,.06), rgba(179,193,176,.16) 68%, rgba(194,205,191,.22)),
     url("/images/garden-bg-light-cat.jpg");
   background-position: center, center, 60% 54%;
   background-size: cover;
-  filter: blur(8px) saturate(.76) brightness(.9) contrast(1.015);
+  filter: blur(2.5px) saturate(.68) brightness(.86) contrast(.96);
 }
 
 .site-backdrop::after {
@@ -230,11 +235,11 @@ body {
   body.is-home.hero-motion-ready .site-backdrop::after {
     display: block;
     background-image:
-      linear-gradient(rgba(220,227,217,.38), rgba(220,227,217,.56)),
-      radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(85,126,92,.1), transparent 34%),
+      linear-gradient(rgba(191,203,189,.24), rgba(191,203,189,.4)),
+      radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(75,112,79,.1), transparent 34%),
       url("/images/garden-bg-light-cat.jpg");
     background-position: center, center, 60% 54%;
-    filter: blur(1.5px) saturate(.88) brightness(.92) contrast(1.035);
+    filter: blur(.5px) saturate(.76) brightness(.88) contrast(1);
     opacity: 0;
     -webkit-mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
     mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
@@ -531,8 +536,8 @@ hr {
 }
 .g-nav.scrolled {
   border-bottom-color: var(--g-border);
-  background: rgba(231,236,228,0.9);
-  box-shadow: 0 1px 0 rgba(85,126,92,.05);
+  background: rgba(221,228,218,0.92);
+  box-shadow: 0 1px 0 rgba(75,112,79,.05);
   backdrop-filter: blur(16px) saturate(1.12);
   -webkit-backdrop-filter: blur(16px) saturate(1.12);
 }

@@ -31,7 +31,7 @@
 <title>{{ resolved_title }}</title>
 <meta name="description" content="{{ resolved_description }}">
 <meta name="author" content="{{ config.author }}">
-<meta name="theme-color" id="g-theme-color" content="#fafaf9">
+<meta name="theme-color" id="g-theme-color" content="#dde4da">
 <meta name="color-scheme" content="light dark">
 <script>
   (function () {
@@ -41,7 +41,7 @@
     if (mode !== 'system') document.documentElement.dataset.theme = mode;
     var dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-    document.getElementById('g-theme-color').setAttribute('content', dark ? '#121212' : '#fafaf9');
+    document.getElementById('g-theme-color').setAttribute('content', dark ? '#121212' : '#dde4da');
   })();
 </script>
 <link rel="icon" href="{{ url_for('images/logo.svg') }}" type="image/svg+xml">
