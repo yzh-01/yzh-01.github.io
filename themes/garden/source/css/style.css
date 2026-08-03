@@ -185,13 +185,15 @@ body {
   pointer-events: none;
   transform: scale(1.035) translate3d(var(--g-scene-x), var(--g-scene-y), 0);
   transform-origin: center;
-  opacity: 1;
+  filter: none;
   transition:
     transform var(--g-motion-fast) var(--g-ease-standard),
-    opacity var(--g-motion-ui) var(--g-ease-soft);
+    filter var(--g-motion-ui) var(--g-ease-soft);
 }
 
-html.theme-switching .site-backdrop { opacity: .16; }
+html.theme-switching .site-backdrop {
+  filter: brightness(.82) saturate(.9);
+}
 
 .site-backdrop::before,
 .site-backdrop::after {
@@ -2714,8 +2716,8 @@ body.toc-open { overflow: hidden; }
   }
   .site-backdrop::before,
   .site-backdrop::after {
-    background-position: 48% center;
-    filter: blur(8px) saturate(.72);
+    background-position: center, center, 60% 54%;
+    filter: blur(2.5px) saturate(.68) brightness(.86) contrast(.96);
   }
   .hero-fireflies { display: none; }
   .hero {

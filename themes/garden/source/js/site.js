@@ -148,15 +148,11 @@
       }
 
       root.classList.add('theme-switching');
+      applyTheme(mode, true);
       themeTimer = window.setTimeout(function () {
         themeTimer = 0;
-        applyTheme(mode, true);
-        window.requestAnimationFrame(function () {
-          window.requestAnimationFrame(function () {
-            root.classList.remove('theme-switching');
-          });
-        });
-      }, 140);
+        root.classList.remove('theme-switching');
+      }, 80);
     }
 
     buttons.forEach(function (button) {
