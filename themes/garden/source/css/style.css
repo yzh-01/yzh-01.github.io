@@ -15,25 +15,25 @@
 /* ===== Tokens ===== */
 :root {
   /* 浅色模式 */
-  --g-bg:          #fafaf9;
-  --g-bg-elevated: #ffffff;
-  --g-bg-soft:     #f2f1ef;
-  --g-border:      #e2e1dd;
-  --g-border-hover:#c8c7c3;
+  --g-bg:          #f2f5ef;
+  --g-bg-elevated: #fafbf7;
+  --g-bg-soft:     #e9eee6;
+  --g-border:      #d5ddd1;
+  --g-border-hover:#b9c6b6;
   --g-text:        #1c1c1c;
   --g-text-soft:   #5e5e5e;
   --g-text-mute:   #72726e;
-  --g-accent:      #5c8a63;
-  --g-accent-hover:#4a7350;
-  --g-accent-soft: rgba(92,138,99,0.08);
-  --g-accent-text: #3d5c43;
-  --g-accent-border: rgba(92,138,99,.2);
-  --g-ambient:      rgba(92,138,99,0.075);
-  --g-glow:         rgba(92,138,99,.17);
+  --g-accent:      #557e5c;
+  --g-accent-hover:#416849;
+  --g-accent-soft: rgba(85,126,92,0.1);
+  --g-accent-text: #35533b;
+  --g-accent-border: rgba(85,126,92,.24);
+  --g-ambient:      rgba(85,126,92,0.09);
+  --g-glow:         rgba(85,126,92,.2);
   --g-ash:         #787874;
   --g-ash-soft:    rgba(120,120,116,0.08);
-  --g-shadow:      0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02);
-  --g-shadow-lg:   0 4px 16px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.03);
+  --g-shadow:      0 1px 3px rgba(34,54,38,.06), 0 1px 2px rgba(34,54,38,.03);
+  --g-shadow-lg:   0 8px 28px rgba(34,54,38,.09), 0 2px 6px rgba(34,54,38,.04);
   /* Motion: frequent UI stays fast; narrative motion gets more room. */
   --g-motion-press:  120ms;
   --g-motion-fast:   180ms;
@@ -194,11 +194,12 @@ body {
   position: absolute;
   inset: -18px;
   background-image:
-    linear-gradient(rgba(250,250,249,.74), rgba(250,250,249,.82)),
-    url("/images/garden-window-bg.jpg");
-  background-position: center 38%;
+    linear-gradient(180deg, rgba(242,245,239,.48), rgba(242,245,239,.68)),
+    radial-gradient(circle at 72% 46%, rgba(255,255,255,.08), rgba(222,232,217,.22) 68%, rgba(242,245,239,.38)),
+    url("/images/garden-light-cat.jpg");
+  background-position: center, center, center 54%;
   background-size: cover;
-  filter: blur(10px) saturate(.72);
+  filter: blur(7px) saturate(.88) contrast(1.02);
 }
 
 .site-backdrop::after {
@@ -227,10 +228,11 @@ body {
   body.is-home.hero-motion-ready .site-backdrop::after {
     display: block;
     background-image:
-      linear-gradient(rgba(250,250,249,.56), rgba(250,250,249,.68)),
-      radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(92,138,99,.12), transparent 34%),
-      url("/images/garden-window-bg.jpg");
-    filter: blur(1.5px) saturate(.94) contrast(1.035);
+      linear-gradient(rgba(242,245,239,.3), rgba(242,245,239,.48)),
+      radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(85,126,92,.1), transparent 34%),
+      url("/images/garden-light-cat.jpg");
+    background-position: center, center, center 54%;
+    filter: blur(1.5px) saturate(1.02) contrast(1.045);
     opacity: 0;
     -webkit-mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
     mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
@@ -525,9 +527,10 @@ hr {
 }
 .g-nav.scrolled {
   border-bottom-color: var(--g-border);
-  background: rgba(250,250,249,0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(242,245,239,0.88);
+  box-shadow: 0 1px 0 rgba(85,126,92,.05);
+  backdrop-filter: blur(16px) saturate(1.12);
+  -webkit-backdrop-filter: blur(16px) saturate(1.12);
 }
 :root[data-theme="dark"] .g-nav.scrolled { background: rgba(18,18,18,0.85); }
 @media (prefers-color-scheme: dark) {
@@ -2750,6 +2753,10 @@ body.toc-open { overflow: hidden; }
   .featured-card .badge { justify-self: start; }
 }
 @media (max-width: 480px) {
+  .site-backdrop::before,
+  .site-backdrop::after {
+    background-position: center, center, 58% 52%;
+  }
   .g-container, .g-wide { padding: 0 16px; }
   .article-wrap { padding: 36px 16px 56px; }
   .g-nav-inner { padding: 14px 16px; }
