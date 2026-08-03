@@ -10,7 +10,7 @@
 - 首页顶部为可回看的雾窗序章，离开视口后复位，返回顶部时重新播放
 - Hero、Garden Map、Latest Posts、Now、Featured、Tech Stack、Journey、Life、About 九个内容模块
 - 可在设置中选择浅色、深色或跟随 `prefers-color-scheme`
-- 浅色模式使用白猫春日花园背景，深色模式保留雨夜窗景；灰色与 moss 绿作为统一品牌色
+- 浅色模式使用白猫春日花园背景与白猫头像，深色模式保留雨夜窗景与黑猫头像；灰色与 moss 绿作为统一品牌色
 - 响应式布局，覆盖桌面、平板与移动端
 - 文章页提供 TOC、标题锚点、阅读时间、代码复制、回到顶部和返回首页介绍区入口
 - macOS 风格代码块，使用本地 Maple Mono 字体

@@ -15,21 +15,21 @@
 /* ===== Tokens ===== */
 :root {
   /* 浅色模式 */
-  --g-bg:          #f2f5ef;
-  --g-bg-elevated: #fafbf7;
-  --g-bg-soft:     #e9eee6;
-  --g-border:      #d5ddd1;
-  --g-border-hover:#b9c6b6;
-  --g-text:        #1c1c1c;
-  --g-text-soft:   #5e5e5e;
-  --g-text-mute:   #72726e;
-  --g-accent:      #557e5c;
+  --g-bg:          #e7ece4;
+  --g-bg-elevated: #f0f3ed;
+  --g-bg-soft:     #dde5da;
+  --g-border:      #c9d3c6;
+  --g-border-hover:#aebcab;
+  --g-text:        #222821;
+  --g-text-soft:   #535c53;
+  --g-text-mute:   #687168;
+  --g-accent:      #4f7656;
   --g-accent-hover:#416849;
-  --g-accent-soft: rgba(85,126,92,0.1);
+  --g-accent-soft: rgba(79,118,86,0.1);
   --g-accent-text: #35533b;
-  --g-accent-border: rgba(85,126,92,.24);
-  --g-ambient:      rgba(85,126,92,0.09);
-  --g-glow:         rgba(85,126,92,.2);
+  --g-accent-border: rgba(79,118,86,.24);
+  --g-ambient:      rgba(79,118,86,0.09);
+  --g-glow:         rgba(79,118,86,.2);
   --g-ash:         #787874;
   --g-ash-soft:    rgba(120,120,116,0.08);
   --g-shadow:      0 1px 3px rgba(34,54,38,.06), 0 1px 2px rgba(34,54,38,.03);
@@ -45,9 +45,9 @@
   --g-ease-standard: cubic-bezier(.2, .8, .2, 1);
   --g-ease-out:      cubic-bezier(.22, 1, .36, 1);
   --g-ease-soft:     cubic-bezier(.4, 0, .2, 1);
-  --g-code-bg:     rgba(248,249,247,.97);
-  --g-code-chrome: #eff0ed;
-  --g-code-border: #d7d9d4;
+  --g-code-bg:     rgba(232,237,229,.98);
+  --g-code-chrome: #dfe5dc;
+  --g-code-border: #c8d1c5;
   --g-code-text:   #26312a;
   --g-code-gutter: #8a938c;
   --g-code-comment:#78827b;
@@ -194,12 +194,12 @@ body {
   position: absolute;
   inset: -18px;
   background-image:
-    linear-gradient(180deg, rgba(242,245,239,.48), rgba(242,245,239,.68)),
-    radial-gradient(circle at 72% 46%, rgba(255,255,255,.08), rgba(222,232,217,.22) 68%, rgba(242,245,239,.38)),
+    linear-gradient(180deg, rgba(220,227,217,.52), rgba(220,227,217,.72)),
+    radial-gradient(circle at 72% 46%, rgba(241,244,238,.06), rgba(204,216,201,.24) 68%, rgba(220,227,217,.4)),
     url("/images/garden-light-cat.jpg");
   background-position: center, center, center 54%;
   background-size: cover;
-  filter: blur(7px) saturate(.88) contrast(1.02);
+  filter: blur(8px) saturate(.76) brightness(.9) contrast(1.015);
 }
 
 .site-backdrop::after {
@@ -228,11 +228,11 @@ body {
   body.is-home.hero-motion-ready .site-backdrop::after {
     display: block;
     background-image:
-      linear-gradient(rgba(242,245,239,.3), rgba(242,245,239,.48)),
+      linear-gradient(rgba(220,227,217,.38), rgba(220,227,217,.56)),
       radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(85,126,92,.1), transparent 34%),
       url("/images/garden-light-cat.jpg");
     background-position: center, center, center 54%;
-    filter: blur(1.5px) saturate(1.02) contrast(1.045);
+    filter: blur(1.5px) saturate(.88) brightness(.92) contrast(1.035);
     opacity: 0;
     -webkit-mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
     mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
@@ -527,7 +527,7 @@ hr {
 }
 .g-nav.scrolled {
   border-bottom-color: var(--g-border);
-  background: rgba(242,245,239,0.88);
+  background: rgba(231,236,228,0.9);
   box-shadow: 0 1px 0 rgba(85,126,92,.05);
   backdrop-filter: blur(16px) saturate(1.12);
   -webkit-backdrop-filter: blur(16px) saturate(1.12);
@@ -924,6 +924,13 @@ hr {
   object-fit: cover;
   object-position: 50% 42%;
   filter: saturate(.82) contrast(1.04);
+}
+.hero-companion .hero-companion-dark { display: none; }
+:root[data-theme="dark"] .hero-companion .hero-companion-light { display: none; }
+:root[data-theme="dark"] .hero-companion .hero-companion-dark { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .hero-companion .hero-companion-light { display: none; }
+  :root:not([data-theme]) .hero-companion .hero-companion-dark { display: block; }
 }
 .hero-identity::after {
   content: "";
