@@ -196,8 +196,8 @@ body {
   background-image:
     linear-gradient(180deg, rgba(220,227,217,.52), rgba(220,227,217,.72)),
     radial-gradient(circle at 72% 46%, rgba(241,244,238,.06), rgba(204,216,201,.24) 68%, rgba(220,227,217,.4)),
-    url("/images/garden-light-cat.jpg");
-  background-position: center, center, center 54%;
+    url("/images/garden-bg-light-cat.jpg");
+  background-position: center, center, 60% 54%;
   background-size: cover;
   filter: blur(8px) saturate(.76) brightness(.9) contrast(1.015);
 }
@@ -209,17 +209,19 @@ body {
 :root[data-theme="dark"] .site-backdrop::before,
 :root[data-theme="dark"] .site-backdrop::after {
   background-image:
-    linear-gradient(rgba(18,18,18,.6), rgba(18,18,18,.76)),
-    url("/images/garden-window-bg.jpg");
-  filter: blur(10px) saturate(.76);
+    linear-gradient(rgba(18,18,18,.48), rgba(18,18,18,.68)),
+    url("/images/garden-bg-dark-cat.jpg");
+  background-position: center, 60% 54%;
+  filter: blur(8px) saturate(.74) contrast(1.03);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .site-backdrop::before,
   :root:not([data-theme]) .site-backdrop::after {
     background-image:
-      linear-gradient(rgba(18,18,18,.6), rgba(18,18,18,.76)),
-      url("/images/garden-window-bg.jpg");
-    filter: blur(10px) saturate(.76);
+      linear-gradient(rgba(18,18,18,.48), rgba(18,18,18,.68)),
+      url("/images/garden-bg-dark-cat.jpg");
+    background-position: center, 60% 54%;
+    filter: blur(8px) saturate(.74) contrast(1.03);
   }
 }
 
@@ -230,8 +232,8 @@ body {
     background-image:
       linear-gradient(rgba(220,227,217,.38), rgba(220,227,217,.56)),
       radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(85,126,92,.1), transparent 34%),
-      url("/images/garden-light-cat.jpg");
-    background-position: center, center, center 54%;
+      url("/images/garden-bg-light-cat.jpg");
+    background-position: center, center, 60% 54%;
     filter: blur(1.5px) saturate(.88) brightness(.92) contrast(1.035);
     opacity: 0;
     -webkit-mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
@@ -247,17 +249,19 @@ body {
 
   :root[data-theme="dark"] body.is-home.hero-motion-ready .site-backdrop::after {
     background-image:
-      linear-gradient(rgba(18,18,18,.42), rgba(18,18,18,.58)),
+      linear-gradient(rgba(18,18,18,.32), rgba(18,18,18,.5)),
       radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(140,184,150,.13), transparent 34%),
-      url("/images/garden-window-bg.jpg");
+      url("/images/garden-bg-dark-cat.jpg");
+    background-position: center, center, 60% 54%;
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) body.is-home.hero-motion-ready .site-backdrop::after {
       background-image:
-        linear-gradient(rgba(18,18,18,.42), rgba(18,18,18,.58)),
+        linear-gradient(rgba(18,18,18,.32), rgba(18,18,18,.5)),
         radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(140,184,150,.13), transparent 34%),
-        url("/images/garden-window-bg.jpg");
+        url("/images/garden-bg-dark-cat.jpg");
+      background-position: center, center, 60% 54%;
     }
   }
 }
@@ -2762,7 +2766,7 @@ body.toc-open { overflow: hidden; }
 @media (max-width: 480px) {
   .site-backdrop::before,
   .site-backdrop::after {
-    background-position: center, center, 58% 52%;
+    background-position: center, center, 60% 54%;
   }
   .g-container, .g-wide { padding: 0 16px; }
   .article-wrap { padding: 36px 16px 56px; }

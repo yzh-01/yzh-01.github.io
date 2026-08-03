@@ -3,7 +3,7 @@
 
 # 建站年份（不会随当前年份变化）
 since: 2026
-asset_version: 20260803-2
+asset_version: 20260803-3
 
 # 首页模块开关（模块未完成时可先关闭）
 modules:
