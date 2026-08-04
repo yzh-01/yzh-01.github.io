@@ -27,8 +27,10 @@
   --g-reading-text:    #3b403a;
   --g-reading-heading: #262a26;
   --g-reading-soft:    #5b625b;
-  --g-on-scene:        #304034;
-  --g-scene-halo:      rgba(236,238,233,.96);
+  --g-on-scene:        #eef3ec;
+  --g-on-scene-soft:   #c8d3c9;
+  --g-on-scene-accent: #add2b3;
+  --g-scene-halo:      rgba(8,14,10,.58);
   --g-accent:      #4b704f;
   --g-accent-hover:#3e6344;
   --g-accent-soft: rgba(75,112,79,0.1);
@@ -87,6 +89,8 @@
   --g-reading-heading: #eeeeeb;
   --g-reading-soft:    #adb1ac;
   --g-on-scene:        #dce2dc;
+  --g-on-scene-soft:   #bdc8be;
+  --g-on-scene-accent: #a3c9ac;
   --g-scene-halo:      rgba(18,18,18,.88);
   --g-accent:      #8cb896;
   --g-accent-hover:#a3c9ac;
@@ -124,6 +128,8 @@
     --g-reading-heading: #eeeeeb;
     --g-reading-soft:    #adb1ac;
     --g-on-scene:        #dce2dc;
+    --g-on-scene-soft:   #bdc8be;
+    --g-on-scene-accent: #a3c9ac;
     --g-scene-halo:      rgba(18,18,18,.88);
     --g-accent:      #8cb896;
     --g-accent-hover:#a3c9ac;
@@ -824,7 +830,8 @@ hr {
   align-items: center;
   gap: 10px;
   margin-bottom: 18px;
-  color: var(--g-text-mute);
+  color: var(--g-on-scene-soft);
+  text-shadow: 0 1px 12px var(--g-scene-halo);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .11em;
@@ -842,13 +849,14 @@ hr {
   font-size: clamp(42px, 6vw, 64px);
   font-weight: 700;
   letter-spacing: -0.045em;
-  color: var(--g-text);
+  color: var(--g-on-scene);
+  text-shadow: 0 2px 20px var(--g-scene-halo);
   margin-bottom: 8px;
 }
 .hero-name {
   display: inline-block;
   white-space: nowrap;
-  color: var(--g-text);
+  color: var(--g-on-scene);
   font-family: var(--g-font-script);
   font-size: 1.04em;
   font-weight: 400;
@@ -859,20 +867,22 @@ hr {
 .hero-thesis {
   max-width: 640px;
   margin: 0 0 22px;
-  color: var(--g-text);
+  color: var(--g-on-scene);
+  text-shadow: 0 1px 16px var(--g-scene-halo);
   font-size: clamp(22px, 3vw, 30px);
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: -.025em;
 }
 .hero-thesis em {
-  color: var(--g-accent-text);
+  color: var(--g-on-scene-accent);
   font-style: normal;
 }
 .hero .tagline {
   max-width: 610px;
   margin: 0;
-  color: var(--g-text-soft);
+  color: var(--g-on-scene-soft);
+  text-shadow: 0 1px 14px var(--g-scene-halo);
   font-size: 16px;
   line-height: 1.7;
 }
@@ -1179,7 +1189,8 @@ body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
 }
 
 /* ===== Module 3: Latest Posts ===== */
-.posts-sec {
+.posts-sec,
+.life-sec {
   margin-bottom: 80px;
   padding: 28px 30px;
   background: var(--g-reading-bg);
@@ -1188,7 +1199,9 @@ body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
   box-shadow: var(--g-shadow);
 }
 .posts-sec .g-sec-label,
-.posts-sec .g-sec-heading > a {
+.posts-sec .g-sec-heading > a,
+.life-sec .g-sec-label,
+.life-sec .g-sec-heading > a {
   color: var(--g-reading-heading);
   text-shadow: none;
 }
@@ -1450,9 +1463,6 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
 .journey-year .cnt { font-size: 12px; color: var(--g-text-mute); }
 
 /* ===== Module 7: Life ===== */
-.life-sec {
-  margin-bottom: 80px;
-}
 
 /* ===== Module 8: About ===== */
 .about-sec {
@@ -2843,7 +2853,8 @@ body.toc-open { overflow: hidden; }
   .site-backdrop::before { background-position: center, 60% 54%; }
   .site-backdrop::after { background-position: center, center, 60% 54%; }
   .g-container, .g-wide { padding: 0 16px; }
-  .posts-sec { padding: 22px 20px; }
+  .posts-sec,
+  .life-sec { padding: 22px 20px; }
   .article-wrap { padding: 36px 16px 56px; }
   .article {
     padding: 30px 20px 42px;
