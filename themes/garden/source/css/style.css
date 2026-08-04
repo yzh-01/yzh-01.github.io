@@ -219,12 +219,11 @@ html.theme-switching .site-backdrop {
   position: absolute;
   inset: -18px;
   background-image:
-    linear-gradient(180deg, rgba(191,203,189,.38), rgba(191,203,189,.56)),
-    radial-gradient(circle at 72% 46%, rgba(196,207,193,.06), rgba(179,193,176,.16) 68%, rgba(194,205,191,.22)),
+    linear-gradient(180deg, rgba(42,58,46,.18), rgba(42,58,46,.32)),
     url("/images/garden-bg-light-cat.jpg");
-  background-position: center, center, 60% 54%;
+  background-position: center, 60% 54%;
   background-size: cover;
-  filter: blur(2.5px) saturate(.68) brightness(.86) contrast(.96);
+  filter: blur(4px) saturate(.72) brightness(.88) contrast(1);
 }
 
 .site-backdrop::after {
@@ -234,19 +233,19 @@ html.theme-switching .site-backdrop {
 :root[data-theme="dark"] .site-backdrop::before,
 :root[data-theme="dark"] .site-backdrop::after {
   background-image:
-    linear-gradient(rgba(18,18,18,.48), rgba(18,18,18,.68)),
+    linear-gradient(rgba(13,18,15,.2), rgba(13,18,15,.4)),
     url("/images/garden-bg-dark-cat.jpg");
   background-position: center, 60% 54%;
-  filter: blur(8px) saturate(.74) contrast(1.03);
+  filter: blur(4px) saturate(.72) brightness(.96) contrast(1);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) .site-backdrop::before,
   :root:not([data-theme]) .site-backdrop::after {
     background-image:
-      linear-gradient(rgba(18,18,18,.48), rgba(18,18,18,.68)),
+      linear-gradient(rgba(13,18,15,.2), rgba(13,18,15,.4)),
       url("/images/garden-bg-dark-cat.jpg");
     background-position: center, 60% 54%;
-    filter: blur(8px) saturate(.74) contrast(1.03);
+    filter: blur(4px) saturate(.72) brightness(.96) contrast(1);
   }
 }
 
@@ -255,11 +254,11 @@ html.theme-switching .site-backdrop {
   body.is-home.hero-motion-ready .site-backdrop::after {
     display: block;
     background-image:
-      linear-gradient(rgba(191,203,189,.24), rgba(191,203,189,.4)),
+      linear-gradient(rgba(42,58,46,.1), rgba(42,58,46,.22)),
       radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(75,112,79,.1), transparent 34%),
       url("/images/garden-bg-light-cat.jpg");
     background-position: center, center, 60% 54%;
-    filter: blur(.5px) saturate(.76) brightness(.88) contrast(1);
+    filter: blur(1px) saturate(.78) brightness(.9) contrast(1);
     opacity: 0;
     -webkit-mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
     mask-image: radial-gradient(circle 190px at var(--g-fog-x) var(--g-fog-y), #000 0 43%, rgba(0,0,0,.86) 58%, transparent 100%);
@@ -278,6 +277,7 @@ html.theme-switching .site-backdrop {
       radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(140,184,150,.13), transparent 34%),
       url("/images/garden-bg-dark-cat.jpg");
     background-position: center, center, 60% 54%;
+    filter: blur(1px) saturate(.78) brightness(.96) contrast(1);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -287,6 +287,7 @@ html.theme-switching .site-backdrop {
         radial-gradient(circle at var(--g-fog-x) var(--g-fog-y), rgba(140,184,150,.13), transparent 34%),
         url("/images/garden-bg-dark-cat.jpg");
       background-position: center, center, 60% 54%;
+      filter: blur(1px) saturate(.78) brightness(.96) contrast(1);
     }
   }
 }
@@ -1180,6 +1181,16 @@ body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
 /* ===== Module 3: Latest Posts ===== */
 .posts-sec {
   margin-bottom: 80px;
+  padding: 28px 30px;
+  background: var(--g-reading-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 14px;
+  box-shadow: var(--g-shadow);
+}
+.posts-sec .g-sec-label,
+.posts-sec .g-sec-heading > a {
+  color: var(--g-reading-heading);
+  text-shadow: none;
 }
 .post-card {
   display: block;
@@ -1214,14 +1225,14 @@ body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
   font-family: var(--g-font-title);
   font-size: 24px; font-weight: 400;
   line-height: 1.35;
-  color: var(--g-text);
+  color: var(--g-reading-heading);
   letter-spacing: .035em;
   margin-bottom: 6px;
   transition: color 0.2s;
 }
 .post-card:hover .post-card-title { color: var(--g-accent); }
 .post-card-meta {
-  font-size: 13px; color: var(--g-text-mute);
+  font-size: 13px; color: var(--g-reading-soft);
   display: flex; gap: 16px; flex-wrap: wrap;
   align-items: center;
 }
@@ -1230,7 +1241,7 @@ body.card-motion-ready .garden-map-card:hover::after { opacity: 1; }
   font-size: 12px;
 }
 .post-card-desc {
-  font-size: 14px; color: var(--g-text-soft);
+  font-size: 14px; color: var(--g-reading-text);
   margin-top: 6px; line-height: 1.6;
 }
 
@@ -2775,11 +2786,8 @@ body.toc-open { overflow: hidden; }
     inset: -16px;
     transform: scale(1.025);
   }
-  .site-backdrop::before,
-  .site-backdrop::after {
-    background-position: center, center, 60% 54%;
-    filter: blur(2.5px) saturate(.68) brightness(.86) contrast(.96);
-  }
+  .site-backdrop::before { background-position: center, 60% 54%; }
+  .site-backdrop::after { background-position: center, center, 60% 54%; }
   .hero-fireflies { display: none; }
   .hero {
     grid-template-columns: 1fr;
@@ -2832,11 +2840,10 @@ body.toc-open { overflow: hidden; }
   .featured-card .badge { justify-self: start; }
 }
 @media (max-width: 480px) {
-  .site-backdrop::before,
-  .site-backdrop::after {
-    background-position: center, center, 60% 54%;
-  }
+  .site-backdrop::before { background-position: center, 60% 54%; }
+  .site-backdrop::after { background-position: center, center, 60% 54%; }
   .g-container, .g-wide { padding: 0 16px; }
+  .posts-sec { padding: 22px 20px; }
   .article-wrap { padding: 36px 16px 56px; }
   .article {
     padding: 30px 20px 42px;
