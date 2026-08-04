@@ -1554,8 +1554,24 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
 }
 /* ===== About Page ===== */
 .about-page {
-  padding-top: 72px;
-  padding-bottom: 88px;
+  margin-top: 48px;
+  margin-bottom: 88px;
+  padding: 56px clamp(28px, 5vw, 56px) 64px;
+  color: var(--g-reading-text);
+  background: var(--g-reading-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 14px;
+  box-shadow: var(--g-shadow-lg);
+}
+.about-page h1,
+.about-page h2,
+.about-page h3,
+.about-page h4 {
+  color: var(--g-reading-heading);
+}
+.about-page .g-sec-label {
+  color: var(--g-reading-heading);
+  text-shadow: none;
 }
 .about-page-hero {
   max-width: 760px;
@@ -1765,6 +1781,12 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
 }
 .error-page-inner {
   width: min(100%, 560px);
+  padding: 48px clamp(24px, 6vw, 52px);
+  color: var(--g-reading-text);
+  background: var(--g-reading-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 14px;
+  box-shadow: var(--g-shadow-lg);
 }
 .error-code {
   color: var(--g-accent);
@@ -1811,11 +1833,12 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
 
 /* ===== Footer ===== */
 .g-footer {
-  border-top: 1px solid var(--g-border);
+  border-top: 1px solid color-mix(in srgb, var(--g-on-scene) 24%, transparent);
   padding: 32px 0 48px;
   margin-top: 32px;
   font-size: 13px;
-  color: var(--g-text-mute);
+  color: var(--g-on-scene-soft);
+  text-shadow: 0 1px 12px var(--g-scene-halo);
 }
 .g-footer-inner {
   max-width: 960px; margin: 0 auto; padding: 0 24px;
@@ -1823,13 +1846,13 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
   flex-wrap: wrap; gap: 12px;
 }
 .g-footer-author {
-  color: var(--g-text-soft);
+  color: var(--g-on-scene);
   font-family: var(--g-font-script);
   font-size: 17px;
   font-weight: 400;
 }
-.g-footer a { color: var(--g-text-soft); }
-.g-footer a:hover { color: var(--g-accent-text); }
+.g-footer a { color: var(--g-on-scene-soft); }
+.g-footer a:hover { color: var(--g-on-scene-accent); }
 .g-footer .links { display: flex; gap: 18px; }
 
 /* ===== Post Page ===== */
@@ -1952,8 +1975,20 @@ body.card-motion-ready .now-card:hover::before { opacity: 1; }
 
 /* ===== Archive / Content Index ===== */
 .archive {
-  padding-top: 64px;
-  padding-bottom: 80px;
+  margin-top: 48px;
+  margin-bottom: 80px;
+  padding: 48px clamp(28px, 5vw, 56px) 56px;
+  color: var(--g-reading-text);
+  background: var(--g-reading-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 14px;
+  box-shadow: var(--g-shadow-lg);
+}
+.archive h1,
+.archive h2,
+.archive h3,
+.archive h4 {
+  color: var(--g-reading-heading);
 }
 .archive-header {
   max-width: 700px;
@@ -2812,7 +2847,11 @@ body.toc-open { overflow: hidden; }
   .garden-map-card { min-height: 0; }
   .g-nav-links { gap: 16px; }
   .g-nav-links a { font-size: 13px; }
-  .archive { padding-top: 48px; padding-bottom: 64px; }
+  .archive {
+    margin-top: 32px;
+    margin-bottom: 64px;
+    padding: 40px 28px 48px;
+  }
   .archive-header { margin-bottom: 36px; }
   .taxonomy-group { grid-template-columns: 1fr; gap: 10px; }
   .taxonomy-label { padding-top: 0; }
@@ -2839,7 +2878,11 @@ body.toc-open { overflow: hidden; }
     aspect-ratio: 16 / 9;
   }
   .about-summary { padding: 26px 24px 28px; }
-  .about-page { padding-top: 48px; padding-bottom: 64px; }
+  .about-page {
+    margin-top: 32px;
+    margin-bottom: 64px;
+    padding: 44px 28px 52px;
+  }
   .about-page-hero { margin-bottom: 64px; }
   .about-chapter { grid-template-columns: 1fr; gap: 28px; padding: 44px 0; }
   .about-chapter-heading { max-width: 360px; }
@@ -2936,7 +2979,12 @@ body.toc-open { overflow: hidden; }
   .hero-stats dd { font-size: 15px; }
   .garden-map-note { display: none; }
   .garden-map-card { padding: 22px; }
-  .about-page { padding-top: 36px; }
+  .about-page {
+    margin-top: 20px;
+    margin-bottom: 48px;
+    padding: 34px 20px 42px;
+    border-radius: 10px;
+  }
   .about-page-hero { margin-bottom: 48px; }
   .about-page-lede { font-size: 17px; }
   .garden-paths { padding-left: 24px; }
@@ -2947,6 +2995,12 @@ body.toc-open { overflow: hidden; }
   .about-photo figcaption { left: 18px; right: 18px; bottom: 14px; }
   .about-summary { padding: 24px 20px 26px; }
   .archive-taxonomy { padding: 22px 0; }
+  .archive {
+    margin-top: 20px;
+    margin-bottom: 48px;
+    padding: 32px 20px 40px;
+    border-radius: 10px;
+  }
   .taxonomy-links { gap: 6px; }
   .taxonomy-links a { padding: 5px 9px; font-size: 12px; }
   .archive-post {
