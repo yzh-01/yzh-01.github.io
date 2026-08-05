@@ -1,0 +1,54 @@
+{% extends '_layout.njk' %}
+
+{% block head_extra %}
+<meta name="robots" content="noindex,follow">
+{% endblock %}
+
+{% block content %}
+<div class="search-page g-wide" data-search-page data-index-url="{{ url_for('search-index.json') }}">
+  <header class="search-hero">
+    <p class="search-kicker">garden search</p>
+    <h1>{{ page.title }}</h1>
+    <p>从标题、摘要、标签、分类与正文中寻找一条曾经走过的路径。</p>
+  </header>
+
+  <form class="garden-search" role="search" novalidate>
+    <label class="sr-only" for="garden-search-input">搜索花园内容</label>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5"></circle>
+      <path d="m16 16 4 4"></path>
+    </svg>
+    <input
+      id="garden-search-input"
+      type="search"
+      name="q"
+      placeholder="搜索文章、标签或正文…"
+      autocomplete="off"
+      spellcheck="false"
+      enterkeyhint="search"
+      aria-describedby="garden-search-hint garden-search-status"
+    >
+    <kbd aria-hidden="true">Esc</kbd>
+  </form>
+
+  <div class="search-hint" id="garden-search-hint">
+    <span>试试：</span>
+    {%- for tag in site.tags.toArray().slice(0, 6) %}
+    <button type="button" data-search-suggestion="{{ tag.name }}">{{ tag.name }}</button>
+    {%- endfor %}
+  </div>
+
+  <div class="search-status" id="garden-search-status" role="status" aria-live="polite">
+    正在整理花园索引…
+  </div>
+  <ol class="search-results" id="garden-search-results"></ol>
+  <div class="search-empty" id="garden-search-empty" hidden>
+    <strong>没有找到对应路径</strong>
+    <span>换一个更短的关键词，或尝试文章标签。</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('js/search.js') }}?v={{ theme.asset_version }}" defer></script>
+{% endblock %}

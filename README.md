@@ -16,6 +16,8 @@
 - macOS 风格代码块，使用本地 Maple Mono 字体
 - 桌面 TOC 支持鼠标、触控笔和键盘调宽，移动端使用目录抽屉
 - 归档页支持分类、标签入口和当前页面即时筛选
+- 全站搜索覆盖文章标题、摘要、标签、分类与正文，按相关度排序并支持 `/` 快捷键
+- Garden Log 按月记录花园的新增、修整与重新思考
 - 尊重 `prefers-reduced-motion`，关闭非必要动画并保留静态内容
 - RSS、Sitemap、Open Graph、Canonical URL 和语义化页面结构
 - 支持使用 Obsidian 管理草稿和文章
@@ -37,9 +39,12 @@
 │   ├── _posts/                  # 已发布 Markdown 文章
 │   ├── _drafts/                 # Obsidian / Hexo 草稿
 │   ├── about/index.md           # About / Contact 页面内容
+│   ├── search/index.md          # 全站搜索页面
+│   ├── garden-log/index.md      # Garden Log 页面
 │   ├── _data/
 │   │   ├── now.yml              # 首页 Now 状态
 │   │   ├── stack.yml            # 首页 Tech Stack
+│   │   ├── garden-log.yml       # 月度 Garden Log 数据
 │   │   └── friends.yml          # 友链预留数据
 │   ├── images/                  # 站点与文章图片
 │   ├── fonts/                   # Maple Mono 等本地字体资源
@@ -53,6 +58,8 @@
 │   │   ├── post.njk             # 文章页
 │   │   ├── archive.njk          # 归档 / 内容索引
 │   │   ├── about.njk            # About 专用页面
+│   │   ├── search.njk           # 全站搜索页面
+│   │   ├── garden-log.njk       # 月度 Garden Log 时间线
 │   │   ├── page.njk             # 普通独立页面
 │   │   ├── 404.njk              # 主题 404 页面
 │   │   └── _partial/            # Head、导航和页脚组件
@@ -60,7 +67,10 @@
 │       ├── css/style.css        # Token、组件、动效与响应式样式
 │       └── js/
 │           ├── site.js          # 首页动效、滚动路径与全站交互
+│           ├── search.js        # 全文搜索、排序与结果渲染
 │           └── post.js          # TOC、锚点、代码复制和表格增强
+├── scripts/
+│   └── search-index.js          # 构建时生成 search-index.json
 ├── scaffolds/                   # Post、Draft、Page 写作模板
 ├── .github/workflows/deploy.yml # GitHub Pages 构建部署
 └── package.json
@@ -153,6 +163,26 @@ D:\code\yzh-01.github.io\source
 - 首页介绍文字与模块结构：编辑 `themes/garden/layout/index.njk`
 - 首页模块开关：编辑 `themes/garden/_config.yml`
 - 全站视觉与动效：编辑 `themes/garden/source/css/style.css`
+
+## 更新 Garden Log
+
+编辑 `source/_data/garden-log.yml`，按照月份从新到旧追加记录：
+
+```yaml
+- month: "2026-09"
+  label: "2026 年 9 月"
+  title: "本月记录标题"
+  summary: "一句话概括这个月的变化。"
+  added:
+    - text: "新增的内容或功能"
+      href: "/optional-path/"
+  revised:
+    - text: "重新整理或修订的内容"
+  reconsidered:
+    - text: "这个月重新思考的问题"
+```
+
+`href` 可省略。搜索索引由 `scripts/search-index.js` 在每次 Hexo 构建时自动生成，不需要手动维护。
 
 首页序章只在首页生成。它占据顶部一屏，向下滚动进入正文；序章离开视口后自动复位，重新向上滚动时再次播放。低动态偏好下保留静态序章，不执行窗格动画。
 

@@ -1,0 +1,16 @@
+- month: "2026-08"
+  label: "2026 年 8 月"
+  title: "让花园从好看走向好用"
+  summary: "完成全站浅色阅读体系的整理，并开始补足内容发现与长期维护能力。"
+  added:
+    - text: "加入覆盖标题、摘要、标签、分类与正文的全站搜索。"
+      href: "/search/"
+    - text: "建立按月维护的 Garden Log，留下花园自身的生长轨迹。"
+      href: "/garden-log/"
+  revised:
+    - text: "统一浅色与深色背景的模糊度、主体位置和视觉权重。"
+    - text: "重整首页、文章、Archive、About 与 404 页面的阅读前景层。"
+    - text: "将移动端文章目录改为阅读全程可访问的固定入口。"
+  reconsidered:
+    - text: "视觉效果继续服务于内容，不再把新增动效作为默认方向。"
+    - text: "从单次展示型主页转向可检索、可回顾、持续更新的 Digital Garden。"

@@ -4,7 +4,22 @@
     <ul class="g-nav-links">
       <li><a href="{{ url_for('/') }}" {% if is_home() %}class="active"{% endif %}>home</a></li>
       <li><a href="{{ url_for('archives/') }}" {% if is_archive() or is_tag() or is_category() %}class="active"{% endif %}>archive</a></li>
+      <li><a href="{{ url_for('garden-log/') }}" {% if page.path == 'garden-log/index.html' %}class="active"{% endif %}>log</a></li>
       <li><a href="{{ url_for('about/') }}" {% if page.path == 'about/index.html' %}class="active"{% endif %}>about</a></li>
+      <li>
+        <a
+          class="g-nav-search{% if page.path == 'search/index.html' %} active{% endif %}"
+          href="{{ url_for('search/') }}"
+          aria-label="搜索花园"
+          title="搜索花园（/）"
+          data-search-link
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+        </a>
+      </li>
     </ul>
   </div>
   <div class="g-scroll-track" aria-hidden="true">

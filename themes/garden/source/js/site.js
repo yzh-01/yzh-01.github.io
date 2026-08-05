@@ -402,6 +402,28 @@
     }
   }
 
+  function setupSearchShortcut() {
+    var link = document.querySelector('[data-search-link]');
+    if (!link) return;
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+      var target = event.target;
+      var isEditing = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      );
+      if (isEditing) return;
+
+      event.preventDefault();
+      var searchInput = document.getElementById('garden-search-input');
+      if (searchInput) searchInput.focus();
+      else window.location.assign(link.href);
+    });
+  }
+
   setupGardenTheme();
   setupGardenEntry();
   setupGardenRoute();
@@ -409,4 +431,5 @@
   setupCardSpotlights();
   setupArchiveFilter();
   setupReveal();
+  setupSearchShortcut();
 })();

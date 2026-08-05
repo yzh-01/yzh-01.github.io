@@ -3,6 +3,8 @@
     <span>&copy; {{ moment().format('YYYY') }} <span class="g-footer-author">{{ config.author }}</span></span>
     <div class="links">
       <a href="{{ url_for('about/') }}">about</a>
+      <a href="{{ url_for('garden-log/') }}">log</a>
+      <a href="{{ url_for('search/') }}">search</a>
       <a href="{{ url_for('atom.xml') }}">rss</a>
       <a href="{{ url_for('sitemap.xml') }}">sitemap</a>
       <a href="https://github.com/yzh-01" target="_blank" rel="noopener">github</a>

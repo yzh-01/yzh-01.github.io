@@ -1,0 +1,71 @@
+{% extends '_layout.njk' %}
+
+{% block content %}
+<div class="garden-log-page g-wide">
+  <header class="garden-log-hero">
+    <p class="garden-log-kicker">monthly field notes</p>
+    <h1>{{ page.title }}</h1>
+    <p>{{ page.description }}</p>
+  </header>
+
+  {%- if site.data['garden-log'] and site.data['garden-log'].length %}
+  <div class="garden-log-timeline">
+    {%- for entry in site.data['garden-log'] %}
+    <article class="garden-log-entry" id="{{ entry.month }}" data-reveal>
+      <div class="garden-log-date">
+        <time datetime="{{ entry.month }}">{{ entry.label }}</time>
+        <a href="#{{ entry.month }}" aria-label="链接到 {{ entry.label }} 的记录">#</a>
+      </div>
+      <div class="garden-log-content">
+        <h2>{{ entry.title }}</h2>
+        {%- if entry.summary %}<p class="garden-log-summary">{{ entry.summary }}</p>{%- endif %}
+
+        <div class="garden-log-groups">
+          {%- if entry.added and entry.added.length %}
+          <section>
+            <h3><span aria-hidden="true">+</span> 新生</h3>
+            <ul>
+              {%- for item in entry.added %}
+              <li>
+                {%- if item.href %}<a href="{{ url_for(item.href) }}">{{ item.text }}</a>{%- else %}{{ item.text }}{%- endif %}
+              </li>
+              {%- endfor %}
+            </ul>
+          </section>
+          {%- endif %}
+
+          {%- if entry.revised and entry.revised.length %}
+          <section>
+            <h3><span aria-hidden="true">~</span> 修整</h3>
+            <ul>
+              {%- for item in entry.revised %}
+              <li>
+                {%- if item.href %}<a href="{{ url_for(item.href) }}">{{ item.text }}</a>{%- else %}{{ item.text }}{%- endif %}
+              </li>
+              {%- endfor %}
+            </ul>
+          </section>
+          {%- endif %}
+
+          {%- if entry.reconsidered and entry.reconsidered.length %}
+          <section>
+            <h3><span aria-hidden="true">↺</span> 回望</h3>
+            <ul>
+              {%- for item in entry.reconsidered %}
+              <li>
+                {%- if item.href %}<a href="{{ url_for(item.href) }}">{{ item.text }}</a>{%- else %}{{ item.text }}{%- endif %}
+              </li>
+              {%- endfor %}
+            </ul>
+          </section>
+          {%- endif %}
+        </div>
+      </div>
+    </article>
+    {%- endfor %}
+  </div>
+  {%- else %}
+  <div class="garden-log-empty">第一条生长记录还在酝酿。</div>
+  {%- endif %}
+</div>
+{% endblock %}
