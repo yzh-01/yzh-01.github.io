@@ -9,13 +9,24 @@
   <div class="site-backdrop" aria-hidden="true"></div>
   {%- if is_home() %}
   <section class="garden-entry" id="garden-intro" data-garden-entry aria-label="苔痕有迹，个人数字花园序章">
+    <div class="garden-entry-clear" data-entry-clear aria-hidden="true"></div>
+    <div class="garden-entry-rain" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
     <div class="garden-entry-panes" aria-hidden="true">
       <i></i><i></i><i></i><i></i>
     </div>
-    <div class="garden-entry-mark">
-      <span>PERSONAL DIGITAL GARDEN</span>
-      <strong>苔痕有迹</strong>
-      <i></i>
+    <div class="garden-entry-coordinates" aria-hidden="true">
+      <span>FIELD NOTES · SINCE {{ theme.since }}</span>
+      <span>TECH · LEARNING · LIFE</span>
+    </div>
+    <div class="garden-entry-stage" data-entry-stage>
+      <div class="garden-entry-mark">
+        <span>PERSONAL DIGITAL GARDEN</span>
+        <strong>苔痕有迹</strong>
+        <em>技术 · 学习 · 日常</em>
+        <i></i>
+      </div>
     </div>
     <a class="garden-entry-scroll" href="#main-content">
       <span>循苔而行</span>

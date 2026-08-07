@@ -177,7 +177,70 @@
 
     if (reduceMotion.matches) return;
 
+    var clearLayer = entry.querySelector('[data-entry-clear]');
+    var pointerFrame = 0;
+    var scrollFrame = 0;
+    var touchTimer = 0;
+
     entry.classList.add('entry-motion-ready');
+
+    function setClearPosition(event) {
+      if (!clearLayer) return;
+      var rect = entry.getBoundingClientRect();
+      var x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+      var y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+      entry.style.setProperty('--entry-clear-x', x.toFixed(1) + 'px');
+      entry.style.setProperty('--entry-clear-y', y.toFixed(1) + 'px');
+    }
+
+    function scheduleClearPosition(event) {
+      if (pointerFrame) return;
+      var clientX = event.clientX;
+      var clientY = event.clientY;
+      pointerFrame = window.requestAnimationFrame(function () {
+        pointerFrame = 0;
+        setClearPosition({ clientX: clientX, clientY: clientY });
+      });
+    }
+
+    if (finePointer.matches) {
+      entry.addEventListener('pointerenter', function (event) {
+        scheduleClearPosition(event);
+        entry.classList.add('is-pointer-active');
+      });
+      entry.addEventListener('pointermove', scheduleClearPosition, { passive: true });
+      entry.addEventListener('pointerleave', function () {
+        entry.classList.remove('is-pointer-active');
+      });
+    } else {
+      entry.addEventListener('pointerdown', function (event) {
+        scheduleClearPosition(event);
+        entry.classList.add('is-pointer-active');
+        window.clearTimeout(touchTimer);
+        touchTimer = window.setTimeout(function () {
+          entry.classList.remove('is-pointer-active');
+        }, 900);
+      }, { passive: true });
+    }
+
+    function updateEntryExit() {
+      scrollFrame = 0;
+      var rect = entry.getBoundingClientRect();
+      var travel = Math.max(1, entry.offsetHeight * .72);
+      var progress = Math.max(0, Math.min(1, -rect.top / travel));
+      entry.style.setProperty('--entry-stage-y', (-34 * progress).toFixed(1) + 'px');
+      entry.style.setProperty('--entry-stage-opacity', Math.max(0, 1 - progress * 1.18).toFixed(3));
+      entry.style.setProperty('--entry-bg-y', (18 * progress).toFixed(1) + 'px');
+    }
+
+    function scheduleEntryExit() {
+      if (scrollFrame) return;
+      scrollFrame = window.requestAnimationFrame(updateEntryExit);
+    }
+
+    updateEntryExit();
+    window.addEventListener('scroll', scheduleEntryExit, { passive: true });
+    window.addEventListener('resize', scheduleEntryExit, { passive: true });
 
     if (!('IntersectionObserver' in window)) {
       entry.classList.add('is-active');
