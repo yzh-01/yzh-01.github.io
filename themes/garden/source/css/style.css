@@ -300,7 +300,7 @@ html.theme-switching .site-backdrop {
 
 /* ===== Home Entry: a replayable mist-to-garden overture ===== */
 .garden-entry {
-  --g-motion-intro: 1800ms;
+  --g-motion-intro: 2200ms;
   --entry-clear-x: 50%;
   --entry-clear-y: 45%;
   --entry-stage-y: 0px;
@@ -359,36 +359,89 @@ html.theme-switching .site-backdrop {
 .garden-entry.entry-motion-ready.is-active .garden-entry-veil {
   animation: g-entry-veil var(--g-motion-intro) var(--g-ease-out) both;
 }
-.garden-entry-bloom {
+.garden-entry-reveal {
+  display: none;
   position: absolute;
-  inset: -16%;
+  inset: -12px;
   z-index: 3;
-  overflow: hidden;
-  background: radial-gradient(ellipse at 50% 47%, rgba(171, 210, 179, .26), rgba(112, 158, 122, .1) 27%, transparent 55%);
-  mix-blend-mode: screen;
-  opacity: 0;
+  background-image:
+    linear-gradient(180deg, rgba(7, 12, 9, .1), rgba(5, 10, 7, .38)),
+    url("/images/garden-window-bg.jpg");
+  background-position: center;
+  background-size: cover;
+  filter: saturate(.96) brightness(.92) contrast(1.08);
   pointer-events: none;
-  transform: scale(.76);
 }
-.garden-entry-bloom::after {
+@supports ((-webkit-mask-image: radial-gradient(ellipse, #000, transparent)) or (mask-image: radial-gradient(ellipse, #000, transparent))) {
+  .garden-entry-reveal {
+    display: block;
+    -webkit-mask-image: radial-gradient(ellipse, #000 0 56%, rgba(0, 0, 0, .88) 64%, rgba(0, 0, 0, .24) 70%, transparent 76%);
+    mask-image: radial-gradient(ellipse, #000 0 56%, rgba(0, 0, 0, .88) 64%, rgba(0, 0, 0, .24) 70%, transparent 76%);
+    -webkit-mask-position: 50% 47%;
+    mask-position: 50% 47%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 0% 0%;
+    mask-size: 0% 0%;
+  }
+  .garden-entry.entry-motion-ready.is-active .garden-entry-reveal {
+    animation: g-entry-reveal var(--g-motion-intro) var(--g-ease-out) both;
+  }
+}
+.garden-entry-impact {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  z-index: 5;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.garden-entry-impact::before {
   content: "";
   position: absolute;
-  top: 10%;
-  bottom: 10%;
-  left: 0;
-  width: 26vw;
-  min-width: 190px;
-  background: linear-gradient(90deg, transparent, rgba(204, 229, 209, .24), rgba(140, 184, 150, .08), transparent);
-  filter: blur(16px);
+  left: -2px;
+  top: -5px;
+  width: 4px;
+  height: 10px;
+  border-radius: 50% 50% 54% 54%;
+  background: linear-gradient(180deg, rgba(234, 245, 236, .18), rgba(178, 216, 186, .95));
+  box-shadow: 0 0 12px rgba(172, 218, 182, .72), 0 0 28px rgba(140, 184, 150, .36);
   opacity: 0;
-  transform: translate3d(-42vw, 0, 0) skewX(-8deg);
+  transform: translate3d(0, -54vh, 0) scale(.68, 1.5);
 }
-.garden-entry.entry-motion-ready.is-active .garden-entry-bloom {
-  animation: g-entry-bloom var(--g-motion-intro) var(--g-ease-out) both;
+.garden-entry-impact::after {
+  content: "";
+  position: absolute;
+  inset: -100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(225, 242, 229, .38), rgba(140, 184, 150, .15) 24%, transparent 62%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: scale(.12);
 }
-.garden-entry.entry-motion-ready.is-active .garden-entry-bloom::after {
-  animation: g-entry-light-sweep var(--g-motion-intro) var(--g-ease-out) both;
+.garden-entry-impact i {
+  position: absolute;
+  inset: -42px;
+  border: 1px solid rgba(190, 222, 197, .42);
+  border-radius: 50%;
+  box-shadow: 0 0 24px rgba(140, 184, 150, .13), inset 0 0 18px rgba(214, 235, 218, .08);
+  opacity: 0;
+  transform: scale(.08);
 }
+.garden-entry-impact i:nth-child(2) { inset: -58px; }
+.garden-entry-impact i:nth-child(3) { inset: -78px; }
+.garden-entry.entry-motion-ready.is-active .garden-entry-impact::before {
+  animation: g-entry-drop var(--g-motion-intro) cubic-bezier(.35, 0, .78, .42) both;
+}
+.garden-entry.entry-motion-ready.is-active .garden-entry-impact::after {
+  animation: g-entry-impact-flash var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry.entry-motion-ready.is-active .garden-entry-impact i {
+  animation: g-entry-ripple var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry.entry-motion-ready.is-active .garden-entry-impact i:nth-child(2) { animation-delay: 70ms; }
+.garden-entry.entry-motion-ready.is-active .garden-entry-impact i:nth-child(3) { animation-delay: 140ms; }
 .garden-entry-mist {
   position: absolute;
   inset: -12%;
@@ -3267,9 +3320,17 @@ body.toc-open { overflow: hidden; }
   .garden-route { display: none; }
 }
 @media (max-width: 768px) {
-  .garden-entry { --g-motion-intro: 1500ms; }
+  .garden-entry { --g-motion-intro: 1900ms; }
   .garden-entry-veil { background-position: 52% center; }
-  .garden-entry-bloom::after { width: 42vw; }
+  .garden-entry-reveal {
+    background-position: 47% center;
+    -webkit-mask-position: 50% 45%;
+    mask-position: 50% 45%;
+  }
+  .garden-entry-impact { top: 45%; }
+  .garden-entry-impact i { inset: -34px; }
+  .garden-entry-impact i:nth-child(2) { inset: -46px; }
+  .garden-entry-impact i:nth-child(3) { inset: -60px; }
   .garden-entry-mist i:nth-child(3) { display: none; }
   .garden-entry::before { background-position: 47% center; }
   .garden-entry-coordinates {
@@ -3607,23 +3668,45 @@ body.toc-open { overflow: hidden; }
 }
 
 @keyframes g-entry-veil {
-  0%, 16% { opacity: 1; transform: scale(1.02); }
-  34% { opacity: .96; transform: scale(1.018); }
-  78%, 100% { opacity: 0; transform: scale(1.065); }
+  0%, 72% { opacity: 1; transform: scale(1.02); }
+  92%, 100% { opacity: 0; transform: scale(1.065); }
 }
 
-@keyframes g-entry-bloom {
-  0%, 18% { opacity: 0; transform: scale(.76); }
-  42% { opacity: .88; transform: scale(.9); }
-  72% { opacity: .28; transform: scale(1.12); }
-  100% { opacity: 0; transform: scale(1.3); }
+@keyframes g-entry-reveal {
+  0%, 31% {
+    -webkit-mask-size: 0% 0%;
+    mask-size: 0% 0%;
+    transform: scale(1.018);
+  }
+  38% {
+    -webkit-mask-size: 8% 8%;
+    mask-size: 8% 8%;
+  }
+  82%, 100% {
+    -webkit-mask-size: 260% 260%;
+    mask-size: 260% 260%;
+    transform: scale(1);
+  }
 }
 
-@keyframes g-entry-light-sweep {
-  0%, 16% { opacity: 0; transform: translate3d(-42vw, 0, 0) skewX(-8deg); }
-  34% { opacity: .72; }
-  76% { opacity: .22; }
-  100% { opacity: 0; transform: translate3d(142vw, 0, 0) skewX(-8deg); }
+@keyframes g-entry-drop {
+  0%, 8% { opacity: 0; transform: translate3d(0, -54vh, 0) scale(.68, 1.5); }
+  13% { opacity: .92; }
+  34% { opacity: 1; transform: translate3d(0, -4px, 0) scale(.76, 1.28); }
+  38% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.6, .42); }
+  41%, 100% { opacity: 0; transform: translate3d(0, 1px, 0) scale(1.8, .28); }
+}
+
+@keyframes g-entry-impact-flash {
+  0%, 35% { opacity: 0; transform: scale(.12); }
+  41% { opacity: .92; transform: scale(.34); }
+  63%, 100% { opacity: 0; transform: scale(1.45); }
+}
+
+@keyframes g-entry-ripple {
+  0%, 36% { opacity: 0; transform: scale(.08); }
+  43% { opacity: .74; }
+  78%, 100% { opacity: 0; transform: scale(6.6); }
 }
 
 @keyframes g-entry-mist {
@@ -3633,23 +3716,23 @@ body.toc-open { overflow: hidden; }
 }
 
 @keyframes g-entry-mark {
-  0%, 28% { opacity: 0; filter: blur(10px); transform: translateY(12px) scale(.95); }
-  56%, 100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+  0%, 49% { opacity: 0; filter: blur(12px); transform: translateY(14px) scale(.94); }
+  80%, 100% { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
 }
 
 @keyframes g-entry-line {
-  0%, 42% { opacity: 0; transform: scaleX(0); }
-  66%, 100% { opacity: 1; transform: scaleX(1); }
+  0%, 61% { opacity: 0; transform: scaleX(0); }
+  88%, 100% { opacity: 1; transform: scaleX(1); }
 }
 
 @keyframes g-entry-scroll-reveal {
-  0%, 70% { opacity: 0; transform: translate(-50%, 8px); }
-  90%, 100% { opacity: 1; transform: translate(-50%, 0); }
+  0%, 79% { opacity: 0; transform: translate(-50%, 8px); }
+  98%, 100% { opacity: 1; transform: translate(-50%, 0); }
 }
 
 @keyframes g-entry-meta {
-  0%, 46% { opacity: 0; transform: translateY(-5px); }
-  72%, 100% { opacity: 1; transform: translateY(0); }
+  0%, 61% { opacity: 0; transform: translateY(-5px); }
+  88%, 100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes g-entry-rain {
@@ -3728,7 +3811,8 @@ body.toc-open { overflow: hidden; }
   .site-backdrop::after { display: none !important; }
   .hero-fireflies { display: none !important; }
   .garden-entry-veil,
-  .garden-entry-bloom,
+  .garden-entry-reveal,
+  .garden-entry-impact,
   .garden-entry-mist { display: none !important; }
   .garden-entry-rain,
   .garden-entry-clear { display: none !important; }
