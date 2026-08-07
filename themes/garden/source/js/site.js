@@ -175,7 +175,25 @@
     var entry = document.querySelector('[data-garden-entry]');
     if (!entry) return;
 
+    var entryClock = entry.querySelector('[data-entry-clock]');
+    var entryTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    function updateEntryClock() {
+      if (!entryClock) return;
+      var now = new Date();
+      entryClock.textContent = entryTimeFormatter.format(now);
+      entryClock.dateTime = now.toISOString();
+    }
+
+    updateEntryClock();
     if (reduceMotion.matches) return;
+    window.setInterval(function () {
+      if (!document.hidden) updateEntryClock();
+    }, 1000);
 
     var clearLayer = entry.querySelector('[data-entry-clear]');
     var pointerFrame = 0;
