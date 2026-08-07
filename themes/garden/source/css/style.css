@@ -299,10 +299,22 @@ html.theme-switching .site-backdrop {
 }
 
 /* ===== Home Entry: a replayable mist-to-garden overture ===== */
+@property --entry-wipe-x {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
+}
+@property --entry-wipe-y {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
+}
 .garden-entry {
   --g-motion-intro: 2200ms;
   --entry-clear-x: 50%;
   --entry-clear-y: 45%;
+  --entry-wipe-x: 1px;
+  --entry-wipe-y: 1px;
   --entry-stage-y: 0px;
   --entry-stage-opacity: 1;
   --entry-bg-y: 0px;
@@ -316,6 +328,7 @@ html.theme-switching .site-backdrop {
   isolation: isolate;
   color: #eef5ef;
   background: #0d130f;
+  transition: --entry-wipe-x 320ms var(--g-ease-out), --entry-wipe-y 320ms var(--g-ease-out);
 }
 .garden-entry::before,
 .garden-entry::after {
@@ -473,49 +486,30 @@ html.theme-switching .site-backdrop {
 .garden-entry-clear {
   display: none;
   position: absolute;
-  inset: -12px;
+  inset: -20px;
   z-index: 4;
   background-image:
-    radial-gradient(circle at var(--entry-clear-x) var(--entry-clear-y), rgba(140,184,150,.1), transparent 38%),
+    linear-gradient(180deg, rgba(184, 207, 189, .08), rgba(145, 171, 151, .12)),
     url("/images/garden-window-bg.jpg");
   background-position: center;
   background-size: cover;
-  filter: saturate(1.02) brightness(.94) contrast(1.08);
+  filter: blur(6px) saturate(.68) brightness(.82) contrast(.94);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--g-motion-ui) var(--g-ease-soft);
 }
 @supports ((mask-image: radial-gradient(circle, #000, transparent)) or (-webkit-mask-image: radial-gradient(circle, #000, transparent))) {
   .garden-entry-clear {
     display: block;
-    -webkit-mask-image: radial-gradient(circle 180px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0,0,0,.86) 62%, transparent 100%);
-    mask-image: radial-gradient(circle 180px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0,0,0,.86) 62%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse var(--entry-wipe-x) var(--entry-wipe-y) at var(--entry-clear-x) var(--entry-clear-y), transparent 0 48%, rgba(0, 0, 0, .22) 64%, rgba(0, 0, 0, .82) 82%, #000 100%);
+    mask-image: radial-gradient(ellipse var(--entry-wipe-x) var(--entry-wipe-y) at var(--entry-clear-x) var(--entry-clear-y), transparent 0 48%, rgba(0, 0, 0, .22) 64%, rgba(0, 0, 0, .82) 82%, #000 100%);
   }
-  .garden-entry.is-pointer-active .garden-entry-clear { opacity: .92; }
-}
-.garden-entry-lens {
-  position: absolute;
-  top: var(--entry-clear-y);
-  left: var(--entry-clear-x);
-  z-index: 5;
-  width: 360px;
-  aspect-ratio: 1;
-  border: 1px solid rgba(207, 231, 212, .18);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, transparent 53%, rgba(226, 241, 229, .08) 58%, rgba(140, 184, 150, .14) 61%, transparent 70%),
-    conic-gradient(from 205deg, transparent 0 37%, rgba(233, 246, 236, .3) 43%, transparent 49% 82%, rgba(140, 184, 150, .18) 88%, transparent 94%);
-  box-shadow:
-    inset 0 0 28px rgba(207, 231, 212, .08),
-    0 0 30px rgba(89, 135, 99, .1);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(.84) rotate(-4deg);
-  transition: opacity 260ms var(--g-ease-soft), transform 360ms var(--g-ease-out);
-}
-.garden-entry.is-pointer-active .garden-entry-lens {
-  opacity: .74;
-  transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  .garden-entry.is-pointer-active {
+    --entry-wipe-x: 190px;
+    --entry-wipe-y: 145px;
+  }
+  .garden-entry.entry-motion-ready.is-active .garden-entry-clear {
+    animation: g-entry-fog-settle var(--g-motion-intro) var(--g-ease-out) both;
+  }
 }
 .garden-entry-rain {
   position: absolute;
@@ -3374,20 +3368,18 @@ body.toc-open { overflow: hidden; }
   .garden-entry-impact i { inset: -34px; }
   .garden-entry-impact i:nth-child(2) { inset: -46px; }
   .garden-entry-impact i:nth-child(3) { inset: -60px; }
-  .garden-entry-lens { width: 250px; }
   .garden-entry-mist i:nth-child(3) { display: none; }
   .garden-entry::before { background-position: 47% center; }
+  .garden-entry-clear { background-position: 47% center; }
   .garden-entry-coordinates {
     font-size: 7px;
     letter-spacing: .14em;
   }
   .garden-entry-rain { opacity: .36; }
   .garden-entry-rain i:nth-child(even) { display: none; }
-  @supports ((-webkit-mask-image: radial-gradient(circle, #000, transparent)) or (mask-image: radial-gradient(circle, #000, transparent))) {
-    .garden-entry-clear {
-      -webkit-mask-image: radial-gradient(circle 125px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0, 0, 0, .86) 62%, transparent 100%);
-      mask-image: radial-gradient(circle 125px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0, 0, 0, .86) 62%, transparent 100%);
-    }
+  .garden-entry.is-pointer-active {
+    --entry-wipe-x: 130px;
+    --entry-wipe-y: 100px;
   }
   .garden-entry-mark strong { font-size: clamp(46px, 15vw, 64px); }
   .article {
@@ -3712,10 +3704,8 @@ body.toc-open { overflow: hidden; }
 }
 
 @keyframes g-entry-veil {
-  0%, 31% { opacity: 1; transform: scale(1.02); }
-  38% { opacity: 1; transform: scale(1.028); }
-  47%, 72% { opacity: 1; transform: scale(1.016); }
-  92%, 100% { opacity: 0; transform: scale(1.065); }
+  0%, 68% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.045); }
 }
 
 @keyframes g-entry-reveal {
@@ -3724,17 +3714,17 @@ body.toc-open { overflow: hidden; }
     mask-size: 0% 0%;
     transform: scale(1.018);
   }
-  38% {
-    -webkit-mask-size: 8% 8%;
-    mask-size: 8% 8%;
-    transform: scale(1.028);
+  41% {
+    -webkit-mask-size: 12% 12%;
+    mask-size: 12% 12%;
+    transform: scale(1.014);
   }
-  51% {
-    -webkit-mask-size: 54% 54%;
-    mask-size: 54% 54%;
+  62% {
+    -webkit-mask-size: 112% 112%;
+    mask-size: 112% 112%;
     transform: scale(1.006);
   }
-  82%, 100% {
+  90%, 100% {
     -webkit-mask-size: 260% 260%;
     mask-size: 260% 260%;
     transform: scale(1);
@@ -3744,21 +3734,26 @@ body.toc-open { overflow: hidden; }
 @keyframes g-entry-drop {
   0%, 8% { opacity: 0; transform: translate3d(0, -54vh, 0) scale(.68, 1.5); }
   13% { opacity: .92; }
-  34% { opacity: 1; transform: translate3d(0, -4px, 0) scale(.76, 1.28); }
-  38% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.6, .42); }
-  41%, 100% { opacity: 0; transform: translate3d(0, 1px, 0) scale(1.8, .28); }
+  35% { opacity: 1; transform: translate3d(0, -3px, 0) scale(.8, 1.2); }
+  39% { opacity: .92; transform: translate3d(0, 0, 0) scale(1.25, .7); }
+  43%, 100% { opacity: 0; transform: translate3d(0, 1px, 0) scale(1.35, .62); }
 }
 
 @keyframes g-entry-impact-flash {
   0%, 35% { opacity: 0; transform: scale(.12); }
-  41% { opacity: .92; transform: scale(.34); }
-  63%, 100% { opacity: 0; transform: scale(1.45); }
+  42% { opacity: .52; transform: scale(.38); }
+  68%, 100% { opacity: 0; transform: scale(1.25); }
 }
 
 @keyframes g-entry-ripple {
   0%, 36% { opacity: 0; transform: scale(.08); }
-  43% { opacity: .74; }
-  78%, 100% { opacity: 0; transform: scale(6.6); }
+  44% { opacity: .48; }
+  86%, 100% { opacity: 0; transform: scale(5.4); }
+}
+
+@keyframes g-entry-fog-settle {
+  0%, 76% { opacity: 0; }
+  100% { opacity: .42; }
 }
 
 @keyframes g-entry-mist {
@@ -3872,8 +3867,7 @@ body.toc-open { overflow: hidden; }
   .garden-entry-impact,
   .garden-entry-mist { display: none !important; }
   .garden-entry-rain,
-  .garden-entry-clear,
-  .garden-entry-lens { display: none !important; }
+  .garden-entry-clear { display: none !important; }
   .garden-entry-stage,
   .garden-entry-coordinates {
     opacity: 1 !important;
