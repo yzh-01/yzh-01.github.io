@@ -369,6 +369,7 @@ html.theme-switching .site-backdrop {
     url("/images/garden-window-bg.jpg");
   background-position: center;
   background-size: cover;
+  box-shadow: inset 0 0 150px rgba(3, 8, 5, .32);
   filter: saturate(.96) brightness(.92) contrast(1.08);
   pointer-events: none;
 }
@@ -430,7 +431,11 @@ html.theme-switching .site-backdrop {
   transform: scale(.08);
 }
 .garden-entry-impact i:nth-child(2) { inset: -58px; }
-.garden-entry-impact i:nth-child(3) { inset: -78px; }
+.garden-entry-impact i:nth-child(2) { border-color: rgba(190, 222, 197, .28); }
+.garden-entry-impact i:nth-child(3) {
+  inset: -78px;
+  border-color: rgba(190, 222, 197, .16);
+}
 .garden-entry.entry-motion-ready.is-active .garden-entry-impact::before {
   animation: g-entry-drop var(--g-motion-intro) cubic-bezier(.35, 0, .78, .42) both;
 }
@@ -487,6 +492,30 @@ html.theme-switching .site-backdrop {
     mask-image: radial-gradient(circle 180px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0,0,0,.86) 62%, transparent 100%);
   }
   .garden-entry.is-pointer-active .garden-entry-clear { opacity: .92; }
+}
+.garden-entry-lens {
+  position: absolute;
+  top: var(--entry-clear-y);
+  left: var(--entry-clear-x);
+  z-index: 5;
+  width: 360px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(207, 231, 212, .18);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 53%, rgba(226, 241, 229, .08) 58%, rgba(140, 184, 150, .14) 61%, transparent 70%),
+    conic-gradient(from 205deg, transparent 0 37%, rgba(233, 246, 236, .3) 43%, transparent 49% 82%, rgba(140, 184, 150, .18) 88%, transparent 94%);
+  box-shadow:
+    inset 0 0 28px rgba(207, 231, 212, .08),
+    0 0 30px rgba(89, 135, 99, .1);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.84) rotate(-4deg);
+  transition: opacity 260ms var(--g-ease-soft), transform 360ms var(--g-ease-out);
+}
+.garden-entry.is-pointer-active .garden-entry-lens {
+  opacity: .74;
+  transform: translate(-50%, -50%) scale(1) rotate(0deg);
 }
 .garden-entry-rain {
   position: absolute;
@@ -573,6 +602,20 @@ html.theme-switching .site-backdrop {
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: .06em;
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .garden-entry-mark strong {
+    color: transparent;
+    background-image: linear-gradient(104deg, #dbe9de 10%, #f7fff8 42%, #a8cdb0 50%, #f3fbf4 58%, #d9e8dc 88%);
+    background-position: 115% center;
+    background-size: 240% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 3px 18px rgba(0, 0, 0, .34));
+  }
+  .garden-entry.entry-motion-ready.is-active .garden-entry-mark strong {
+    animation: g-entry-title-ink var(--g-motion-intro) var(--g-ease-out) both;
+  }
 }
 .garden-entry-mark em {
   margin-top: 11px;
@@ -3331,6 +3374,7 @@ body.toc-open { overflow: hidden; }
   .garden-entry-impact i { inset: -34px; }
   .garden-entry-impact i:nth-child(2) { inset: -46px; }
   .garden-entry-impact i:nth-child(3) { inset: -60px; }
+  .garden-entry-lens { width: 250px; }
   .garden-entry-mist i:nth-child(3) { display: none; }
   .garden-entry::before { background-position: 47% center; }
   .garden-entry-coordinates {
@@ -3668,7 +3712,9 @@ body.toc-open { overflow: hidden; }
 }
 
 @keyframes g-entry-veil {
-  0%, 72% { opacity: 1; transform: scale(1.02); }
+  0%, 31% { opacity: 1; transform: scale(1.02); }
+  38% { opacity: 1; transform: scale(1.028); }
+  47%, 72% { opacity: 1; transform: scale(1.016); }
   92%, 100% { opacity: 0; transform: scale(1.065); }
 }
 
@@ -3681,6 +3727,12 @@ body.toc-open { overflow: hidden; }
   38% {
     -webkit-mask-size: 8% 8%;
     mask-size: 8% 8%;
+    transform: scale(1.028);
+  }
+  51% {
+    -webkit-mask-size: 54% 54%;
+    mask-size: 54% 54%;
+    transform: scale(1.006);
   }
   82%, 100% {
     -webkit-mask-size: 260% 260%;
@@ -3713,6 +3765,11 @@ body.toc-open { overflow: hidden; }
   0% { opacity: .08; transform: translate3d(0, 0, 0) scale(.96); }
   55% { opacity: .18; }
   100% { opacity: .1; transform: translate3d(var(--mist-x), var(--mist-y), 0) scale(1.08); }
+}
+
+@keyframes g-entry-title-ink {
+  0%, 52% { background-position: 115% center; }
+  84%, 100% { background-position: -15% center; }
 }
 
 @keyframes g-entry-mark {
@@ -3815,7 +3872,8 @@ body.toc-open { overflow: hidden; }
   .garden-entry-impact,
   .garden-entry-mist { display: none !important; }
   .garden-entry-rain,
-  .garden-entry-clear { display: none !important; }
+  .garden-entry-clear,
+  .garden-entry-lens { display: none !important; }
   .garden-entry-stage,
   .garden-entry-coordinates {
     opacity: 1 !important;
