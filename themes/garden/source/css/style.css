@@ -299,22 +299,10 @@ html.theme-switching .site-backdrop {
 }
 
 /* ===== Home Entry: a replayable mist-to-garden overture ===== */
-@property --entry-wipe-x {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 1px;
-}
-@property --entry-wipe-y {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 1px;
-}
 .garden-entry {
   --g-motion-intro: 2200ms;
   --entry-clear-x: 50%;
   --entry-clear-y: 45%;
-  --entry-wipe-x: 1px;
-  --entry-wipe-y: 1px;
   --entry-stage-y: 0px;
   --entry-stage-opacity: 1;
   --entry-bg-y: 0px;
@@ -328,7 +316,6 @@ html.theme-switching .site-backdrop {
   isolation: isolate;
   color: #eef5ef;
   background: #0d130f;
-  transition: --entry-wipe-x 320ms var(--g-ease-out), --entry-wipe-y 320ms var(--g-ease-out);
 }
 .garden-entry::before,
 .garden-entry::after {
@@ -382,7 +369,6 @@ html.theme-switching .site-backdrop {
     url("/images/garden-window-bg.jpg");
   background-position: center;
   background-size: cover;
-  box-shadow: inset 0 0 150px rgba(3, 8, 5, .32);
   filter: saturate(.96) brightness(.92) contrast(1.08);
   pointer-events: none;
 }
@@ -444,11 +430,7 @@ html.theme-switching .site-backdrop {
   transform: scale(.08);
 }
 .garden-entry-impact i:nth-child(2) { inset: -58px; }
-.garden-entry-impact i:nth-child(2) { border-color: rgba(190, 222, 197, .28); }
-.garden-entry-impact i:nth-child(3) {
-  inset: -78px;
-  border-color: rgba(190, 222, 197, .16);
-}
+.garden-entry-impact i:nth-child(3) { inset: -78px; }
 .garden-entry.entry-motion-ready.is-active .garden-entry-impact::before {
   animation: g-entry-drop var(--g-motion-intro) cubic-bezier(.35, 0, .78, .42) both;
 }
@@ -486,30 +468,25 @@ html.theme-switching .site-backdrop {
 .garden-entry-clear {
   display: none;
   position: absolute;
-  inset: -20px;
+  inset: -12px;
   z-index: 4;
   background-image:
-    linear-gradient(180deg, rgba(184, 207, 189, .08), rgba(145, 171, 151, .12)),
+    radial-gradient(circle at var(--entry-clear-x) var(--entry-clear-y), rgba(140,184,150,.1), transparent 38%),
     url("/images/garden-window-bg.jpg");
   background-position: center;
   background-size: cover;
-  filter: blur(6px) saturate(.68) brightness(.82) contrast(.94);
+  filter: saturate(1.02) brightness(.94) contrast(1.08);
   opacity: 0;
   pointer-events: none;
+  transition: opacity var(--g-motion-ui) var(--g-ease-soft);
 }
 @supports ((mask-image: radial-gradient(circle, #000, transparent)) or (-webkit-mask-image: radial-gradient(circle, #000, transparent))) {
   .garden-entry-clear {
     display: block;
-    -webkit-mask-image: radial-gradient(ellipse var(--entry-wipe-x) var(--entry-wipe-y) at var(--entry-clear-x) var(--entry-clear-y), transparent 0 48%, rgba(0, 0, 0, .22) 64%, rgba(0, 0, 0, .82) 82%, #000 100%);
-    mask-image: radial-gradient(ellipse var(--entry-wipe-x) var(--entry-wipe-y) at var(--entry-clear-x) var(--entry-clear-y), transparent 0 48%, rgba(0, 0, 0, .22) 64%, rgba(0, 0, 0, .82) 82%, #000 100%);
+    -webkit-mask-image: radial-gradient(circle 180px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0,0,0,.86) 62%, transparent 100%);
+    mask-image: radial-gradient(circle 180px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0,0,0,.86) 62%, transparent 100%);
   }
-  .garden-entry.is-pointer-active {
-    --entry-wipe-x: 190px;
-    --entry-wipe-y: 145px;
-  }
-  .garden-entry.entry-motion-ready.is-active .garden-entry-clear {
-    animation: g-entry-fog-settle var(--g-motion-intro) var(--g-ease-out) both;
-  }
+  .garden-entry.is-pointer-active .garden-entry-clear { opacity: .92; }
 }
 .garden-entry-rain {
   position: absolute;
@@ -596,20 +573,6 @@ html.theme-switching .site-backdrop {
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: .06em;
-}
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .garden-entry-mark strong {
-    color: transparent;
-    background-image: linear-gradient(104deg, #dbe9de 10%, #f7fff8 42%, #a8cdb0 50%, #f3fbf4 58%, #d9e8dc 88%);
-    background-position: 115% center;
-    background-size: 240% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    filter: drop-shadow(0 3px 18px rgba(0, 0, 0, .34));
-  }
-  .garden-entry.entry-motion-ready.is-active .garden-entry-mark strong {
-    animation: g-entry-title-ink var(--g-motion-intro) var(--g-ease-out) both;
-  }
 }
 .garden-entry-mark em {
   margin-top: 11px;
@@ -3370,16 +3333,17 @@ body.toc-open { overflow: hidden; }
   .garden-entry-impact i:nth-child(3) { inset: -60px; }
   .garden-entry-mist i:nth-child(3) { display: none; }
   .garden-entry::before { background-position: 47% center; }
-  .garden-entry-clear { background-position: 47% center; }
   .garden-entry-coordinates {
     font-size: 7px;
     letter-spacing: .14em;
   }
   .garden-entry-rain { opacity: .36; }
   .garden-entry-rain i:nth-child(even) { display: none; }
-  .garden-entry.is-pointer-active {
-    --entry-wipe-x: 130px;
-    --entry-wipe-y: 100px;
+  @supports ((-webkit-mask-image: radial-gradient(circle, #000, transparent)) or (mask-image: radial-gradient(circle, #000, transparent))) {
+    .garden-entry-clear {
+      -webkit-mask-image: radial-gradient(circle 125px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0, 0, 0, .86) 62%, transparent 100%);
+      mask-image: radial-gradient(circle 125px at var(--entry-clear-x) var(--entry-clear-y), #000 0 42%, rgba(0, 0, 0, .86) 62%, transparent 100%);
+    }
   }
   .garden-entry-mark strong { font-size: clamp(46px, 15vw, 64px); }
   .article {
@@ -3704,8 +3668,8 @@ body.toc-open { overflow: hidden; }
 }
 
 @keyframes g-entry-veil {
-  0%, 68% { opacity: 1; transform: scale(1.02); }
-  100% { opacity: 0; transform: scale(1.045); }
+  0%, 72% { opacity: 1; transform: scale(1.02); }
+  92%, 100% { opacity: 0; transform: scale(1.065); }
 }
 
 @keyframes g-entry-reveal {
@@ -3714,17 +3678,11 @@ body.toc-open { overflow: hidden; }
     mask-size: 0% 0%;
     transform: scale(1.018);
   }
-  41% {
-    -webkit-mask-size: 12% 12%;
-    mask-size: 12% 12%;
-    transform: scale(1.014);
+  38% {
+    -webkit-mask-size: 8% 8%;
+    mask-size: 8% 8%;
   }
-  62% {
-    -webkit-mask-size: 112% 112%;
-    mask-size: 112% 112%;
-    transform: scale(1.006);
-  }
-  90%, 100% {
+  82%, 100% {
     -webkit-mask-size: 260% 260%;
     mask-size: 260% 260%;
     transform: scale(1);
@@ -3734,37 +3692,27 @@ body.toc-open { overflow: hidden; }
 @keyframes g-entry-drop {
   0%, 8% { opacity: 0; transform: translate3d(0, -54vh, 0) scale(.68, 1.5); }
   13% { opacity: .92; }
-  35% { opacity: 1; transform: translate3d(0, -3px, 0) scale(.8, 1.2); }
-  39% { opacity: .92; transform: translate3d(0, 0, 0) scale(1.25, .7); }
-  43%, 100% { opacity: 0; transform: translate3d(0, 1px, 0) scale(1.35, .62); }
+  34% { opacity: 1; transform: translate3d(0, -4px, 0) scale(.76, 1.28); }
+  38% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.6, .42); }
+  41%, 100% { opacity: 0; transform: translate3d(0, 1px, 0) scale(1.8, .28); }
 }
 
 @keyframes g-entry-impact-flash {
   0%, 35% { opacity: 0; transform: scale(.12); }
-  42% { opacity: .52; transform: scale(.38); }
-  68%, 100% { opacity: 0; transform: scale(1.25); }
+  41% { opacity: .92; transform: scale(.34); }
+  63%, 100% { opacity: 0; transform: scale(1.45); }
 }
 
 @keyframes g-entry-ripple {
   0%, 36% { opacity: 0; transform: scale(.08); }
-  44% { opacity: .48; }
-  86%, 100% { opacity: 0; transform: scale(5.4); }
-}
-
-@keyframes g-entry-fog-settle {
-  0%, 76% { opacity: 0; }
-  100% { opacity: .42; }
+  43% { opacity: .74; }
+  78%, 100% { opacity: 0; transform: scale(6.6); }
 }
 
 @keyframes g-entry-mist {
   0% { opacity: .08; transform: translate3d(0, 0, 0) scale(.96); }
   55% { opacity: .18; }
   100% { opacity: .1; transform: translate3d(var(--mist-x), var(--mist-y), 0) scale(1.08); }
-}
-
-@keyframes g-entry-title-ink {
-  0%, 52% { background-position: 115% center; }
-  84%, 100% { background-position: -15% center; }
 }
 
 @keyframes g-entry-mark {
