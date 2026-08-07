@@ -181,6 +181,8 @@
     var pointerFrame = 0;
     var scrollFrame = 0;
     var touchTimer = 0;
+    var pointerX = 0;
+    var pointerY = 0;
 
     entry.classList.add('entry-motion-ready');
 
@@ -194,12 +196,12 @@
     }
 
     function scheduleClearPosition(event) {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
       if (pointerFrame) return;
-      var clientX = event.clientX;
-      var clientY = event.clientY;
       pointerFrame = window.requestAnimationFrame(function () {
         pointerFrame = 0;
-        setClearPosition({ clientX: clientX, clientY: clientY });
+        setClearPosition({ clientX: pointerX, clientY: pointerY });
       });
     }
 

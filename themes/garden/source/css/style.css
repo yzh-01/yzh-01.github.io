@@ -298,9 +298,9 @@ html.theme-switching .site-backdrop {
   }
 }
 
-/* ===== Home Entry: a replayable rainy-window overture above the garden ===== */
+/* ===== Home Entry: a replayable mist-to-garden overture ===== */
 .garden-entry {
-  --g-motion-intro: 2300ms;
+  --g-motion-intro: 1800ms;
   --entry-clear-x: 50%;
   --entry-clear-y: 45%;
   --entry-stage-y: 0px;
@@ -331,7 +331,7 @@ html.theme-switching .site-backdrop {
     url("/images/garden-window-bg.jpg");
   background-position: center;
   background-size: cover;
-  filter: blur(3.5px) saturate(.82) brightness(.86) contrast(1.06);
+  filter: blur(2px) saturate(.84) brightness(.88) contrast(1.06);
   transform: translate3d(0, var(--entry-bg-y), 0) scale(1.035);
 }
 .garden-entry::after {
@@ -340,11 +340,83 @@ html.theme-switching .site-backdrop {
     radial-gradient(circle at 50% 45%, rgba(140,184,150,.19), transparent 31%),
     linear-gradient(180deg, rgba(5,9,7,.16), transparent 34%, rgba(5,9,7,.58));
 }
+.garden-entry-veil {
+  position: absolute;
+  inset: -18px;
+  z-index: 2;
+  background-image:
+    linear-gradient(180deg, rgba(4, 8, 6, .18), rgba(4, 8, 6, .54)),
+    url("/images/garden-night-window.jpg");
+  background-position: center;
+  background-size: cover;
+  box-shadow: inset 0 0 120px rgba(2, 6, 4, .42);
+  filter: blur(2px) saturate(.8) brightness(.78) contrast(1.08);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.02);
+}
+.garden-entry.entry-motion-ready .garden-entry-veil { opacity: 1; }
+.garden-entry.entry-motion-ready.is-active .garden-entry-veil {
+  animation: g-entry-veil var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry-bloom {
+  position: absolute;
+  inset: -16%;
+  z-index: 3;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 47%, rgba(171, 210, 179, .26), rgba(112, 158, 122, .1) 27%, transparent 55%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(.76);
+}
+.garden-entry-bloom::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  left: 0;
+  width: 26vw;
+  min-width: 190px;
+  background: linear-gradient(90deg, transparent, rgba(204, 229, 209, .24), rgba(140, 184, 150, .08), transparent);
+  filter: blur(16px);
+  opacity: 0;
+  transform: translate3d(-42vw, 0, 0) skewX(-8deg);
+}
+.garden-entry.entry-motion-ready.is-active .garden-entry-bloom {
+  animation: g-entry-bloom var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry.entry-motion-ready.is-active .garden-entry-bloom::after {
+  animation: g-entry-light-sweep var(--g-motion-intro) var(--g-ease-out) both;
+}
+.garden-entry-mist {
+  position: absolute;
+  inset: -12%;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+.garden-entry-mist i {
+  position: absolute;
+  width: clamp(260px, 38vw, 620px);
+  aspect-ratio: 1.7;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(186, 210, 191, .12), rgba(113, 148, 121, .04) 46%, transparent 72%);
+  filter: blur(28px);
+  opacity: .12;
+  transform: translate3d(0, 0, 0);
+}
+.garden-entry-mist i:nth-child(1) { top: 8%; left: -8%; --mist-x: 11vw; --mist-y: 4vh; --mist-time: 12s; }
+.garden-entry-mist i:nth-child(2) { top: 38%; right: -12%; --mist-x: -13vw; --mist-y: -5vh; --mist-time: 15s; }
+.garden-entry-mist i:nth-child(3) { bottom: -9%; left: 29%; --mist-x: 7vw; --mist-y: -7vh; --mist-time: 18s; }
+.garden-entry.is-active .garden-entry-mist i {
+  animation: g-entry-mist var(--mist-time) var(--g-ease-soft) infinite alternate;
+}
 .garden-entry-clear {
   display: none;
   position: absolute;
   inset: -12px;
-  z-index: 2;
+  z-index: 4;
   background-image:
     radial-gradient(circle at var(--entry-clear-x) var(--entry-clear-y), rgba(140,184,150,.1), transparent 38%),
     url("/images/garden-window-bg.jpg");
@@ -366,7 +438,7 @@ html.theme-switching .site-backdrop {
 .garden-entry-rain {
   position: absolute;
   inset: -12% 0 0;
-  z-index: 3;
+  z-index: 4;
   overflow: hidden;
   opacity: .52;
   pointer-events: none;
@@ -393,36 +465,6 @@ html.theme-switching .site-backdrop {
 .garden-entry-rain i:nth-child(5) { --rain-x: 67%; --rain-h: 19vh; --rain-speed: 4.1s; --rain-delay: -.2s; }
 .garden-entry-rain i:nth-child(6) { --rain-x: 81%; --rain-h: 11vh; --rain-speed: 3.3s; --rain-delay: -1.9s; }
 .garden-entry-rain i:nth-child(7) { --rain-x: 94%; --rain-h: 16vh; --rain-speed: 3.9s; --rain-delay: -3.1s; }
-.garden-entry-panes {
-  position: absolute;
-  inset: -3px;
-  z-index: 4;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 1px;
-  background: transparent;
-  perspective: 900px;
-}
-.garden-entry-panes i {
-  display: block;
-  background-image:
-    linear-gradient(rgba(5,9,7,.2), rgba(5,9,7,.46)),
-    url("/images/garden-night-window.jpg");
-  background-repeat: no-repeat;
-  background-size: 200% 200%;
-  box-shadow: inset 0 0 0 .5px rgba(183,203,188,.22), inset 0 0 48px rgba(3,7,5,.26);
-  filter: blur(2px) saturate(.84) brightness(.8) contrast(1.08);
-}
-.garden-entry.entry-motion-ready .garden-entry-panes i { will-change: transform, opacity; }
-.garden-entry.entry-motion-ready.is-active .garden-entry-panes i {
-  animation: g-entry-pane var(--g-motion-intro) var(--g-ease-out) both;
-  animation-delay: var(--pane-delay, 0ms);
-}
-.garden-entry-panes i:nth-child(1) { --pane-x: -104%; --pane-y: -104%; --pane-delay: 0ms; background-position: left top; transform-origin: right bottom; }
-.garden-entry-panes i:nth-child(2) { --pane-x: 104%; --pane-y: -104%; --pane-delay: 80ms; background-position: right top; transform-origin: left bottom; }
-.garden-entry-panes i:nth-child(3) { --pane-x: -104%; --pane-y: 104%; --pane-delay: 150ms; background-position: left bottom; transform-origin: right top; }
-.garden-entry-panes i:nth-child(4) { --pane-x: 104%; --pane-y: 104%; --pane-delay: 230ms; background-position: right bottom; transform-origin: left top; }
 .garden-entry-coordinates {
   position: absolute;
   top: max(24px, env(safe-area-inset-top));
@@ -3225,11 +3267,10 @@ body.toc-open { overflow: hidden; }
   .garden-route { display: none; }
 }
 @media (max-width: 768px) {
-  .garden-entry { --g-motion-intro: 1650ms; }
-  .garden-entry-panes i {
-    filter: blur(2px) saturate(.82) brightness(.78) contrast(1.06);
-  }
-  .garden-entry.entry-motion-ready.is-active .garden-entry-panes i { animation-name: g-entry-pane-mobile; }
+  .garden-entry { --g-motion-intro: 1500ms; }
+  .garden-entry-veil { background-position: 52% center; }
+  .garden-entry-bloom::after { width: 42vw; }
+  .garden-entry-mist i:nth-child(3) { display: none; }
   .garden-entry::before { background-position: 47% center; }
   .garden-entry-coordinates {
     font-size: 7px;
@@ -3565,22 +3606,30 @@ body.toc-open { overflow: hidden; }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes g-entry-pane {
-  0%, 20% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1.035);
-  }
-  42% { opacity: .98; }
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--pane-x), var(--pane-y), 0) scale(1.08);
-  }
+@keyframes g-entry-veil {
+  0%, 16% { opacity: 1; transform: scale(1.02); }
+  34% { opacity: .96; transform: scale(1.018); }
+  78%, 100% { opacity: 0; transform: scale(1.065); }
 }
 
-@keyframes g-entry-pane-mobile {
-  0%, 20% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.025); }
-  42% { opacity: .98; }
-  100% { opacity: 0; transform: translate3d(0, var(--pane-y), 0) scale(1.04); }
+@keyframes g-entry-bloom {
+  0%, 18% { opacity: 0; transform: scale(.76); }
+  42% { opacity: .88; transform: scale(.9); }
+  72% { opacity: .28; transform: scale(1.12); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
+@keyframes g-entry-light-sweep {
+  0%, 16% { opacity: 0; transform: translate3d(-42vw, 0, 0) skewX(-8deg); }
+  34% { opacity: .72; }
+  76% { opacity: .22; }
+  100% { opacity: 0; transform: translate3d(142vw, 0, 0) skewX(-8deg); }
+}
+
+@keyframes g-entry-mist {
+  0% { opacity: .08; transform: translate3d(0, 0, 0) scale(.96); }
+  55% { opacity: .18; }
+  100% { opacity: .1; transform: translate3d(var(--mist-x), var(--mist-y), 0) scale(1.08); }
 }
 
 @keyframes g-entry-mark {
@@ -3678,7 +3727,9 @@ body.toc-open { overflow: hidden; }
   }
   .site-backdrop::after { display: none !important; }
   .hero-fireflies { display: none !important; }
-  .garden-entry-panes { display: none; }
+  .garden-entry-veil,
+  .garden-entry-bloom,
+  .garden-entry-mist { display: none !important; }
   .garden-entry-rain,
   .garden-entry-clear { display: none !important; }
   .garden-entry-stage,
