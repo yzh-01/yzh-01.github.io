@@ -115,11 +115,23 @@
     tocOverlay.hidden = false;
     placeTocToggle(mobileQuery.matches);
 
+    var currentTocParent = '';
+    var firstTocParent = '';
+
     headings.forEach(function (heading) {
       var link = document.createElement('a');
       link.href = '#' + heading.id;
       link.textContent = heading.dataset.tocText || getHeadingText(heading);
-      if (heading.tagName.toLowerCase() === 'h3') link.className = 'toc-h3';
+      if (heading.tagName.toLowerCase() === 'h2') {
+        currentTocParent = heading.id;
+        if (!firstTocParent) firstTocParent = currentTocParent;
+      } else {
+        link.className = 'toc-h3';
+        heading.dataset.tocParent = currentTocParent;
+        link.dataset.tocParent = currentTocParent;
+        if (!currentTocParent) link.classList.add('toc-orphan');
+        if (currentTocParent === firstTocParent) link.classList.add('toc-context');
+      }
       link.addEventListener('click', function (event) {
         event.preventDefault();
         scrollToHeading(heading.id);
@@ -133,7 +145,15 @@
       var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (!entry.isIntersecting) return;
-          tocLinks.forEach(function (link) { link.classList.remove('active'); });
+          var activeParent = entry.target.tagName.toLowerCase() === 'h2'
+            ? entry.target.id
+            : entry.target.dataset.tocParent;
+          tocLinks.forEach(function (link) {
+            link.classList.remove('active');
+            if (link.classList.contains('toc-h3') && !link.classList.contains('toc-orphan')) {
+              link.classList.toggle('toc-context', link.dataset.tocParent === activeParent);
+            }
+          });
           var active = tocNav.querySelector('a[href="#' + CSS.escape(entry.target.id) + '"]');
           if (active) {
             active.classList.add('active');
