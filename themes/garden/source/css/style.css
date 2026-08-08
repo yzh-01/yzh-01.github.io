@@ -28,6 +28,70 @@
   src: url("/fonts/kalam-latin-400.woff2") format("woff2");
 }
 
+/* Chinese calligraphy used only by the garden title and opening scene. */
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-100.woff2") format("woff2");
+  unicode-range: U+82D4;
+}
+
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-104.woff2") format("woff2");
+  unicode-range: U+832B;
+}
+
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-108.woff2") format("woff2");
+  unicode-range: U+75D5;
+}
+
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-111.woff2") format("woff2");
+  unicode-range: U+7070;
+}
+
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-113.woff2") format("woff2");
+  unicode-range: U+8FF9, U+96E8;
+}
+
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-115.woff2") format("woff2");
+  unicode-range: U+6B62;
+}
+
+@font-face {
+  font-family: "Liu Jian Mao Cao";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/liu-jian-mao-cao-119.woff2") format("woff2");
+  unicode-range: U+6709;
+}
+
 /* ===== Tokens ===== */
 :root {
   /* 浅色模式 */
@@ -85,7 +149,8 @@
   /* 字级 */
   --g-font:       -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
   --g-font-mono:  "Maple Mono", "SF Mono", "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", ui-monospace, monospace;
-  --g-font-script:"Caveat", "Liu Jian Mao Cao", "Segoe Script", "STXingkai", "华文行楷", "KaiTi", cursive;
+  --g-font-script:"Caveat", "Segoe Script", "STXingkai", "华文行楷", "KaiTi", cursive;
+  --g-font-zh-script: "Liu Jian Mao Cao", "STXingkai", "华文行楷", "KaiTi", cursive;
   --g-font-title: "Kalam", "Zhi Mang Xing", "STXingkai", "KaiTi", cursive;
 
   /* 间距 */
@@ -619,7 +684,7 @@ html.theme-switching .site-backdrop {
   opacity: .68;
 }
 .garden-entry-mark strong {
-  font-family: var(--g-font-script);
+  font-family: var(--g-font-zh-script);
   font-size: clamp(48px, 8vw, 84px);
   font-weight: 400;
   line-height: 1.1;
@@ -1371,7 +1436,7 @@ body.is-home .g-sec-label::before {
   padding-right: 82px;
   margin: 0 0 8px;
   color: var(--g-text);
-  font-family: var(--g-font-script);
+  font-family: var(--g-font-zh-script);
   font-size: 42px;
   font-weight: 400;
   line-height: 1.3;
