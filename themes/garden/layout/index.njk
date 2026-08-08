@@ -1,5 +1,9 @@
 {% extends '_layout.njk' %}
 
+{% block head_extra %}
+<link rel="stylesheet" href="{{ url_for('css/home.css') }}?v={{ theme.asset_version }}">
+{% endblock %}
+
 {# ===== 构建时数据预计算（一次遍历全站）===== #}
 {%- set all_posts = site.posts.toArray() -%}
 {%- set wc = 0 -%}
@@ -80,20 +84,26 @@
   {# ===== 1. Personal Hero ===== #}
   {%- if theme.modules.hero %}
   <section class="hero" id="garden-home">
+    <span class="hero-index" aria-hidden="true">OBSERVATION / 001</span>
+    <div class="hero-orbit" aria-hidden="true">
+      <i></i><i></i><i></i>
+      <span>GROWING<br>IN PUBLIC</span>
+    </div>
     <div class="hero-fireflies" aria-hidden="true">
       <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
     <div class="hero-copy">
       <p class="hero-eyebrow"><span aria-hidden="true"></span>个人数字花园 · 持续生长中</p>
-      <h1>HELLO，我是 <span class="hero-name">{{ config.author }}。</span></h1>
-      <p class="hero-thesis">在代码、学习与生活之间，<em>持续记录。</em></p>
-      <p class="tagline">这里整理技术实践、学习中的疑问，也留下普通日子的碎片。</p>
+      <h1><span class="hero-greeting">HELLO, I'M</span><span class="hero-name">{{ config.author }}</span></h1>
+      <p class="hero-thesis">把代码写进日常，<br><em>也把生活种进时间里。</em></p>
+      <p class="tagline">一座仍在施工的私人观测站。技术实践、学习中的疑问与普通日子的碎片，在这里彼此照亮。</p>
       <div class="hero-actions">
         <a class="hero-action primary" href="#latest-posts">阅读最近文章 <span aria-hidden="true">↓</span></a>
         <a class="hero-action" href="{{ url_for('about/') }}">关于我 <span aria-hidden="true">→</span></a>
       </div>
     </div>
     <aside class="hero-identity" aria-label="关于这个数字花园">
+      <span class="hero-specimen-label">SPECIMEN · SELF PORTRAIT</span>
       <div class="hero-companion">
         <img class="hero-companion-light" src="{{ url_for('images/garden-light-avatar.jpg') }}" width="736" height="736" alt="一只探出头的白猫" decoding="async">
         <img class="hero-companion-dark" src="{{ url_for('images/garden-companion.jpg') }}" width="720" height="720" alt="一只坐在林间苔藓上的黑猫" decoding="async">
@@ -118,6 +128,12 @@
     </aside>
     <div class="hero-trace" aria-hidden="true"></div>
   </section>
+  <div class="garden-signal-strip" aria-label="花园内容方向">
+    <div aria-hidden="true">
+      <span>CODE AS CRAFT</span><i>✦</i><span>LEARNING IN PUBLIC</span><i>✦</i><span>ORDINARY DAYS</span><i>✦</i><span>KEEP GROWING</span><i>✦</i>
+      <span aria-hidden="true">CODE AS CRAFT</span><i aria-hidden="true">✦</i><span aria-hidden="true">LEARNING IN PUBLIC</span><i aria-hidden="true">✦</i><span aria-hidden="true">ORDINARY DAYS</span><i aria-hidden="true">✦</i><span aria-hidden="true">KEEP GROWING</span><i aria-hidden="true">✦</i>
+    </div>
+  </div>
   {%- endif %}
 
   {# ===== 2. Latest Posts ===== #}
@@ -252,6 +268,7 @@
       <span class="garden-map-note">按兴趣走进这座花园</span>
     </div>
     <div class="garden-terrain">
+      <div class="terrain-radar" aria-hidden="true"><i></i><i></i><i></i><span></span></div>
       <svg class="garden-terrain-lines" viewBox="0 0 920 460" preserveAspectRatio="none" aria-hidden="true">
         <path class="terrain-contour terrain-contour-a" d="M60 236C154 94 302 73 433 170S691 279 860 111" />
         <path class="terrain-contour terrain-contour-b" d="M41 343C189 256 297 332 420 277S677 168 875 319" />

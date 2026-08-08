@@ -445,6 +445,55 @@
     window.addEventListener('pageshow', clearTransitionSources);
   }
 
+  function setupHomeDepth() {
+    var hero = document.querySelector('.is-home .hero');
+    var identity = hero ? hero.querySelector('.hero-identity') : null;
+    var orbit = hero ? hero.querySelector('.hero-orbit') : null;
+    if (!hero || !identity || !orbit || !window.CSS || !window.CSS.supports('translate: 1px')) return;
+
+    var frame = 0;
+    var leaveTimer = 0;
+    var targetX = 0;
+    var targetY = 0;
+
+    function enabled() {
+      return finePointer.matches && !reduceMotion.matches;
+    }
+
+    function renderDepth() {
+      frame = 0;
+      identity.style.translate = (targetX * 9).toFixed(2) + 'px ' + (targetY * 7).toFixed(2) + 'px';
+      orbit.style.translate = (targetX * -13).toFixed(2) + 'px ' + (targetY * -10).toFixed(2) + 'px';
+    }
+
+    function scheduleDepth(event) {
+      if (!enabled()) return;
+      var rect = hero.getBoundingClientRect();
+      targetX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - .5) * 2));
+      targetY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - .5) * 2));
+      identity.style.willChange = 'translate';
+      orbit.style.willChange = 'translate';
+      window.clearTimeout(leaveTimer);
+      if (!frame) frame = window.requestAnimationFrame(renderDepth);
+    }
+
+    function resetDepth() {
+      targetX = 0;
+      targetY = 0;
+      if (!frame) frame = window.requestAnimationFrame(renderDepth);
+      leaveTimer = window.setTimeout(function () {
+        identity.style.removeProperty('will-change');
+        orbit.style.removeProperty('will-change');
+      }, 650);
+    }
+
+    hero.addEventListener('pointermove', scheduleDepth, { passive: true });
+    hero.addEventListener('pointerleave', resetDepth, { passive: true });
+    reduceMotion.addEventListener('change', function () {
+      if (!enabled()) resetDepth();
+    });
+  }
+
   function setupCardSpotlights() {
     var cards = Array.prototype.slice.call(document.querySelectorAll('[data-spotlight]'));
     if (!cards.length) return;
@@ -590,6 +639,7 @@
   setupGardenRoute();
   setupGardenWander();
   setupHeroFog();
+  setupHomeDepth();
   setupCardSpotlights();
   setupPageTransitions();
   setupArchiveFilter();
