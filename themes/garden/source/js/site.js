@@ -388,6 +388,63 @@
     updateScrollState();
   }
 
+  function setupGardenWander() {
+    var wander = document.querySelector('[data-garden-wander]');
+    var pool = document.querySelector('[data-garden-wander-pool]');
+    if (!wander || !pool) return;
+
+    var paths = Array.prototype.slice.call(pool.querySelectorAll('[data-wander-path]')).map(function (item) {
+      return item.dataset.wanderPath;
+    }).filter(Boolean);
+    if (!paths.length) return;
+
+    wander.addEventListener('click', function (event) {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+
+      var lastPath = '';
+      try { lastPath = window.sessionStorage.getItem('garden-last-wander') || ''; } catch (error) {}
+      var currentPath = window.location.pathname;
+      var candidates = paths.filter(function (path) {
+        return path !== currentPath && (paths.length < 3 || path !== lastPath);
+      });
+      if (!candidates.length) candidates = paths.slice();
+
+      var randomValue = Math.random();
+      if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+        var values = new Uint32Array(1);
+        window.crypto.getRandomValues(values);
+        randomValue = values[0] / 4294967296;
+      }
+      var destination = candidates[Math.floor(randomValue * candidates.length)];
+      try { window.sessionStorage.setItem('garden-last-wander', destination); } catch (error) {}
+      window.location.assign(destination);
+    });
+  }
+
+  function setupPageTransitions() {
+    var links = Array.prototype.slice.call(document.querySelectorAll('[data-post-transition]'));
+    if (!links.length || !window.CSS || !window.CSS.supports('view-transition-name: garden-post-title')) return;
+
+    function clearTransitionSources() {
+      document.querySelectorAll('.is-transition-source').forEach(function (item) {
+        item.classList.remove('is-transition-source');
+      });
+    }
+
+    links.forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        var title = link.querySelector('[data-post-transition-title]');
+        if (!title) return;
+        clearTransitionSources();
+        title.classList.add('is-transition-source');
+      });
+    });
+
+    window.addEventListener('pageshow', clearTransitionSources);
+  }
+
   function setupCardSpotlights() {
     var cards = Array.prototype.slice.call(document.querySelectorAll('[data-spotlight]'));
     if (!cards.length) return;
@@ -531,8 +588,10 @@
   setupGardenTheme();
   setupGardenEntry();
   setupGardenRoute();
+  setupGardenWander();
   setupHeroFog();
   setupCardSpotlights();
+  setupPageTransitions();
   setupArchiveFilter();
   setupReveal();
   setupSearchShortcut();
