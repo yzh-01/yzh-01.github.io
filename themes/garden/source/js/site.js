@@ -7,6 +7,7 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   var gardenRoute = document.querySelector('.garden-route');
+  var gardenRouteFill = gardenRoute ? gardenRoute.querySelector('.garden-route-track i') : null;
   var gardenRouteItems = [];
   var gardenRouteStart = 0;
   var gardenRouteEnd = 1;
@@ -22,7 +23,7 @@
       if (marker >= item.top) activeIndex = index;
     });
 
-    gardenRoute.style.setProperty('--garden-route-progress', progress.toFixed(4));
+    if (gardenRouteFill) gardenRouteFill.style.transform = 'scaleY(' + progress.toFixed(4) + ')';
     gardenRouteItems.forEach(function (item, index) {
       var active = index === activeIndex;
       item.link.classList.toggle('active', active);
@@ -196,6 +197,7 @@
     }, 1000);
 
     var clearLayer = entry.querySelector('[data-entry-clear]');
+    var entryStage = entry.querySelector('.garden-entry-stage');
     var pointerFrame = 0;
     var scrollFrame = 0;
     var touchTimer = 0;
@@ -209,8 +211,8 @@
       var rect = entry.getBoundingClientRect();
       var x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
       var y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
-      entry.style.setProperty('--entry-clear-x', x.toFixed(1) + 'px');
-      entry.style.setProperty('--entry-clear-y', y.toFixed(1) + 'px');
+      clearLayer.style.setProperty('--entry-clear-x', x.toFixed(1) + 'px');
+      clearLayer.style.setProperty('--entry-clear-y', y.toFixed(1) + 'px');
     }
 
     function scheduleClearPosition(event) {
@@ -248,8 +250,10 @@
       var rect = entry.getBoundingClientRect();
       var travel = Math.max(1, entry.offsetHeight * .72);
       var progress = Math.max(0, Math.min(1, -rect.top / travel));
-      entry.style.setProperty('--entry-stage-y', (-34 * progress).toFixed(1) + 'px');
-      entry.style.setProperty('--entry-stage-opacity', Math.max(0, 1 - progress * 1.18).toFixed(3));
+      if (entryStage) {
+        entryStage.style.transform = 'translate3d(0, ' + (-34 * progress).toFixed(1) + 'px, 0)';
+        entryStage.style.opacity = Math.max(0, 1 - progress * 1.18).toFixed(3);
+      }
       entry.style.setProperty('--entry-bg-y', (18 * progress).toFixed(1) + 'px');
     }
 

@@ -64,7 +64,6 @@
     if (!toc || !tocToggle || !tocOverlay) return;
     toc.classList.remove('mobile-open');
     tocOverlay.classList.remove('open');
-    tocOverlay.hidden = true;
     tocToggle.setAttribute('aria-expanded', 'false');
     tocToggle.setAttribute('aria-label', '打开文章目录');
     document.body.classList.remove('toc-open');
@@ -76,7 +75,6 @@
   function openToc() {
     if (!toc || !tocToggle || !tocOverlay) return;
     lastFocused = document.activeElement;
-    tocOverlay.hidden = false;
     toc.classList.add('mobile-open');
     tocOverlay.classList.add('open');
     tocToggle.setAttribute('aria-expanded', 'true');
@@ -96,6 +94,7 @@
     wrap.classList.add('has-toc');
     document.body.classList.add('has-toc-page');
     if (tocToggle) tocToggle.hidden = false;
+    tocOverlay.hidden = false;
 
     headings.forEach(function (heading) {
       var link = document.createElement('a');

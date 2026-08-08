@@ -55,6 +55,7 @@
   --g-ease-standard: cubic-bezier(.2, .8, .2, 1);
   --g-ease-out:      cubic-bezier(.22, 1, .36, 1);
   --g-ease-soft:     cubic-bezier(.4, 0, .2, 1);
+  --g-ease-drawer:   cubic-bezier(.32, .72, 0, 1);
   --g-code-bg:     rgba(222,228,219,.98);
   --g-code-chrome: #d5ddd2;
   --g-code-border: #bec9bb;
@@ -1173,12 +1174,22 @@ body.is-home .g-sec-label::before {
   letter-spacing: .11em;
 }
 .hero-eyebrow span {
+  position: relative;
   width: 7px;
   height: 7px;
   flex: none;
   background: var(--g-accent);
   border-radius: 50%;
   box-shadow: 0 0 0 5px var(--g-accent-soft);
+}
+.hero-eyebrow span::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid var(--g-accent);
+  border-radius: inherit;
+  opacity: 0;
+  transform: scale(.72);
 }
 .hero h1 {
   font-family: var(--g-font);
@@ -3140,11 +3151,10 @@ body.toc-open { overflow: hidden; }
   }
 
   /* hide desktop TOC + handle */
-  .article-wrap .toc-handle,
-  .article-wrap .article-toc {
+  .article-wrap .toc-handle {
     display: none !important;
   }
-  .article-toc.mobile-open {
+  .article-wrap.has-toc .article-toc {
     display: block !important;
     position: fixed;
     top: auto;
@@ -3166,7 +3176,23 @@ body.toc-open { overflow: hidden; }
     box-shadow: 0 -8px 32px rgba(0,0,0,.12);
     overflow-y: auto;
     overscroll-behavior: contain;
-    animation: toc-slide-up 0.25s ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(calc(100% + 12px));
+    transition:
+      transform 240ms var(--g-ease-drawer),
+      opacity 180ms var(--g-ease-out),
+      visibility 0s linear 240ms;
+    will-change: transform, opacity;
+  }
+  .article-wrap.has-toc .article-toc.mobile-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition-duration: 240ms, 160ms, 0s;
+    transition-delay: 0s;
   }
   .article-toc.mobile-open .toc-heading {
     position: sticky;
@@ -3178,11 +3204,6 @@ body.toc-open { overflow: hidden; }
   }
   .article-toc.mobile-open .toc-title { margin-bottom: 0; }
   .article-toc.mobile-open .toc-close { display: inline-flex; }
-  @keyframes toc-slide-up {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-
   /* Persistent mobile TOC trigger: stays available throughout reading. */
   body.has-toc-page .toc-toggle {
     display: inline-flex;
@@ -3209,23 +3230,26 @@ body.toc-open { overflow: hidden; }
     -webkit-backdrop-filter: blur(14px) saturate(1.08);
     transition: background 0.2s, border-color 0.2s, color 0.2s, transform .2s var(--g-ease-out);
   }
-  .toc-toggle:hover {
-    color: var(--g-accent-text);
-    background: var(--g-accent-soft);
-    border-color: var(--g-accent-border);
-    transform: translateY(-1px);
-  }
-
   /* overlay backdrop */
-  .toc-overlay { display: none; }
-  .toc-overlay.open {
+  .toc-overlay {
     display: block;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.25);
     z-index: 55;
-    opacity: 1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
     backdrop-filter: blur(2px);
+    transition:
+      opacity 180ms var(--g-ease-out),
+      visibility 0s linear 180ms;
+  }
+  .toc-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
   }
 
   /* prevent content overflow */
@@ -3241,6 +3265,14 @@ body.toc-open { overflow: hidden; }
 :root[data-theme="dark"] .toc-overlay.open { background: rgba(0,0,0,0.5); }
 @media (max-width: 1023px) and (prefers-color-scheme: dark) {
   :root:not([data-theme]) .toc-overlay.open { background: rgba(0,0,0,0.5); }
+}
+@media (max-width: 1023px) and (hover: hover) and (pointer: fine) {
+  .toc-toggle:hover {
+    color: var(--g-accent-text);
+    background: var(--g-accent-soft);
+    border-color: var(--g-accent-border);
+    transform: translateY(-1px);
+  }
 }
 
 /* ===== Heading Anchor Links ===== */
@@ -3263,12 +3295,21 @@ body.toc-open { overflow: hidden; }
   line-height: 1;
 }
 .article-body h2:hover .h-anchor,
-.article-body h3:hover .h-anchor {
+.article-body h3:hover .h-anchor,
+.article-body h2 .h-anchor:focus-visible,
+.article-body h3 .h-anchor:focus-visible {
   opacity: 1;
 }
 .article-body h2 .h-anchor:hover,
 .article-body h3 .h-anchor:hover {
   color: var(--g-accent);
+}
+.article-body h2 .h-anchor:focus-visible,
+.article-body h3 .h-anchor:focus-visible {
+  color: var(--g-accent-text);
+  outline: 2px solid var(--g-accent);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 @media (max-width: 768px) {
   .article-body h2 .h-anchor,
@@ -3739,8 +3780,6 @@ body.toc-open { overflow: hidden; }
   }
   .garden-search kbd { display: none; }
   .search-results a { padding: 19px 8px; }
-  .search-results a:hover,
-  .search-results a:focus-visible { padding-left: 14px; }
   .garden-log-entry {
     grid-template-columns: 1fr;
     gap: 18px;
@@ -3809,8 +3848,8 @@ body.toc-open { overflow: hidden; }
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
   }
-  .hero-eyebrow span {
-    animation: g-status-pulse 4.2s ease-in-out infinite;
+  .hero-eyebrow span::after {
+    animation: g-status-wave 4.2s var(--g-ease-out) infinite;
   }
   .now-signal {
     animation: g-now-core 2.8s var(--g-ease-soft) infinite;
@@ -3961,20 +4000,19 @@ body.toc-open { overflow: hidden; }
   86% { opacity: .62; }
 }
 
-@keyframes g-status-pulse {
-  0%, 58%, 100% { box-shadow: 0 0 0 4px var(--g-accent-soft); }
-  68% { box-shadow: 0 0 0 7px transparent, 0 0 13px var(--g-glow); }
+@keyframes g-status-wave {
+  0%, 58% { opacity: 0; transform: scale(.72); }
+  68% { opacity: .72; }
+  84%, 100% { opacity: 0; transform: scale(1.72); }
 }
 
 @keyframes g-now-core {
   0%, 100% {
     opacity: .72;
-    box-shadow: 0 0 0 3px var(--g-accent-soft), 0 0 7px transparent;
     transform: scale(.82);
   }
   22% {
     opacity: 1;
-    box-shadow: 0 0 0 5px var(--g-accent-soft), 0 0 18px var(--g-glow);
     transform: scale(1.16);
   }
   42% { opacity: .9; transform: scale(.96); }
