@@ -3,16 +3,16 @@
 
 # 建站年份（不会随当前年份变化）
 since: 2026
-asset_version: 20260807-9
+asset_version: 20260808-1
 
 # 首页模块开关（模块未完成时可先关闭）
 modules:
   hero: true
   latest_posts: true
   now: true
-  featured_projects: true
-  tech_stack: true
-  journey: true
+  featured_notes: true
+  workbench: true
+  garden_log: true
   life: true
   about: true
 

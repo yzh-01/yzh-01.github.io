@@ -16,6 +16,24 @@
   var tocOverlay = document.getElementById('toc-overlay');
   var headings = Array.prototype.slice.call(articleBody.querySelectorAll('h2, h3'));
   var lastFocused = null;
+  var tocOriginalParent = tocToggle ? tocToggle.parentNode : null;
+  var tocOriginalNext = tocToggle ? tocToggle.nextSibling : null;
+
+  function placeTocToggle(isMobile) {
+    if (!tocToggle || !tocOriginalParent) return;
+    var actions = document.querySelector('.garden-control-actions');
+    if (isMobile && actions) {
+      tocToggle.classList.add('garden-control-button');
+      actions.insertBefore(tocToggle, actions.firstChild);
+      return;
+    }
+    tocToggle.classList.remove('garden-control-button');
+    if (tocOriginalNext && tocOriginalNext.parentNode === tocOriginalParent) {
+      tocOriginalParent.insertBefore(tocToggle, tocOriginalNext);
+    } else {
+      tocOriginalParent.appendChild(tocToggle);
+    }
+  }
 
   function scrollToHeading(id) {
     var target = document.getElementById(id);
@@ -95,6 +113,7 @@
     document.body.classList.add('has-toc-page');
     if (tocToggle) tocToggle.hidden = false;
     tocOverlay.hidden = false;
+    placeTocToggle(mobileQuery.matches);
 
     headings.forEach(function (heading) {
       var link = document.createElement('a');
@@ -154,6 +173,7 @@
     });
 
     mobileQuery.addEventListener('change', function (event) {
+      placeTocToggle(event.matches);
       if (!event.matches) closeToc({ restoreFocus: false });
     });
   }

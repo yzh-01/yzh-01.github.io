@@ -127,8 +127,25 @@
 
     if (!controls || !panel || !toggle) return;
 
+    var panelTimer = 0;
+    var panelFrame = 0;
+
     function setPanel(open) {
-      panel.hidden = !open;
+      window.clearTimeout(panelTimer);
+      window.cancelAnimationFrame(panelFrame);
+      if (open) {
+        panel.hidden = false;
+        panelFrame = window.requestAnimationFrame(function () {
+          panelFrame = 0;
+          panel.classList.add('is-open');
+        });
+      } else {
+        panel.classList.remove('is-open');
+        panelTimer = window.setTimeout(function () {
+          panel.hidden = true;
+          panelTimer = 0;
+        }, 240);
+      }
       toggle.setAttribute('aria-expanded', String(open));
       toggle.setAttribute('aria-label', open ? '关闭花园设置' : '打开花园设置');
     }

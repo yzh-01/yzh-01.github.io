@@ -1,10 +1,29 @@
-# 技术栈 · 按领域分组展示
-# 编辑此文件即可更新首页 Tech Stack 模块
-- group: 语言
-  items: [TypeScript, Python, Java, C]
-- group: 前端
-  items: [React, Next.js, Tailwind CSS, Vite]
-- group: 后端
-  items: [Node.js, Express, MySQL, Docker]
-- group: 工具
-  items: [Git, VS Code, Figma, GitHub Actions]
+# 当前工作台 · 记录真正使用中的工具，而不是静态技能清单
+- group: 语言与基础
+  items:
+    - name: TypeScript
+      note: 前端与类型建模
+    - name: Python
+      note: 脚本与自动化
+    - name: Java
+      note: 课程与后端基础
+    - name: C
+      note: 系统与语言基础
+- group: Web 实践
+  items:
+    - name: React
+      note: 组件与交互实验
+    - name: Next.js
+      note: 全栈 Web 探索
+    - name: Vite
+      note: 轻量原型构建
+- group: 写作与发布
+  items:
+    - name: Obsidian
+      note: 草稿与知识整理
+    - name: Hexo
+      note: 数字花园生成
+    - name: GitHub Actions
+      note: 自动构建与部署
+    - name: Maple Mono
+      note: 代码阅读与写作

@@ -31,14 +31,14 @@
   </section>
   {%- endif %}
 
-  {%- if site.data.now and site.data.now.length %}
+  {%- if site.data.now and site.data.now.items and site.data.now.items.length %}
   <section class="about-chapter" aria-labelledby="about-now-title" data-reveal>
     <div class="about-chapter-heading">
       <div class="g-sec-label" id="about-now-title">此刻</div>
       <p>会随阶段变化的小型状态页。</p>
     </div>
     <div class="about-now-list">
-      {%- for item in site.data.now %}
+      {%- for item in site.data.now.items %}
       <div class="about-now-item">
         <span>{{ item.label }}</span>
         <p>{{ item.text }}</p>

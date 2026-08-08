@@ -4,6 +4,33 @@
 {% set article_length = article_text.length %}
 {% set reading_minutes = ((article_length + 299) / 300) | int %}
 {% set toc_available = theme.post.toc and ('<h2' in page.content or '<h3' in page.content) %}
+{% set note_status = page.status or 'growing' %}
+{% set note_status_label = '萌芽' %}
+{% if note_status == 'growing' %}{% set note_status_label = '生长中' %}{% endif %}
+{% if note_status == 'evergreen' %}{% set note_status_label = '常青' %}{% endif %}
+{% set related_posts = [] %}
+{% set backlink_posts = [] %}
+{% for candidate in site.posts.toArray() %}
+  {% if candidate.path != page.path %}
+    {% set is_related = false %}
+    {% for current_tag in page.tags.toArray() %}
+      {% for candidate_tag in candidate.tags.toArray() %}
+        {% if current_tag.name == candidate_tag.name %}{% set is_related = true %}{% endif %}
+      {% endfor %}
+    {% endfor %}
+    {% if not is_related %}
+      {% for current_category in page.categories.toArray() %}
+        {% for candidate_category in candidate.categories.toArray() %}
+          {% if current_category.name == candidate_category.name %}{% set is_related = true %}{% endif %}
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+    {% if is_related and related_posts.length < 3 %}{% set _ = related_posts.push(candidate) %}{% endif %}
+    {% if page.path in candidate.content or url_for(page.path) in candidate.content %}
+      {% set _ = backlink_posts.push(candidate) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
 {% if reading_minutes < 1 %}{% set reading_minutes = 1 %}{% endif %}
 
 {% block head_extra %}
@@ -32,6 +59,10 @@
 <div class="article-wrap{% if not toc_available %} no-toc{% endif %}" data-toc-enabled="{{ 'true' if toc_available else 'false' }}">
   <article class="article">
     <header class="article-header">
+      <div class="article-garden-state">
+        <span class="note-status note-status-{{ note_status }}"><i aria-hidden="true"></i>{{ note_status_label }}</span>
+        <span>最后整理于 <time datetime="{{ (page.updated if page.updated else page.date).format('YYYY-MM-DD') }}">{{ (page.updated if page.updated else page.date).format('YYYY-MM-DD') }}</time></span>
+      </div>
       <h1>{{ page.title }}</h1>
       <div class="article-meta">
         <time datetime="{{ page.date.format('YYYY-MM-DD') }}">{{ page.date.format('YYYY-MM-DD') }}</time>
@@ -49,9 +80,10 @@
         {%- endif -%}
         {%- if page.tags.length -%}
         <span class="sep" aria-hidden="true">·</span>
-        {%- for tag in page.tags.toArray() -%}
+        {%- for tag in page.tags.toArray().slice(0, 3) -%}
         <a href="{{ url_for(tag.path) }}">#{{ tag.name }}</a>{% if not loop.last %} {% endif %}
         {%- endfor -%}
+        {%- if page.tags.length > 3 %}<span class="article-meta-more">+{{ page.tags.length - 3 }}</span>{%- endif %}
         {%- endif -%}
       </div>
       {%- if toc_available %}
@@ -75,6 +107,43 @@
     <div class="article-body">
       {{ page.content | safe }}
     </div>
+
+    {%- if related_posts.length or backlink_posts.length %}
+    <footer class="article-connections">
+      {%- if related_posts.length %}
+      <section aria-labelledby="related-notes-title">
+        <div class="article-connections-heading">
+          <p>continue wandering</p>
+          <h2 id="related-notes-title">继续漫游</h2>
+        </div>
+        <div class="related-notes-grid">
+          {%- for related in related_posts %}
+          <a href="{{ url_for(related.path) }}">
+            <time datetime="{{ related.date.format('YYYY-MM-DD') }}">{{ related.date.format('YYYY-MM-DD') }}</time>
+            <h3>{{ related.title }}</h3>
+            {%- if related.description %}<p>{{ related.description }}</p>{%- endif %}
+            <span>阅读笔记 <b aria-hidden="true">→</b></span>
+          </a>
+          {%- endfor %}
+        </div>
+      </section>
+      {%- endif %}
+
+      {%- if backlink_posts.length %}
+      <section class="backlink-notes" aria-labelledby="backlink-notes-title">
+        <div class="article-connections-heading compact">
+          <p>backlinks</p>
+          <h2 id="backlink-notes-title">哪些笔记提到了这里</h2>
+        </div>
+        <ul>
+          {%- for backlink in backlink_posts %}
+          <li><a href="{{ url_for(backlink.path) }}">{{ backlink.title }}</a></li>
+          {%- endfor %}
+        </ul>
+      </section>
+      {%- endif %}
+    </footer>
+    {%- endif %}
 
     {%- if page.prev or page.next %}
     <nav class="post-nav" aria-label="文章导航">

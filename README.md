@@ -8,13 +8,13 @@
 
 - 自有 Garden 主题，不依赖第三方 Hexo 主题
 - 首页顶部为可回看的水滴序章：水滴撞击雾窗后形成涟漪，花园从软边波纹中扩散显露，并加入环境微光、花园信号、本地时间、雨痕与滚动退场
-- Hero、Garden Map、Latest Posts、Now、Featured、Tech Stack、Journey、Life、About 九个内容模块
+- 首页按“正在生长 → 知识地形 → 生活侧枝 → 关于”组织内容，包含最近文章、Now、精选笔记、当前工作台、Garden Log 与生活记录
 - 可在设置中选择浅色、深色或跟随 `prefers-color-scheme`
 - 浅色与深色模式分别使用同构的白猫、黑猫花园背景，并切换对应头像；灰色与 moss 绿作为统一品牌色
 - 响应式布局，覆盖桌面、平板与移动端
-- 文章页提供 TOC、标题锚点、阅读时间、代码复制、回到顶部和返回首页介绍区入口
+- 文章页提供成长状态、更新时间、相关笔记、反向链接、TOC、标题锚点、阅读时间和代码复制
 - macOS 风格代码块，使用本地 Maple Mono 字体
-- 桌面 TOC 支持鼠标、触控笔和键盘调宽，移动端使用目录抽屉
+- 桌面 TOC 支持鼠标、触控笔和键盘调宽；移动端目录并入统一底部工具栏
 - 归档页支持分类、标签入口和当前页面即时筛选
 - 全站搜索覆盖文章标题、摘要、标签、分类与正文，按相关度排序并支持 `/` 快捷键
 - Garden Log 按月记录花园的新增、修整与重新思考
@@ -43,7 +43,7 @@
 │   ├── garden-log/index.md      # Garden Log 页面
 │   ├── _data/
 │   │   ├── now.yml              # 首页 Now 状态
-│   │   ├── stack.yml            # 首页 Tech Stack
+│   │   ├── stack.yml            # 首页“当前工作台”
 │   │   ├── garden-log.yml       # 月度 Garden Log 数据
 │   │   └── friends.yml          # 友链预留数据
 │   ├── images/                  # 站点与文章图片
@@ -114,10 +114,11 @@ categories:
   - 分类
 description: 用一句话概括文章内容
 featured: true
+status: growing
 ---
 ```
 
-`featured` 是可选字段；设置为 `true` 后，文章会进入首页 Featured 模块。中文标题建议设置稳定的英文 `permalink`，避免文章重命名时 URL 发生变化。
+`featured` 是可选字段；设置为 `true` 后，文章会进入首页“长期维护”模块。`status` 支持 `seedling`（萌芽）、`growing`（生长中）和 `evergreen`（常青），未填写时默认为 `growing`。中文标题建议设置稳定的英文 `permalink`，避免文章重命名时 URL 发生变化。
 
 文章图片统一放在：
 
@@ -158,7 +159,7 @@ D:\code\yzh-01.github.io\source
 ## 更新首页内容
 
 - Now 状态：编辑 `source/_data/now.yml`
-- Tech Stack：编辑 `source/_data/stack.yml`
+- 当前工作台：编辑 `source/_data/stack.yml`，同时写明工具的实际用途
 - About / Contact：编辑 `source/about/index.md`
 - 首页介绍文字与模块结构：编辑 `themes/garden/layout/index.njk`
 - 首页模块开关：编辑 `themes/garden/_config.yml`
@@ -190,12 +191,12 @@ D:\code\yzh-01.github.io\source
 
 - 品牌色：灰 + moss 绿
 - 正文字体：系统字体栈
-- 品牌字与文章标题：手写字体，并保留系统字体回退
+- 品牌字与文章标题：本地 Caveat / Kalam 手写字体，并保留系统字体回退
 - 代码字体：本地 Maple Mono
 - 动效：集中于雾窗序章、视差雾气、内容渐入、卡片聚光和状态呼吸
 - 响应式断点：桌面、平板和移动端分层适配
 - 无障碍：跳转正文、键盘焦点、语义化标签和减少动态效果支持
-- 阅读偏好：首页与文章页右下角均提供返回首页介绍区和外观设置，文章页额外提供回到顶部；主题选择保存在浏览器中并跨页面生效
+- 阅读偏好：首页与文章页提供返回首页介绍区和外观设置；文章页移动端将目录、回到顶部、首页与设置合并为同一工具栏；主题选择保存在浏览器中并跨页面生效
 
 修改静态资源后，需要同步更新 `themes/garden/_config.yml` 中的 `asset_version`，以刷新浏览器缓存。
 
