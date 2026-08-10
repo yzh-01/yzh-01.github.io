@@ -4,47 +4,14 @@
   {{ partial('_partial/head.njk') }}
   {% block head_extra %}{% endblock %}
 </head>
-<body{% if is_home() %} class="is-home"{% endif %}>
+<body class="{% if is_home() %}is-home{% else %}is-inner{% endif %}{% if is_post() %} is-post{% endif %}{% if is_archive() or is_tag() or is_category() %} is-archive{% endif %}{% if page.layout %} layout-{{ page.layout }}{% endif %}">
   <a class="skip-link" href="#main-content">跳到正文</a>
   <div class="site-backdrop" aria-hidden="true"></div>
-  {%- if is_home() %}
-  <section class="garden-entry" id="garden-intro" data-garden-entry aria-label="苔痕有迹，个人数字花园序章">
-    <div class="garden-entry-veil" aria-hidden="true"></div>
-    <div class="garden-entry-reveal" aria-hidden="true"></div>
-    <div class="garden-entry-impact" aria-hidden="true">
-      <i></i><i></i><i></i>
-    </div>
-    <div class="garden-entry-mist" aria-hidden="true">
-      <i></i><i></i><i></i>
-    </div>
-    <div class="garden-entry-glimmers" aria-hidden="true">
-      <i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="garden-entry-clear" data-entry-clear aria-hidden="true"></div>
-    <div class="garden-entry-rain" aria-hidden="true">
-      <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="garden-entry-coordinates" aria-hidden="true">
-      <span>FIELD NOTES · SINCE {{ theme.since }}</span>
-      <span>TECH · LEARNING · LIFE</span>
-    </div>
-    <div class="garden-entry-stage" data-entry-stage>
-      <div class="garden-entry-mark">
-        <span>PERSONAL DIGITAL GARDEN</span>
-        <strong>苔痕有迹</strong>
-        <em>技术 · 学习 · 日常</em>
-        <i></i>
-      </div>
-    </div>
-    <div class="garden-entry-atmosphere" aria-hidden="true">
-      <span class="garden-entry-signal"><i></i><span>GARDEN AWAKE</span></span>
-      <span class="garden-entry-clock"><span>LOCAL</span><time data-entry-clock>--:--:--</time></span>
-    </div>
-    <a class="garden-entry-scroll" href="#main-content">
-      <span>循苔而行</span>
-      <i aria-hidden="true"></i>
-    </a>
-  </section>
+  {%- if not is_home() %}
+  <div class="inner-atmosphere" aria-hidden="true">
+    <i></i>
+  </div>
+  <aside class="inner-page-readout" aria-hidden="true"><span>SYS.PAGE_FIELD</span><b>{{ page.layout or 'INDEX' }}</b><i>SCROLL // ACTIVE</i></aside>
   {%- endif %}
   {{ partial('_partial/nav.njk') }}
 
@@ -54,7 +21,6 @@
 
   {{ partial('_partial/footer.njk') }}
 
-  {%- if is_home() or is_post() %}
   <div class="garden-controls" data-garden-controls>
     <section class="garden-settings" id="garden-settings" aria-labelledby="garden-settings-title" hidden>
       <p class="garden-settings-kicker">GARDEN SETTINGS</p>
@@ -82,7 +48,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
       </button>
       {%- endif %}
-      <a class="garden-home-button garden-control-button" href="{% if is_home() %}#garden-home{% else %}{{ url_for('/') }}#garden-home{% endif %}" aria-label="返回首页介绍区">
+      <a class="garden-home-button garden-control-button" href="{% if is_home() %}#hello{% else %}{{ url_for('/') }}#hello{% endif %}" aria-label="返回首页介绍区">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg>
       </a>
       <button class="garden-settings-toggle garden-control-button" type="button" aria-label="打开花园设置" aria-expanded="false" aria-controls="garden-settings">
@@ -90,7 +56,6 @@
       </button>
     </div>
   </div>
-  {%- endif %}
 
   <script src="{{ url_for('js/site.js') }}?v={{ theme.asset_version }}" defer></script>
   {% block scripts %}{% endblock %}

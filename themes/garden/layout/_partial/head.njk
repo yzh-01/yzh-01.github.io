@@ -31,7 +31,7 @@
 <title>{{ resolved_title }}</title>
 <meta name="description" content="{{ resolved_description }}">
 <meta name="author" content="{{ config.author }}">
-<meta name="theme-color" id="g-theme-color" content="#dde4da">
+<meta name="theme-color" id="g-theme-color" content="#e3e8e0">
 <meta name="color-scheme" content="light dark">
 <script>
   (function () {
@@ -40,11 +40,15 @@
     if (mode !== 'light' && mode !== 'dark') mode = 'system';
     if (mode !== 'system') document.documentElement.dataset.theme = mode;
     var dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.dataset.resolvedTheme = dark ? 'dark' : 'light';
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-    document.getElementById('g-theme-color').setAttribute('content', dark ? '#121212' : '#dde4da');
+    document.getElementById('g-theme-color').setAttribute('content', dark ? '#090b0a' : '#e3e8e0');
   })();
 </script>
 <link rel="icon" href="{{ url_for('images/logo.svg') }}" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800&family=DotGothic16&family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Unbounded:wght@400;500;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('css/style.css') }}?v={{ theme.asset_version }}">
 <link rel="alternate" href="{{ url_for('atom.xml') }}" type="application/atom+xml" title="{{ config.title }}">
 <link rel="canonical" href="{{ canonical_url }}">

@@ -59,6 +59,7 @@
 <div class="article-wrap{% if not toc_available %} no-toc{% endif %}" data-toc-enabled="{{ 'true' if toc_available else 'false' }}">
   <article class="article">
     <header class="article-header">
+      <p class="inner-content-kicker">&gt; READING_BUFFER / {{ page.date.format('YYYY.MM.DD') }}</p>
       <div class="article-garden-state">
         <span class="note-status note-status-{{ note_status }}"><i aria-hidden="true"></i>{{ note_status_label }}</span>
         <span>最后整理于 <time datetime="{{ (page.updated if page.updated else page.date).format('YYYY-MM-DD') }}">{{ (page.updated if page.updated else page.date).format('YYYY-MM-DD') }}</time></span>

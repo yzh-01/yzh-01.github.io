@@ -4,383 +4,331 @@
 <link rel="stylesheet" href="{{ url_for('css/home.css') }}?v={{ theme.asset_version }}">
 {% endblock %}
 
-{# ===== 构建时数据预计算（一次遍历全站）===== #}
 {%- set all_posts = site.posts.toArray() -%}
-{%- set wc = 0 -%}
-{%- for p in all_posts -%}
-  {%- set wc = wc + (p.content | striptags).length -%}
-{%- endfor -%}
-
-{%- set cy = moment().format('YYYY') -%}
-
-{# Unique years sorted desc #}
-{%- set year_list = [] -%}
-{%- set prev = '' -%}
-{%- for p in all_posts | reverse -%}
-  {%- set y = p.date.format('YYYY') -%}
-  {%- if y != prev -%}
-    {%- set prev = y -%}
-    {%- set _ = year_list.push(y) -%}
-  {%- endif -%}
-{%- endfor -%}
-{%- set year_list = year_list | reverse -%}
-
-{# Featured posts: front matter 里 featured: true 的 #}
-{%- set featured_posts = [] -%}
-{%- for p in all_posts -%}
-  {%- if p.featured -%}
-    {%- set _ = featured_posts.push(p) -%}
-  {%- endif -%}
-{%- endfor -%}
-{# Life posts: tagged 生活 / 随笔 / 读书 #}
-{%- set life_tags = ['生活','随笔','读书','life','essay','reading'] -%}
-{%- set life_posts = [] -%}
-{%- for p in all_posts -%}
-  {%- for t in p.tags.toArray() -%}
-    {%- if life_tags.includes(t.name) -%}
-      {%- set already = false -%}
-      {%- for lp in life_posts -%}
-        {%- if lp.path == p.path -%}{%- set already = true -%}{%- endif -%}
-      {%- endfor -%}
-      {%- if not already -%}{%- set _ = life_posts.push(p) -%}{%- endif -%}
-    {%- endif -%}
-  {%- endfor -%}
-{%- endfor -%}
-{%- set life_post_count = life_posts.length -%}
-{%- set life_posts = life_posts.slice(0, 4) -%}
-
-{# Garden terrain counts: broad paths may overlap by design. #}
-{%- set tech_posts = [] -%}
-{%- set study_posts = [] -%}
-{%- set tech_terms = ['学习笔记','VSCode','软件工程','工具','hacking','code'] -%}
-{%- set study_terms = ['笔记','学习','notes','review','reading'] -%}
-{%- for p in all_posts -%}
-  {%- set is_tech = false -%}
-  {%- set is_study = false -%}
-  {%- for c in p.categories.toArray() -%}
-    {%- if tech_terms.includes(c.name) %}{%- set is_tech = true -%}{%- endif -%}
-    {%- if study_terms.includes(c.name) %}{%- set is_study = true -%}{%- endif -%}
-  {%- endfor -%}
-  {%- for t in p.tags.toArray() -%}
-    {%- if tech_terms.includes(t.name) %}{%- set is_tech = true -%}{%- endif -%}
-    {%- if study_terms.includes(t.name) %}{%- set is_study = true -%}{%- endif -%}
-  {%- endfor -%}
-  {%- if is_tech %}{%- set _ = tech_posts.push(p) -%}{%- endif -%}
-  {%- if is_study %}{%- set _ = study_posts.push(p) -%}{%- endif -%}
-{%- endfor -%}
+{%- set latest_posts = page.posts.toArray().slice(0, 3) -%}
 
 {% block content %}
-<div class="g-wide">
-
-  <nav class="garden-route" aria-label="首页花园路径">
-    <span class="garden-route-track" aria-hidden="true"><i></i></span>
-    <a href="#garden-intro" data-route-link><span>序章</span></a>
-    {%- if theme.modules.hero %}<a href="#garden-home" data-route-link><span>生长</span></a>{%- endif %}
-    <a href="#garden-map" data-route-link><span>地形</span></a>
-    {%- if theme.modules.life and life_posts.length %}<a href="#life" data-route-link><span>侧枝</span></a>{%- endif %}
-    {%- if theme.modules.about %}<a href="#garden-about" data-route-link><span>关于</span></a>{%- endif %}
-  </nav>
-
-  {# ===== 1. Personal Hero ===== #}
-  {%- if theme.modules.hero %}
-  <section class="hero" id="garden-home">
-    <span class="hero-index" aria-hidden="true">OBSERVATION / 001</span>
-    <div class="hero-orbit" aria-hidden="true">
-      <i></i><i></i><i></i>
-      <span>GROWING<br>IN PUBLIC</span>
-    </div>
-    <div class="hero-fireflies" aria-hidden="true">
-      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="hero-copy">
-      <p class="hero-eyebrow"><span aria-hidden="true"></span>个人数字花园 · 持续生长中</p>
-      <h1><span class="hero-greeting">HELLO, I'M</span><span class="hero-name">{{ config.author }}</span></h1>
-      <p class="hero-thesis">把代码写进日常，<br><em>也把生活种进时间里。</em></p>
-      <p class="tagline">一座仍在施工的私人观测站。技术实践、学习中的疑问与普通日子的碎片，在这里彼此照亮。</p>
-      <div class="hero-actions">
-        <a class="hero-action primary" href="#latest-posts">阅读最近文章 <span aria-hidden="true">↓</span></a>
-        <a class="hero-action" href="{{ url_for('about/') }}">关于我 <span aria-hidden="true">→</span></a>
+<div class="folio">
+  <section class="garden-boot" data-garden-boot aria-label="花园启动界面" hidden>
+    <div class="garden-boot-ghost" aria-hidden="true">GARDEN<br>NODE</div>
+    <div class="garden-boot-console">
+      <div class="garden-boot-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <b>Y</b>
+      </div>
+      <p class="garden-boot-eyebrow">PRIVATE FIELD NOTE / NO. 00</p>
+      <h2>这不是一张名片。<br><em>是我留下的现场。</em></h2>
+      <div class="garden-boot-readout" aria-live="polite">
+        <span data-boot-status>正在辨认花园里的痕迹</span>
+        <strong><i data-boot-progress>00</i>%</strong>
+      </div>
+      <div class="garden-boot-bar" aria-hidden="true"><i data-boot-bar></i></div>
+      <div class="garden-boot-actions">
+        <button type="button" data-boot-enter>进入现场 <span>↗</span></button>
+        <button type="button" data-motion-lite>保持安静模式</button>
       </div>
     </div>
-    <aside class="hero-identity" aria-label="关于这个数字花园">
-      <span class="hero-specimen-label">SPECIMEN · SELF PORTRAIT</span>
-      <div class="hero-companion">
-        <img class="hero-companion-light" src="{{ url_for('images/garden-light-avatar.jpg') }}" width="736" height="736" alt="一只探出头的白猫" decoding="async">
-        <img class="hero-companion-dark" src="{{ url_for('images/garden-companion.jpg') }}" width="720" height="720" alt="一只坐在林间苔藓上的黑猫" decoding="async">
-      </div>
-      <p class="hero-hand">雨止灰茫</p>
-      <p class="hero-motto">在不确定里，积累一点确定。</p>
-      <dl class="hero-stats">
-        <div>
-          <dt>记录</dt>
-          <dd>{{ all_posts.length }}<small>篇</small></dd>
-        </div>
-        <div>
-          <dt>文字</dt>
-          <dd>{{ wc }}<small>字</small></dd>
-        </div>
-        <div>
-          <dt>生长</dt>
-          <dd>{{ year_list.length }}<small>年</small></dd>
-        </div>
-      </dl>
-      <p class="hero-since">// since {{ theme.since or cy }}</p>
-    </aside>
-    <div class="hero-trace" aria-hidden="true"></div>
+    <p class="garden-boot-aside">代码会过期，<br>留下来的感受不会。</p>
   </section>
-  <div class="garden-signal-strip" aria-label="花园内容方向">
-    <div aria-hidden="true">
-      <span>CODE AS CRAFT</span><i>✦</i><span>LEARNING IN PUBLIC</span><i>✦</i><span>ORDINARY DAYS</span><i>✦</i><span>KEEP GROWING</span><i>✦</i>
-      <span aria-hidden="true">CODE AS CRAFT</span><i aria-hidden="true">✦</i><span aria-hidden="true">LEARNING IN PUBLIC</span><i aria-hidden="true">✦</i><span aria-hidden="true">ORDINARY DAYS</span><i aria-hidden="true">✦</i><span aria-hidden="true">KEEP GROWING</span><i aria-hidden="true">✦</i>
-    </div>
+
+  <div class="garden-atmosphere" aria-hidden="true">
+    <canvas class="garden-particles" data-garden-particles></canvas>
+    <div class="garden-scanlines"></div>
+    <div class="garden-noise"></div>
   </div>
-  {%- endif %}
 
-  {# ===== 2. Latest Posts ===== #}
-  {%- set latest_posts = page.posts.toArray().slice(0, 6) -%}
-  {%- if theme.modules.latest_posts and latest_posts.length %}
-  {%- set lead_post = latest_posts[0] -%}
-  {%- set lead_status = lead_post.status or 'growing' -%}
-  {%- set lead_status_label = '萌芽' -%}
-  {%- if lead_status == 'growing' %}{%- set lead_status_label = '生长中' -%}{%- endif -%}
-  {%- if lead_status == 'evergreen' %}{%- set lead_status_label = '常青' -%}{%- endif -%}
-  <section class="posts-sec" id="latest-posts" data-reveal>
-    <div class="g-sec-heading">
-      <h2 class="g-sec-label">recent posts</h2>
-      <a href="{{ url_for('archives/') }}">查看全部 <span aria-hidden="true">→</span></a>
+  <aside class="garden-hud" aria-hidden="true">
+    <div class="garden-hud-system"><b>SYS.ON</b><span>GARDEN.NODE / {{ all_posts.length }} NOTES</span></div>
+    <div class="garden-hud-vitals"><span>CPU <i data-hud-cpu>07</i>%</span><span>MEM <i data-hud-mem>24</i>%</span></div>
+    <div class="garden-hud-scroll"><b data-hud-percent>000</b><span><i data-hud-progress></i></span><small>SCROLL</small></div>
+    <i class="garden-corner garden-corner-a"></i><i class="garden-corner garden-corner-b"></i>
+    <i class="garden-corner garden-corner-c"></i><i class="garden-corner garden-corner-d"></i>
+  </aside>
+
+  <div class="garden-cursor" data-garden-cursor aria-hidden="true">
+    <i class="garden-cursor-dot"></i><i class="garden-cursor-frame"></i><span>OPEN</span>
+  </div>
+  <div class="garden-ripple-layer" data-ripple-layer aria-hidden="true"></div>
+
+  <div class="garden-pet" data-garden-pet data-post-count="{{ all_posts.length }}">
+    <p data-pet-bubble aria-live="polite">嘘，花园刚刚醒。</p>
+    <button type="button" data-pet-button aria-label="和花园里的猫打个招呼">
+      <img class="garden-pet-light" src="{{ url_for('images/garden-light-avatar.jpg') }}" width="160" height="160" alt="">
+      <img class="garden-pet-dark" src="{{ url_for('images/garden-companion.jpg') }}" width="160" height="160" alt="">
+      <span aria-hidden="true">摸一下</span>
+    </button>
+  </div>
+
+  <div class="garden-overgrowth" data-garden-overgrowth aria-hidden="true">
+    <div><small>UNLISTED FIELD FOUND</small><strong>苔藓正在越过屏幕边界。</strong><span>隐藏路径：↑ ↑ ↓ ↓ ← → ← → B A</span></div>
+  </div>
+
+  <section class="folio-cover" id="hello" data-home-window aria-labelledby="folio-title">
+    <div class="folio-cover-photo" aria-hidden="true">
+      <img class="folio-photo-light" src="{{ url_for('images/garden-bg-light-cat.jpg') }}" width="1600" height="900" alt="">
+      <img class="folio-photo-dark" src="{{ url_for('images/garden-bg-dark-cat.jpg') }}" width="1600" height="900" alt="">
+      <span class="folio-cover-lens" data-home-lens>
+        <img class="folio-photo-light" src="{{ url_for('images/garden-bg-light-cat.jpg') }}" width="1600" height="900" alt="">
+        <img class="folio-photo-dark" src="{{ url_for('images/garden-bg-dark-cat.jpg') }}" width="1600" height="900" alt="">
+      </span>
     </div>
-    <div class="posts-editorial{% if latest_posts.length == 1 %} is-single{% endif %}">
-      <a class="post-lead" href="{{ url_for(lead_post.path) }}" data-post-transition>
-        <span class="post-lead-kicker">
-          <span>latest note</span>
-          <i aria-hidden="true"></i>
-          <span>{{ lead_status_label }}</span>
-        </span>
-        <h3 data-post-transition-title>{{ lead_post.title }}</h3>
-        {%- if lead_post.description -%}
-        <p>{{ lead_post.description }}</p>
-        {%- endif -%}
-        <span class="post-lead-foot">
-          <time datetime="{{ lead_post.date.format('YYYY-MM-DD') }}">{{ lead_post.date.format('YYYY-MM-DD') }}</time>
-          {%- for tag in lead_post.tags.toArray().slice(0, 2) -%}<span>{{ tag.name }}</span>{%- endfor -%}
-          <span>{{ (lead_post.content | striptags).length }} 字</span>
-          <b>打开笔记 <span aria-hidden="true">↗</span></b>
-        </span>
-      </a>
-      {%- if latest_posts.length > 1 %}
-      <div class="post-brief-list post-brief-count-{{ latest_posts.length - 1 }}" aria-label="更多近期文章">
-        {%- for post in latest_posts.slice(1) -%}
-        <a class="post-brief" href="{{ url_for(post.path) }}" data-post-transition>
-          <span class="post-brief-index">{{ loop.index + 1 if loop.index >= 9 else '0' + (loop.index + 1) }}</span>
-          <span class="post-brief-copy">
-            <strong data-post-transition-title>{{ post.title }}</strong>
-            {%- if post.description %}<span>{{ post.description }}</span>{%- endif %}
-            <small><time datetime="{{ post.date.format('YYYY-MM-DD') }}">{{ post.date.format('MM-DD') }}</time>{% if post.tags.length %} · {{ post.tags.toArray()[0].name }}{% endif %}</small>
-          </span>
-          <span class="post-brief-arrow" aria-hidden="true">→</span>
-        </a>
-        {%- endfor -%}
+    <div class="folio-cover-shade" aria-hidden="true"></div>
+
+    <div class="folio-masthead">
+      <a href="{{ url_for('/') }}" data-scramble><i aria-hidden="true"></i>SYS.ONLINE</a>
+      <span>USER: {{ config.author }}.DEV</span>
+      <time data-home-clock data-clock-prefix="T: ">T: --:--</time>
+    </div>
+
+    <div class="folio-fracture" data-fracture aria-hidden="true">
+      <span class="folio-fracture-base">雨止灰茫</span>
+      <span class="folio-fracture-shard shard-a">雨止灰茫</span>
+      <span class="folio-fracture-shard shard-b">雨止灰茫</span>
+      <span class="folio-fracture-shard shard-c">雨止灰茫</span>
+      <span class="folio-fracture-shard shard-d">雨止灰茫</span>
+      <span class="folio-fracture-shard shard-e">雨止灰茫</span>
+    </div>
+
+    <div class="folio-cover-copy">
+      <h1 id="folio-title">雨止灰茫 — ZIHY 的个人数字花园</h1>
+      <p class="folio-cover-role" aria-label="FIELD STRING CORRUPTED">
+        <span data-scramble aria-hidden="true">譁?蟄励′螟ｱ繧上ｌ縺溘</span><br>
+        <em data-scramble aria-hidden="true">縺薙％縺九ｉ // 0x7F</em>
+      </p>
+      <div class="folio-cover-terminal">
+        <b>&gt; SOLITUDE: ACCEPTED</b><br>
+        MOOD: CLOUDY<br>
+        NOISE_FILTER: ON<br>
+        <span>[ THE WORLD IS LOUD. I AM NOT. ]</span>
       </div>
-      {%- endif %}
+    </div>
+
+    <aside class="folio-cover-fragment" data-home-quote-card tabindex="0" role="button" aria-label="切换一条低潮语录">
+      <span><b>// LOW_TIDE_TRANSMISSION</b><i aria-hidden="true">■</i></span>
+      <blockquote data-home-quote>“抑郁让人失去构想明天的力气。”</blockquote>
+      <small data-home-quote-source>— CAPCUT · LOW TIDE / 01</small>
+      <div data-home-quote-pool hidden>
+        <span data-quote-source="CAPCUT · LOW TIDE / 01">抑郁让人失去构想明天的力气。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 02">像隔着玻璃看世界经过，却碰不到它。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 03">它不总是眼泪，更多时候是漫长的麻木。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 04">不一定悲伤，只是一片无边的空。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 05">痛苦把人关住，而自己也成了守门者。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 06">像思念一个从未存在过的故乡。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 07">思绪成为战场，最难对付的是自己。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 08">脑海里的伤痕，看不见，也迟迟不退。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 09">不是悲伤，是仿佛什么都没有了。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 10">我怀念那个会笑、会快乐的自己。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 11">世界仍有颜色，只是我暂时看不见。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 12">最沉的难过，往往说不出原因。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 13">某天醒来，熟悉的自己已经走远。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 14">空洞藏进骨头里，安静地疼。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 15">每一天都像拖着身体穿过泥泞。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 16">有时只想沉睡，把醒来留到很远以后。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 17">脑海越安静，噪音反而越响。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 18">我不是难过，只是被掏空了。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 19">低落像一场缓慢发生的雪崩。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 20">在自己的城市里，也会找不到归路。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 21">有些日子不是生活，只是在维持呼吸。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 22">身体与思绪，像站在彼此的对面。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 23">不是软弱，只是已经独自撑了太久。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 24">心里像留着一道无法合拢的裂缝。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 25">有时候，连自己的悲伤都重得抱不动。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 26">假装坚强太久，也会把力气用光。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 27">快乐与暂时忘记悲伤，并不是一回事。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 28">像隔着屏幕，看另一个人替自己生活。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 29">天很亮，我的世界却仍旧灰着。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 30">最难防备的，是自己的思绪突然转身。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 31">眼泪只是心里没能说出口的话。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 32">最深的痛，是为了照顾别人而否认自己。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 33">悲伤是一场没有声响的内在风暴。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 34">如果今天只能好好呼吸，也已经足够。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 35">痛苦不一定流泪，也会藏进礼貌的笑。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 36">有些疼，没有名字，也找不到理由。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 37">最难的告别，是告别曾经的自己。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 38">有时不是愤怒或难过，只是真的累了。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 39">最孤独的时候，连依靠都像不存在。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 40">当一切都不对，很难回答哪里不对。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 41">麻木疼痛时，快乐也会一起失去知觉。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 42">心太重，身体便走得很慢。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 43">有些伤口，只有自己知道它在。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 44">今天留下的疼，也可能成为明天的力气。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 45">悲伤有时只容得下一个人。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 46">灵魂累了，比身体更需要休息。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 47">最难忍住的眼泪，常发生在人群里。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 48">难过并不可耻，它只是人性的一部分。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 49">有些悲伤似乎没有尽头，但时间仍在走。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 50">每一天，都像重新面对一次自己。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 51">我只想暂时关掉感受，让心安静一会儿。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 52">人群并不总能消除孤独。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 53">眼泪来时，不必急着让它停下。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 54">状态不好，也仍然值得被善待。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 55">最疼的告别，往往从未真正说出口。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 56">我有许多难过的理由，也还在寻找快乐的理由。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 57">看不见的痛，并不等于不存在。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 58">像沉在水里，看着所有人正常呼吸。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 59">遗憾总爱使用“本可以”和“早知道”。</span>
+        <span data-quote-source="CAPCUT · LOW TIDE / 60">有时笑声很完整，心却在里面碎裂。</span>
+      </div>
+    </aside>
+
+    <p class="folio-cover-side">CODE / COURSE / LIFE / FIELD NOTES</p>
+    <a class="folio-cover-scroll" href="#explore"><span>沿着痕迹往下</span><i aria-hidden="true"></i></a>
+  </section>
+
+  <section class="folio-explore" id="explore" aria-labelledby="folio-explore-title" data-field-motion>
+    <svg class="folio-explore-contours" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M-70 128C80 32 182 164 312 92S545 22 678 94s245 37 342-23 240-56 482 24"/>
+        <path d="M-96 166C65 72 188 197 330 126S561 60 694 130s231 35 340-24 250-45 486 39"/>
+        <path d="M-52 246C96 158 207 262 346 204s231-43 350 17 224 53 342-1 278-34 458 60"/>
+        <path d="M-91 306C42 214 194 319 338 270s248-52 370 8 211 68 338 15 264-16 439 88"/>
+        <path d="M-68 392C70 310 210 394 358 354s250-26 370 34 216 72 334 20 257-1 435 102"/>
+        <path d="M-112 485C40 391 192 486 350 448s264-10 384 47 216 66 342 23 253 24 400 118"/>
+        <path d="M-42 574C115 492 224 559 379 536s254 17 374 68 222 53 343 17 240 38 372 126"/>
+        <path d="M-83 668C76 584 232 654 396 634s260 31 382 80 214 46 331 12 232 48 348 135"/>
+        <path d="M978 488c80-72 182-21 207 62s-31 172-108 182-143-61-118-139 96-93 148-43 14 128-51 133-100-65-55-111 105 2 73 53"/>
+        <path d="M44 530c34-49 91-37 108 9s-15 93-64 96-82-42-52-80 79-2 56 41"/>
+      </g>
+    </svg>
+    <svg class="folio-explore-route" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M55 822L214 770 264 588 500 700 620 423 846 532 1006 352 1288 408"/>
+      <g><circle cx="214" cy="770" r="4"/><circle cx="500" cy="700" r="4"/><circle cx="846" cy="532" r="4"/><circle cx="1288" cy="408" r="4"/></g>
+    </svg>
+    <span class="folio-explore-ping" aria-hidden="true"><i></i></span>
+    <div class="folio-field-motion" aria-hidden="true"><i class="folio-field-sweep"></i><b></b><b></b><b></b></div>
+
+    <div class="folio-explore-grid">
+      <aside class="folio-profile" aria-label="ZIHY 状态面板" data-reveal>
+        <div class="folio-profile-status"><span>STATUS: ZIHY.OS</span><b><i></i>ACTIVE</b></div>
+        <div class="folio-profile-id">
+          <img src="{{ url_for('images/garden-companion.jpg') }}" width="160" height="160" alt="">
+          <div><h2>ZIHY</h2><p>STUDENT / BUILDER / WRITER</p></div>
+        </div>
+        <dl>
+          <div><dt>DESIGNATION</dt><dd>CREATOR</dd></div>
+          <div><dt>PRIMARY_LANG</dt><dd>TS / PY / JAVA / C</dd></div>
+          <div><dt>FIELD_MODE</dt><dd>CODE / COURSE / LIFE</dd></div>
+          <div><dt>NOTE_COUNT</dt><dd>{{ all_posts.length }} ENTRIES</dd></div>
+          <div><dt>GITHUB_NET</dt><dd>YZH-01 / ONLINE</dd></div>
+        </dl>
+        <nav aria-label="个人快捷入口">
+          <a href="https://github.com/yzh-01" target="_blank" rel="noopener"><span>◉</span>EXEC_GITHUB</a>
+          <a href="{{ url_for('archives/') }}"><span>▣</span>OPEN_ARCHIVE</a>
+          <a href="{{ url_for('about/') }}"><span>✉</span>INIT_ABOUT</a>
+        </nav>
+        <div class="folio-profile-clock"><small>SYS.CLOCK_MODULE</small><time data-home-clock data-clock-prefix="&gt; " data-clock-ms>&gt; --:--:--:---</time></div>
+      </aside>
+
+      <div class="folio-directory" data-reveal>
+        <div class="folio-directory-ghost" aria-hidden="true">ARCHIVE_NODE</div>
+        <header><h2 id="folio-explore-title"><i>&gt;</i> SYS.EXPLORE</h2><span>DIR_LIST</span></header>
+        <nav aria-label="探索数字花园">
+          <a class="folio-directory-item folio-directory-item-1" href="{{ url_for('archives/') }}">
+            <small>01 / ARCHIVE</small><strong><i>&gt;</i> Archives.</strong><em>ALL FIELD NOTES</em><code>HASH: 0xA17E _</code>
+          </a>
+          <a class="folio-directory-item folio-directory-item-2" href="{{ url_for('categories/study-notes/') }}">
+            <small>02 / NOTES</small><strong><i>&gt;</i> Study.</strong><em>LATEST: {{ latest_posts[0].title if latest_posts.length else 'NULL' }}</em><code>HASH: 0xC0DE _</code>
+          </a>
+          <a class="folio-directory-item folio-directory-item-3" href="{{ url_for('garden-log/') }}">
+            <small>03 / LOGS</small><strong><i>&gt;</i> Garden Log.</strong><em>MONTHLY PATCHES & THOUGHTS</em><code>HASH: 0xF13D _</code>
+          </a>
+          <a class="folio-directory-item folio-directory-item-4" href="{{ url_for('about/') }}">
+            <small>04 / PROFILE</small><strong><i>&gt;</i> About.</strong><em>PERSONAL DOSSIER</em><code>HASH: 0x21FF _</code>
+          </a>
+        </nav>
+      </div>
     </div>
   </section>
-  {%- endif %}
 
-  {# ===== 3. Right Now: status + workbench + garden log ===== #}
-  {%- set has_now = theme.modules.now and site.data.now and site.data.now.items and site.data.now.items.length -%}
-  {%- set has_workbench = theme.modules.workbench and site.data.stack and site.data.stack.length -%}
-  {%- set has_garden_log = theme.modules.garden_log and site.data['garden-log'] and site.data['garden-log'].length -%}
-  {%- if has_garden_log %}{%- set latest_log = site.data['garden-log'][0] -%}{%- endif -%}
-  {%- if has_now or has_workbench or has_garden_log %}
-  <section class="present-sec" id="now" data-reveal>
-    <div class="g-sec-heading">
-      <h2 class="g-sec-label">right now</h2>
-      {%- if site.data.now.updated %}<span class="section-freshness">更新于 {{ site.data.now.updated }}</span>{%- endif %}
-    </div>
-    <div class="present-board{% if not has_now %} present-board-without-status{% endif %}{% if not has_workbench %} present-board-without-workbench{% endif %}">
-      {%- if has_now %}
-      <div class="present-status-panel">
-        <header class="present-lede">
-          <span>FIELD NOTE / 此刻</span>
-          <h3>读、学、做，构成这座花园最近的天气。</h3>
-          <p>它们会改变，也会留下生长过的痕迹。</p>
+  {%- if latest_posts.length %}
+  <section class="folio-articles" id="articles" aria-labelledby="folio-articles-title" data-field-motion>
+    <svg class="folio-articles-contours" viewBox="0 0 1440 820" preserveAspectRatio="none" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M-60 72C96 4 196 118 340 58s258-51 380 13 210 66 330 14 260-45 456 34"/>
+        <path d="M-88 116C70 42 203 154 356 96s250-36 374 30 224 63 348 8 254-29 417 70"/>
+        <path d="M-50 190C105 110 230 217 382 166s250-22 376 40 224 59 347 12 252-4 397 91"/>
+        <path d="M-84 270C71 185 230 282 394 240s253-2 375 53 220 48 340 11 250 23 386 108"/>
+        <path d="M-40 362C114 284 255 359 414 334s248 20 367 70 215 37 329 8 238 41 365 119"/>
+        <path d="M-78 466C84 380 247 452 421 437s253 38 373 83 208 31 319 5 230 52 350 129"/>
+        <path d="M-42 575C119 492 278 560 443 548s246 44 361 84 204 26 308 4 216 57 326 128"/>
+        <path d="M1018 156c78-61 170-13 190 64s-37 157-108 160-126-66-96-134 91-72 129-21-4 113-60 106-77-69-34-103 91 13 53 52"/>
+        <path d="M48 438c38-55 99-37 114 15s-25 100-77 95-78-55-41-91 82 12 52 48"/>
+      </g>
+    </svg>
+    <div class="folio-field-motion folio-field-motion-articles" aria-hidden="true"><i class="folio-field-sweep"></i><b></b><b></b><b></b></div>
+
+    <div class="folio-articles-grid">
+      <aside class="folio-article-console" aria-label="花园贡献记录与日历" data-reveal>
+        <header><span>SYS.GARDEN_ACTIVITY</span><b><i></i>LIVE</b></header>
+
+        <section class="folio-contribution" data-contribution-wall aria-labelledby="folio-contribution-title">
+          <div class="folio-contribution-heading">
+            <div><small>DAILY_CONTRIBUTION</small><h3 id="folio-contribution-title">留下过痕迹的日子</h3></div>
+            <span data-contribution-summary>-- ACTIVE DAYS</span>
+          </div>
+          <div class="folio-contribution-months" data-contribution-months aria-hidden="true"></div>
+          <div class="folio-contribution-matrix">
+            <div class="folio-contribution-weekdays" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+            <div class="folio-contribution-grid" data-contribution-grid role="img" aria-label="最近二十八周的文章发布贡献"></div>
+          </div>
+          <div class="folio-contribution-foot">
+            <span>28 WEEK WINDOW / ARTICLE LOG</span>
+            <p><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i></p>
+          </div>
+          <div hidden>
+            {%- for post in all_posts %}<i data-contribution-date="{{ post.date.format('YYYY-MM-DD') }}"></i>{%- endfor %}
+          </div>
+        </section>
+
+        <section class="folio-calendar" data-folio-calendar aria-labelledby="folio-calendar-title">
+          <header><small>SYS.DATE</small><time id="folio-calendar-title" data-calendar-title>----.--</time></header>
+          <div class="folio-calendar-weekdays" aria-hidden="true"><span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span><span>SA</span><span>SU</span></div>
+          <div class="folio-calendar-days" data-calendar-grid aria-label="本月日历"></div>
+          <footer><span>YEAR PROGRESS</span><b data-calendar-progress>--.---%</b></footer>
+        </section>
+      </aside>
+
+      <div class="folio-article-stream" data-reveal>
+        <header>
+          <h2 id="folio-articles-title"><i>&gt;</i> RECENT_LOG</h2>
+          <a href="{{ url_for('archives/') }}">VIEW ALL LOGS ↗</a>
         </header>
-        <div class="present-status-list">
-      {%- for item in site.data.now.items -%}
-          <div class="present-status-item">
-        <span class="now-signal" aria-hidden="true"></span>
-            <div>
-              <h4>{{ item.label }}</h4>
-              <p>{{ item.text }}</p>
-            </div>
-          </div>
-      {%- endfor -%}
+        <ol>
+          {%- for post in latest_posts %}
+          <li data-motion-row>
+            <a href="{{ url_for(post.path) }}" data-post-transition>
+              <small>0{{ loop.index }} / {{ post.date.format('YYYY.MM.DD') }}</small>
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.description if post.description else 'CONTENTS AWAITING INDEX.' }}</p>
+              <span>READ_LOG ↗</span>
+            </a>
+          </li>
+          {%- endfor %}
+        </ol>
+      </div>
+    </div>
+    <p class="folio-articles-baseline" aria-hidden="true">RECENT_LOG &lt;</p>
+  </section>
+  {%- endif %}
+
+  <section class="folio-outro" id="the-end" data-folio-outro aria-labelledby="folio-outro-label">
+    <span class="folio-outro-orbit" aria-hidden="true"><i></i></span>
+    <div class="folio-outro-inner">
+      <p class="folio-outro-signal"><i aria-hidden="true"></i><span>LIVE_FIELD / MOVE TO DISTURB</span></p>
+      <p class="sr-only" id="folio-outro-label">This ends now</p>
+      <h2 aria-hidden="true"><span data-outro-text data-outro-value="This ends now">This ends now</span></h2>
+      <div class="folio-outro-track" data-outro-track role="slider" tabindex="0" aria-label="拖动调节结尾信号" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+        <i aria-hidden="true"></i><b aria-hidden="true"></b>
+        <span data-outro-meter>SIGNAL 100%</span>
+      </div>
+      <div class="folio-outro-meta">
+        <span data-outro-status>MOVE: REPEL // CLICK: IMPACT // DRAG: DETUNE</span>
+        <div class="folio-outro-actions">
+          <a href="#hello">回到开头 <b aria-hidden="true">↑</b></a>
         </div>
       </div>
-      {%- endif %}
-
-      {%- if has_workbench %}
-      <section class="present-workbench" id="stack" aria-labelledby="present-workbench-title">
-        <header class="present-block-heading">
-          <span>WORKBENCH</span>
-          <div>
-            <h3 id="present-workbench-title">正在使用的工具</h3>
-            <p>不是技能陈列，而是此刻真正放在桌面上的东西。</p>
-          </div>
-        </header>
-        <div class="present-stack-groups">
-          {%- for g in site.data.stack -%}
-          <div class="present-stack-group">
-            <h4>{{ g.group }}</h4>
-            <div>
-              {%- for item in g.items -%}
-              <span class="present-stack-tag">
-                <strong>{{ item.name or item }}</strong>
-                {%- if item.note %}<small>{{ item.note }}</small>{%- endif %}
-              </span>
-              {%- endfor -%}
-            </div>
-          </div>
-          {%- endfor -%}
-        </div>
-      </section>
-      {%- endif %}
-
-      {%- if has_garden_log %}
-      <a class="present-log" id="garden-log" href="{{ url_for('garden-log/#' + latest_log.month) }}">
-        <span class="present-log-label">GARDEN LOG</span>
-        <time datetime="{{ latest_log.month }}">{{ latest_log.label }}</time>
-        <span class="present-log-copy">
-          <strong>{{ latest_log.title }}</strong>
-          <small>{{ latest_log.summary }}</small>
-        </span>
-        <span class="present-log-arrow" aria-hidden="true">↗</span>
-      </a>
-      {%- endif %}
     </div>
   </section>
-  {%- endif %}
-
-  {# ===== 4. Garden Map ===== #}
-  <section class="garden-map" id="garden-map" data-reveal aria-labelledby="garden-map-title">
-    <div class="g-sec-heading">
-      <h2 class="g-sec-label" id="garden-map-title">knowledge terrain</h2>
-      <span class="garden-map-note">按兴趣走进这座花园</span>
-    </div>
-    <div class="garden-terrain">
-      <div class="terrain-radar" aria-hidden="true"><i></i><i></i><i></i><span></span></div>
-      <svg class="garden-terrain-lines" viewBox="0 0 920 460" preserveAspectRatio="none" aria-hidden="true">
-        <path class="terrain-contour terrain-contour-a" d="M60 236C154 94 302 73 433 170S691 279 860 111" />
-        <path class="terrain-contour terrain-contour-b" d="M41 343C189 256 297 332 420 277S677 168 875 319" />
-        <path class="terrain-branch" d="M455 230C348 210 271 155 187 130" />
-        <path class="terrain-branch" d="M455 230C571 190 644 125 744 112" />
-        <path class="terrain-branch" d="M455 230C589 272 670 336 759 348" />
-      </svg>
-      <span class="terrain-compass" aria-hidden="true"><i></i>N / 00°</span>
-      <span class="terrain-origin" aria-hidden="true"><i></i><span>YOU ARE HERE</span></span>
-
-      <a class="terrain-node terrain-node-code" href="{{ url_for('categories/study-notes/') }}">
-        <span class="terrain-node-meta">CODE · {{ tech_posts.length }} NOTES</span>
-        <strong>技术探索</strong>
-        <small>代码、课程与工具实践</small>
-        <b aria-hidden="true">↗</b>
-      </a>
-      <a class="terrain-node terrain-node-notes" href="{{ url_for('tags/notes/') }}">
-        <span class="terrain-node-meta">LEARNING · {{ study_posts.length }} NOTES</span>
-        <strong>学习记录</strong>
-        <small>问题、复习与未成熟的想法</small>
-        <b aria-hidden="true">↗</b>
-      </a>
-      <a class="terrain-node terrain-node-life" href="{{ url_for('categories/diary/') }}">
-        <span class="terrain-node-meta">LIFE · {{ life_post_count }} NOTES</span>
-        <strong>日常生活</strong>
-        <small>书、情绪与普通日子的碎片</small>
-        <b aria-hidden="true">↗</b>
-      </a>
-
-      <a class="garden-wander" href="{{ url_for(all_posts[0].path) if all_posts.length else url_for('archives/') }}" data-garden-wander>
-        <span aria-hidden="true">⌁</span>
-        <strong>随便走走</strong>
-        <small>进入一篇随机笔记</small>
-      </a>
-      <div class="garden-wander-pool" data-garden-wander-pool hidden>
-        {%- for post in all_posts %}<span data-wander-path="{{ url_for(post.path) }}"></span>{%- endfor %}
-      </div>
-    </div>
-  </section>
-
-  {# ===== 5. Long-lived notes ===== #}
-  {%- if theme.modules.featured_notes and featured_posts.length %}
-  <section class="featured-sec" id="featured" data-reveal>
-    <div class="g-sec-heading">
-      <h2 class="g-sec-label">long-lived notes</h2>
-      <span class="section-freshness">持续修订的内容</span>
-    </div>
-    {%- for fp in featured_posts.slice(0, 2) -%}
-    <a class="featured-card" href="{{ url_for(fp.path) }}" data-spotlight data-post-transition{% if loop.index > 1 %} style="margin-top:14px"{% endif %}>
-      <div>
-        <h3 data-post-transition-title>{{ fp.title }}</h3>
-        {%- if fp.description -%}
-        <div class="desc">{{ fp.description }}</div>
-        {%- endif -%}
-        <div class="meta">
-          <span>{{ (fp.content | striptags).length }} 字</span>
-          <span>整理于 {{ (fp.updated if fp.updated else fp.date).format('YYYY-MM-DD') }}</span>
-        </div>
-      </div>
-      <span class="badge">evergreen</span>
-    </a>
-    {%- endfor -%}
-  </section>
-  {%- endif %}
-
-  {# ===== 6. Life ===== #}
-  {%- if theme.modules.life and life_posts.length %}
-  <section class="life-sec" id="life" data-reveal>
-    <div class="g-sec-heading">
-      <h2 class="g-sec-label">life</h2>
-      <a href="{{ url_for('categories/diary/') }}">更多生活记录 <span aria-hidden="true">→</span></a>
-    </div>
-    <div class="life-notes-grid">
-      {%- for post in life_posts -%}
-      <a class="life-note{% if loop.first %} life-note-featured{% endif %}" href="{{ url_for(post.path) }}" data-post-transition>
-        {%- if loop.first %}
-        <span class="life-note-media" aria-hidden="true">
-          <img class="life-note-media-light" src="{{ url_for('images/garden-light-cat.jpg') }}" width="735" height="525" alt="" loading="lazy" decoding="async">
-          <img class="life-note-media-dark" src="{{ url_for('images/garden-companion.jpg') }}" width="720" height="720" alt="" loading="lazy" decoding="async">
-        </span>
-        {%- endif %}
-        <span class="life-note-copy">
-          <span class="life-note-kicker"><time>{{ post.date.format('YYYY-MM-DD') }}</time> · life note</span>
-          <strong data-post-transition-title>{{ post.title }}</strong>
-          {%- if post.description %}<span class="life-note-desc">{{ post.description }}</span>{%- endif %}
-          <span class="life-note-link">走进这一天 <b aria-hidden="true">→</b></span>
-        </span>
-      </a>
-      {%- endfor %}
-    </div>
-  </section>
-  {%- endif %}
-
-  {# ===== 9. About ===== #}
-  {%- if theme.modules.about %}
-  <section class="about-sec" id="garden-about" data-reveal>
-    <figure class="about-photo">
-      <img src="{{ url_for('images/garden-night-window.jpg') }}" width="735" height="551" alt="夜色中透过玻璃窗看见的植物与灯光" loading="lazy" decoding="async">
-      <figcaption>窗内写字，窗外生长。</figcaption>
-    </figure>
-    <div class="about-summary">
-      <h2>关于这个花园</h2>
-      <p>这里是一块长期维护的个人数字空间。</p>
-      <p>代码、学习与生活并排生长。</p>
-      <p class="about-signature"><span>{{ config.author }}</span> · 学习者、实践者、长期记录者</p>
-      <div class="links">
-        <a class="link-btn primary" href="{{ url_for('about/') }}">继续了解 <span aria-hidden="true">→</span></a>
-        <a class="link-btn" href="https://github.com/yzh-01" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
-      </div>
-    </div>
-  </section>
-  {%- endif %}
 
 </div>
 {% endblock %}

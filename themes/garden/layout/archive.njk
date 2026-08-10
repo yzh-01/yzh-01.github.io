@@ -19,6 +19,7 @@
     {%- if not is_root_archive %}
     <a class="archive-back" href="{{ url_for('archives/') }}">← 全部内容</a>
     {%- endif %}
+    <p class="inner-content-kicker">&gt; ARCHIVE_INDEX / {{ 'ROOT' if is_root_archive else 'FILTERED' }}</p>
     <h1>{{ archive_title }}</h1>
     {%- set archive_posts = page.posts.toArray() if page.posts else site.posts.toArray() %}
     <p class="sub">
