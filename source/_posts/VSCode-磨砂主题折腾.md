@@ -181,4 +181,4 @@ d:\Edge\iuliu-illes-jt2qFluLxsE-unsplash.jpg
 
 ## 实际效果预览
 
-![VSCode 磨砂主题与亚克力背景效果](/images/posts/vscode-maple-mono-acrylic/preview.webp)
+![VSCode 磨砂主题与亚克力背景效果|585](/images/posts/vscode-maple-mono-acrylic/preview.webp)

@@ -60,7 +60,49 @@
   </div>
 
   <div class="garden-overgrowth" data-garden-overgrowth aria-hidden="true">
-    <div><small>UNLISTED FIELD FOUND</small><strong>苔藓正在越过屏幕边界。</strong><span>隐藏路径：↑ ↑ ↓ ↓ ← → ← → B A</span></div>
+    <div class="garden-overgrowth-flash" aria-hidden="true"></div>
+    <svg class="garden-overgrowth-vines" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g class="garden-overgrowth-vines-back">
+        <path pathLength="1" d="M-80 830 C170 700 140 410 390 370 S720 510 820 270 S1110 30 1680 120" />
+        <path pathLength="1" d="M-40 110 C250 240 280 40 520 170 S790 420 1050 310 S1380 80 1660 350" />
+        <path pathLength="1" d="M80 940 C220 660 520 800 600 560 S470 210 760 -80" />
+        <path pathLength="1" d="M1510 980 C1390 680 1120 790 1100 510 S1320 210 1040 -70" />
+      </g>
+      <g class="garden-overgrowth-vines-front">
+        <path pathLength="1" d="M-60 610 C210 510 310 650 480 490 S650 130 920 230 S1210 610 1660 460" />
+        <path pathLength="1" d="M-30 300 C180 390 330 220 520 340 S780 730 1040 610 S1350 270 1660 250" />
+        <path pathLength="1" d="M360 940 C410 710 680 690 720 490 S650 190 880 -50" />
+      </g>
+    </svg>
+    <div class="garden-overgrowth-spores" aria-hidden="true">
+      <i style="--x:7%;--y:74%;--d:.1s;--s:.7"></i><i style="--x:14%;--y:24%;--d:.8s;--s:1.1"></i>
+      <i style="--x:21%;--y:58%;--d:.35s;--s:.5"></i><i style="--x:29%;--y:82%;--d:1.2s;--s:1.4"></i>
+      <i style="--x:34%;--y:16%;--d:.55s;--s:.8"></i><i style="--x:41%;--y:44%;--d:1.5s;--s:1.2"></i>
+      <i style="--x:48%;--y:70%;--d:.2s;--s:.6"></i><i style="--x:55%;--y:27%;--d:1s;--s:1.5"></i>
+      <i style="--x:61%;--y:61%;--d:.7s;--s:.9"></i><i style="--x:68%;--y:12%;--d:1.35s;--s:.6"></i>
+      <i style="--x:73%;--y:78%;--d:.45s;--s:1.3"></i><i style="--x:79%;--y:38%;--d:1.65s;--s:.8"></i>
+      <i style="--x:86%;--y:67%;--d:.9s;--s:1.1"></i><i style="--x:92%;--y:20%;--d:.25s;--s:.7"></i>
+    </div>
+    <div class="garden-overgrowth-node" aria-hidden="true"><i></i><b></b></div>
+    <div class="garden-overgrowth-impact" aria-hidden="true"><i></i><b></b></div>
+    <div class="garden-overgrowth-cat" aria-hidden="true">
+      <img
+        class="garden-overgrowth-cat-frame"
+        src="{{ url_for('images/easter-egg/sumi/run/00.webp') }}"
+        data-sumi-frame
+        data-sumi-base="{{ url_for('images/easter-egg/sumi/') }}"
+        width="192"
+        height="208"
+        alt="">
+      <i class="garden-overgrowth-cat-contact" aria-hidden="true"></i>
+      <span>SUMI / INTERCEPTING</span>
+    </div>
+    <div class="garden-overgrowth-copy" role="status" aria-live="polite">
+      <small data-overgrowth-status>ACCESS CODE ACCEPTED // ROOT WAKE</small>
+      <strong>花园正在接管屏幕。</strong>
+      <span>别动。它只是在确认你不是路过。</span>
+      <button type="button" data-overgrowth-close>提前归还屏幕 <b aria-hidden="true">×</b></button>
+    </div>
   </div>
 
   <section class="folio-cover" id="hello" data-home-window aria-labelledby="folio-title">

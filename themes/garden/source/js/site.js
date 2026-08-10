@@ -1858,23 +1858,226 @@
   function setupGardenEasterEgg() {
     var overlay = document.querySelector('[data-garden-overgrowth]');
     if (!overlay) return;
+    var close = overlay.querySelector('[data-overgrowth-close]');
+    var status = overlay.querySelector('[data-overgrowth-status]');
+    var keeperLabel = overlay.querySelector('.garden-overgrowth-cat span');
+    var keeper = overlay.querySelector('.garden-overgrowth-cat');
+    var keeperFrame = overlay.querySelector('[data-sumi-frame]');
+    var keeperBase = keeperFrame ? keeperFrame.getAttribute('data-sumi-base') : '';
+    var vines = overlay.querySelector('.garden-overgrowth-vines');
+    var spores = overlay.querySelector('.garden-overgrowth-spores');
     var sequence = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+    var keeperMotions = {
+      run: { count: 8, fps: 15, loop: true },
+      pounce: { count: 5, fps: 6.2, loop: false },
+      strike: { count: 4, fps: 7, loop: false },
+      hold: { count: 6, fps: 5, loop: true }
+    };
     var position = 0;
-    var timer = 0;
+    var timers = [];
+    var active = false;
+    var pointerFrame = 0;
+    var pointerX = 0;
+    var pointerY = 0;
+    var keeperAnimation = 0;
+    var keeperMotion = null;
+    var keeperFrameIndex = -1;
+
+    function keeperFrameUrl(name, index) {
+      return keeperBase + name + '/' + String(index).padStart(2, '0') + '.webp';
+    }
+
+    function preloadKeeper() {
+      if (!keeperFrame || !keeperBase) return;
+      Object.keys(keeperMotions).forEach(function (name) {
+        for (var index = 0; index < keeperMotions[name].count; index += 1) {
+          var image = new Image();
+          image.decoding = 'async';
+          image.src = keeperFrameUrl(name, index);
+        }
+      });
+    }
+
+    function stopKeeperMotion() {
+      if (keeperAnimation) window.cancelAnimationFrame(keeperAnimation);
+      keeperAnimation = 0;
+      keeperMotion = null;
+      keeperFrameIndex = -1;
+    }
+
+    function renderKeeperFrame(now) {
+      if (!keeperMotion || !keeperFrame) return;
+      var elapsed = Math.max(0, now - keeperMotion.startedAt);
+      var rawIndex = Math.floor(elapsed * keeperMotion.mode.fps / 1000);
+      var index = keeperMotion.mode.loop
+        ? rawIndex % keeperMotion.mode.count
+        : Math.min(rawIndex, keeperMotion.mode.count - 1);
+      if (index !== keeperFrameIndex) {
+        keeperFrame.src = keeperFrameUrl(keeperMotion.name, index);
+        keeperFrameIndex = index;
+      }
+      if (!keeperMotion.mode.loop && rawIndex >= keeperMotion.mode.count - 1) {
+        keeperAnimation = 0;
+        return;
+      }
+      keeperAnimation = window.requestAnimationFrame(renderKeeperFrame);
+    }
+
+    function setKeeperMotion(name, staticFrame) {
+      if (!keeperFrame || !keeperMotions[name]) return;
+      stopKeeperMotion();
+      keeperFrame.dataset.motion = name;
+      if (typeof staticFrame === 'number') {
+        keeperFrame.src = keeperFrameUrl(name, Math.max(0, Math.min(staticFrame, keeperMotions[name].count - 1)));
+        return;
+      }
+      keeperMotion = { name: name, mode: keeperMotions[name], startedAt: performance.now() };
+      keeperAnimation = window.requestAnimationFrame(renderKeeperFrame);
+    }
+
+    function clearTimers() {
+      timers.forEach(function (timer) { window.clearTimeout(timer); });
+      timers = [];
+    }
+
+    function later(callback, delay) {
+      timers.push(window.setTimeout(callback, delay));
+    }
+
+    function setStatus(message) {
+      if (status) status.textContent = message;
+    }
+
+    function finish() {
+      if (!active || overlay.classList.contains('is-receding')) return;
+      clearTimers();
+      overlay.classList.add('is-receding');
+      document.documentElement.classList.remove('garden-overrun', 'garden-root-impact');
+      setStatus('FIELD RESTORED // ROOTS WITHDRAWING');
+      later(function () {
+        overlay.classList.remove('is-active', 'is-receding', 'is-pouncing', 'is-striking', 'is-contained');
+        overlay.setAttribute('aria-hidden', 'true');
+        if (vines) vines.style.removeProperty('transform');
+        if (spores) spores.style.removeProperty('transform');
+        stopKeeperMotion();
+        active = false;
+      }, gardenMotionIsLite() ? 20 : 780);
+    }
+
+    function awaken() {
+      clearTimers();
+      overlay.classList.remove('is-active', 'is-receding', 'is-pouncing', 'is-striking', 'is-contained');
+      document.documentElement.classList.remove('garden-root-impact');
+      void overlay.offsetWidth;
+      active = true;
+      overlay.classList.add('is-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('garden-overrun');
+      setStatus('ACCESS CODE ACCEPTED // ROOT WAKE');
+      if (keeperLabel) keeperLabel.textContent = 'SUMI / INTERCEPTING';
+      document.dispatchEvent(new CustomEvent('garden:pet', { detail: '暗号正确。它们正在从页面背面长出来。' }));
+
+      if (gardenMotionIsLite()) {
+        overlay.classList.add('is-contained');
+        setKeeperMotion('hold', 2);
+        later(finish, 4200);
+        return;
+      }
+
+      setKeeperMotion('run');
+      later(function () { setStatus('ROOT NETWORK // 37% // SIGNAL SPREADING'); }, 950);
+      later(function () { setStatus('SUMI // INTERCEPT COURSE LOCKED'); }, 1950);
+      later(function () {
+        overlay.classList.add('is-pouncing');
+        setKeeperMotion('pounce');
+        if (keeperLabel) keeperLabel.textContent = 'SUMI / POUNCE VECTOR';
+      }, 2200);
+      later(function () {
+        overlay.classList.add('is-striking');
+        setKeeperMotion('strike');
+        if (keeperLabel) keeperLabel.textContent = 'SUMI / PAW COMMITTED';
+        setStatus('SUMI // PAW STRIKE ARMED');
+      }, 3100);
+      later(function () {
+        document.documentElement.classList.add('garden-root-impact');
+        setStatus('IMPACT CONFIRMED // NODE COLLAPSING');
+      }, 3460);
+      later(function () {
+        document.documentElement.classList.remove('garden-root-impact');
+        overlay.classList.add('is-contained');
+        setKeeperMotion('hold');
+        if (keeperLabel) keeperLabel.textContent = 'SUMI / NODE PINNED';
+        setStatus('OVERGROWTH CONTAINED // RETURNING CONTROL');
+        document.dispatchEvent(new CustomEvent('garden:pet', { detail: '抓住了。屏幕很快还你。' }));
+      }, 3860);
+      later(finish, 6900);
+    }
+
+    function renderParallax() {
+      pointerFrame = 0;
+      if (!active || gardenMotionIsLite()) return;
+      var nx = pointerX / Math.max(1, window.innerWidth) - .5;
+      var ny = pointerY / Math.max(1, window.innerHeight) - .5;
+      if (vines) vines.style.transform = 'translate3d(' + (nx * 22).toFixed(1) + 'px,' + (ny * 16).toFixed(1) + 'px,0)';
+      if (spores) spores.style.transform = 'translate3d(' + (nx * -10).toFixed(1) + 'px,' + (ny * -7).toFixed(1) + 'px,0)';
+    }
+
+    function createBurst(event) {
+      if (!active || gardenMotionIsLite() || event.target.closest('button')) return;
+      if (keeper && overlay.classList.contains('is-contained')) {
+        var rect = keeper.getBoundingClientRect();
+        var hitKeeper = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+        if (hitKeeper) {
+          overlay.classList.remove('is-contained', 'is-striking');
+          void keeper.offsetWidth;
+          overlay.classList.add('is-striking');
+          setKeeperMotion('strike');
+          document.documentElement.classList.add('garden-root-impact');
+          setStatus('SUMI // SECONDARY PRESS');
+          later(function () {
+            document.documentElement.classList.remove('garden-root-impact');
+            overlay.classList.add('is-contained');
+            setKeeperMotion('hold');
+            setStatus('NODE STILL PINNED // GOOD CAT');
+          }, 760);
+          return;
+        }
+      }
+      var burst = document.createElement('i');
+      burst.className = 'garden-root-burst';
+      burst.style.left = event.clientX + 'px';
+      burst.style.top = event.clientY + 'px';
+      burst.setAttribute('aria-hidden', 'true');
+      overlay.appendChild(burst);
+      burst.addEventListener('animationend', function () { burst.remove(); }, { once: true });
+    }
 
     document.addEventListener('keydown', function (event) {
+      var target = event.target;
+      if (target && (target.matches('input, textarea, select') || target.isContentEditable)) return;
+      if (active && event.key === 'Escape') {
+        finish();
+        return;
+      }
       var key = event.key.toLowerCase();
       position = key === sequence[position] ? position + 1 : (key === sequence[0] ? 1 : 0);
       if (position < sequence.length) return;
       position = 0;
-      window.clearTimeout(timer);
-      overlay.classList.add('is-active');
-      overlay.setAttribute('aria-hidden', 'false');
-      document.dispatchEvent(new CustomEvent('garden:pet', { detail: '你真的输入了。现在苔藓有点失控。' }));
-      timer = window.setTimeout(function () {
-        overlay.classList.remove('is-active');
-        overlay.setAttribute('aria-hidden', 'true');
-      }, 4300);
+      awaken();
+    });
+
+    if (close) close.addEventListener('click', finish);
+    preloadKeeper();
+    overlay.addEventListener('click', createBurst);
+    overlay.addEventListener('pointermove', function (event) {
+      if (!active || gardenMotionIsLite()) return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      if (!pointerFrame) pointerFrame = window.requestAnimationFrame(renderParallax);
+    }, { passive: true });
+    overlay.addEventListener('pointerleave', function () {
+      if (vines) vines.style.transform = 'translate3d(0,0,0)';
+      if (spores) spores.style.transform = 'translate3d(0,0,0)';
     });
   }
 

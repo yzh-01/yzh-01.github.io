@@ -788,11 +788,263 @@ body.garden-pet-ready .garden-pet { opacity: 1; transform: none; pointer-events:
 }
 .garden-pet.is-happy button { animation: garden-pet-hop .55s cubic-bezier(.34, 1.56, .64, 1); }
 
-.garden-overgrowth { --bone: #edf1eb; position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; padding: 24px; color: var(--bone); background: rgba(6, 13, 8, .94); opacity: 0; visibility: hidden; pointer-events: none; }
-.garden-overgrowth > div { display: grid; gap: 16px; width: min(720px, 100%); padding: clamp(26px, 6vw, 70px); border: 1px solid rgba(171, 210, 177, .4); text-align: center; }
-.garden-overgrowth small, .garden-overgrowth span { font: 9px/1.5 var(--mono); letter-spacing: .16em; }
-.garden-overgrowth strong { color: var(--bone); font: italic 600 clamp(38px, 7vw, 92px)/1.05 var(--serif); }
-.garden-overgrowth.is-active { opacity: 1; visibility: visible; animation: garden-alert .12s steps(2) 8; }
+.garden-overgrowth {
+  --bone: #edf1eb;
+  --root-node-x: 68%;
+  --root-node-y: 54%;
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  color: var(--bone);
+  background:
+    radial-gradient(circle at var(--root-node-x) var(--root-node-y), rgba(117, 174, 126, .11), transparent 0 24%),
+    linear-gradient(112deg, rgba(3, 9, 5, .9), rgba(7, 19, 10, .52) 48%, rgba(2, 8, 5, .88));
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  transition: opacity 680ms cubic-bezier(.4, 0, 1, 1), visibility 0s linear 680ms;
+}
+.garden-overgrowth::before,
+.garden-overgrowth::after {
+  content: "";
+  position: absolute;
+  inset: -14%;
+  z-index: -2;
+  pointer-events: none;
+}
+.garden-overgrowth::before {
+  background: repeating-radial-gradient(ellipse at 50% 100%, transparent 0 42px, rgba(178, 210, 181, .055) 43px 44px, transparent 45px 73px);
+  opacity: 0;
+  transform: scale(.82) rotate(-4deg);
+}
+.garden-overgrowth::after {
+  background: radial-gradient(ellipse at 50% 104%, rgba(86, 126, 91, .27), transparent 58%);
+  opacity: 0;
+  transform: translate3d(0, 14%, 0);
+}
+.garden-overgrowth.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 280ms cubic-bezier(0, 0, .2, 1), visibility 0s;
+}
+.garden-overgrowth.is-receding { opacity: 0; pointer-events: none; transition-duration: 760ms; }
+.garden-overgrowth.is-active::before { animation: garden-root-radar 5.8s cubic-bezier(.16, 1, .3, 1) .25s both; }
+.garden-overgrowth.is-active::after { animation: garden-root-mist 5.9s cubic-bezier(.16, 1, .3, 1) .1s both; }
+
+.garden-overgrowth-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  background: linear-gradient(105deg, transparent 0 38%, rgba(215, 239, 217, .24) 48%, transparent 57%);
+  opacity: 0;
+  transform: translate3d(-110%, 0, 0) skewX(-8deg);
+  pointer-events: none;
+}
+.garden-overgrowth.is-active .garden-overgrowth-flash { animation: garden-root-flash 880ms cubic-bezier(.4, 0, .2, 1) both; }
+
+.garden-overgrowth-vines { position: absolute; inset: -2%; z-index: 1; width: 104%; height: 104%; overflow: visible; pointer-events: none; transform: translate3d(0, 0, 0); transition: transform 480ms cubic-bezier(.16, 1, .3, 1); }
+.garden-overgrowth-vines path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+}
+.garden-overgrowth-vines-back path { stroke: rgba(115, 163, 121, .38); stroke-width: 1.2; filter: drop-shadow(0 0 8px rgba(92, 150, 101, .15)); }
+.garden-overgrowth-vines-front path { stroke: rgba(179, 215, 183, .7); stroke-width: 1.5; filter: drop-shadow(0 0 11px rgba(120, 183, 131, .3)); }
+.garden-overgrowth.is-active .garden-overgrowth-vines-back path { animation: garden-vine-grow 3.4s cubic-bezier(.16, 1, .3, 1) both; }
+.garden-overgrowth.is-active .garden-overgrowth-vines-front path { animation: garden-vine-grow 2.75s cubic-bezier(.16, 1, .3, 1) .42s both; }
+.garden-overgrowth-vines path:nth-child(2) { animation-delay: .18s !important; }
+.garden-overgrowth-vines path:nth-child(3) { animation-delay: .34s !important; }
+.garden-overgrowth-vines path:nth-child(4) { animation-delay: .52s !important; }
+.garden-overgrowth-vines-front path:nth-child(2) { animation-delay: .58s !important; }
+.garden-overgrowth-vines-front path:nth-child(3) { animation-delay: .76s !important; }
+
+.garden-overgrowth-spores { position: absolute; inset: 0; z-index: 2; pointer-events: none; transform: translate3d(0, 0, 0); transition: transform 620ms cubic-bezier(.16, 1, .3, 1); }
+.garden-overgrowth-spores i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(4px * var(--s));
+  height: calc(4px * var(--s));
+  background: #c7e2ca;
+  border-radius: 50%;
+  box-shadow: 0 0 calc(13px * var(--s)) rgba(163, 217, 171, .72);
+  opacity: 0;
+  transform: translate3d(0, 34px, 0) scale(.2);
+}
+.garden-overgrowth.is-active .garden-overgrowth-spores i { animation: garden-spore-rise 3.1s cubic-bezier(.16, 1, .3, 1) var(--d) infinite; }
+
+.garden-overgrowth-node {
+  position: absolute;
+  left: var(--root-node-x);
+  top: var(--root-node-y);
+  z-index: 3;
+  width: clamp(70px, 8vw, 118px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(177, 221, 184, .34);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.15);
+  pointer-events: none;
+}
+.garden-overgrowth-node::before,
+.garden-overgrowth-node::after { content: ""; position: absolute; border: 1px solid rgba(159, 211, 169, .24); border-radius: inherit; }
+.garden-overgrowth-node::before { inset: 18%; }
+.garden-overgrowth-node::after { inset: -38%; }
+.garden-overgrowth-node i { position: absolute; left: 50%; top: -45%; width: 1px; height: 190%; background: linear-gradient(transparent, rgba(205, 237, 209, .62), transparent); transform: rotate(33deg); }
+.garden-overgrowth-node b { position: absolute; inset: 43%; background: #d7efda; border-radius: 50%; box-shadow: 0 0 28px rgba(164, 225, 174, .9); }
+.garden-overgrowth.is-active .garden-overgrowth-node { animation: garden-root-node 4.8s cubic-bezier(.34, 1.56, .64, 1) .9s both; }
+.garden-overgrowth.is-active.is-striking .garden-overgrowth-node { animation: garden-node-crush 860ms cubic-bezier(.4, 0, .2, 1) .33s both; transform-origin: 22% 62%; }
+
+.garden-overgrowth-impact {
+  position: absolute;
+  left: var(--root-node-x);
+  top: var(--root-node-y);
+  z-index: 4;
+  width: 32px;
+  aspect-ratio: 1;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.2);
+  pointer-events: none;
+}
+.garden-overgrowth-impact::before,
+.garden-overgrowth-impact::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(220, 244, 222, .92);
+  border-radius: 50%;
+  box-shadow: 0 0 34px rgba(164, 225, 174, .7);
+}
+.garden-overgrowth-impact::after { border-style: dashed; transform: rotate(22deg) scale(1.45); }
+.garden-overgrowth-impact i,
+.garden-overgrowth-impact b { position: absolute; left: 45%; top: 45%; width: 7px; height: 7px; background: #d9f0dc; box-shadow: 0 0 14px rgba(174, 229, 183, .9); transform: rotate(45deg); }
+.garden-overgrowth.is-striking .garden-overgrowth-impact { animation: garden-node-impact 920ms cubic-bezier(.16, 1, .3, 1) .33s both; }
+.garden-overgrowth.is-striking .garden-overgrowth-impact::before { animation: garden-impact-ring 860ms cubic-bezier(.16, 1, .3, 1) .33s both; }
+.garden-overgrowth.is-striking .garden-overgrowth-impact::after { animation: garden-impact-ring-alt 1.05s cubic-bezier(.16, 1, .3, 1) .4s both; }
+.garden-overgrowth.is-striking .garden-overgrowth-impact i { animation: garden-impact-shard-a 780ms cubic-bezier(.16, 1, .3, 1) .33s both; }
+.garden-overgrowth.is-striking .garden-overgrowth-impact b { animation: garden-impact-shard-b 820ms cubic-bezier(.16, 1, .3, 1) .33s both; }
+
+.garden-overgrowth-cat {
+  position: absolute;
+  left: var(--root-node-x);
+  top: var(--root-node-y);
+  z-index: 5;
+  display: grid;
+  width: clamp(220px, 22vw, 340px);
+  aspect-ratio: 192 / 208;
+  opacity: 0;
+  transform: translate3d(calc(-68vw - 120%), -86%, 0) rotate(-5deg) scale(.84);
+  transform-origin: 88% 92%;
+  pointer-events: none;
+}
+.garden-overgrowth.is-active .garden-overgrowth-cat { will-change: transform, opacity; }
+.garden-overgrowth-cat-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  image-rendering: auto;
+  filter: drop-shadow(0 17px 16px rgba(0, 0, 0, .58)) drop-shadow(0 0 1px rgba(193, 221, 197, .42));
+}
+.garden-overgrowth-cat-contact {
+  position: absolute;
+  right: 0;
+  bottom: 3%;
+  width: 30%;
+  height: 8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(197, 231, 202, .42), rgba(102, 170, 112, .08) 52%, transparent 72%);
+  opacity: 0;
+  transform: translate3d(1%, 0, 0) scale(.25, .55);
+  filter: blur(2px);
+}
+.garden-overgrowth-cat span {
+  position: absolute;
+  left: 55%;
+  top: calc(100% + 2px);
+  color: rgba(218, 236, 219, .72);
+  font: 7px/1 var(--mono);
+  letter-spacing: .14em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.garden-overgrowth.is-active:not(.is-pouncing):not(.is-striking):not(.is-contained) .garden-overgrowth-cat {
+  animation: garden-sumi-approach 2.05s cubic-bezier(.22, .72, .2, 1) .15s both;
+}
+.garden-overgrowth.is-pouncing:not(.is-striking):not(.is-contained) .garden-overgrowth-cat {
+  animation: garden-sumi-pounce 900ms cubic-bezier(.2, .75, .25, 1) both;
+}
+.garden-overgrowth.is-striking:not(.is-contained) .garden-overgrowth-cat {
+  animation: garden-sumi-strike 760ms cubic-bezier(.22, .72, .2, 1) both;
+}
+.garden-overgrowth.is-striking .garden-overgrowth-cat-contact {
+  animation: garden-sumi-contact 760ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.garden-overgrowth.is-contained .garden-overgrowth-cat {
+  opacity: 1;
+  transform: translate3d(-88%, -92%, 0) rotate(0) scale(1);
+}
+.garden-overgrowth.is-contained .garden-overgrowth-cat-contact {
+  opacity: .28;
+  transform: translate3d(1%, 0, 0) scale(1.05, .72);
+}
+.garden-overgrowth.is-contained .garden-overgrowth-cat span { color: #c7e2ca; }
+
+.garden-overgrowth-copy {
+  position: absolute;
+  left: clamp(24px, 7vw, 120px);
+  bottom: clamp(34px, 8vh, 94px);
+  z-index: 6;
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  width: min(680px, calc(100vw - 48px));
+  opacity: 0;
+  transform: translate3d(0, 36px, 0);
+}
+.garden-overgrowth-copy small { color: #a8cfad; font: 8px/1.4 var(--pixel); letter-spacing: .18em; }
+.garden-overgrowth-copy strong { color: var(--bone); font: 500 clamp(36px, 6vw, 82px)/.96 var(--scrawl); letter-spacing: .01em; text-shadow: 0 10px 34px rgba(0, 0, 0, .54); }
+.garden-overgrowth-copy > span { color: rgba(222, 236, 223, .68); font: 10px/1.6 var(--mono); letter-spacing: .08em; }
+.garden-overgrowth-copy button { margin-top: 11px; padding: 10px 0; color: rgba(220, 238, 221, .68); background: transparent; border: 0; border-bottom: 1px solid rgba(183, 219, 187, .34); font: 8px/1 var(--mono); letter-spacing: .13em; cursor: pointer; }
+.garden-overgrowth-copy button b { display: inline-block; margin-left: 10px; font-size: 12px; transition: transform 180ms cubic-bezier(.34, 1.56, .64, 1); }
+@media (hover: hover) and (pointer: fine) {
+  .garden-overgrowth-copy button:hover { color: var(--bone); border-color: rgba(211, 235, 214, .72); }
+  .garden-overgrowth-copy button:hover b { transform: rotate(90deg) scale(1.25); }
+}
+.garden-overgrowth-copy button:focus-visible { outline: 1px solid #b3d8b8; outline-offset: 5px; }
+.garden-overgrowth.is-active .garden-overgrowth-copy { animation: garden-root-copy 760ms cubic-bezier(.16, 1, .3, 1) 1.65s both; }
+
+.garden-root-burst {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  width: 42px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(194, 231, 199, .78);
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(149, 211, 158, .32), inset 0 0 20px rgba(182, 224, 188, .2);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.2);
+  animation: garden-root-burst 980ms cubic-bezier(.16, 1, .3, 1) forwards;
+}
+.garden-root-burst::before,
+.garden-root-burst::after { content: ""; position: absolute; inset: 24%; border: 1px solid rgba(190, 227, 195, .48); border-radius: inherit; }
+.garden-root-burst::after { inset: 46%; background: #d7efda; border: 0; box-shadow: 0 0 18px rgba(181, 231, 189, .86); }
+
+html.garden-overrun .g-nav { animation: garden-system-skew 760ms cubic-bezier(.16, 1, .3, 1) both; }
+html.garden-overrun .folio-cover,
+html.garden-overrun .folio-explore,
+html.garden-overrun .folio-articles,
+html.garden-overrun .folio-outro { animation: garden-world-buckle 980ms cubic-bezier(.16, 1, .3, 1) both; }
+html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 520ms cubic-bezier(.4, 0, .2, 1) both; }
 
 @keyframes garden-pulse { 50% { opacity: .35; } }
 @keyframes garden-cover-drift { from { transform: scale(1.035) translate3d(-.45%, -.2%, 0); } to { transform: scale(1.075) translate3d(.55%, .35%, 0); } }
@@ -811,6 +1063,124 @@ body.garden-pet-ready .garden-pet { opacity: 1; transform: none; pointer-events:
 @keyframes garden-ripple { 0% { opacity: 1; transform: scale(.2) rotate(-18deg); } 65% { opacity: .45; } 100% { opacity: 0; transform: scale(2.25) rotate(12deg); } }
 @keyframes garden-pet-hop { 0%, 100% { transform: none; } 35% { transform: translateY(-13px) rotate(-6deg); } 65% { transform: translateY(2px) rotate(4deg); } }
 @keyframes garden-alert { 0% { transform: translate(0); } 25% { transform: translate(-3px, 2px); } 50% { transform: translate(3px, -1px); } 75% { transform: translate(-1px, -2px); } }
+@keyframes garden-root-flash {
+  0% { opacity: 0; transform: translate3d(-110%, 0, 0) skewX(-8deg); }
+  34% { opacity: .9; }
+  100% { opacity: 0; transform: translate3d(112%, 0, 0) skewX(-8deg); }
+}
+@keyframes garden-vine-grow {
+  0% { opacity: 0; stroke-dashoffset: 1; }
+  12% { opacity: 1; }
+  100% { opacity: 1; stroke-dashoffset: 0; }
+}
+@keyframes garden-root-radar {
+  0% { opacity: 0; transform: scale(.82) rotate(-4deg); }
+  28% { opacity: .7; }
+  100% { opacity: .26; transform: scale(1.12) rotate(3deg); }
+}
+@keyframes garden-root-mist {
+  0% { opacity: 0; transform: translate3d(0, 14%, 0); }
+  35% { opacity: 1; }
+  100% { opacity: .52; transform: translate3d(0, -4%, 0); }
+}
+@keyframes garden-spore-rise {
+  0% { opacity: 0; transform: translate3d(0, 34px, 0) scale(.2); }
+  24% { opacity: .84; }
+  72% { opacity: .34; }
+  100% { opacity: 0; transform: translate3d(12px, -92px, 0) scale(1.2); }
+}
+@keyframes garden-root-node {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15) rotate(-35deg); }
+  18% { opacity: .9; transform: translate(-50%, -50%) scale(1.1) rotate(0); }
+  32%, 54% { opacity: .72; transform: translate(-50%, -50%) scale(.92) rotate(18deg); }
+  66% { opacity: 1; transform: translate(-50%, -50%) scale(1.18) rotate(35deg); }
+  74%, 100% { opacity: .16; transform: translate(-50%, -50%) scale(.28) rotate(46deg); }
+}
+@keyframes garden-sumi-approach {
+  0%, 5% { opacity: 0; transform: translate3d(calc(-68vw - 110%), -84%, 0) rotate(-6deg) scale(.82); }
+  16% { opacity: 1; transform: translate3d(calc(-55vw - 70%), -91%, 0) rotate(2deg) scale(1.04, .96); }
+  48% { opacity: 1; transform: translate3d(-36vw, -96%, 0) rotate(-1deg) scale(.98, 1.02); }
+  76% { opacity: 1; transform: translate3d(-17vw, -91%, 0) rotate(2deg) scale(1.03, .97); }
+  100% { opacity: 1; transform: translate3d(-132%, -92%, 0) rotate(0) scale(1); }
+}
+@keyframes garden-sumi-pounce {
+  0% { opacity: 1; transform: translate3d(-132%, -92%, 0) rotate(0) scale(1); }
+  22% { opacity: 1; transform: translate3d(-136%, -88%, 0) rotate(-3deg) scale(1.06, .9); }
+  58% { opacity: 1; transform: translate3d(-101%, -120%, 0) rotate(-2deg) scale(1.07, .95); }
+  78% { opacity: 1; transform: translate3d(-83%, -89%, 0) rotate(2deg) scale(1.06, .92); }
+  100% { opacity: 1; transform: translate3d(-88%, -92%, 0) rotate(0) scale(1); }
+}
+@keyframes garden-sumi-strike {
+  0% { opacity: 1; transform: translate3d(-88%, -92%, 0) rotate(0) scale(1); }
+  31% { opacity: 1; transform: translate3d(-91%, -94%, 0) rotate(-2deg) scale(1.03, .97); }
+  56% { opacity: 1; transform: translate3d(-85%, -89%, 0) rotate(1deg) scale(1.07, .9); }
+  72% { opacity: 1; transform: translate3d(-90%, -95%, 0) rotate(-1deg) scale(.98, 1.04); }
+  100% { opacity: 1; transform: translate3d(-88%, -92%, 0) rotate(0) scale(1); }
+}
+@keyframes garden-sumi-contact {
+  0%, 38% { opacity: 0; transform: translate3d(1%, 0, 0) scale(.25, .55); }
+  57% { opacity: .9; transform: translate3d(1%, 0, 0) scale(1.4, .68); }
+  76% { opacity: .34; transform: translate3d(1%, 0, 0) scale(.88, .78); }
+  100% { opacity: .28; transform: translate3d(1%, 0, 0) scale(1.05, .72); }
+}
+@keyframes garden-node-crush {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1.18) rotate(35deg); }
+  22% { opacity: 1; transform: translate(-45%, -50%) scale(1.38, .62) rotate(58deg); }
+  44% { opacity: .86; transform: translate(-34%, -46%) scale(.48, 1.16) rotate(82deg); }
+  68% { opacity: .32; transform: translate(-18%, -42%) scale(.24, .44) rotate(118deg); }
+  100% { opacity: 0; transform: translate(14%, -38%) scale(.08) rotate(160deg); }
+}
+@keyframes garden-node-impact {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.45); }
+}
+@keyframes garden-impact-ring {
+  0% { opacity: 1; transform: scale(.25); }
+  100% { opacity: 0; transform: scale(8.5); }
+}
+@keyframes garden-impact-ring-alt {
+  0% { opacity: .86; transform: rotate(22deg) scale(.3); }
+  100% { opacity: 0; transform: rotate(88deg) scale(11); }
+}
+@keyframes garden-impact-shard-a {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) rotate(45deg) scale(1); }
+  100% { opacity: 0; transform: translate3d(92px, -64px, 0) rotate(210deg) scale(.25); }
+}
+@keyframes garden-impact-shard-b {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) rotate(45deg) scale(1); }
+  100% { opacity: 0; transform: translate3d(-76px, 86px, 0) rotate(-170deg) scale(.2); }
+}
+@keyframes garden-impact-jolt {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  14% { transform: translate3d(-8px, 3px, 0); }
+  30% { transform: translate3d(7px, -4px, 0); }
+  48% { transform: translate3d(-5px, -2px, 0); }
+  68% { transform: translate3d(3px, 2px, 0); }
+}
+@keyframes garden-root-copy {
+  0% { opacity: 0; transform: translate3d(0, 36px, 0); filter: blur(8px); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+@keyframes garden-root-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.16) rotate(-18deg); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(7.5) rotate(34deg); }
+}
+@keyframes garden-system-skew {
+  0% { transform: none; }
+  18% { transform: translate3d(-9px, 0, 0) skewX(-3deg); }
+  38% { transform: translate3d(7px, 0, 0) skewX(2deg); }
+  64% { transform: translate3d(-2px, 0, 0); }
+  100% { transform: none; }
+}
+@keyframes garden-world-buckle {
+  0% { transform: none; }
+  16% { transform: translate3d(0, 5px, 0) scale(.994, 1.006); }
+  34% { transform: translate3d(-4px, -2px, 0) scale(1.004, .996); }
+  62% { transform: translate3d(2px, 0, 0); }
+  100% { transform: none; }
+}
 @keyframes garden-route { to { stroke-dashoffset: -380; } }
 @keyframes garden-outro-signal { 50% { opacity: .34; box-shadow: 0 0 7px color-mix(in srgb, var(--moss-bright) 24%, transparent); } }
 @keyframes garden-outro-impact {
@@ -898,6 +1268,13 @@ body.garden-pet-ready .garden-pet { opacity: 1; transform: none; pointer-events:
   .garden-pet { left: 11px; right: auto; bottom: 14px; }
   .garden-pet button { width: 50px; height: 50px; }
   .garden-pet > p { max-width: 190px; }
+  .garden-overgrowth { --root-node-x: 73%; --root-node-y: 41%; }
+  .garden-overgrowth-copy { left: 20px; bottom: 38px; width: calc(100vw - 40px); gap: 9px; }
+  .garden-overgrowth-copy strong { font-size: clamp(32px, 10.5vw, 48px); }
+  .garden-overgrowth-copy > span { max-width: 290px; font-size: 8px; }
+  .garden-overgrowth-node { width: 70px; }
+  .garden-overgrowth-cat { width: 230px; }
+  .garden-overgrowth-cat span { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -909,10 +1286,23 @@ html.garden-lite-motion .garden-scanlines,
 html.garden-lite-motion .garden-noise,
 html.garden-lite-motion .garden-cursor,
 html.garden-lite-motion .folio-fracture-shard,
+html.garden-lite-motion .garden-overgrowth-spores,
 html.garden-lite-motion .folio-field-motion { display: none; }
 html.garden-lite-motion .folio-cover-photo > img,
 html.garden-lite-motion .folio-explore-contours g,
 html.garden-lite-motion .folio-articles-contours g { animation: none; }
+html.garden-lite-motion .garden-overgrowth *,
+html.garden-lite-motion .garden-overgrowth::before,
+html.garden-lite-motion .garden-overgrowth::after,
+html.garden-lite-motion.garden-overrun .g-nav,
+html.garden-lite-motion.garden-overrun .folio-cover,
+html.garden-lite-motion.garden-overrun .folio-explore,
+html.garden-lite-motion.garden-overrun .folio-articles,
+html.garden-lite-motion.garden-overrun .folio-outro { animation: none !important; transition: none !important; }
+html.garden-lite-motion .garden-overgrowth.is-active .garden-overgrowth-vines path { stroke-dashoffset: 0; }
+html.garden-lite-motion .garden-overgrowth.is-active .garden-overgrowth-copy { opacity: 1; transform: none; filter: none; }
+html.garden-lite-motion .garden-overgrowth.is-active .garden-overgrowth-node { opacity: .35; transform: translate(-50%, -50%); }
+html.garden-lite-motion .garden-overgrowth.is-active .garden-overgrowth-cat { opacity: 1; transform: translate3d(-88%, -92%, 0); }
 html.garden-lite-motion.garden-cursor-on,
 html.garden-lite-motion.garden-cursor-on a,
 html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
@@ -934,6 +1324,18 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
   .folio-fracture-shard { transition: none; transform: none !important; }
   .folio-contribution-grid span, .folio-calendar-days button { transition: none; }
   .folio-contribution-grid span.is-pointed, .folio-contribution-grid span.is-near, .folio-calendar-days button.is-pointed, .folio-calendar-days button.is-near { transform: none !important; }
+  .garden-overgrowth *, .garden-overgrowth::before, .garden-overgrowth::after { animation: none !important; transition: none !important; }
+  .garden-overgrowth.is-active::before, .garden-overgrowth.is-active::after { opacity: .32; transform: none; }
+  .garden-overgrowth.is-active .garden-overgrowth-vines path { stroke-dashoffset: 0; }
+  .garden-overgrowth.is-active .garden-overgrowth-copy { opacity: 1; transform: none; filter: none; }
+  .garden-overgrowth.is-active .garden-overgrowth-node { opacity: .35; transform: translate(-50%, -50%); }
+  .garden-overgrowth.is-active .garden-overgrowth-cat { opacity: 1; transform: translate3d(-88%, -92%, 0); }
+  .garden-overgrowth-spores, .garden-overgrowth-flash { display: none; }
+  html.garden-overrun .g-nav,
+  html.garden-overrun .folio-cover,
+  html.garden-overrun .folio-explore,
+  html.garden-overrun .folio-articles,
+  html.garden-overrun .folio-outro { animation: none !important; }
 }
 
 /* Light field: the same system wakes beneath the white cat, not a second design. */
