@@ -46,6 +46,56 @@
   overflow: clip;
 }
 
+/* One continuous ruined field anchors every home section. The photograph,
+   terrain drawing and engineering grid are deliberately separate materials. */
+.folio-world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #050605;
+}
+.folio-world::before {
+  content: "";
+  position: absolute;
+  inset: -3%;
+  z-index: 0;
+  opacity: .78;
+  background: url("../images/garden-ruins-field.webp") center 52% / cover no-repeat;
+  filter: grayscale(1) contrast(1.32) brightness(.43);
+  transform: scale(1.025);
+  animation: garden-world-drift 36s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+  will-change: transform;
+}
+.folio-world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 1;
+  background-image:
+    radial-gradient(ellipse at 50% 43%, rgba(5, 7, 6, .02) 0 18%, rgba(4, 6, 5, .28) 53%, rgba(2, 3, 2, .9) 108%),
+    linear-gradient(90deg, rgba(0, 0, 0, .62), transparent 20% 80%, rgba(0, 0, 0, .66)),
+    linear-gradient(rgba(214, 225, 213, .022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214, 225, 213, .022) 1px, transparent 1px),
+    repeating-linear-gradient(135deg, transparent 0 7px, rgba(221, 232, 220, .012) 7px 8px);
+  background-size: auto, auto, 80px 80px, 80px 80px, 8px 8px;
+}
+.folio-world-contours {
+  position: absolute;
+  inset: -2%;
+  z-index: 1;
+  width: 104%;
+  height: 104%;
+  color: rgba(198, 211, 198, .12);
+  opacity: .8;
+  mix-blend-mode: screen;
+  transform: scale(1.02) translate3d(-4px, 0, 0);
+  animation: garden-world-contours 22s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+}
+.folio-world-contours path { vector-effect: non-scaling-stroke; }
+
 .folio *, .folio *::before, .folio *::after { box-sizing: border-box; }
 .folio a { color: inherit; }
 .is-home .site-backdrop { display: none; }
@@ -102,7 +152,7 @@
   position: relative;
   min-height: max(720px, 92svh);
   color: var(--bone);
-  background: var(--void);
+  background: linear-gradient(180deg, rgba(5, 7, 6, .12), rgba(5, 7, 6, .3) 66%, rgba(5, 7, 6, .58));
   isolation: isolate;
   overflow: hidden;
 }
@@ -128,7 +178,7 @@
 
 .folio-cover-photo > img {
   position: absolute;
-  opacity: .17;
+  opacity: 0;
   filter: grayscale(1) contrast(1.25) brightness(.58);
   transform: scale(1.035);
   animation: garden-cover-drift 19s cubic-bezier(.45, 0, .55, 1) infinite alternate;
@@ -139,8 +189,8 @@
 .folio-cover-shade {
   z-index: 1;
   background:
-    radial-gradient(circle at 50% 45%, rgba(9, 11, 10, .1) 0 18%, rgba(9, 11, 10, .46) 55%, var(--void) 100%),
-    linear-gradient(180deg, rgba(9, 11, 10, .12), rgba(9, 11, 10, .22) 56%, rgba(9, 11, 10, .8));
+    radial-gradient(ellipse at 50% 43%, rgba(9, 11, 10, 0) 0 22%, rgba(9, 11, 10, .14) 58%, rgba(5, 7, 6, .52) 100%),
+    linear-gradient(180deg, rgba(5, 7, 6, .04), rgba(5, 7, 6, .08) 58%, rgba(5, 7, 6, .5));
 }
 
 .folio-cover-lens {
@@ -292,7 +342,7 @@
 .folio-cover-scroll i { width: 1px; height: 44px; background: linear-gradient(var(--moss), transparent); transform-origin: top; animation: garden-descend 2s ease-in-out infinite; }
 
 /* Explore node — a direct structural homage to the reference section. */
-.folio-explore { position: relative; min-height: clamp(790px, 88svh, 940px); padding: clamp(84px, 8vw, 118px) 0 54px; background: #090b0a; border-top: 1px solid var(--line); isolation: isolate; overflow: hidden; }
+.folio-explore { position: relative; min-height: clamp(790px, 88svh, 940px); padding: clamp(84px, 8vw, 118px) 0 54px; background: linear-gradient(180deg, rgba(6, 8, 7, .56), rgba(6, 8, 7, .7)); border-top: 1px solid var(--line); isolation: isolate; overflow: hidden; }
 .folio-explore::before { content: ""; position: absolute; inset: 0; z-index: -3; opacity: .26; background: linear-gradient(rgba(211, 225, 211, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(211, 225, 211, .025) 1px, transparent 1px); background-size: 80px 80px; }
 .folio-explore-contours, .folio-explore-route { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; pointer-events: none; }
 .folio-explore-contours { color: rgba(188, 206, 190, .14); }
@@ -363,7 +413,7 @@
 }
 
 /* Recent log — the explore terrain continues into real article data. */
-.folio-articles { position: relative; min-height: clamp(740px, 84svh, 860px); margin-top: -1px; padding: clamp(86px, 8vw, 116px) 0 clamp(82px, 8vw, 112px); background: #090b0a; border-top: 1px solid rgba(218, 229, 216, .09); isolation: isolate; overflow: hidden; }
+.folio-articles { position: relative; min-height: clamp(740px, 84svh, 860px); margin-top: -1px; padding: clamp(86px, 8vw, 116px) 0 clamp(82px, 8vw, 112px); background: linear-gradient(180deg, rgba(6, 8, 7, .7), rgba(6, 8, 7, .76)); border-top: 1px solid rgba(218, 229, 216, .09); isolation: isolate; overflow: hidden; }
 .folio-articles::before { content: ""; position: absolute; inset: 0; z-index: -3; opacity: .26; background: linear-gradient(rgba(211, 225, 211, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(211, 225, 211, .025) 1px, transparent 1px); background-size: 80px 80px; }
 .folio-articles::after { content: "FIELD_LOG"; position: absolute; right: -1.5vw; top: 1.5vw; z-index: -2; color: rgba(229, 237, 227, .027); font: 700 clamp(86px, 15vw, 220px)/.8 var(--tall); letter-spacing: -.045em; white-space: nowrap; }
 .folio-articles-contours { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; color: rgba(188, 206, 190, .13); pointer-events: none; }
@@ -471,7 +521,7 @@
   margin-top: -1px;
   place-items: center;
   color: var(--bone);
-  background: var(--void);
+  background: linear-gradient(180deg, rgba(5, 7, 6, .76), rgba(5, 7, 6, .92));
   border-top: 1px solid var(--line);
   isolation: isolate;
   overflow: hidden;
@@ -1038,6 +1088,8 @@ html.garden-overrun .folio-outro { animation: garden-world-buckle 980ms cubic-be
 html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms cubic-bezier(.23, 1, .32, 1) both; }
 
 @keyframes garden-pulse { 50% { opacity: .35; } }
+@keyframes garden-world-drift { from { transform: scale(1.025) translate3d(-.35%, -.18%, 0); } to { transform: scale(1.065) translate3d(.45%, .24%, 0); } }
+@keyframes garden-world-contours { from { transform: scale(1.02) translate3d(-4px, 0, 0); opacity: .62; } to { transform: scale(1.035) translate3d(6px, -4px, 0); opacity: .88; } }
 @keyframes garden-cover-drift { from { transform: scale(1.035) translate3d(-.45%, -.2%, 0); } to { transform: scale(1.075) translate3d(.55%, .35%, 0); } }
 @keyframes garden-field-breathe { from { transform: scale(1) translate3d(-3px, 0, 0); opacity: .72; } to { transform: scale(1.018) translate3d(5px, -3px, 0); opacity: 1; } }
 @keyframes garden-field-sweep { 0%, 10% { opacity: 0; transform: translate3d(-8vw, 0, 0) skewX(-7deg); } 18% { opacity: .62; } 68% { opacity: .34; } 76%, 100% { opacity: 0; transform: translate3d(112vw, 0, 0) skewX(-7deg); } }
@@ -1520,7 +1572,7 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
   .folio *, .folio *::before, .folio *::after { scroll-behavior: auto !important; }
   .folio .reveal-ready, .folio .reveal-ready.reveal-visible { opacity: 1; transform: none; transition: none; }
   .garden-boot { transition-duration: .01ms; }
-  .garden-boot::after, .garden-boot-mark span, .garden-scanlines, .garden-noise, .garden-ripple, .garden-pet.is-happy button, .garden-overgrowth.is-active, .folio-masthead a i, .folio-cover-fragment > span i, .folio-cover-scroll i, .folio-explore-route path, .folio-cover-photo > img, .folio-explore-contours g, .folio-articles-contours g, .folio-outro-track b, .folio-outro h2 span, .folio-outro-pulse { animation: none; }
+  .garden-boot::after, .garden-boot-mark span, .garden-scanlines, .garden-noise, .garden-ripple, .garden-pet.is-happy button, .garden-overgrowth.is-active, .folio-masthead a i, .folio-cover-fragment > span i, .folio-cover-scroll i, .folio-explore-route path, .folio-cover-photo > img, .folio-world::before, .folio-world-contours, .folio-explore-contours g, .folio-articles-contours g, .folio-outro-track b, .folio-outro h2 span, .folio-outro-pulse { animation: none; }
   .folio-outro-glyph { transform: none !important; text-shadow: none; will-change: auto; }
   .folio-outro-pulse { display: none; }
   .garden-particles, .folio-cover-lens { display: none; }
@@ -1564,15 +1616,31 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
 :root[data-resolved-theme="light"] .folio-photo-dark,
 :root[data-resolved-theme="light"] .garden-pet-dark { display: none; }
 :root[data-resolved-theme="light"] .folio-cover-photo > img {
-  opacity: .31;
+  opacity: 0;
   filter: grayscale(.84) saturate(.45) contrast(.9) brightness(1.08);
 }
+:root[data-resolved-theme="light"] .folio-world { background: #e3e8e0; }
+:root[data-resolved-theme="light"] .folio-world::before {
+  opacity: .34;
+  filter: grayscale(1) contrast(.82) brightness(1.28);
+  mix-blend-mode: multiply;
+}
+:root[data-resolved-theme="light"] .folio-world::after {
+  background-image:
+    radial-gradient(ellipse at 50% 43%, rgba(227, 232, 224, .02) 0 20%, rgba(227, 232, 224, .4) 64%, rgba(227, 232, 224, .9) 112%),
+    linear-gradient(90deg, rgba(227, 232, 224, .72), transparent 23% 77%, rgba(227, 232, 224, .76)),
+    linear-gradient(rgba(48, 63, 50, .032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(48, 63, 50, .032) 1px, transparent 1px),
+    repeating-linear-gradient(135deg, transparent 0 7px, rgba(48, 63, 50, .014) 7px 8px);
+  background-size: auto, auto, 80px 80px, 80px 80px, 8px 8px;
+}
+:root[data-resolved-theme="light"] .folio-world-contours { color: rgba(48, 63, 50, .16); mix-blend-mode: multiply; }
 :root[data-resolved-theme="light"] .folio-cover-lens { filter: grayscale(.3) saturate(.55) contrast(.94); }
 :root[data-resolved-theme="light"] .folio-cover-lens img { opacity: .6; }
 :root[data-resolved-theme="light"] .folio-cover-shade {
   background:
-    radial-gradient(circle at 50% 44%, rgba(227, 232, 224, .04) 0 18%, rgba(227, 232, 224, .42) 58%, var(--void) 100%),
-    linear-gradient(180deg, rgba(227, 232, 224, .08), rgba(227, 232, 224, .18) 56%, rgba(227, 232, 224, .88));
+    radial-gradient(ellipse at 50% 44%, rgba(227, 232, 224, 0) 0 20%, rgba(227, 232, 224, .16) 62%, rgba(227, 232, 224, .54) 100%),
+    linear-gradient(180deg, rgba(227, 232, 224, .04), rgba(227, 232, 224, .08) 56%, rgba(227, 232, 224, .56));
 }
 :root[data-resolved-theme="light"] .folio-cover::after { color: rgba(32, 39, 32, .28); }
 :root[data-resolved-theme="light"] .folio-fracture::before { -webkit-text-stroke-color: rgba(49, 94, 60, .28); }
@@ -1589,9 +1657,10 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
 
 :root[data-resolved-theme="light"] .folio-explore,
 :root[data-resolved-theme="light"] .folio-articles {
-  background: var(--void);
+  background: rgba(227, 232, 224, .72);
   border-top-color: var(--line);
 }
+:root[data-resolved-theme="light"] .folio-outro { background: rgba(227, 232, 224, .84); }
 :root[data-resolved-theme="light"] .folio-explore::before,
 :root[data-resolved-theme="light"] .folio-articles::before {
   opacity: .48;
