@@ -1858,81 +1858,74 @@
   function setupGardenEasterEgg() {
     var overlay = document.querySelector('[data-garden-overgrowth]');
     if (!overlay) return;
+    var canvas = overlay.querySelector('[data-overgrowth-field]');
     var close = overlay.querySelector('[data-overgrowth-close]');
     var status = overlay.querySelector('[data-overgrowth-status]');
-    var keeperLabel = overlay.querySelector('.garden-overgrowth-cat span');
-    var keeper = overlay.querySelector('.garden-overgrowth-cat');
-    var keeperFrame = overlay.querySelector('[data-sumi-frame]');
-    var keeperBase = keeperFrame ? keeperFrame.getAttribute('data-sumi-base') : '';
-    var vines = overlay.querySelector('.garden-overgrowth-vines');
-    var spores = overlay.querySelector('.garden-overgrowth-spores');
+    var hint = overlay.querySelector('[data-overgrowth-hint]');
+    var controls = overlay.querySelector('[data-game-controls]');
+    var context = canvas ? canvas.getContext('2d', { alpha: false, desynchronized: true }) : null;
+    if (!canvas || !context) return;
+
     var sequence = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
-    var keeperMotions = {
-      run: { count: 8, fps: 15, loop: true },
-      pounce: { count: 5, fps: 6.2, loop: false },
-      strike: { count: 4, fps: 7, loop: false },
-      hold: { count: 6, fps: 5, loop: true }
+    var palette = {
+      ink: '#050607', night: '#0b0e0f', cloud: '#14191a', slate: '#202728',
+      mist: '#3b4745', moss: '#758374', light: '#c9d0c6', bone: '#e4e6df'
     };
     var position = 0;
-    var timers = [];
     var active = false;
-    var pointerFrame = 0;
-    var pointerX = 0;
-    var pointerY = 0;
-    var keeperAnimation = 0;
-    var keeperMotion = null;
-    var keeperFrameIndex = -1;
+    var receding = false;
+    var frame = 0;
+    var resizeTimer = 0;
+    var timers = [];
+    var previousFocus = null;
+    var logicalWidth = 320;
+    var logicalHeight = 180;
+    var worldWidth = 760;
+    var horizonY = 88;
+    var groundY = 128;
+    var cameraX = 0;
+    var startedAt = 0;
+    var lastFrame = 0;
+    var randomState = 0x2f6e2b1d;
+    var gameState = 'idle';
+    var respawnAt = 0;
+    var wonAt = 0;
+    var lastGateNotice = 0;
+    var screenShake = 0;
+    var activatedCount = 0;
+    var checkpoint = { x: 18, y: 0 };
+    var platforms = [];
+    var signals = [];
+    var hazards = [];
+    var buildings = [];
+    var stars = [];
+    var rain = [];
+    var particles = [];
+    var ripples = [];
+    var input = { left: false, right: false, pointer: 0, jumpBuffer: 0, jumpHeld: false };
+    var player = {
+      x: 18, y: 0, previousY: 0, width: 5, height: 14,
+      velocityX: 0, velocityY: 0, direction: 1, onGround: false,
+      coyote: 0, step: 0, squash: 0, visible: true, gliding: false,
+      idleTime: 0, lastIdleShake: 0, shakeUntil: 0,
+      signalPoseUntil: 0, landedAt: 0
+    };
+    var gate = { x: 0, y: 0 };
 
-    function keeperFrameUrl(name, index) {
-      return keeperBase + name + '/' + String(index).padStart(2, '0') + '.webp';
+    function random() {
+      randomState ^= randomState << 13;
+      randomState ^= randomState >>> 17;
+      randomState ^= randomState << 5;
+      return (randomState >>> 0) / 4294967296;
     }
 
-    function preloadKeeper() {
-      if (!keeperFrame || !keeperBase) return;
-      Object.keys(keeperMotions).forEach(function (name) {
-        for (var index = 0; index < keeperMotions[name].count; index += 1) {
-          var image = new Image();
-          image.decoding = 'async';
-          image.src = keeperFrameUrl(name, index);
-        }
-      });
+    function clamp(value, minimum, maximum) {
+      return Math.max(minimum, Math.min(maximum, value));
     }
 
-    function stopKeeperMotion() {
-      if (keeperAnimation) window.cancelAnimationFrame(keeperAnimation);
-      keeperAnimation = 0;
-      keeperMotion = null;
-      keeperFrameIndex = -1;
-    }
-
-    function renderKeeperFrame(now) {
-      if (!keeperMotion || !keeperFrame) return;
-      var elapsed = Math.max(0, now - keeperMotion.startedAt);
-      var rawIndex = Math.floor(elapsed * keeperMotion.mode.fps / 1000);
-      var index = keeperMotion.mode.loop
-        ? rawIndex % keeperMotion.mode.count
-        : Math.min(rawIndex, keeperMotion.mode.count - 1);
-      if (index !== keeperFrameIndex) {
-        keeperFrame.src = keeperFrameUrl(keeperMotion.name, index);
-        keeperFrameIndex = index;
-      }
-      if (!keeperMotion.mode.loop && rawIndex >= keeperMotion.mode.count - 1) {
-        keeperAnimation = 0;
-        return;
-      }
-      keeperAnimation = window.requestAnimationFrame(renderKeeperFrame);
-    }
-
-    function setKeeperMotion(name, staticFrame) {
-      if (!keeperFrame || !keeperMotions[name]) return;
-      stopKeeperMotion();
-      keeperFrame.dataset.motion = name;
-      if (typeof staticFrame === 'number') {
-        keeperFrame.src = keeperFrameUrl(name, Math.max(0, Math.min(staticFrame, keeperMotions[name].count - 1)));
-        return;
-      }
-      keeperMotion = { name: name, mode: keeperMotions[name], startedAt: performance.now() };
-      keeperAnimation = window.requestAnimationFrame(renderKeeperFrame);
+    function easeOut(value) {
+      var progress = clamp(value, 0, 1);
+      return 1 - Math.pow(1 - progress, 3);
     }
 
     function clearTimers() {
@@ -1944,141 +1937,836 @@
       timers.push(window.setTimeout(callback, delay));
     }
 
-    function setStatus(message) {
-      if (status) status.textContent = message;
+    function pixel(x, y, width, height, color, alpha) {
+      context.globalAlpha = alpha === undefined ? 1 : alpha;
+      context.fillStyle = color;
+      context.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+      context.globalAlpha = 1;
+    }
+
+    function pixelLine(x0, y0, x1, y1, color, alpha) {
+      var startX = Math.round(x0);
+      var startY = Math.round(y0);
+      var endX = Math.round(x1);
+      var endY = Math.round(y1);
+      var dx = Math.abs(endX - startX);
+      var sx = startX < endX ? 1 : -1;
+      var dy = -Math.abs(endY - startY);
+      var sy = startY < endY ? 1 : -1;
+      var error = dx + dy;
+      context.globalAlpha = alpha === undefined ? 1 : alpha;
+      context.fillStyle = color;
+      while (true) {
+        context.fillRect(startX, startY, 1, 1);
+        if (startX === endX && startY === endY) break;
+        var twice = error * 2;
+        if (twice >= dy) { error += dy; startX += sx; }
+        if (twice <= dx) { error += dx; startY += sy; }
+      }
+      context.globalAlpha = 1;
+    }
+
+    function fitCanvas() {
+      var rect = overlay.getBoundingClientRect();
+      var cssWidth = Math.max(1, Math.round(rect.width || window.innerWidth));
+      var cssHeight = Math.max(1, Math.round(rect.height || window.innerHeight));
+      var pixelSize = cssWidth < 720 ? 3 : (cssWidth > 2600 ? 6 : 4);
+      logicalWidth = Math.max(128, Math.round(cssWidth / pixelSize));
+      logicalHeight = Math.max(96, Math.round(cssHeight / pixelSize));
+      worldWidth = Math.max(380, Math.round(logicalWidth * 2.42));
+      horizonY = Math.round(logicalHeight * .48);
+      groundY = Math.round(logicalHeight * .72);
+      canvas.width = logicalWidth;
+      canvas.height = logicalHeight;
+      context.imageSmoothingEnabled = false;
+    }
+
+    function addGroundSegment(start, end) {
+      if (end - start < 2) return;
+      platforms.push({ x: start, y: groundY, width: end - start, height: logicalHeight - groundY + 8, elevated: false });
+    }
+
+    function buildLevel() {
+      platforms = [];
+      signals = [];
+      hazards = [];
+      buildings = [];
+      stars = [];
+      rain = [];
+      randomState = 0x2f6e2b1d;
+
+      var gapWidth = clamp(Math.round(logicalWidth * .046), 13, 23);
+      var gapCenters = [worldWidth * .285, worldWidth * .555, worldWidth * .785];
+      var cursor = 0;
+      gapCenters.forEach(function (center) {
+        addGroundSegment(cursor, center - gapWidth / 2);
+        cursor = center + gapWidth / 2;
+      });
+      addGroundSegment(cursor, worldWidth);
+
+      var upper = {
+        x: worldWidth * .425,
+        y: groundY - 15,
+        width: Math.max(38, worldWidth * .105),
+        height: 3,
+        elevated: true
+      };
+      platforms.push(upper);
+      var memoryPlatform = { x: worldWidth * .67, y: groundY - 10, width: Math.max(25, worldWidth * .07), height: 3, elevated: true };
+      platforms.push(memoryPlatform);
+
+      signals.push({ x: worldWidth * .17, y: groundY, active: false, label: 'ARTICLE', phase: random() * Math.PI * 2 });
+      signals.push({ x: upper.x + upper.width * .56, y: upper.y, active: false, label: 'NOTE', phase: random() * Math.PI * 2 });
+      signals.push({ x: memoryPlatform.x + memoryPlatform.width * .56, y: memoryPlatform.y, active: false, label: 'MEMORY', phase: random() * Math.PI * 2 });
+
+      hazards.push({ x: worldWidth * .355, y: groundY - 5, min: worldWidth * .325, max: worldWidth * .405, velocity: 9.5, phase: 0 });
+      hazards.push({ x: worldWidth * .615, y: groundY - 5, min: worldWidth * .59, max: worldWidth * .68, velocity: -11, phase: 1.8 });
+      hazards.push({ x: worldWidth * .835, y: groundY - 5, min: worldWidth * .815, max: worldWidth * .89, velocity: 12, phase: 3.1 });
+
+      gate.x = worldWidth - 34;
+      gate.y = groundY;
+      checkpoint.x = 18;
+      checkpoint.y = groundY - player.height;
+
+      for (var starIndex = 0; starIndex < Math.round(logicalWidth * .12); starIndex += 1) {
+        stars.push({ x: random() * logicalWidth, y: random() * Math.max(8, horizonY - 13), bright: random() > .84, phase: random() * Math.PI * 2 });
+      }
+      var buildingX = -8;
+      while (buildingX < worldWidth + logicalWidth) {
+        var buildingWidth = 5 + Math.floor(random() * 12);
+        var buildingHeight = 7 + Math.floor(random() * Math.max(7, logicalHeight * .12));
+        buildings.push({ x: buildingX, width: buildingWidth, height: buildingHeight, lit: random() > .7, phase: random() * Math.PI * 2 });
+        buildingX += buildingWidth + 1 + Math.floor(random() * 4);
+      }
+      var rainCount = Math.round(logicalWidth * .3);
+      for (var rainIndex = 0; rainIndex < rainCount; rainIndex += 1) {
+        rain.push({
+          x: random() * logicalWidth,
+          y: random() * logicalHeight,
+          speed: 48 + random() * 78,
+          length: 1 + Math.floor(random() * 5),
+          depth: .25 + random() * .75
+        });
+      }
+    }
+
+    function resetPlayer(atCheckpoint) {
+      var spawn = atCheckpoint ? checkpoint : { x: 18, y: groundY - player.height };
+      player.x = spawn.x;
+      player.y = spawn.y;
+      player.previousY = player.y;
+      player.velocityX = 0;
+      player.velocityY = 0;
+      player.direction = 1;
+      player.onGround = true;
+      player.coyote = .1;
+      player.step = 0;
+      player.squash = 0;
+      player.gliding = false;
+      player.idleTime = 0;
+      player.lastIdleShake = performance.now();
+      player.shakeUntil = 0;
+      player.signalPoseUntil = 0;
+      player.landedAt = 0;
+      player.visible = true;
+      cameraX = clamp(player.x - logicalWidth * .28, 0, worldWidth - logicalWidth);
+      input.jumpBuffer = 0;
+    }
+
+    function resetGame() {
+      buildLevel();
+      overlay.classList.remove('is-game-won');
+      activatedCount = 0;
+      particles = [];
+      ripples = [];
+      screenShake = 0;
+      wonAt = 0;
+      gameState = 'playing';
+      resetPlayer(false);
+      if (status) status.textContent = 'ENDLINE // 00 / 03 SIGNALS';
+      if (hint) hint.textContent = '点亮三座文章信标。A/D 移动，W/空格跳跃；空中按住可撑伞缓降。';
+    }
+
+    function spawnPixels(x, y, count, color, force) {
+      for (var index = 0; index < count; index += 1) {
+        var angle = random() * Math.PI * 2;
+        var speed = (4 + random() * (force || 18));
+        particles.push({
+          x: x, y: y,
+          velocityX: Math.cos(angle) * speed,
+          velocityY: Math.sin(angle) * speed - 5,
+          age: 0,
+          life: .32 + random() * .65,
+          color: color || palette.light
+        });
+      }
+      while (particles.length > 110) particles.shift();
+    }
+
+    function addRipple(x, y, strength) {
+      ripples.push({ x: x, y: y, age: 0, life: .8 + (strength || 1) * .26, strength: strength || 1 });
+      while (ripples.length > 24) ripples.shift();
+    }
+
+    function queueJump() {
+      if (!active || gameState !== 'playing') return;
+      input.jumpBuffer = .14;
+      input.jumpHeld = true;
+    }
+
+    function releaseJump() {
+      input.jumpHeld = false;
+      if (player.velocityY < -24) player.velocityY *= .52;
+    }
+
+    function killPlayer(reason) {
+      if (gameState !== 'playing') return;
+      gameState = 'respawning';
+      respawnAt = performance.now() + 720;
+      player.visible = false;
+      input.left = input.right = false;
+      input.pointer = 0;
+      screenShake = 4.5;
+      spawnPixels(player.x + player.width / 2, Math.min(player.y + player.height / 2, groundY), 28, palette.light, 24);
+      addRipple(player.x + player.width / 2, groundY + 1, 1.2);
+      if (status) status.textContent = 'SIGNAL LOST // REBUILDING AT LAST LIGHT';
+      if (hint) hint.textContent = reason === 'noise' ? '被噪点碰到了。稍等，正在最近的信标处重组。' : '掉进断轨了。稍等，正在最近的信标处重组。';
+    }
+
+    function activateSignal(signal) {
+      if (signal.active || gameState !== 'playing') return;
+      signal.active = true;
+      signal.activatedAt = performance.now();
+      activatedCount += 1;
+      checkpoint.x = signal.x - player.width / 2;
+      checkpoint.y = signal.y - player.height;
+      screenShake = 1.1;
+      player.signalPoseUntil = performance.now() + 720;
+      spawnPixels(signal.x, signal.y - 8, 22, palette.moss, 18);
+      addRipple(signal.x, signal.y + 1, 1.25);
+      if (status) status.textContent = signal.label + ' SIGNAL RESTORED // 0' + activatedCount + ' / 03';
+      if (hint) hint.textContent = activatedCount === 3 ? '全部信标已恢复。继续向右，ENDLINE 已经打开。' : '这里现在是新的检查点。继续向右寻找下一段信号。';
+      document.dispatchEvent(new CustomEvent('garden:pet', { detail: signal.label + ' 已经写回花园。' }));
+    }
+
+    function winGame(now) {
+      if (gameState !== 'playing') return;
+      gameState = 'won';
+      wonAt = now;
+      overlay.classList.add('is-game-won');
+      player.velocityX = 0;
+      player.velocityY = 0;
+      input.left = input.right = false;
+      input.pointer = 0;
+      screenShake = 1.8;
+      spawnPixels(gate.x + 5, gate.y - 13, 42, palette.bone, 28);
+      if (status) status.textContent = 'ENDLINE CLEARED // 03 / 03 SIGNALS';
+      if (hint) hint.textContent = '通关。三段内容信号已写回花园。按 R 可以重新开始。';
+      document.dispatchEvent(new CustomEvent('garden:pet', { detail: '线路尽头不是终点，是花园重新开始更新。' }));
+    }
+
+    function inputAxis() {
+      var keyboard = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+      return keyboard || input.pointer;
+    }
+
+    function updateRain(delta) {
+      var rainScale = gameState === 'won' ? .24 : 1;
+      rain.forEach(function (drop) {
+        drop.y += drop.speed * delta * rainScale;
+        drop.x += clamp(player.velocityX * .004, -.35, .35) * drop.speed * delta;
+        if (drop.y > logicalHeight + 6 || drop.x < -8 || drop.x > logicalWidth + 8) {
+          drop.y = -drop.length - random() * 14;
+          drop.x = random() * logicalWidth;
+        }
+      });
+    }
+
+    function updateHazards(delta) {
+      hazards.forEach(function (hazard) {
+        hazard.x += hazard.velocity * delta;
+        if (hazard.x <= hazard.min || hazard.x >= hazard.max) {
+          hazard.x = clamp(hazard.x, hazard.min, hazard.max);
+          hazard.velocity *= -1;
+        }
+      });
+    }
+
+    function updateParticles(delta) {
+      particles = particles.filter(function (particle) {
+        particle.age += delta;
+        particle.x += particle.velocityX * delta;
+        particle.y += particle.velocityY * delta;
+        particle.velocityY += 44 * delta;
+        return particle.age < particle.life;
+      });
+      ripples = ripples.filter(function (ripple) {
+        ripple.age += delta;
+        return ripple.age < ripple.life;
+      });
+    }
+
+    function horizontalOverlap(aX, aWidth, bX, bWidth) {
+      return aX + aWidth > bX && aX < bX + bWidth;
+    }
+
+    function updatePlayer(delta, now) {
+      if (gameState === 'respawning') {
+        if (now >= respawnAt) {
+          resetPlayer(true);
+          gameState = 'playing';
+          spawnPixels(player.x + player.width / 2, player.y + player.height / 2, 18, palette.moss, 14);
+          if (status) status.textContent = 'REBUILT // CHECKPOINT RESTORED';
+          if (hint) hint.textContent = '继续。信标不会因为失败而熄灭。';
+        }
+        return;
+      }
+      if (gameState === 'won') {
+        var exitProgress = clamp((now - wonAt) / 1100, 0, 1);
+        player.gliding = false;
+        player.direction = 1;
+        player.step += delta * 7;
+        player.x += (gate.x + 6 - player.x) * Math.min(1, delta * 2.8);
+        player.visible = exitProgress < .92;
+        return;
+      }
+
+      var axis = inputAxis();
+      var acceleration = player.onGround ? 148 : (player.gliding ? 112 : 94);
+      if (axis) {
+        player.velocityX += axis * acceleration * delta;
+        player.direction = axis < 0 ? -1 : 1;
+      } else {
+        player.velocityX *= Math.pow(player.onGround ? .0006 : .12, delta);
+      }
+      var maximumSpeed = player.gliding ? 39 : 35;
+      player.velocityX = clamp(player.velocityX, -maximumSpeed, maximumSpeed);
+      if (Math.abs(player.velocityX) < .12) player.velocityX = 0;
+      player.x = clamp(player.x + player.velocityX * delta, 0, worldWidth - player.width);
+
+      input.jumpBuffer = Math.max(0, input.jumpBuffer - delta);
+      player.coyote = player.onGround ? .105 : Math.max(0, player.coyote - delta);
+      if (input.jumpBuffer > 0 && player.coyote > 0) {
+        input.jumpBuffer = 0;
+        player.coyote = 0;
+        player.onGround = false;
+        player.velocityY = -76;
+        player.squash = .2;
+        spawnPixels(player.x + player.width / 2, player.y + player.height, 5, palette.mist, 9);
+      }
+
+      player.previousY = player.y;
+      var previousBottom = player.y + player.height;
+      player.gliding = input.jumpHeld && !player.onGround && player.velocityY > 9;
+      var gravity = player.gliding ? 72 : 168;
+      var terminalVelocity = player.gliding ? 34 : 78;
+      player.velocityY = Math.min(terminalVelocity, player.velocityY + gravity * delta);
+      player.y += player.velocityY * delta;
+      var nextBottom = player.y + player.height;
+      var landedOn = null;
+      if (player.velocityY >= 0) {
+        platforms.forEach(function (platform) {
+          if (landedOn || !horizontalOverlap(player.x + .7, player.width - 1.4, platform.x, platform.width)) return;
+          if (previousBottom <= platform.y + 1.2 && nextBottom >= platform.y) landedOn = platform;
+        });
+      }
+      if (landedOn) {
+        var landingSpeed = player.velocityY;
+        player.y = landedOn.y - player.height;
+        player.velocityY = 0;
+        if (!player.onGround && landingSpeed > 28) {
+          player.squash = clamp(landingSpeed / 150, .14, .4);
+          player.landedAt = now;
+          addRipple(player.x + player.width / 2, landedOn.y + 1, .65);
+          spawnPixels(player.x + player.width / 2, landedOn.y, 7, palette.mist, 13);
+        }
+        player.gliding = false;
+        player.onGround = true;
+      } else {
+        player.onGround = false;
+      }
+      player.squash = Math.max(0, player.squash - delta * 1.9);
+      if (Math.abs(player.velocityX) > .8 && player.onGround) player.step += delta * (5.8 + Math.abs(player.velocityX) * .1);
+      if (player.onGround && Math.abs(player.velocityX) < .24 && !axis) {
+        player.idleTime += delta;
+        if (player.idleTime > 3.1 && now - player.lastIdleShake > 4300) {
+          player.lastIdleShake = now;
+          player.shakeUntil = now + 560;
+          spawnPixels(player.x + player.width / 2, player.y - 7, 7, palette.mist, 11);
+        }
+      } else {
+        player.idleTime = 0;
+      }
+
+      signals.forEach(function (signal) {
+        var centerX = player.x + player.width / 2;
+        var bottom = player.y + player.height;
+        if (!signal.active && Math.abs(centerX - signal.x) < 7 && Math.abs(bottom - signal.y) < 11) activateSignal(signal);
+      });
+
+      hazards.forEach(function (hazard) {
+        if (gameState !== 'playing') return;
+        if (horizontalOverlap(player.x, player.width, hazard.x - 2, 5) && player.y + player.height > hazard.y && player.y < hazard.y + 5) killPlayer('noise');
+      });
+
+      if (player.y > logicalHeight + 12) killPlayer('fall');
+      if (gameState !== 'playing') return;
+      if (player.x + player.width > gate.x - 1) {
+        if (activatedCount === signals.length) {
+          winGame(now);
+        } else {
+          player.x = gate.x - player.width - 2;
+          player.velocityX = -14;
+          if (now - lastGateNotice > 900) {
+            lastGateNotice = now;
+            if (status) status.textContent = 'ENDLINE LOCKED // ' + String(signals.length - activatedCount).padStart(2, '0') + ' SIGNALS MISSING';
+            if (hint) hint.textContent = '还有信标没有点亮。向左返回，已点亮的位置仍是检查点。';
+          }
+        }
+      }
+    }
+
+    function updateCamera(delta) {
+      var target = clamp(player.x - logicalWidth * .38, 0, Math.max(0, worldWidth - logicalWidth));
+      cameraX += (target - cameraX) * Math.min(1, delta * 5.4);
+      screenShake = Math.max(0, screenShake - delta * 10);
+    }
+
+    function updateGame(delta, now) {
+      updateRain(delta);
+      updateHazards(delta);
+      updateParticles(delta);
+      updatePlayer(delta, now);
+      updateCamera(delta);
+    }
+
+    function screenX(worldX, parallax) {
+      return worldX - cameraX * (parallax === undefined ? 1 : parallax);
+    }
+
+    function drawMoon() {
+      var x = Math.round(logicalWidth * .76);
+      var y = Math.round(logicalHeight * .18);
+      var radius = Math.max(8, Math.round(Math.min(logicalWidth, logicalHeight) * .075));
+      for (var row = -radius; row <= radius; row += 1) {
+        var half = Math.floor(Math.sqrt(Math.max(0, radius * radius - row * row)));
+        for (var column = -half; column <= half; column += 2) {
+          if ((column + row) % 3) pixel(x + column, y + row, 1, 1, palette.mist, .36);
+        }
+      }
+    }
+
+    function drawSky(now) {
+      pixel(0, 0, logicalWidth, logicalHeight, palette.night);
+      drawMoon();
+      stars.forEach(function (star) {
+        pixel(star.x - cameraX * .035, star.y, 1, 1, star.bright ? palette.light : palette.mist, star.bright ? .25 + Math.sin(now * .001 + star.phase) * .08 : .1);
+      });
+      var cloudOffset = ((now - startedAt) * .0022) % (logicalWidth + 70);
+      pixel(logicalWidth - cloudOffset, horizonY * .34, 66, 2, palette.slate, .24);
+      pixel(logicalWidth * .32 - cloudOffset * .5, horizonY * .55, 92, 3, palette.cloud, .28);
+      buildings.forEach(function (building) {
+        var x = screenX(building.x, .2);
+        if (x + building.width < -2 || x > logicalWidth + 2) return;
+        pixel(x, horizonY - building.height, building.width, building.height, palette.cloud, .88);
+        if (building.lit) pixel(x + Math.floor(building.width / 2), horizonY - building.height + 4, 1, 1, palette.moss, .24 + Math.sin(now * .0007 + building.phase) * .04);
+      });
+      pixel(0, horizonY, logicalWidth, 1, palette.mist, .3);
+      pixel(0, horizonY + 2, logicalWidth, 1, palette.slate, .25);
+    }
+
+    function drawPlatforms(now) {
+      platforms.forEach(function (platform) {
+        var x = screenX(platform.x);
+        if (x + platform.width < -4 || x > logicalWidth + 4) return;
+        pixel(x, platform.y, platform.width, platform.height, palette.ink);
+        pixel(x, platform.y, platform.width, 1, platform.elevated ? palette.moss : palette.mist, platform.elevated ? .46 : .38);
+        pixel(x, platform.y + 3, platform.width, 1, palette.slate, .26);
+        if (platform.elevated) {
+          for (var brace = 4; brace < platform.width; brace += 14) pixelLine(x + brace, platform.y + 3, x + brace + 5, platform.y + 10, palette.mist, .19);
+        } else {
+          for (var sleeper = 2; sleeper < platform.width; sleeper += 15) pixel(x + sleeper, platform.y + 17, 9, 1, palette.mist, .17);
+          pixel(x, platform.y + 15, platform.width, 1, palette.slate, .44);
+          pixel(x, platform.y + 23, platform.width, 1, palette.slate, .5);
+        }
+      });
+      for (var puddle = 0; puddle < 7; puddle += 1) {
+        var puddleX = screenX(worldWidth * (.09 + puddle * .125));
+        var shimmer = .12 + Math.sin(now * .0014 + puddle) * .03;
+        pixel(puddleX, groundY + 5 + (puddle % 3) * 3, 9 + (puddle % 4) * 4, 1, palette.mist, shimmer);
+      }
+    }
+
+    function drawRain(front) {
+      rain.forEach(function (drop) {
+        if ((drop.depth > .62) !== front) return;
+        var lean = clamp(player.velocityX * .012, -.8, .8) * drop.length;
+        pixelLine(drop.x, drop.y, drop.x + lean, drop.y + drop.length, front ? palette.light : palette.mist, front ? .2 + drop.depth * .2 : .1 + drop.depth * .1);
+      });
+    }
+
+    function drawSignal(signal, now) {
+      var x = screenX(signal.x);
+      if (x < -12 || x > logicalWidth + 12) return;
+      var pulse = .78 + Math.sin(now * .002 + signal.phase) * .13;
+      var alpha = signal.active ? pulse : .2;
+      pixel(x, signal.y - 10, 1, 11, palette.mist, signal.active ? .54 : .28);
+      pixel(x - 2, signal.y - 12, 5, 3, signal.active ? palette.light : palette.slate, alpha);
+      pixel(x - 1, signal.y - 13, 3, 1, signal.active ? palette.bone : palette.mist, alpha);
+      if (signal.active) {
+        pixel(x - 6, signal.y - 10, 13, 1, palette.moss, alpha * .16);
+        for (var reflection = 2; reflection < 13; reflection += 3) pixel(x - Math.floor((13 - reflection) / 4), signal.y + reflection, 1 + Math.floor((13 - reflection) / 2), 1, palette.moss, alpha * (1 - reflection / 13) * .22);
+      }
+    }
+
+    function drawHazard(hazard, now) {
+      var x = screenX(hazard.x);
+      if (x < -10 || x > logicalWidth + 10) return;
+      var glitch = Math.floor(now / 110 + hazard.phase) % 3;
+      pixel(x - 2, hazard.y + 2, 5, 3, palette.slate, .9);
+      pixel(x - 1 + glitch, hazard.y, 3, 2, palette.mist, .72);
+      pixel(x - 4 + glitch * 2, hazard.y + 1, 2, 1, palette.light, .34);
+      pixel(x + 3 - glitch, hazard.y + 4, 2, 1, palette.moss, .28);
+    }
+
+    function drawGate(now) {
+      var x = screenX(gate.x);
+      if (x < -20 || x > logicalWidth + 20) return;
+      var powered = activatedCount === signals.length;
+      var open = powered ? easeOut((now - (wonAt || signals[2].activatedAt || now)) / 900) : 0;
+      pixel(x, gate.y - 27, 2, 28, palette.mist, .58);
+      pixel(x + 12, gate.y - 27, 2, 28, palette.mist, .58);
+      pixel(x, gate.y - 28, 14, 2, palette.mist, .58);
+      pixel(x + 2, gate.y - 25, 10, 22, palette.slate, .82);
+      pixel(x + 2, gate.y - 25, Math.max(1, 5 - open * 5), 22, palette.ink);
+      pixel(x + 7 + open * 5, gate.y - 25, Math.max(1, 5 - open * 5), 22, palette.ink);
+      pixel(x + 6, gate.y - 31, 2, 2, powered ? palette.bone : palette.mist, powered ? .9 : .25);
+      if (powered) pixel(x - 5, gate.y - 29, 24, 1, palette.moss, .12 + Math.sin(now * .003) * .04);
+    }
+
+    function drawPlayer(now) {
+      if (!player.visible) return;
+      var x = Math.round(screenX(player.x));
+      var y = Math.round(player.y);
+      var centerX = x + 2;
+      var winning = gameState === 'won';
+      var winProgress = winning ? clamp((now - wonAt) / 1100, 0, 1) : 0;
+      var moving = (Math.abs(player.velocityX) > .8 && player.onGround) || (winning && winProgress < .78);
+      var stepFrame = moving ? Math.floor(player.step * 3) % 6 : 0;
+      var bobPattern = [0, -1, 0, 0, -1, 0];
+      var bob = moving ? bobPattern[stepFrame] : (player.idleTime > 1.2 ? Math.round(Math.sin(now * .0022) * .45) : 0);
+      var direction = player.direction;
+      var squash = player.squash > .08 ? 1 : 0;
+      var gliding = player.gliding;
+      var airborne = !player.onGround;
+      var signalPose = now < player.signalPoseUntil;
+      var shaking = now < player.shakeUntil;
+      var shake = shaking ? Math.round(Math.sin((player.shakeUntil - now) * .075) * 2) : 0;
+      var foldedUmbrella = winning && now - wonAt > 260;
+      var blink = Math.floor((now + player.x * 23) / 1850) % 7 === 0;
+
+      if (player.onGround) {
+        var landingGlow = clamp(1 - (now - player.landedAt) / 260, 0, 1);
+        pixel(centerX - 6 - landingGlow * 2, y + player.height + 2, 13 + landingGlow * 4, 1, palette.mist, .13 + landingGlow * .12);
+        pixel(centerX - 3, y + player.height + 5, 7, 1, palette.moss, .07);
+      }
+
+      var scarfLift = gliding ? -2 : clamp(Math.round(-player.velocityY * .025), -1, 2);
+      var scarfWave = Math.round(Math.sin(now * .01 + player.step) * 1.2);
+      pixel(centerX - direction * 3, y + 4 + bob, 3, 2, palette.moss, .78);
+      pixel(centerX - direction * 6, y + 4 + bob + scarfLift, 4, 1, palette.moss, .64);
+      pixel(centerX - direction * 9, y + 4 + bob + scarfLift + scarfWave, 4, 1, palette.moss, .42);
+      if (Math.abs(player.velocityX) > 18 || gliding) pixel(centerX - direction * 12, y + 4 + bob + scarfLift + scarfWave, 3, 1, palette.moss, .24);
+
+      pixel(centerX - direction * 4, y + 4 + bob + squash, 4, 7 - squash, palette.ink, .94);
+      pixel(centerX - direction * 4, y + 5 + bob + squash, 2, 4, palette.mist, .38);
+
+      if (foldedUmbrella) {
+        var foldedX = centerX + direction * 5;
+        pixelLine(foldedX, y - 5 + bob, foldedX, y + 10 + bob, palette.mist, .72);
+        pixel(foldedX - 1, y - 5 + bob, 3, 8, palette.slate, .9);
+        pixel(foldedX, y - 6 + bob, 1, 2, palette.light, .55);
+        pixel(foldedX + direction, y + 10 + bob, 2, 1, palette.moss, .58);
+      } else {
+        var canopyHalf = gliding ? 12 : 10;
+        var canopyCenter = centerX + clamp(Math.round(player.velocityX * .028), -2, 2) + shake;
+        var canopyY = y - (gliding ? 11 : 9) + bob + squash;
+        pixel(canopyCenter - 2, canopyY, 5, 1, palette.mist, .78);
+        pixel(canopyCenter - 5, canopyY + 1, 11, 1, palette.slate, .94);
+        pixel(canopyCenter - canopyHalf + 3, canopyY + 2, canopyHalf * 2 - 5, 1, palette.slate);
+        pixel(canopyCenter - canopyHalf, canopyY + 3, canopyHalf * 2 + 1, 2, palette.ink);
+        pixel(canopyCenter - canopyHalf + 1, canopyY + 3, canopyHalf - 2, 1, palette.mist, .52);
+        pixel(canopyCenter - canopyHalf, canopyY + 5, 4, 1, palette.slate, .92);
+        pixel(canopyCenter - 2, canopyY + 5, 5, 1, palette.slate, .92);
+        pixel(canopyCenter + canopyHalf - 3, canopyY + 5, 4, 1, palette.slate, .92);
+        pixelLine(canopyCenter, canopyY + 1, canopyCenter - canopyHalf + 3, canopyY + 4, palette.mist, .28);
+        pixelLine(canopyCenter, canopyY + 1, canopyCenter + canopyHalf - 3, canopyY + 4, palette.mist, .28);
+        pixelLine(canopyCenter, canopyY + 2, centerX + 2, y + 8 + bob, palette.mist, .68);
+        pixel(centerX + 1, y + 8 + bob, 3, 1, palette.mist, .64);
+        if (gliding || shaking) {
+          var dripStep = Math.floor(now / 90) % 4;
+          pixel(canopyCenter - canopyHalf, canopyY + 7 + dripStep, 1, 2, palette.light, .35);
+          pixel(canopyCenter + canopyHalf, canopyY + 6 + ((dripStep + 2) % 4), 1, 2, palette.light, .3);
+          if (shaking) pixel(canopyCenter - 4, canopyY + 8 + ((dripStep + 1) % 3), 1, 1, palette.moss, .38);
+        }
+      }
+
+      pixel(centerX - 2, y + bob + squash, 5, 4 - squash, palette.slate);
+      pixel(centerX - 1 + direction, y + 1 + bob + squash, 3, 2, palette.light, .68);
+      pixel(centerX - 2, y + bob + squash, 5, 1, palette.ink, .9);
+      pixel(centerX - direction * 2, y + 1 + bob + squash, 1, 3, palette.ink, .68);
+      if (!blink) pixel(centerX + direction, y + 2 + bob + squash, 1, 1, palette.bone, .7);
+
+      pixel(centerX - 3, y + 4 + bob + squash, 7, 7 - squash, palette.slate);
+      pixel(centerX - 2, y + 5 + bob + squash, 5, 5 - squash, palette.mist, .52);
+      pixel(centerX - 2, y + 4 + bob + squash, 2, 2, palette.light, .32);
+      pixel(centerX + 2, y + 6 + bob, 1, 1, palette.moss, .66);
+      pixel(centerX, y + 6 + bob, 1, 1, palette.ink, .72);
+      pixel(centerX, y + 8 + bob, 1, 1, palette.ink, .72);
+
+      if (signalPose) {
+        pixelLine(centerX - direction * 2, y + 6 + bob, centerX - direction * 6, y + 1 + bob, palette.mist, .82);
+        pixel(centerX - direction * 7, y + bob, 2, 2, palette.bone, .78);
+      } else {
+        pixelLine(centerX + direction * 2, y + 6 + bob, centerX + direction * 3, y + 9 + bob, palette.mist, .66);
+        pixel(centerX + direction * 3, y + 9 + bob, 2, 1, palette.light, .54);
+      }
+
+      if (airborne) {
+        if (gliding) {
+          pixel(centerX - direction * 1, y + 10 + bob, 3, 2, palette.mist, .86);
+          pixel(centerX - direction * 4, y + 11 + bob, 4, 2, palette.slate, .92);
+          pixel(centerX - direction * 6, y + 12 + bob, 3, 1, palette.light, .44);
+        } else {
+          var tuck = player.velocityY < 0 ? 1 : 0;
+          pixel(centerX - 3, y + 10 - tuck + bob, 3, 2, palette.mist, .84);
+          pixel(centerX + 1, y + 11 + tuck + bob, 3, 2, palette.slate, .9);
+          pixel(centerX - 4, y + 11 - tuck + bob, 2, 1, palette.light, .4);
+        }
+      } else {
+        var legFrames = [
+          [-1, 0, 1, 0], [-2, 0, 2, -1], [-1, -1, 3, 0],
+          [1, 0, -1, 0], [2, -1, -2, 0], [3, 0, -1, -1]
+        ];
+        var legs = legFrames[stepFrame];
+        pixel(centerX - 2 + legs[0] * direction, y + 10 + legs[1] + bob, 2, 4 - Math.max(0, legs[1]), palette.mist, .86);
+        pixel(centerX + 1 + legs[2] * direction, y + 10 + legs[3] + bob, 2, 4 - Math.max(0, legs[3]), palette.slate, .94);
+        pixel(centerX - 3 + legs[0] * direction, y + 13 + bob, 3, 1, palette.light, .44);
+        pixel(centerX + 1 + legs[2] * direction, y + 13 + bob, 3, 1, palette.light, .34);
+      }
+    }
+
+    function drawEffects() {
+      ripples.forEach(function (ripple) {
+        var progress = ripple.age / ripple.life;
+        var width = 2 + easeOut(progress) * 20 * ripple.strength;
+        pixel(screenX(ripple.x) - width / 2, ripple.y, width, 1, palette.light, (1 - progress) * .34);
+      });
+      particles.forEach(function (particle) {
+        pixel(screenX(particle.x), particle.y, 1, 1, particle.color, clamp(1 - particle.age / particle.life, 0, 1) * .72);
+      });
+    }
+
+    function drawHud(now) {
+      var startX = logicalWidth - 27;
+      signals.forEach(function (signal, index) {
+        pixel(startX + index * 8, 8, 5, 5, signal.active ? palette.light : palette.slate, signal.active ? .84 : .48);
+        pixel(startX + 1 + index * 8, 9, 3, 3, signal.active ? palette.moss : palette.ink, signal.active ? .62 + Math.sin(now * .002 + index) * .08 : .8);
+      });
+      pixel(startX, 16, 21, 1, palette.mist, .2);
+      var progress = clamp(player.x / Math.max(1, gate.x), 0, 1);
+      pixel(startX, 16, 21 * progress, 1, palette.moss, .56);
+    }
+
+    function renderGame(now) {
+      var shakeX = screenShake > 0 ? (random() - .5) * screenShake : 0;
+      var shakeY = screenShake > 0 ? (random() - .5) * screenShake * .5 : 0;
+      context.save();
+      context.translate(Math.round(shakeX), Math.round(shakeY));
+      drawSky(now);
+      drawRain(false);
+      drawPlatforms(now);
+      signals.forEach(function (signal) { drawSignal(signal, now); });
+      hazards.forEach(function (hazard) { drawHazard(hazard, now); });
+      drawGate(now);
+      drawEffects();
+      drawPlayer(now);
+      drawRain(true);
+      drawHud(now);
+      var reveal = easeOut((now - startedAt) / 760);
+      if (reveal < 1) {
+        var open = logicalHeight * reveal;
+        var top = horizonY - open * .48;
+        var bottom = horizonY + open * .52;
+        pixel(0, 0, logicalWidth, Math.max(0, top), palette.ink);
+        pixel(0, bottom, logicalWidth, logicalHeight - bottom, palette.ink);
+      }
+      context.restore();
+    }
+
+    function renderLoop(now) {
+      if (!active) return;
+      if (document.hidden) {
+        lastFrame = now;
+        frame = window.requestAnimationFrame(renderLoop);
+        return;
+      }
+      var elapsed = now - lastFrame;
+      if (elapsed < 1000 / 30) {
+        frame = window.requestAnimationFrame(renderLoop);
+        return;
+      }
+      var delta = Math.min(.045, elapsed / 1000);
+      lastFrame = now;
+      if (!receding) updateGame(delta, now);
+      renderGame(now);
+      frame = window.requestAnimationFrame(renderLoop);
+    }
+
+    function stopGame() {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      input.left = input.right = false;
+      input.pointer = 0;
+      input.jumpHeld = false;
+      context.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     function finish() {
-      if (!active || overlay.classList.contains('is-receding')) return;
+      if (!active || receding) return;
       clearTimers();
+      receding = true;
       overlay.classList.add('is-receding');
-      document.documentElement.classList.remove('garden-overrun', 'garden-root-impact');
-      setStatus('FIELD RESTORED // ROOTS WITHDRAWING');
+      if (status) status.textContent = 'LEVEL CLOSED // RETURNING TO GARDEN';
       later(function () {
-        overlay.classList.remove('is-active', 'is-receding', 'is-pouncing', 'is-striking', 'is-contained');
+        overlay.classList.remove('is-active', 'is-receding', 'is-game-won');
         overlay.setAttribute('aria-hidden', 'true');
-        if (vines) vines.style.removeProperty('transform');
-        if (spores) spores.style.removeProperty('transform');
-        stopKeeperMotion();
         active = false;
-      }, gardenMotionIsLite() ? 20 : 780);
+        gameState = 'idle';
+        stopGame();
+        if (previousFocus && previousFocus.focus && document.contains(previousFocus)) previousFocus.focus({ preventScroll: true });
+      }, gardenMotionIsLite() ? 20 : 440);
     }
 
     function awaken() {
       clearTimers();
-      overlay.classList.remove('is-active', 'is-receding', 'is-pouncing', 'is-striking', 'is-contained');
-      document.documentElement.classList.remove('garden-root-impact');
+      stopGame();
+      overlay.classList.remove('is-active', 'is-receding', 'is-game-won');
       void overlay.offsetWidth;
+      previousFocus = document.activeElement;
       active = true;
+      receding = false;
       overlay.classList.add('is-active');
       overlay.setAttribute('aria-hidden', 'false');
-      document.documentElement.classList.add('garden-overrun');
-      setStatus('ACCESS CODE ACCEPTED // ROOT WAKE');
-      if (keeperLabel) keeperLabel.textContent = 'SUMI / INTERCEPTING';
-      document.dispatchEvent(new CustomEvent('garden:pet', { detail: '暗号正确。它们正在从页面背面长出来。' }));
+      fitCanvas();
+      startedAt = performance.now();
+      lastFrame = startedAt;
+      resetGame();
+      document.dispatchEvent(new CustomEvent('garden:pet', { detail: 'ENDLINE 已打开：找回文章、笔记和记忆。' }));
 
       if (gardenMotionIsLite()) {
-        overlay.classList.add('is-contained');
-        setKeeperMotion('hold', 2);
-        later(finish, 4200);
+        startedAt -= 1200;
+        renderGame(performance.now());
+        if (status) status.textContent = 'STATIC LEVEL // MOTION REDUCED';
+        if (hint) hint.textContent = '系统已按动态偏好展示静态关卡。可以退出并返回页面。';
+        later(finish, 5200);
         return;
       }
-
-      setKeeperMotion('run');
-      later(function () { setStatus('ROOT NETWORK // 37% // SIGNAL SPREADING'); }, 950);
-      later(function () { setStatus('SUMI // INTERCEPT COURSE LOCKED'); }, 1950);
-      later(function () {
-        overlay.classList.add('is-pouncing');
-        setKeeperMotion('pounce');
-        if (keeperLabel) keeperLabel.textContent = 'SUMI / POUNCE VECTOR';
-      }, 2200);
-      later(function () {
-        overlay.classList.add('is-striking');
-        setKeeperMotion('strike');
-        if (keeperLabel) keeperLabel.textContent = 'SUMI / PAW COMMITTED';
-        setStatus('SUMI // PAW STRIKE ARMED');
-      }, 3100);
-      later(function () {
-        document.documentElement.classList.add('garden-root-impact');
-        setStatus('IMPACT CONFIRMED // NODE COLLAPSING');
-      }, 3460);
-      later(function () {
-        document.documentElement.classList.remove('garden-root-impact');
-        overlay.classList.add('is-contained');
-        setKeeperMotion('hold');
-        if (keeperLabel) keeperLabel.textContent = 'SUMI / NODE PINNED';
-        setStatus('OVERGROWTH CONTAINED // RETURNING CONTROL');
-        document.dispatchEvent(new CustomEvent('garden:pet', { detail: '抓住了。屏幕很快还你。' }));
-      }, 3860);
-      later(finish, 6900);
+      frame = window.requestAnimationFrame(renderLoop);
     }
 
-    function renderParallax() {
-      pointerFrame = 0;
-      if (!active || gardenMotionIsLite()) return;
-      var nx = pointerX / Math.max(1, window.innerWidth) - .5;
-      var ny = pointerY / Math.max(1, window.innerHeight) - .5;
-      if (vines) vines.style.transform = 'translate3d(' + (nx * 22).toFixed(1) + 'px,' + (ny * 16).toFixed(1) + 'px,0)';
-      if (spores) spores.style.transform = 'translate3d(' + (nx * -10).toFixed(1) + 'px,' + (ny * -7).toFixed(1) + 'px,0)';
-    }
-
-    function createBurst(event) {
-      if (!active || gardenMotionIsLite() || event.target.closest('button')) return;
-      if (keeper && overlay.classList.contains('is-contained')) {
-        var rect = keeper.getBoundingClientRect();
-        var hitKeeper = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
-        if (hitKeeper) {
-          overlay.classList.remove('is-contained', 'is-striking');
-          void keeper.offsetWidth;
-          overlay.classList.add('is-striking');
-          setKeeperMotion('strike');
-          document.documentElement.classList.add('garden-root-impact');
-          setStatus('SUMI // SECONDARY PRESS');
-          later(function () {
-            document.documentElement.classList.remove('garden-root-impact');
-            overlay.classList.add('is-contained');
-            setKeeperMotion('hold');
-            setStatus('NODE STILL PINNED // GOOD CAT');
-          }, 760);
-          return;
-        }
-      }
-      var burst = document.createElement('i');
-      burst.className = 'garden-root-burst';
-      burst.style.left = event.clientX + 'px';
-      burst.style.top = event.clientY + 'px';
-      burst.setAttribute('aria-hidden', 'true');
-      overlay.appendChild(burst);
-      burst.addEventListener('animationend', function () { burst.remove(); }, { once: true });
+    function isEditingTarget(target) {
+      return target && (target.matches('input, textarea, select') || target.isContentEditable);
     }
 
     document.addEventListener('keydown', function (event) {
       var target = event.target;
-      if (target && (target.matches('input, textarea, select') || target.isContentEditable)) return;
-      if (active && event.key === 'Escape') {
-        finish();
+      if (isEditingTarget(target)) return;
+      var key = event.key.toLowerCase();
+      if (active) {
+        if (event.key === 'Escape') { event.preventDefault(); finish(); return; }
+        if (target && target.closest && target.closest('button') && (event.key === ' ' || event.key === 'Enter')) return;
+        if (key === 'r') { event.preventDefault(); resetGame(); startedAt = performance.now() - 800; return; }
+        if (key === 'a' || event.key === 'ArrowLeft') { event.preventDefault(); input.left = true; return; }
+        if (key === 'd' || event.key === 'ArrowRight') { event.preventDefault(); input.right = true; return; }
+        if (key === 'w' || event.key === 'ArrowUp' || event.key === ' ') {
+          event.preventDefault();
+          if (!event.repeat) queueJump();
+          return;
+        }
         return;
       }
-      var key = event.key.toLowerCase();
       position = key === sequence[position] ? position + 1 : (key === sequence[0] ? 1 : 0);
       if (position < sequence.length) return;
       position = 0;
       awaken();
     });
 
-    if (close) close.addEventListener('click', finish);
-    preloadKeeper();
-    overlay.addEventListener('click', createBurst);
-    overlay.addEventListener('pointermove', function (event) {
-      if (!active || gardenMotionIsLite()) return;
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      if (!pointerFrame) pointerFrame = window.requestAnimationFrame(renderParallax);
-    }, { passive: true });
-    overlay.addEventListener('pointerleave', function () {
-      if (vines) vines.style.transform = 'translate3d(0,0,0)';
-      if (spores) spores.style.transform = 'translate3d(0,0,0)';
+    document.addEventListener('keyup', function (event) {
+      if (!active) return;
+      var key = event.key.toLowerCase();
+      if (key === 'a' || event.key === 'ArrowLeft') input.left = false;
+      if (key === 'd' || event.key === 'ArrowRight') input.right = false;
+      if (key === 'w' || event.key === 'ArrowUp' || event.key === ' ') releaseJump();
     });
+
+    overlay.addEventListener('pointermove', function (event) {
+      if (!active || receding || gardenMotionIsLite() || event.pointerType === 'touch') return;
+      var rect = canvas.getBoundingClientRect();
+      var pointerScreenX = (event.clientX - rect.left) / Math.max(1, rect.width) * logicalWidth;
+      var playerScreenX = screenX(player.x + player.width / 2);
+      input.pointer = pointerScreenX < playerScreenX - 14 ? -1 : (pointerScreenX > playerScreenX + 14 ? 1 : 0);
+    }, { passive: true });
+    overlay.addEventListener('pointerleave', function () { input.pointer = 0; });
+    overlay.addEventListener('pointerdown', function (event) {
+      if (!active || receding || gardenMotionIsLite() || event.button !== 0 || event.pointerType === 'touch' || event.target.closest('button')) return;
+      event.preventDefault();
+      queueJump();
+    });
+    overlay.addEventListener('pointerup', function (event) {
+      if (event.pointerType !== 'touch') releaseJump();
+    });
+
+    function bindHoldControl(selector, property) {
+      if (!controls) return;
+      var button = controls.querySelector(selector);
+      if (!button) return;
+      button.addEventListener('pointerdown', function (event) {
+        event.preventDefault();
+        button.setPointerCapture(event.pointerId);
+        input[property] = true;
+      });
+      function release(event) {
+        input[property] = false;
+        if (button.hasPointerCapture && button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+      }
+      button.addEventListener('pointerup', release);
+      button.addEventListener('pointercancel', release);
+      button.addEventListener('lostpointercapture', function () { input[property] = false; });
+    }
+
+    bindHoldControl('[data-game-left]', 'left');
+    bindHoldControl('[data-game-right]', 'right');
+    if (controls) {
+      var jump = controls.querySelector('[data-game-jump]');
+      if (jump) {
+        jump.addEventListener('pointerdown', function (event) { event.preventDefault(); queueJump(); });
+        jump.addEventListener('pointerup', releaseJump);
+        jump.addEventListener('pointercancel', releaseJump);
+      }
+    }
+    if (close) close.addEventListener('click', finish);
+    window.addEventListener('resize', function () {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(function () {
+        fitCanvas();
+        if (!active) return;
+        startedAt = performance.now() - 800;
+        resetGame();
+        if (gardenMotionIsLite()) renderGame(performance.now());
+      }, 140);
+    }, { passive: true });
+    fitCanvas();
   }
 
   function setupSearchShortcut() {
