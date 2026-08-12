@@ -336,6 +336,9 @@
     var contributionGrid = wall ? wall.querySelector('[data-contribution-grid]') : null;
     var contributionMonths = wall ? wall.querySelector('[data-contribution-months]') : null;
     var contributionSummary = wall ? wall.querySelector('[data-contribution-summary]') : null;
+    var githubUser = wall ? wall.dataset.githubUser : '';
+    var githubCacheKey = 'garden-github-contributions:' + githubUser;
+    var githubCacheTtl = 6 * 60 * 60 * 1000;
     var calendar = document.querySelector('[data-folio-calendar]');
     var calendarTitle = calendar ? calendar.querySelector('[data-calendar-title]') : null;
     var calendarGrid = calendar ? calendar.querySelector('[data-calendar-grid]') : null;
@@ -350,13 +353,49 @@
       return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
     }
 
-    function renderContributionWall(now) {
+    function normalizeGithubContributions(payload) {
+      if (!payload || !Array.isArray(payload.contributions)) throw new Error('Invalid GitHub contribution payload');
+      return payload.contributions.filter(function (entry) {
+        return entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date);
+      }).map(function (entry) {
+        return {
+          date: entry.date,
+          count: Math.max(0, Number(entry.count) || 0),
+          level: Math.max(0, Math.min(4, Number(entry.level) || 0))
+        };
+      });
+    }
+
+    function readGithubCache() {
+      if (!githubUser) return null;
+      try {
+        var cached = JSON.parse(window.localStorage.getItem(githubCacheKey));
+        if (!cached || !Array.isArray(cached.contributions) || !cached.savedAt) return null;
+        return {
+          contributions: normalizeGithubContributions(cached),
+          fresh: Date.now() - Number(cached.savedAt) < githubCacheTtl
+        };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeGithubCache(contributions) {
+      try {
+        window.localStorage.setItem(githubCacheKey, JSON.stringify({
+          savedAt: Date.now(),
+          contributions: contributions
+        }));
+      } catch (error) {}
+    }
+
+    function renderContributionWall(now, contributions, state) {
       if (!wall || !contributionGrid || !contributionMonths) return;
       var counts = Object.create(null);
-      var dateNodes = wall.querySelectorAll('[data-contribution-date]');
-      Array.prototype.forEach.call(dateNodes, function (node) {
-        var key = node.dataset.contributionDate;
-        counts[key] = (counts[key] || 0) + 1;
+      var levels = Object.create(null);
+      (contributions || []).forEach(function (entry) {
+        counts[entry.date] = entry.count;
+        levels[entry.date] = entry.level;
       });
 
       var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -366,6 +405,7 @@
       start.setDate(start.getDate() - 195);
       var todayKey = dateKey(today);
       var activeDays = 0;
+      var totalContributions = 0;
       var fragment = document.createDocumentFragment();
       contributionGrid.textContent = '';
       contributionMonths.textContent = '';
@@ -375,23 +415,29 @@
         day.setDate(start.getDate() + dayIndex);
         var key = dateKey(day);
         var count = counts[key] || 0;
-        if (count) activeDays += 1;
-        var level = count === 0 ? 0 : (count === 1 ? 3 : 4);
+        if (count && day <= today) {
+          activeDays += 1;
+          totalContributions += count;
+        }
+        var level = levels[key] || 0;
         var cell = document.createElement('span');
         cell.dataset.level = String(level);
         cell.dataset.date = key;
         cell.dataset.count = String(count);
         cell.dataset.index = String(dayIndex);
         cell.style.setProperty('--cell-delay', ((dayIndex % 28) * 14 + (dayIndex % 7) * 18) + 'ms');
-        cell.title = key + ' · ' + count + (count === 1 ? ' article' : ' articles');
+        cell.title = key + ' · ' + count + (count === 1 ? ' GitHub contribution' : ' GitHub contributions');
         if (day > today) cell.classList.add('is-future');
         if (key === todayKey) cell.classList.add('is-today');
         fragment.appendChild(cell);
       }
       contributionGrid.appendChild(fragment);
-      contributionGrid.setAttribute('aria-label', '最近二十八周共有 ' + activeDays + ' 天发布了文章');
+      contributionGrid.setAttribute('aria-label', '最近二十八周共有 ' + totalContributions + ' 次 GitHub 贡献，活跃 ' + activeDays + ' 天');
+      wall.dataset.githubState = state || 'live';
       if (contributionSummary) {
-        contributionSummary.textContent = String(activeDays).padStart(2, '0') + ' ACTIVE DAYS';
+        if (state === 'syncing') contributionSummary.textContent = 'SYNCING GITHUB';
+        else if (state === 'offline') contributionSummary.textContent = 'GITHUB OFFLINE';
+        else contributionSummary.textContent = String(totalContributions).padStart(3, '0') + ' CONTRIBUTIONS';
         contributionSummary.dataset.defaultText = contributionSummary.textContent;
       }
 
@@ -407,6 +453,32 @@
         label.style.left = (week / 28 * 100).toFixed(3) + '%';
         contributionMonths.appendChild(label);
       }
+    }
+
+    function syncGithubContributions(cached) {
+      if (!wall || !githubUser || typeof window.fetch !== 'function') return;
+      if (cached && cached.fresh) return;
+
+      var controller = typeof window.AbortController === 'function' ? new AbortController() : null;
+      var timeout = window.setTimeout(function () {
+        if (controller) controller.abort();
+      }, 8000);
+      var endpoint = 'https://github-contributions-api.jogruber.de/v4/' + encodeURIComponent(githubUser) + '?y=last';
+      var options = { credentials: 'omit', cache: 'default' };
+      if (controller) options.signal = controller.signal;
+
+      window.fetch(endpoint, options).then(function (response) {
+        if (!response.ok) throw new Error('GitHub contribution request failed');
+        return response.json();
+      }).then(function (payload) {
+        var contributions = normalizeGithubContributions(payload);
+        writeGithubCache(contributions);
+        renderContributionWall(new Date(), contributions, 'live');
+      }).catch(function () {
+        if (!cached) renderContributionWall(new Date(), [], 'offline');
+      }).then(function () {
+        window.clearTimeout(timeout);
+      });
     }
 
     function renderCalendar(now) {
@@ -462,8 +534,10 @@
 
     function render() {
       var now = new Date();
-      renderContributionWall(now);
+      var cached = readGithubCache();
+      renderContributionWall(now, cached ? cached.contributions : [], cached ? 'cached' : 'syncing');
       renderCalendar(now);
+      syncGithubContributions(cached);
     }
 
     function clearContributionPoint() {
@@ -487,7 +561,7 @@
       if (wall) wall.classList.add('is-reading-date');
       if (contributionSummary) {
         var count = Number(cell.dataset.count || 0);
-        contributionSummary.textContent = cell.dataset.date.replace(/-/g, '.') + (count ? ' / +' + count : ' / IDLE');
+        contributionSummary.textContent = cell.dataset.date.replace(/-/g, '.') + (count ? ' / +' + count + ' GH' : ' / IDLE');
       }
     }
 

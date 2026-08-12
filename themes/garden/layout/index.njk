@@ -289,22 +289,19 @@
       <aside class="folio-article-console" aria-label="花园贡献记录与日历" data-reveal>
         <header><span>SYS.GARDEN_ACTIVITY</span><b><i></i>LIVE</b></header>
 
-        <section class="folio-contribution" data-contribution-wall aria-labelledby="folio-contribution-title">
+        <section class="folio-contribution" data-contribution-wall data-github-user="{{ theme.github_username or 'yzh-01' }}" data-github-state="syncing" aria-labelledby="folio-contribution-title">
           <div class="folio-contribution-heading">
             <div><small>DAILY_CONTRIBUTION</small><h3 id="folio-contribution-title">留下过痕迹的日子</h3></div>
-            <span data-contribution-summary>-- ACTIVE DAYS</span>
+            <span data-contribution-summary aria-live="polite">SYNCING GITHUB</span>
           </div>
           <div class="folio-contribution-months" data-contribution-months aria-hidden="true"></div>
           <div class="folio-contribution-matrix">
             <div class="folio-contribution-weekdays" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
-            <div class="folio-contribution-grid" data-contribution-grid role="img" aria-label="最近二十八周的文章发布贡献"></div>
+            <div class="folio-contribution-grid" data-contribution-grid role="img" aria-label="正在同步最近二十八周的 GitHub 贡献"></div>
           </div>
           <div class="folio-contribution-foot">
-            <span>28 WEEK WINDOW / ARTICLE LOG</span>
+            <span>28 WEEK WINDOW / GITHUB GRAPH</span>
             <p><i data-level="0"></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><i data-level="4"></i></p>
-          </div>
-          <div hidden>
-            {%- for post in all_posts %}<i data-contribution-date="{{ post.date.format('YYYY-MM-DD') }}"></i>{%- endfor %}
           </div>
         </section>
 

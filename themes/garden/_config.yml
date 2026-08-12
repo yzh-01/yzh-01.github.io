@@ -3,7 +3,8 @@
 
 # 建站年份（不会随当前年份变化）
 since: 2026
-asset_version: 20260811-31
+asset_version: 20260812-32
+github_username: yzh-01
 
 # 首页模块开关（模块未完成时可先关闭）
 modules:
