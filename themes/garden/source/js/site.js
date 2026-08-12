@@ -722,16 +722,14 @@
     var quote = card.querySelector('[data-home-quote]');
     var author = card.querySelector('[data-home-quote-author]');
     var work = card.querySelector('[data-home-quote-work]');
-    var link = card.querySelector('[data-home-quote-link]');
     var indexLabel = card.querySelector('[data-home-quote-index]');
     var status = card.querySelector('[data-home-quote-status]');
     var nextButton = card.querySelector('[data-home-quote-next]');
     var progress = card.querySelector('[data-home-quote-progress]');
     var film = card.querySelector('[data-home-quote-film]');
     var frameLabel = card.querySelector('[data-home-quote-frame]');
-    var poolElement = card.querySelector('[data-home-quote-pool]');
     var items = Array.prototype.slice.call(card.querySelectorAll('[data-home-quote-pool] > span'));
-    if (!quote || !author || !work || !link || !nextButton || items.length < 2) return;
+    if (!quote || !author || !work || !nextButton || items.length < 2) return;
     var storageKey = 'garden-last-home-quote';
     var sessionOrder = [];
     var cyclePosition = 0;
@@ -747,7 +745,6 @@
         text: item.textContent.trim(),
         author: named ? item.dataset.quoteAuthor : 'LOW TIDE ARCHIVE',
         work: named ? item.dataset.quoteWork : item.dataset.quoteSource,
-        url: named ? item.dataset.quoteUrl : (poolElement.dataset.quoteFallbackUrl || '#'),
         number: itemIndex + 1
       };
     }
@@ -811,8 +808,6 @@
         quote.dataset.quoteCopy = '“' + data.text + '”';
         author.textContent = data.author;
         work.textContent = data.work;
-        link.href = data.url;
-        link.setAttribute('aria-label', '核对“' + data.text + '”的引用来源');
         if (indexLabel) indexLabel.textContent = String(data.number).padStart(2, '0') + ' / ' + String(items.length).padStart(2, '0');
         if (frameLabel) frameLabel.textContent = String(data.number).padStart(2, '0');
         if (status) status.textContent = 'LOCKED';

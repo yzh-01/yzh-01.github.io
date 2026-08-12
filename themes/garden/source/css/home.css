@@ -396,14 +396,12 @@
 .folio-quote-meta strong { color: color-mix(in srgb, var(--bone) 88%, transparent); font: 600 11px/1.25 var(--quote); letter-spacing: .055em; white-space: nowrap; }
 .folio-quote-meta strong::before { content: "— "; color: var(--moss-bright); font-family: var(--mono); }
 .folio-quote-meta cite { min-width: 0; color: var(--dim); font: 7px/1.35 var(--mono); font-style: normal; letter-spacing: .05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.folio-quote-rail { position: absolute; right: 7px; bottom: 7px; z-index: 5; display: flex; align-items: center; gap: 18px; }
-.folio-quote-source { position: relative; display: flex; align-items: center; gap: 7px; color: var(--dim); font: 6px/1 var(--mono); letter-spacing: .13em; text-decoration: none; transition: color 180ms ease, transform 220ms cubic-bezier(.23, 1, .32, 1); }
-.folio-quote-source i { color: color-mix(in srgb, var(--bone) 54%, transparent); font: 7px/1 var(--quote); font-style: normal; letter-spacing: .04em; opacity: 0; transform: translateX(5px); transition: opacity 160ms ease, transform 220ms cubic-bezier(.23, 1, .32, 1); }
-.folio-quote-next { display: flex; align-items: center; gap: 8px; min-height: 26px; padding: 0 0 0 13px; color: var(--dim); background: transparent; border: 0; border-left: 1px solid var(--line); font: 6px/1 var(--mono); letter-spacing: .13em; cursor: pointer; transition: transform 150ms cubic-bezier(.23, 1, .32, 1), color 180ms ease; }
+.folio-quote-rail { position: absolute; right: 7px; bottom: 7px; z-index: 5; }
+.folio-quote-next { display: flex; align-items: center; gap: 8px; min-height: 26px; padding: 0; color: var(--dim); background: transparent; border: 0; font: 6px/1 var(--mono); letter-spacing: .13em; cursor: pointer; transition: transform 150ms cubic-bezier(.23, 1, .32, 1), color 180ms ease; }
 .folio-quote-next b { color: var(--moss-bright); font: 13px/1 var(--mono); font-weight: 400; transition: transform 220ms cubic-bezier(.23, 1, .32, 1); }
 .folio-quote-next:active { transform: scale(.95); }
-.folio-quote-next:focus-visible, .folio-quote-source:focus-visible { outline: 1px solid var(--moss-bright); outline-offset: 4px; }
-.folio-quote-progress { position: absolute; left: 39px; right: 154px; bottom: 7px; z-index: 3; height: 12px; color: color-mix(in srgb, var(--bone) 24%, transparent); font: 5px/1 var(--mono); letter-spacing: .12em; }
+.folio-quote-next:focus-visible { outline: 1px solid var(--moss-bright); outline-offset: 4px; }
+.folio-quote-progress { position: absolute; left: 39px; right: 76px; bottom: 7px; z-index: 3; height: 12px; color: color-mix(in srgb, var(--bone) 24%, transparent); font: 5px/1 var(--mono); letter-spacing: .12em; }
 .folio-quote-progress::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: color-mix(in srgb, var(--bone) 10%, transparent); }
 .folio-quote-progress span { position: absolute; left: 0; bottom: 5px; }
 .folio-quote-progress i { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, var(--moss-bright), transparent); transform: scaleX(0); transform-origin: left; }
@@ -414,8 +412,6 @@
 .folio-cover-fragment.is-changing .folio-quote-film::before { opacity: .42; }
 
 @media (hover: hover) and (pointer: fine) {
-  .folio-quote-source:hover { color: var(--moss-bright); transform: translateX(-2px); }
-  .folio-quote-source:hover i, .folio-quote-source:focus-visible i { opacity: 1; transform: translateX(0); }
   .folio-quote-next:hover { color: var(--bone); }
   .folio-quote-next:hover b { transform: translateX(4px); }
   .folio-cover-fragment:hover blockquote span::after { opacity: .26; transform: translateX(4px); }
@@ -1586,9 +1582,8 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .folio-quote-meta strong { font-size: 10px; }
   .folio-quote-meta cite { font-size: 6px; }
   .folio-quote-rail { right: 0; top: auto; bottom: 5px; gap: 14px; width: auto; }
-  .folio-quote-source i { display: none; }
   .folio-quote-next { width: auto; height: auto; min-height: 24px; }
-  .folio-quote-progress { left: 30px; right: 128px; bottom: 5px; }
+  .folio-quote-progress { left: 30px; right: 69px; bottom: 5px; }
   .folio-cover-side { display: none; }
   .folio-cover-scroll { bottom: 18px; left: 20px; transform: none; }
   .folio-cover-scroll span { display: none; }
@@ -1648,7 +1643,7 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .folio-quote-head > span { gap: 8px; }
   .folio-quote-head i { font-size: 5px; }
   .folio-quote-meta { align-items: flex-start; flex-direction: column; gap: 3px; }
-  .folio-quote-progress { left: 27px; right: 124px; }
+  .folio-quote-progress { left: 27px; right: 66px; }
 }
 
 html.garden-lite-motion .garden-particles,
