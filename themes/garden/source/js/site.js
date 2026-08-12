@@ -720,43 +720,197 @@
     var card = document.querySelector('[data-home-quote-card]');
     if (!card) return;
     var quote = card.querySelector('[data-home-quote]');
-    var source = card.querySelector('[data-home-quote-source]');
+    var author = card.querySelector('[data-home-quote-author]');
+    var work = card.querySelector('[data-home-quote-work]');
+    var link = card.querySelector('[data-home-quote-link]');
+    var indexLabel = card.querySelector('[data-home-quote-index]');
+    var status = card.querySelector('[data-home-quote-status]');
+    var nextButton = card.querySelector('[data-home-quote-next]');
+    var progress = card.querySelector('[data-home-quote-progress]');
+    var film = card.querySelector('[data-home-quote-film]');
+    var frameLabel = card.querySelector('[data-home-quote-frame]');
+    var poolElement = card.querySelector('[data-home-quote-pool]');
     var items = Array.prototype.slice.call(card.querySelectorAll('[data-home-quote-pool] > span'));
-    if (!quote || !source || items.length < 2) return;
-    var currentText = quote.textContent.replace(/[“”]/g, '').trim();
+    if (!quote || !author || !work || !link || !nextButton || items.length < 2) return;
+    var storageKey = 'garden-last-home-quote';
+    var sessionOrder = [];
+    var cyclePosition = 0;
+    var currentIndex = -1;
     var timer = 0;
     var changeTimer = 0;
+    var revealTimer = 0;
+    var interval = 10500;
+
+    function getItemData(item, itemIndex) {
+      var named = Boolean(item.dataset.quoteAuthor);
+      return {
+        text: item.textContent.trim(),
+        author: named ? item.dataset.quoteAuthor : 'LOW TIDE ARCHIVE',
+        work: named ? item.dataset.quoteWork : item.dataset.quoteSource,
+        url: named ? item.dataset.quoteUrl : (poolElement.dataset.quoteFallbackUrl || '#'),
+        number: itemIndex + 1
+      };
+    }
+
+    function shuffledOrder(avoidIndex) {
+      var order = items.map(function (_, itemIndex) { return itemIndex; });
+      for (var cursor = order.length - 1; cursor > 0; cursor -= 1) {
+        var swapIndex = Math.floor(Math.random() * (cursor + 1));
+        var temporary = order[cursor];
+        order[cursor] = order[swapIndex];
+        order[swapIndex] = temporary;
+      }
+      if (order.length > 1 && order[0] === avoidIndex) {
+        var alternative = order.findIndex(function (itemIndex) { return itemIndex !== avoidIndex; });
+        var first = order[0];
+        order[0] = order[alternative];
+        order[alternative] = first;
+      }
+      return order;
+    }
+
+    function remember(itemIndex) {
+      try { window.localStorage.setItem(storageKey, String(itemIndex)); } catch (error) {}
+    }
+
+    function previousIndex() {
+      try {
+        var stored = Number(window.localStorage.getItem(storageKey));
+        return Number.isInteger(stored) ? stored : -1;
+      } catch (error) {
+        return -1;
+      }
+    }
 
     function schedule() {
       window.clearTimeout(timer);
+      if (progress) {
+        progress.style.animation = 'none';
+        void progress.offsetWidth;
+        progress.style.animation = gardenMotionIsLite() ? 'none' : 'garden-quote-progress ' + interval + 'ms linear forwards';
+      }
       timer = window.setTimeout(function () {
         if (!document.hidden) showNext();
         else schedule();
-      }, 8500);
+      }, interval);
     }
 
-    function showNext() {
+    function renderItem(itemIndex, immediate) {
       window.clearTimeout(changeTimer);
-      var candidates = items.filter(function (item) { return item.textContent.trim() !== currentText; });
-      var pool = candidates.length ? candidates : items;
-      var item = pool[Math.floor(Math.random() * pool.length)];
-      card.classList.add('is-changing');
+      window.clearTimeout(revealTimer);
+      var data = getItemData(items[itemIndex], itemIndex);
+      var shouldAnimate = !immediate && !gardenMotionIsLite();
+      card.classList.remove('is-changing');
+      if (shouldAnimate) {
+        void card.offsetWidth;
+        card.classList.add('is-changing');
+      }
+      if (status) status.textContent = shouldAnimate ? 'EXPOSING' : 'LOCKED';
       changeTimer = window.setTimeout(function () {
-        quote.textContent = '“' + item.textContent.trim() + '”';
-        source.textContent = '— ' + item.dataset.quoteSource;
-        currentText = item.textContent.trim();
-        card.classList.remove('is-changing');
-      }, gardenMotionIsLite() ? 0 : 170);
+        quote.textContent = '“' + data.text + '”';
+        quote.dataset.quoteCopy = '“' + data.text + '”';
+        author.textContent = data.author;
+        work.textContent = data.work;
+        link.href = data.url;
+        link.setAttribute('aria-label', '核对“' + data.text + '”的引用来源');
+        if (indexLabel) indexLabel.textContent = String(data.number).padStart(2, '0') + ' / ' + String(items.length).padStart(2, '0');
+        if (frameLabel) frameLabel.textContent = String(data.number).padStart(2, '0');
+        if (status) status.textContent = 'LOCKED';
+        card.dataset.quoteNumber = String(data.number).padStart(2, '0');
+        currentIndex = itemIndex;
+        remember(itemIndex);
+        if (!shouldAnimate) {
+          card.classList.remove('is-changing');
+          return;
+        }
+        revealTimer = window.setTimeout(function () {
+          card.classList.remove('is-changing');
+        }, 260);
+      }, shouldAnimate ? 190 : 0);
       schedule();
     }
 
-    card.addEventListener('click', showNext);
-    card.addEventListener('keydown', function (event) {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
+    function showNext() {
+      if (!sessionOrder.length || cyclePosition >= sessionOrder.length) {
+        sessionOrder = shuffledOrder(currentIndex);
+        cyclePosition = 0;
+      }
+      renderItem(sessionOrder[cyclePosition], false);
+      cyclePosition += 1;
+    }
+
+    nextButton.addEventListener('click', function () {
       showNext();
     });
-    schedule();
+
+    if (film && !gardenMotionIsLite() && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      var motionFrame = 0;
+      var targetX = 0;
+      var targetY = 0;
+      var targetRotateX = 0;
+      var targetRotateY = 0;
+      var currentX = 0;
+      var currentY = 0;
+      var currentRotateX = 0;
+      var currentRotateY = 0;
+
+      function renderFilmMotion() {
+        currentX += (targetX - currentX) * .13;
+        currentY += (targetY - currentY) * .13;
+        currentRotateX += (targetRotateX - currentRotateX) * .13;
+        currentRotateY += (targetRotateY - currentRotateY) * .13;
+        film.style.transform = 'translate3d(' + currentX.toFixed(2) + 'px,' + currentY.toFixed(2) + 'px,0) rotateX(' + currentRotateX.toFixed(2) + 'deg) rotateY(' + currentRotateY.toFixed(2) + 'deg) rotateZ(-.25deg)';
+
+        var settled = Math.abs(targetX - currentX) < .02 && Math.abs(targetY - currentY) < .02 && Math.abs(targetRotateX - currentRotateX) < .02 && Math.abs(targetRotateY - currentRotateY) < .02;
+        if (!settled) {
+          motionFrame = window.requestAnimationFrame(renderFilmMotion);
+          return;
+        }
+        motionFrame = 0;
+        if (!targetX && !targetY && !targetRotateX && !targetRotateY) {
+          film.style.transform = '';
+          card.classList.remove('is-tracking');
+        }
+      }
+
+      function requestFilmMotion() {
+        if (!motionFrame) motionFrame = window.requestAnimationFrame(renderFilmMotion);
+      }
+
+      card.addEventListener('pointermove', function (event) {
+        var bounds = card.getBoundingClientRect();
+        var normalizedX = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
+        var normalizedY = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+        targetX = normalizedX * 5;
+        targetY = normalizedY * 3;
+        targetRotateX = normalizedY * -1.15;
+        targetRotateY = normalizedX * 1.45;
+        card.classList.add('is-tracking');
+        requestFilmMotion();
+      });
+
+      card.addEventListener('pointerleave', function () {
+        targetX = 0;
+        targetY = 0;
+        targetRotateX = 0;
+        targetRotateY = 0;
+        requestFilmMotion();
+      });
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        window.clearTimeout(timer);
+        if (progress) progress.style.animationPlayState = 'paused';
+      } else {
+        if (progress) progress.style.animationPlayState = 'running';
+        schedule();
+      }
+    });
+
+    sessionOrder = shuffledOrder(previousIndex());
+    renderItem(sessionOrder[0], true);
+    cyclePosition = 1;
   }
 
   function setupHomeWindow() {
