@@ -621,6 +621,101 @@
     }, 60 * 60 * 1000);
   }
 
+  function setupWorldMotion() {
+    var world = document.querySelector('.folio-world');
+    if (!world || gardenMotionIsLite()) return;
+
+    var currentX = 0;
+    var currentY = 0;
+    var currentScroll = 0;
+    var currentEnergy = 0;
+    var currentPointerX = window.innerWidth * .5;
+    var currentPointerY = window.innerHeight * .42;
+    var targetX = 0;
+    var targetY = 0;
+    var targetScroll = 0;
+    var targetEnergy = 0;
+    var targetPointerX = currentPointerX;
+    var targetPointerY = currentPointerY;
+    var lastPointerX = currentPointerX;
+    var lastPointerY = currentPointerY;
+    var lastScrollY = window.scrollY;
+    var frame = 0;
+
+    function mix(from, to, amount) { return from + (to - from) * amount; }
+    function near(a, b) { return Math.abs(a - b) < .025; }
+
+    function render() {
+      frame = 0;
+      currentX = mix(currentX, targetX, .105);
+      currentY = mix(currentY, targetY, .105);
+      currentScroll = mix(currentScroll, targetScroll, .09);
+      currentEnergy = mix(currentEnergy, targetEnergy, .16);
+      currentPointerX = mix(currentPointerX, targetPointerX, .14);
+      currentPointerY = mix(currentPointerY, targetPointerY, .14);
+      targetEnergy *= .88;
+
+      world.style.setProperty('--world-back-x', (-currentX * .24).toFixed(2) + 'px');
+      world.style.setProperty('--world-back-y', (-currentY * .18 + currentScroll * .2).toFixed(2) + 'px');
+      world.style.setProperty('--world-mid-x', (currentX * .38).toFixed(2) + 'px');
+      world.style.setProperty('--world-mid-y', (currentY * .27 + currentScroll * .48).toFixed(2) + 'px');
+      world.style.setProperty('--world-front-x', (currentX * .72).toFixed(2) + 'px');
+      world.style.setProperty('--world-front-y', (currentY * .5 + currentScroll * .78).toFixed(2) + 'px');
+      world.style.setProperty('--world-pointer-x', currentPointerX.toFixed(1) + 'px');
+      world.style.setProperty('--world-pointer-y', currentPointerY.toFixed(1) + 'px');
+      world.style.setProperty('--world-energy', currentEnergy.toFixed(3));
+      world.style.setProperty('--world-contour-opacity', (.54 + currentEnergy * .18).toFixed(3));
+      world.style.setProperty('--world-rain-opacity', (.4 + currentEnergy * .14).toFixed(3));
+      world.style.setProperty('--world-rain-opacity-light', (.24 + currentEnergy * .1).toFixed(3));
+      world.style.setProperty('--world-brightness', (1 + currentEnergy * .22).toFixed(3));
+      world.style.setProperty('--rain-skew', (currentX * .045).toFixed(2) + 'deg');
+
+      if (!near(currentX, targetX) || !near(currentY, targetY) || !near(currentScroll, targetScroll) || currentEnergy > .012 || !near(currentPointerX, targetPointerX) || !near(currentPointerY, targetPointerY)) schedule();
+    }
+
+    function schedule() {
+      if (!frame) frame = window.requestAnimationFrame(render);
+    }
+
+    document.addEventListener('pointermove', function (event) {
+      var dx = event.clientX - lastPointerX;
+      var dy = event.clientY - lastPointerY;
+      targetX = (event.clientX / Math.max(1, window.innerWidth) - .5) * 30;
+      targetY = (event.clientY / Math.max(1, window.innerHeight) - .5) * 18;
+      targetPointerX = event.clientX;
+      targetPointerY = event.clientY;
+      targetEnergy = Math.max(targetEnergy, Math.min(1, Math.sqrt(dx * dx + dy * dy) / 42));
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      schedule();
+    }, { passive: true });
+
+    document.documentElement.addEventListener('mouseleave', function () {
+      targetX = 0;
+      targetY = 0;
+      targetPointerX = window.innerWidth * .5;
+      targetPointerY = window.innerHeight * .42;
+      schedule();
+    }, { passive: true });
+
+    window.addEventListener('scroll', function () {
+      var nextScrollY = window.scrollY;
+      var delta = nextScrollY - lastScrollY;
+      targetScroll = Math.max(-38, Math.min(8, nextScrollY * -.018));
+      targetEnergy = Math.max(targetEnergy, Math.min(1, Math.abs(delta) / 34));
+      lastScrollY = nextScrollY;
+      schedule();
+    }, { passive: true });
+
+    window.addEventListener('resize', function () {
+      targetPointerX = Math.min(targetPointerX, window.innerWidth);
+      targetPointerY = Math.min(targetPointerY, window.innerHeight);
+      schedule();
+    }, { passive: true });
+
+    schedule();
+  }
+
   function setupFieldMotion() {
     var sections = Array.prototype.slice.call(document.querySelectorAll('[data-field-motion]'));
     if (!sections.length || gardenMotionIsLite()) return;
@@ -3028,6 +3123,7 @@
   setupGardenEntry();
   setupHomeClock();
   setupContributionCalendar();
+  setupWorldMotion();
   setupFieldMotion();
   setupHomeQuoteFragment();
   setupHomeWindow();
