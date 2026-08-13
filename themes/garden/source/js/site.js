@@ -1494,54 +1494,31 @@
     var label = cursor.querySelector('span');
     if (!dot || !frameElement) return;
 
-    var pointerX = window.innerWidth / 2;
-    var pointerY = window.innerHeight / 2;
-    var frameX = pointerX;
-    var frameY = pointerY;
-    var frameW = 34;
-    var frameH = 34;
-    var targetX = frameX;
-    var targetY = frameY;
-    var targetW = frameW;
-    var targetH = frameH;
     var currentTarget = null;
 
-    function render() {
-      frameX += (targetX - frameX) * .2;
-      frameY += (targetY - frameY) * .2;
-      frameW += (targetW - frameW) * .22;
-      frameH += (targetH - frameH) * .22;
-      dot.style.transform = 'translate3d(' + pointerX.toFixed(1) + 'px,' + pointerY.toFixed(1) + 'px,0)';
-      frameElement.style.width = frameW.toFixed(1) + 'px';
-      frameElement.style.height = frameH.toFixed(1) + 'px';
-      frameElement.style.transform = 'translate3d(' + frameX.toFixed(1) + 'px,' + frameY.toFixed(1) + 'px,0)';
-      if (label) label.style.transform = 'translate3d(' + (frameX + frameW + 7).toFixed(1) + 'px,' + (frameY + 5).toFixed(1) + 'px,0)';
-      window.requestAnimationFrame(render);
+    function placeFrame(x, y, width, height, targeting) {
+      frameElement.style.width = width.toFixed(1) + 'px';
+      frameElement.style.height = height.toFixed(1) + 'px';
+      frameElement.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+      if (label) label.style.transform = 'translate3d(' + (x + width + (targeting ? 7 : -10)).toFixed(1) + 'px,' + (y + 5).toFixed(1) + 'px,0)';
     }
 
-    function updateTarget(element) {
-      if (element === currentTarget) return;
+    function updateTarget(element, pointerX, pointerY) {
+      if (element && element === currentTarget) return;
       currentTarget = element;
       cursor.classList.toggle('is-targeting', Boolean(element));
-      if (!element) return;
+      if (!element) {
+        placeFrame(pointerX, pointerY, 30, 30, false);
+        return;
+      }
       var rect = element.getBoundingClientRect();
-      targetX = rect.left - 5;
-      targetY = rect.top - 5;
-      targetW = rect.width + 10;
-      targetH = rect.height + 10;
+      placeFrame(rect.left - 5, rect.top - 5, rect.width + 10, rect.height + 10, true);
     }
 
     document.addEventListener('pointermove', function (event) {
-      pointerX = event.clientX;
-      pointerY = event.clientY;
+      dot.style.transform = 'translate3d(' + event.clientX.toFixed(1) + 'px,' + event.clientY.toFixed(1) + 'px,0)';
       var hovered = event.target.closest ? event.target.closest('a, button, [data-cursor-target]') : null;
-      updateTarget(hovered);
-      if (!hovered) {
-        targetX = pointerX;
-        targetY = pointerY;
-        targetW = 34;
-        targetH = 34;
-      }
+      updateTarget(hovered, event.clientX, event.clientY);
       cursor.classList.add('is-visible');
     }, { passive: true });
     document.addEventListener('pointerdown', function () { cursor.classList.add('is-down'); });
@@ -1550,12 +1527,10 @@
     window.addEventListener('scroll', function () {
       if (!currentTarget) return;
       var rect = currentTarget.getBoundingClientRect();
-      targetX = rect.left - 5;
-      targetY = rect.top - 5;
+      placeFrame(rect.left - 5, rect.top - 5, rect.width + 10, rect.height + 10, true);
     }, { passive: true });
 
     root.classList.add('garden-cursor-on');
-    window.requestAnimationFrame(render);
   }
 
   function setupGardenRipples() {
@@ -1610,6 +1585,8 @@
     var track = outro.querySelector('[data-outro-track]');
     var meter = outro.querySelector('[data-outro-meter]');
     var status = outro.querySelector('[data-outro-status]');
+    var keeper = outro.querySelector('[data-outro-keeper]');
+    var returnLink = outro.querySelector('.folio-outro-actions a');
     var target = text ? text.dataset.outroValue || text.textContent : '';
     var glyphs = '▒░▓/\\<>[]{}01?#';
     var models = [];
@@ -1617,6 +1594,10 @@
     var physicsFrame = 0;
     var pointerFrame = 0;
     var settleFrame = 0;
+    var dragFrame = 0;
+    var dragRect = null;
+    var pendingDragX = 0;
+    var lastTunePercentage = -1;
     var statusTimer = 0;
     var pointerX = 0;
     var pointerY = 0;
@@ -1632,6 +1613,193 @@
     var scrambleTick = 0;
     var entered = false;
     var baseStatus = 'MOVE: REPEL // CLICK: IMPACT // DRAG: DETUNE';
+    var keeperTimer = 0;
+
+    function keeperPalette() {
+      var light = document.documentElement.dataset.resolvedTheme === 'light';
+      return light ? {
+        outline: '#050806', deepest: '#0a0e0b', shadow: '#111813', cloth: '#18221b',
+        mid: '#253229', edge: '#3b4a3f', scarf: '#203528', scarfLight: '#59735f',
+        face: '#030504', faceShadow: '#080c09', hair: '#010201', eye: '#b9d8bd',
+        leather: '#151a16', brass: '#655f49', glow: '#7ea886', light: '#dcebdd', boot: '#030504'
+      } : {
+        outline: '#010302', deepest: '#040705', shadow: '#0a100c', cloth: '#101812',
+        mid: '#19251d', edge: '#2c3b30', scarf: '#1e3225', scarfLight: '#54715b',
+        face: '#010201', faceShadow: '#050806', hair: '#000100', eye: '#c9e3cc',
+        leather: '#101511', brass: '#696047', glow: '#96c29d', light: '#edf7ed', boot: '#010302'
+      };
+    }
+
+    function keeperRect(context, x, y, width, height, color) {
+      context.fillStyle = color;
+      context.fillRect(Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+    }
+
+    function keeperPoly(context, points, color) {
+      context.fillStyle = color;
+      context.beginPath();
+      points.forEach(function (point, index) {
+        if (index) context.lineTo(Math.round(point[0]), Math.round(point[1]));
+        else context.moveTo(Math.round(point[0]), Math.round(point[1]));
+      });
+      context.closePath();
+      context.fill();
+    }
+
+    function drawKeeperLantern(context, x, y, palette) {
+      keeperRect(context, x + 3, y - 5, 8, 2, palette.brass);
+      keeperRect(context, x + 1, y - 3, 12, 3, palette.outline);
+      keeperRect(context, x, y, 14, 16, palette.outline);
+      keeperRect(context, x + 2, y + 2, 10, 11, palette.brass);
+      keeperRect(context, x + 4, y + 3, 6, 9, palette.glow);
+      keeperRect(context, x + 6, y + 4, 3, 7, palette.light);
+      keeperRect(context, x + 2, y + 14, 10, 3, palette.deepest);
+      keeperRect(context, x + 3, y + 1, 2, 12, palette.edge);
+    }
+
+    function drawKeeperCharacter(context, now) {
+      if (!context || !keeperCanvas) return;
+      var palette = keeperPalette();
+      var pointing = outro.classList.contains('is-keeper-pointing');
+      var walking = outro.classList.contains('is-keeper-walking');
+      var startled = outro.classList.contains('is-keeper-startled');
+      var settled = outro.classList.contains('is-keeper-settled');
+      var watching = outro.classList.contains('is-keeper-watching') && !pointing;
+      var turning = watching && Math.abs(keeperLookX) > .14;
+      var walkFrame = Math.floor(now / 120) % 4;
+      var reactionAge = Math.max(0, now - keeperReactionStart);
+      var jump = startled ? -Math.round(Math.sin(Math.min(1, reactionAge / 680) * Math.PI) * 13) : 0;
+      var squash = settled && reactionAge < 430 ? Math.sin(Math.min(1, reactionAge / 430) * Math.PI) : 0;
+      var facing = pointing ? 1 : (turning ? (keeperLookX < 0 ? -1 : 1) : keeperFacing);
+      var lookY = watching ? Math.max(-5, Math.min(5, Math.round(keeperLookY * 5))) : 0;
+      var anchorX = 102;
+      var groundY = 118 + jump;
+      var bodyBob = walking ? (walkFrame % 2 ? -2 : 0) : 0;
+
+      context.clearRect(0, 0, keeperCanvas.width, keeperCanvas.height);
+      context.imageSmoothingEnabled = false;
+
+      context.save();
+      context.globalAlpha = startled ? .22 : .38;
+      keeperPoly(context, startled ? [[92, 119], [112, 119], [116, 122], [88, 122]] : [[74, 117], [126, 117], [132, 122], [68, 122]], palette.outline);
+      context.restore();
+
+      context.save();
+      context.translate(anchorX, groundY);
+      context.scale(facing, 1);
+      if (squash) context.scale(1 + squash * .06, 1 - squash * .1);
+
+      var legSwing = walking ? (walkFrame < 2 ? 5 : -3) : 0;
+      keeperRect(context, -13 + legSwing, -34, 11, 29, palette.outline);
+      keeperRect(context, -10 + legSwing, -32, 6, 22, palette.shadow);
+      keeperRect(context, -16 + legSwing, -7, 16, 7, palette.boot);
+      keeperRect(context, 3 - legSwing, -34, 11, 29, palette.outline);
+      keeperRect(context, 6 - legSwing, -32, 6, 22, palette.deepest);
+      keeperRect(context, 1 - legSwing, -7, 17, 7, palette.boot);
+
+      if (turning || pointing) {
+        context.translate(4, 0);
+        context.save();
+        context.globalAlpha = pointing ? .26 : .18;
+        keeperPoly(context, [[37, -72 + lookY], [78, -98 + lookY * 2], [78, -32 + lookY * 2], [37, -58 + lookY]], palette.glow);
+        context.globalAlpha = pointing ? .24 : .13;
+        keeperPoly(context, [[39, -69 + lookY], [78, -83 + lookY * 2], [78, -46 + lookY * 2], [39, -61 + lookY]], palette.light);
+        context.restore();
+
+        keeperPoly(context, [[-24, -84 + bodyBob], [-12, -90 + bodyBob], [4, -85 + bodyBob], [7, -43], [-5, -31], [-20, -36]], palette.outline);
+        keeperPoly(context, [[-21, -81 + bodyBob], [-11, -86 + bodyBob], [1, -81 + bodyBob], [3, -45], [-6, -36], [-17, -40]], palette.cloth);
+        keeperRect(context, -24, -78 + bodyBob, 8, 31, palette.leather);
+        keeperRect(context, -22, -74 + bodyBob, 3, 23, palette.brass);
+        keeperPoly(context, [[-4, -78], [5, -80], [15, -52], [9, -48], [2, -58]], palette.outline);
+        keeperPoly(context, [[-1, -76], [4, -77], [12, -53], [9, -52]], palette.mid);
+        keeperPoly(context, [[1, -79], [10, -80], [27, -69 + lookY], [25, -62 + lookY], [15, -64 + lookY]], palette.outline);
+        keeperPoly(context, [[5, -76], [9, -76], [24, -67 + lookY], [23, -64 + lookY], [14, -67]], palette.edge);
+        keeperRect(context, 24, -69 + lookY, 8, 8, palette.faceShadow);
+        drawKeeperLantern(context, 31, -77 + lookY, palette);
+
+        keeperPoly(context, [[-19, -112 + lookY], [-8, -120 + lookY], [9, -119 + lookY], [20, -107 + lookY], [22, -91 + lookY], [15, -82 + lookY], [-8, -82 + lookY], [-20, -91 + lookY]], palette.outline);
+        keeperPoly(context, [[-15, -109 + lookY], [-7, -116 + lookY], [8, -115 + lookY], [16, -105 + lookY], [17, -93 + lookY], [11, -86 + lookY], [-7, -86 + lookY], [-16, -93 + lookY]], palette.cloth);
+        keeperPoly(context, [[-10, -107 + lookY], [6, -111 + lookY], [16, -104 + lookY], [15, -91 + lookY], [5, -87 + lookY], [-7, -91 + lookY]], palette.deepest);
+        keeperPoly(context, [[-9, -108 + lookY], [4, -113 + lookY], [13, -106 + lookY], [5, -105 + lookY], [-1, -101 + lookY]], palette.outline);
+        context.save();
+        context.globalAlpha = .26;
+        keeperRect(context, 5, -103 + lookY, 11, 10, palette.glow);
+        context.restore();
+        keeperRect(context, 8, -100 + lookY, 5, 4, palette.eye);
+        keeperRect(context, 14, -95 + lookY, 7, 4, palette.shadow);
+        keeperRect(context, 18, -94 + lookY, 4, 2, palette.deepest);
+        keeperPoly(context, [[-14, -88], [10, -90], [18, -83], [13, -77], [-9, -80]], palette.scarf);
+        keeperRect(context, -8, -86, 20, 3, palette.scarfLight);
+        keeperPoly(context, [[-12, -83], [-29, -76], [-33, -66], [-16, -71]], palette.scarf);
+        keeperRect(context, -30, -73, 12, 3, palette.scarfLight);
+        keeperRect(context, -3, -52, 11, 18, palette.deepest);
+        keeperRect(context, 0, -48, 5, 9, palette.scarfLight);
+
+        keeperRect(context, 25, -87 + lookY, 3, 3, palette.glow);
+        keeperRect(context, 30, -93 + lookY, 2, 2, palette.light);
+        keeperRect(context, 35, -87 + lookY, 2, 2, palette.glow);
+      } else {
+        var armSwing = walking ? (walkFrame < 2 ? 5 : -3) : 0;
+        keeperRect(context, -24, -82 + bodyBob, 12, 38, palette.outline);
+        keeperRect(context, -21, -78 + bodyBob, 7, 29, palette.leather);
+        keeperRect(context, -19, -74 + bodyBob, 3, 22, palette.brass);
+        keeperPoly(context, [[-21, -78 + bodyBob], [-13, -81 + bodyBob], [-13 + armSwing, -43], [-21 + armSwing, -41]], palette.outline);
+        keeperPoly(context, [[-18, -75 + bodyBob], [-15, -76 + bodyBob], [-16 + armSwing, -46], [-19 + armSwing, -45]], palette.mid);
+        keeperPoly(context, [[20, -78 + bodyBob], [13, -82 + bodyBob], [14 - armSwing, -43], [22 - armSwing, -41]], palette.outline);
+        keeperPoly(context, [[17, -75 + bodyBob], [14, -77 + bodyBob], [17 - armSwing, -46], [20 - armSwing, -45]], palette.edge);
+        keeperPoly(context, [[-18, -84 + bodyBob], [17, -84 + bodyBob], [24, -35], [12, -29], [5, -34], [-2, -29], [-9, -34], [-24, -35]], palette.outline);
+        keeperPoly(context, [[-14, -81 + bodyBob], [13, -81 + bodyBob], [19, -39], [10, -34], [4, -39], [-2, -34], [-9, -39], [-19, -39]], palette.cloth);
+        keeperPoly(context, [[-12, -78 + bodyBob], [-4, -81 + bodyBob], [-6, -40], [-13, -43]], palette.mid);
+        keeperPoly(context, [[11, -79 + bodyBob], [14, -77 + bodyBob], [18, -40], [11, -38]], palette.shadow);
+        keeperRect(context, -7, -67 + bodyBob, 14, 27, palette.deepest);
+        keeperRect(context, -4, -62 + bodyBob, 8, 17, palette.shadow);
+        keeperRect(context, -1, -56 + bodyBob, 4, 4, palette.scarfLight);
+
+        keeperPoly(context, [[-21, -110 + lookY], [-11, -120 + lookY], [10, -120 + lookY], [21, -110 + lookY], [23, -91 + lookY], [15, -82 + lookY], [-15, -82 + lookY], [-23, -92 + lookY]], palette.outline);
+        keeperPoly(context, [[-17, -108 + lookY], [-9, -116 + lookY], [9, -116 + lookY], [17, -107 + lookY], [18, -94 + lookY], [12, -87 + lookY], [-12, -87 + lookY], [-18, -94 + lookY]], palette.cloth);
+        keeperRect(context, -13, -107 + lookY, 26, 17, palette.deepest);
+        keeperPoly(context, [[-13, -108 + lookY], [-6, -114 + lookY], [11, -112 + lookY], [14, -104 + lookY], [7, -106 + lookY], [2, -101 + lookY], [-4, -105 + lookY], [-13, -101 + lookY]], palette.outline);
+        context.save();
+        context.globalAlpha = .22;
+        keeperRect(context, -11 + Math.round(keeperLookX * 2), -102 + lookY, 9, 10, palette.glow);
+        keeperRect(context, 2 + Math.round(keeperLookX * 2), -102 + lookY, 9, 10, palette.glow);
+        context.restore();
+        keeperRect(context, -8 + Math.round(keeperLookX * 2), -99 + lookY, 4, 4, palette.eye);
+        keeperRect(context, 5 + Math.round(keeperLookX * 2), -99 + lookY, 4, 4, palette.eye);
+        keeperRect(context, -4, -90 + lookY, 9, 3, palette.shadow);
+        keeperPoly(context, [[-18, -88], [14, -89], [21, -82], [14, -75], [-13, -77], [-22, -82]], palette.scarf);
+        keeperRect(context, -10, -85, 25, 3, palette.scarfLight);
+        keeperPoly(context, [[14, -84], [31, -77], [28, -68], [12, -76]], palette.scarf);
+        keeperRect(context, 16, -80, 11, 3, palette.scarfLight);
+        drawKeeperLantern(context, 15 - armSwing, -44, palette);
+      }
+      context.restore();
+    }
+
+    function paintKeeper(now) {
+      keeperFrame = 0;
+      if (!keeperContext) return;
+      drawKeeperCharacter(keeperContext, now);
+      if (keeperVisible && !gardenMotionIsLite() && (
+        outro.classList.contains('is-keeper-walking') ||
+        outro.classList.contains('is-keeper-startled') ||
+        outro.classList.contains('is-keeper-settled')
+      )) keeperFrame = window.requestAnimationFrame(paintKeeper);
+    }
+
+    function startKeeperPaint() {
+      if (!keeperFrame) keeperFrame = window.requestAnimationFrame(paintKeeper);
+    }
+
+    function reactKeeper(className, duration) {
+      if (!keeper) return;
+      window.clearTimeout(keeperTimer);
+      outro.classList.remove('is-keeper-startled', 'is-keeper-settled');
+      outro.classList.add(className);
+      keeperTimer = window.setTimeout(function () {
+        outro.classList.remove(className);
+      }, duration || 520);
+    }
 
     function buildTitle() {
       if (!text || !target) return;
@@ -1704,35 +1872,42 @@
       }
     }
 
-    function setTune(value, randomize) {
+    function setTune(value, randomize, lightweight) {
       tune = Math.max(0, Math.min(1, value));
       var percentage = Math.round(tune * 100);
-      outro.style.setProperty('--outro-tune', tune.toFixed(3));
       if (track) {
         var trackX = Math.max(0, (track.clientWidth - 7) * tune);
-        outro.style.setProperty('--outro-track-x', trackX.toFixed(1) + 'px');
-        track.setAttribute('aria-valuenow', percentage);
+        var keeperX = 28 + Math.max(0, track.clientWidth - 56) * tune;
+        track.style.setProperty('--outro-tune', tune.toFixed(3));
+        track.style.setProperty('--outro-track-x', trackX.toFixed(1) + 'px');
+        (keeper || outro).style.setProperty('--outro-keeper-x', keeperX.toFixed(1) + 'px');
+        if (percentage !== lastTunePercentage) track.setAttribute('aria-valuenow', percentage);
       }
-      if (meter) meter.textContent = 'SIGNAL ' + String(percentage).padStart(3, '0') + '%';
-      if (dragging) setStatus('FIELD.TUNE: ' + String(percentage).padStart(3, '0') + ' // RELEASE TO RESOLVE');
-      applyCharacters(tune, randomize);
-      schedulePhysics();
+      if (percentage !== lastTunePercentage && meter) meter.textContent = 'SIGNAL ' + String(percentage).padStart(3, '0') + '%';
+      lastTunePercentage = percentage;
+      if (!lightweight) {
+        applyCharacters(tune, randomize);
+        schedulePhysics();
+      }
     }
 
     function settleTune() {
       window.cancelAnimationFrame(settleFrame);
       var from = tune;
       var started = performance.now();
-      var duration = 620;
+      var duration = 360;
+      outro.classList.add('is-keeper-walking');
 
       function render(now) {
         var progress = Math.min(1, (now - started) / duration);
         var eased = 1 - Math.pow(1 - progress, 4);
-        setTune(from + (1 - from) * eased, true);
+        setTune(from + (1 - from) * eased, false, true);
         if (progress < 1) settleFrame = window.requestAnimationFrame(render);
         else {
-          setTune(1, false);
+          setTune(1, false, false);
           setStatus(baseStatus);
+          outro.classList.remove('is-keeper-walking');
+          reactKeeper('is-keeper-settled', 460);
         }
       }
 
@@ -1741,8 +1916,13 @@
 
     function updateTune(clientX) {
       if (!track) return;
-      var rect = track.getBoundingClientRect();
-      setTune((clientX - rect.left) / rect.width, true);
+      var rect = dragRect || track.getBoundingClientRect();
+      setTune((clientX - rect.left) / rect.width, false, true);
+    }
+
+    function flushDragTune() {
+      dragFrame = 0;
+      if (dragging) updateTune(pendingDragX);
     }
 
     function schedulePhysics() {
@@ -1790,7 +1970,7 @@
         if (Math.abs(model.x) + Math.abs(model.y) + Math.abs(model.velocityX) + Math.abs(model.velocityY) + Math.abs(model.rotation) > .08) isMoving = true;
       });
 
-      if (pointerActive || dragging || isMoving || pointerEnergy > .01) schedulePhysics();
+      if (dragging || isMoving || pointerEnergy > .01) schedulePhysics();
     }
 
     function createImpact(clientX, clientY) {
@@ -1819,6 +1999,7 @@
       });
       pointerEnergy = 1;
       setStatus('FIELD.IMPACT: X' + Math.round(localX) + ' / Y' + Math.round(localY), 1100);
+      reactKeeper('is-keeper-startled', 720);
       schedulePhysics();
     }
 
@@ -1847,6 +2028,7 @@
     }
 
     buildTitle();
+    setTune(tune, false);
 
     if (gardenMotionIsLite()) {
       outro.classList.add('is-visible');
@@ -1877,9 +2059,12 @@
         previousTime = performance.now();
         measureTitle();
         outro.classList.add('is-pointer-in');
+        outro.classList.add('is-keeper-watching');
+        if (!pointerFrame) pointerFrame = window.requestAnimationFrame(renderPointer);
         schedulePhysics();
       });
       outro.addEventListener('pointermove', function (event) {
+        if (dragging) return;
         if (!dragging) pointerActive = true;
         var now = performance.now();
         var elapsed = Math.max(8, now - previousTime);
@@ -1898,6 +2083,7 @@
         pointerActive = false;
         pointerEnergy = 0;
         outro.classList.remove('is-pointer-in');
+        outro.classList.remove('is-keeper-watching');
         resetPointer();
         schedulePhysics();
       });
@@ -1910,25 +2096,34 @@
         window.cancelAnimationFrame(settleFrame);
         dragging = true;
         pointerActive = false;
+        dragRect = track.getBoundingClientRect();
+        pendingDragX = event.clientX;
         outro.classList.add('is-tuning');
-        track.setPointerCapture(event.pointerId);
-        measureTitle();
+        setStatus('FIELD.TUNE // RELEASE TO RESOLVE');
         updateTune(event.clientX);
       });
-      track.addEventListener('pointermove', function (event) {
+      window.addEventListener('pointermove', function (event) {
         if (!dragging) return;
-        updateTune(event.clientX);
-      });
-      track.addEventListener('pointerup', function (event) {
+        pendingDragX = event.clientX;
+        if (!dragFrame) dragFrame = window.requestAnimationFrame(flushDragTune);
+      }, { passive: true });
+      window.addEventListener('pointerup', function () {
         if (!dragging) return;
+        window.cancelAnimationFrame(dragFrame);
+        dragFrame = 0;
+        updateTune(pendingDragX);
         dragging = false;
+        dragRect = null;
         pointerActive = finePointer.matches;
         outro.classList.remove('is-tuning');
-        if (track.hasPointerCapture(event.pointerId)) track.releasePointerCapture(event.pointerId);
         settleTune();
       });
-      track.addEventListener('pointercancel', function () {
+      window.addEventListener('pointercancel', function () {
+        if (!dragging) return;
+        window.cancelAnimationFrame(dragFrame);
+        dragFrame = 0;
         dragging = false;
+        dragRect = null;
         outro.classList.remove('is-tuning');
         settleTune();
       });
@@ -1943,6 +2138,7 @@
         window.cancelAnimationFrame(settleFrame);
         dragging = true;
         outro.classList.add('is-tuning');
+        outro.classList.add('is-keeper-walking');
         setTune(next, true);
         dragging = false;
         window.clearTimeout(track._settleTimer);
@@ -1951,6 +2147,15 @@
           settleTune();
         }, 360);
       });
+    }
+
+    if (returnLink) {
+      if (finePointer.matches) {
+        returnLink.addEventListener('pointerenter', function () { outro.classList.add('is-keeper-pointing'); });
+        returnLink.addEventListener('pointerleave', function () { outro.classList.remove('is-keeper-pointing'); });
+      }
+      returnLink.addEventListener('focus', function () { outro.classList.add('is-keeper-pointing'); });
+      returnLink.addEventListener('blur', function () { outro.classList.remove('is-keeper-pointing'); });
     }
 
     window.addEventListener('resize', function () {
@@ -1986,6 +2191,216 @@
       });
     }, { threshold: [0, .16, .35], rootMargin: '0px 0px -5% 0px' });
     observer.observe(outro);
+  }
+
+  function setupFolioEclipse() {
+    var outro = document.querySelector('[data-folio-outro]');
+    var eclipse = outro && outro.querySelector('[data-outro-eclipse]');
+    var trigger = eclipse && eclipse.querySelector('[data-outro-return]');
+    var text = outro && outro.querySelector('[data-outro-text]');
+    if (!outro || !eclipse || !trigger) return;
+    var frame = 0;
+    var pointerX = 0;
+    var pointerY = 0;
+    var entered = false;
+
+    function buildTitle() {
+      if (!text || text.children.length) return;
+      var value = text.dataset.outroValue || text.textContent;
+      var fragment = document.createDocumentFragment();
+      value.split('').forEach(function (character) {
+        var glyph = document.createElement('span');
+        glyph.className = 'folio-outro-glyph' + (/\s/.test(character) ? ' is-space' : '');
+        glyph.textContent = /\s/.test(character) ? '\u00a0' : character;
+        fragment.appendChild(glyph);
+      });
+      text.textContent = '';
+      text.appendChild(fragment);
+    }
+
+    function renderPointer() {
+      frame = 0;
+      var rect = eclipse.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      var nx = Math.max(-1, Math.min(1, (pointerX - (rect.left + rect.width / 2)) / (rect.width / 2)));
+      var ny = Math.max(-1, Math.min(1, (pointerY - (rect.top + rect.height / 2)) / (rect.height / 2)));
+      trigger.style.setProperty('--eclipse-x', (nx * 7).toFixed(2) + 'px');
+      trigger.style.setProperty('--eclipse-y', (ny * 5).toFixed(2) + 'px');
+      trigger.style.setProperty('--eclipse-tilt', (nx * 3.5).toFixed(2) + 'deg');
+    }
+
+    function resetPointer() {
+      trigger.style.setProperty('--eclipse-x', '0px');
+      trigger.style.setProperty('--eclipse-y', '0px');
+      trigger.style.setProperty('--eclipse-tilt', '0deg');
+    }
+
+    buildTitle();
+
+    if (!gardenMotionIsLite() && finePointer.matches) {
+      eclipse.addEventListener('pointermove', function (event) {
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+        if (!frame) frame = window.requestAnimationFrame(renderPointer);
+      }, { passive: true });
+      eclipse.addEventListener('pointerleave', resetPointer);
+    }
+
+    trigger.addEventListener('click', function () {
+      if (outro.classList.contains('is-eclipse-closing')) return;
+      outro.classList.add('is-eclipse-closing');
+      window.setTimeout(function () {
+        var start = document.querySelector('#hello');
+        if (start) start.scrollIntoView({ behavior: gardenMotionIsLite() ? 'auto' : 'smooth', block: 'start' });
+        else window.scrollTo({ top: 0, behavior: gardenMotionIsLite() ? 'auto' : 'smooth' });
+      }, gardenMotionIsLite() ? 0 : 260);
+      window.setTimeout(function () { outro.classList.remove('is-eclipse-closing'); }, 760);
+    });
+
+    if (!('IntersectionObserver' in window) || gardenMotionIsLite()) {
+      outro.classList.add('is-visible');
+      return;
+    }
+
+    outro.classList.add('is-motion-ready');
+    new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting || entry.intersectionRatio < .18 || entered) return;
+        entered = true;
+        outro.classList.add('is-visible');
+        observer.unobserve(outro);
+      });
+    }, { threshold: [.18, .4] }).observe(outro);
+  }
+
+  function setupPixelOutro() {
+    var outro = document.querySelector('[data-folio-outro]');
+    var vista = outro && outro.querySelector('[data-pixel-outro]');
+    var screen = vista && vista.querySelector('[data-pixel-lamp]');
+    if (!outro || !vista || !screen) return;
+    var moon = screen.querySelector('.pixel-moon');
+    var ridges = screen.querySelectorAll('.pixel-ridge');
+    var beam = screen.querySelector('.pixel-beam');
+    var frame = 0;
+    var pointerX = 0;
+    var pointerY = 0;
+    var entered = false;
+
+    function renderPointer() {
+      frame = 0;
+      var rect = screen.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      var nx = Math.max(-1, Math.min(1, (pointerX - (rect.left + rect.width / 2)) / (rect.width / 2)));
+      var ny = Math.max(-1, Math.min(1, (pointerY - (rect.top + rect.height / 2)) / (rect.height / 2)));
+      screen.style.setProperty('--pixel-x', (nx * 4).toFixed(2) + 'px');
+      screen.style.setProperty('--pixel-y', (ny * 3).toFixed(2) + 'px');
+      if (moon) moon.style.transform = 'translate3d(' + (nx * -2.4).toFixed(2) + 'px,' + (ny * -1.6).toFixed(2) + 'px,0)';
+      Array.prototype.forEach.call(ridges, function (ridge, index) {
+        ridge.style.transform = 'translate3d(' + (nx * (index ? -.8 : -1.4)).toFixed(2) + 'px,' + (ny * -.5).toFixed(2) + 'px,0)';
+      });
+      if (beam && !screen.classList.contains('is-lamp-off')) {
+        var lighthouseX = rect.left + rect.width * .84;
+        var lighthouseY = rect.top + rect.height * .58;
+        var angle = Math.atan2(lighthouseY - pointerY, lighthouseX - pointerX) * 180 / Math.PI;
+        angle = Math.max(-14, Math.min(14, angle));
+        beam.style.transform = 'rotate(' + angle.toFixed(2) + 'deg) scaleX(1)';
+        screen.classList.add('is-aiming');
+      }
+    }
+
+    function resetPointer() {
+      screen.style.setProperty('--pixel-x', '0px');
+      screen.style.setProperty('--pixel-y', '0px');
+      if (moon) moon.style.transform = 'translate3d(0,0,0)';
+      Array.prototype.forEach.call(ridges, function (ridge) { ridge.style.transform = 'translate3d(0,0,0)'; });
+      if (beam) beam.style.removeProperty('transform');
+      screen.classList.remove('is-aiming');
+    }
+
+    function animateEffect(element, keyframes, options, fallback) {
+      var removed = false;
+      function remove() {
+        if (removed) return;
+        removed = true;
+        element.remove();
+      }
+      if (typeof element.animate === 'function') {
+        var animation = element.animate(keyframes, options);
+        animation.finished.then(remove, remove);
+      }
+      window.setTimeout(remove, fallback);
+    }
+
+    function createRipple(x, y) {
+      var ripple = document.createElement('span');
+      ripple.className = 'pixel-click-ripple';
+      ripple.style.left = (x * 100).toFixed(2) + '%';
+      ripple.style.top = (y * 100).toFixed(2) + '%';
+      ripple.setAttribute('aria-hidden', 'true');
+      screen.appendChild(ripple);
+      animateEffect(ripple, [
+        { opacity: .82, transform: 'scale(.72)' },
+        { opacity: 0, transform: 'scale(2.2)' }
+      ], { duration: 460, easing: 'steps(5, end)', fill: 'forwards' }, 620);
+    }
+
+    function createMeteor(x, y) {
+      var meteor = document.createElement('span');
+      meteor.className = 'pixel-meteor';
+      meteor.style.left = (Math.min(.72, x) * 100).toFixed(2) + '%';
+      meteor.style.top = (Math.min(.48, y) * 100).toFixed(2) + '%';
+      meteor.setAttribute('aria-hidden', 'true');
+      screen.appendChild(meteor);
+      animateEffect(meteor, [
+        { opacity: 1, transform: 'translate3d(0,0,0)', offset: 0 },
+        { opacity: 1, transform: 'translate3d(52px,27px,0)', offset: .72 },
+        { opacity: 0, transform: 'translate3d(74px,38px,0)', offset: 1 }
+      ], { duration: 540, easing: 'steps(6, end)', fill: 'forwards' }, 760);
+    }
+
+    function toggleLamp() {
+      screen.classList.toggle('is-lamp-off');
+      var lampOff = screen.classList.contains('is-lamp-off');
+      screen.setAttribute('aria-pressed', lampOff ? 'true' : 'false');
+      if (lampOff && beam) beam.style.removeProperty('transform');
+    }
+
+    if (!gardenMotionIsLite() && finePointer.matches) {
+      screen.addEventListener('pointermove', function (event) {
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+        if (!frame) frame = window.requestAnimationFrame(renderPointer);
+      }, { passive: true });
+      screen.addEventListener('pointerleave', resetPointer);
+    }
+
+    screen.addEventListener('click', function (event) {
+      if (!event.detail || gardenMotionIsLite()) {
+        toggleLamp();
+        return;
+      }
+      var rect = screen.getBoundingClientRect();
+      var x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      var y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+      if (x > .72 && y > .36) toggleLamp();
+      else if (y > .64) createRipple(x, y);
+      else createMeteor(x, y);
+    });
+
+    if (!('IntersectionObserver' in window) || gardenMotionIsLite()) {
+      outro.classList.add('is-visible');
+      return;
+    }
+
+    outro.classList.add('is-motion-ready');
+    new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting || entry.intersectionRatio < .14 || entered) return;
+        entered = true;
+        outro.classList.add('is-visible');
+        observer.unobserve(outro);
+      });
+    }, { threshold: [.14, .32] }).observe(outro);
   }
 
   function setupFractureTitle() {
@@ -3112,10 +3527,9 @@
   setupGardenTheme();
   setupGardenBoot();
   setupGardenHud();
-  setupGardenCursor();
   setupGardenRipples();
   setupGardenScramble();
-  setupFolioOutro();
+  setupPixelOutro();
   setupFractureTitle();
   setupGardenParticles();
   setupGardenPet();

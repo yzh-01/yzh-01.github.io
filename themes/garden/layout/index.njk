@@ -64,9 +64,6 @@
     <i class="garden-corner garden-corner-c"></i><i class="garden-corner garden-corner-d"></i>
   </aside>
 
-  <div class="garden-cursor" data-garden-cursor aria-hidden="true">
-    <i class="garden-cursor-dot"></i><i class="garden-cursor-frame"></i><span>OPEN</span>
-  </div>
   <div class="garden-ripple-layer" data-ripple-layer aria-hidden="true"></div>
 
   <div class="garden-pet" data-garden-pet data-post-count="{{ all_posts.length }}">
@@ -88,7 +85,6 @@
     </div>
     <div class="garden-overgrowth-copy" role="status" aria-live="polite">
       <small data-overgrowth-status>ENDLINE // 00 / 03 SIGNALS</small>
-      <strong>This ends now</strong>
       <span data-overgrowth-hint>点亮三座文章信标。A/D 移动，W/空格跳跃；空中按住可撑伞缓降。</span>
       <button type="button" data-overgrowth-close>退出关卡 <b aria-hidden="true">×</b></button>
     </div>
@@ -373,18 +369,33 @@
   </section>
   {%- endif %}
 
-  <section class="folio-outro" id="the-end" data-folio-outro aria-labelledby="folio-outro-label">
+  <section class="folio-outro" id="the-end" data-folio-outro aria-label="页面结尾">
     <span class="folio-outro-orbit" aria-hidden="true"><i></i></span>
     <div class="folio-outro-inner">
       <p class="folio-outro-signal"><i aria-hidden="true"></i><span>LIVE_FIELD / MOVE TO DISTURB</span></p>
-      <p class="sr-only" id="folio-outro-label">This ends now</p>
-      <h2 aria-hidden="true"><span data-outro-text data-outro-value="This ends now">This ends now</span></h2>
-      <div class="folio-outro-track" data-outro-track role="slider" tabindex="0" aria-label="拖动调节结尾信号" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
-        <i aria-hidden="true"></i><b aria-hidden="true"></b>
-        <span data-outro-meter>SIGNAL 100%</span>
+      <div class="folio-pixel-vista" data-pixel-outro>
+        <button class="folio-pixel-screen" type="button" data-pixel-lamp aria-label="交互像素夜景：点击湖面、天空或灯塔" aria-pressed="false">
+          <span class="pixel-sky" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+          </span>
+          <span class="pixel-moon" aria-hidden="true"></span>
+          <span class="pixel-cloud pixel-cloud-a" aria-hidden="true"></span>
+          <span class="pixel-cloud pixel-cloud-b" aria-hidden="true"></span>
+          <span class="pixel-rain" aria-hidden="true"></span>
+          <span class="pixel-ridge pixel-ridge-back" aria-hidden="true"></span>
+          <span class="pixel-ridge pixel-ridge-front" aria-hidden="true"></span>
+          <span class="pixel-lake" aria-hidden="true"><i></i><b></b></span>
+          <span class="pixel-lighthouse" aria-hidden="true"><i></i><b></b><em></em></span>
+          <span class="pixel-beam" aria-hidden="true"></span>
+          <span class="pixel-boat" aria-hidden="true"><i></i></span>
+          <span class="pixel-frame" aria-hidden="true"></span>
+          <span class="pixel-scan" aria-hidden="true"></span>
+          <span class="pixel-fireflies" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="pixel-reflection" aria-hidden="true"></span>
+        </button>
       </div>
       <div class="folio-outro-meta">
-        <span data-outro-status>MOVE: REPEL // CLICK: IMPACT // DRAG: DETUNE</span>
+        <span data-outro-status>MOVE: GRAVITY // CLICK: RETURN</span>
         <div class="folio-outro-actions">
           <a href="#hello">回到开头 <b aria-hidden="true">↑</b></a>
         </div>
