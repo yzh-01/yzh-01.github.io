@@ -2281,10 +2281,31 @@
     var moon = screen.querySelector('.pixel-moon');
     var ridges = screen.querySelectorAll('.pixel-ridge');
     var beam = screen.querySelector('.pixel-beam');
+    var beamFocus = screen.querySelector('.pixel-beam-focus');
+    var boatBody = screen.querySelector('.pixel-boat > i');
+    var boatLight = screen.querySelector('.pixel-boat > i > em');
+    var lampLight = screen.querySelector('.pixel-lighthouse > i');
+    var reflection = screen.querySelector('.pixel-reflection');
+    var rain = screen.querySelector('.pixel-rain');
     var frame = 0;
     var pointerX = 0;
     var pointerY = 0;
     var entered = false;
+    var boatReaction = null;
+    var signalActive = false;
+    var signalQueue = 0;
+    var signalFinishTimer = 0;
+    var signalReplyTimer = 0;
+    var signalAnimations = [];
+
+    function getZone(x, y) {
+      var moonX = (x - .185) / .105;
+      var moonY = (y - .19) / .13;
+      if (moonX * moonX + moonY * moonY < 1) return 'moon';
+      if (x > .73 && y > .3 && y < .79) return 'lamp';
+      if (y > .62) return 'water';
+      return 'sky';
+    }
 
     function renderPointer() {
       frame = 0;
@@ -2292,29 +2313,35 @@
       if (!rect.width || !rect.height) return;
       var nx = Math.max(-1, Math.min(1, (pointerX - (rect.left + rect.width / 2)) / (rect.width / 2)));
       var ny = Math.max(-1, Math.min(1, (pointerY - (rect.top + rect.height / 2)) / (rect.height / 2)));
-      screen.style.setProperty('--pixel-x', (nx * 4).toFixed(2) + 'px');
-      screen.style.setProperty('--pixel-y', (ny * 3).toFixed(2) + 'px');
       if (moon) moon.style.transform = 'translate3d(' + (nx * -2.4).toFixed(2) + 'px,' + (ny * -1.6).toFixed(2) + 'px,0)';
       Array.prototype.forEach.call(ridges, function (ridge, index) {
-        ridge.style.transform = 'translate3d(' + (nx * (index ? -.8 : -1.4)).toFixed(2) + 'px,' + (ny * -.5).toFixed(2) + 'px,0)';
+        ridge.style.transform = 'translate3d(' + (nx * (index ? -1.1 : -1.8)).toFixed(2) + 'px,' + (ny * (index ? -.45 : -.7)).toFixed(2) + 'px,0)';
       });
-      if (beam && !screen.classList.contains('is-lamp-off')) {
+
+      var localX = Math.max(0, Math.min(1, (pointerX - rect.left) / rect.width));
+      var localY = Math.max(0, Math.min(1, (pointerY - rect.top) / rect.height));
+      screen.dataset.pixelZone = getZone(localX, localY);
+      if (beam && !screen.classList.contains('is-lamp-off') && !signalActive) {
         var lighthouseX = rect.left + rect.width * .84;
         var lighthouseY = rect.top + rect.height * .58;
         var angle = Math.atan2(lighthouseY - pointerY, lighthouseX - pointerX) * 180 / Math.PI;
-        angle = Math.max(-14, Math.min(14, angle));
+        angle = Math.max(-18, Math.min(18, angle));
         beam.style.transform = 'rotate(' + angle.toFixed(2) + 'deg) scaleX(1)';
         screen.classList.add('is-aiming');
+        if (beamFocus) {
+          var focusY = Math.max(rect.height * .68, Math.min(rect.height * .89, pointerY - rect.top));
+          beamFocus.style.transform = 'translate3d(' + (pointerX - rect.left).toFixed(1) + 'px,' + focusY.toFixed(1) + 'px,0)';
+        }
       }
     }
 
     function resetPointer() {
-      screen.style.setProperty('--pixel-x', '0px');
-      screen.style.setProperty('--pixel-y', '0px');
       if (moon) moon.style.transform = 'translate3d(0,0,0)';
       Array.prototype.forEach.call(ridges, function (ridge) { ridge.style.transform = 'translate3d(0,0,0)'; });
       if (beam) beam.style.removeProperty('transform');
+      if (beamFocus) beamFocus.style.transform = 'translate3d(-100px,-100px,0)';
       screen.classList.remove('is-aiming');
+      delete screen.dataset.pixelZone;
     }
 
     function animateEffect(element, keyframes, options, fallback) {
@@ -2331,20 +2358,42 @@
       window.setTimeout(remove, fallback);
     }
 
-    function createRipple(x, y) {
+    function nudgeBoat(x) {
+      if (!boatBody || gardenMotionIsLite() || typeof boatBody.animate !== 'function') return;
+      if (boatReaction) boatReaction.cancel();
+      var direction = x < .5 ? 1 : -1;
+      var reaction = boatBody.animate([
+        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 0 },
+        { transform: 'translate3d(' + (direction * 4) + 'px,-4px,0) rotate(' + (direction * 4) + 'deg)', offset: .34 },
+        { transform: 'translate3d(' + (direction * -2) + 'px,2px,0) rotate(' + (direction * -2) + 'deg)', offset: .7 },
+        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 1 }
+      ], { duration: 440, easing: 'steps(6, end)' });
+      boatReaction = reaction;
+      reaction.finished.then(function () {
+        if (boatReaction === reaction) boatReaction = null;
+      }, function () {
+        if (boatReaction === reaction) boatReaction = null;
+      });
+    }
+
+    function createRipple(x, y, reactToBoat) {
+      if (gardenMotionIsLite()) return;
       var ripple = document.createElement('span');
       ripple.className = 'pixel-click-ripple';
       ripple.style.left = (x * 100).toFixed(2) + '%';
-      ripple.style.top = (y * 100).toFixed(2) + '%';
+      ripple.style.top = (Math.max(.68, y) * 100).toFixed(2) + '%';
       ripple.setAttribute('aria-hidden', 'true');
       screen.appendChild(ripple);
       animateEffect(ripple, [
-        { opacity: .82, transform: 'scale(.72)' },
-        { opacity: 0, transform: 'scale(2.2)' }
-      ], { duration: 460, easing: 'steps(5, end)', fill: 'forwards' }, 620);
+        { opacity: .88, transform: 'scale(.72)', offset: 0 },
+        { opacity: .62, transform: 'scale(1.28)', offset: .36 },
+        { opacity: 0, transform: 'scale(3.1)', offset: 1 }
+      ], { duration: 680, easing: 'steps(7, end)', fill: 'forwards' }, 820);
+      if (reactToBoat !== false) nudgeBoat(x);
     }
 
     function createMeteor(x, y) {
+      if (gardenMotionIsLite()) return;
       var meteor = document.createElement('span');
       meteor.className = 'pixel-meteor';
       meteor.style.left = (Math.min(.72, x) * 100).toFixed(2) + '%';
@@ -2355,14 +2404,180 @@
         { opacity: 1, transform: 'translate3d(0,0,0)', offset: 0 },
         { opacity: 1, transform: 'translate3d(52px,27px,0)', offset: .72 },
         { opacity: 0, transform: 'translate3d(74px,38px,0)', offset: 1 }
-      ], { duration: 540, easing: 'steps(6, end)', fill: 'forwards' }, 760);
+      ], { duration: 520, easing: 'steps(7, end)', fill: 'forwards' }, 720);
     }
 
-    function toggleLamp() {
+    function createLightning(x) {
+      if (gardenMotionIsLite()) return;
+      var lightning = document.createElement('span');
+      var flash = document.createElement('span');
+      lightning.className = 'pixel-lightning';
+      flash.className = 'pixel-sky-flash';
+      lightning.style.left = (Math.max(.08, Math.min(.68, x)) * 100).toFixed(2) + '%';
+      lightning.style.top = '7%';
+      lightning.setAttribute('aria-hidden', 'true');
+      flash.setAttribute('aria-hidden', 'true');
+      screen.appendChild(flash);
+      screen.appendChild(lightning);
+      animateEffect(lightning, [
+        { opacity: 0, transform: 'scaleY(.92)', offset: 0 },
+        { opacity: 1, transform: 'scaleY(1)', offset: .1 },
+        { opacity: .18, transform: 'scaleY(1)', offset: .36 },
+        { opacity: 1, transform: 'scaleY(1)', offset: .5 },
+        { opacity: 0, transform: 'scaleY(1)', offset: 1 }
+      ], { duration: 440, easing: 'steps(5, end)', fill: 'forwards' }, 600);
+      animateEffect(flash, [
+        { opacity: 0, transform: 'scale(1)', offset: 0 },
+        { opacity: .8, transform: 'scale(1)', offset: .12 },
+        { opacity: .08, transform: 'scale(1)', offset: .4 },
+        { opacity: .46, transform: 'scale(1)', offset: .52 },
+        { opacity: 0, transform: 'scale(1)', offset: 1 }
+      ], { duration: 360, easing: 'steps(4, end)', fill: 'forwards' }, 520);
+      if (rain && typeof rain.animate === 'function') {
+        rain.animate([
+          { opacity: .2, transform: 'translate3d(0,-16px,0)' },
+          { opacity: .52, transform: 'translate3d(-5px,2px,0)' },
+          { opacity: .2, transform: 'translate3d(-10px,18px,0)' }
+        ], { duration: 460, easing: 'steps(5, end)' });
+      }
+      nudgeBoat(x);
+    }
+
+    function createMoonPulse() {
+      if (gardenMotionIsLite()) return;
+      var pulse = document.createElement('span');
+      pulse.className = 'pixel-click-ripple pixel-moon-pulse';
+      pulse.style.left = '18.5%';
+      pulse.style.top = '19%';
+      pulse.setAttribute('aria-hidden', 'true');
+      screen.appendChild(pulse);
+      animateEffect(pulse, [
+        { opacity: .82, transform: 'scale(.82)' },
+        { opacity: 0, transform: 'scale(2.6)' }
+      ], { duration: 520, easing: 'steps(6, end)', fill: 'forwards' }, 680);
+    }
+
+    function updateLabel() {
+      var weather = screen.classList.contains('is-clear') ? '晴夜' : '雨夜';
+      var lamp = signalActive ? '灯塔正在呼叫' : '灯塔等待呼叫';
+      screen.setAttribute('aria-label', '交互像素' + weather + '，' + lamp + '；月亮、天空、湖面与灯塔均可点击');
+    }
+
+    function toggleWeather() {
+      screen.classList.toggle('is-clear');
+      createMoonPulse();
+      updateLabel();
+    }
+
+    function trackSignalAnimation(element, keyframes, options) {
+      if (!element || typeof element.animate !== 'function') return;
+      signalAnimations.push(element.animate(keyframes, options));
+    }
+
+    function clearSignalAnimations() {
+      signalAnimations.forEach(function (animation) { animation.cancel(); });
+      signalAnimations = [];
+    }
+
+    function finishLighthouseSignal() {
+      window.clearTimeout(signalReplyTimer);
+      signalActive = false;
+      screen.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
+      screen.classList.add('is-lamp-off');
+      clearSignalAnimations();
+      updateLabel();
+      if (signalQueue > 0) {
+        signalQueue -= 1;
+        signalFinishTimer = window.setTimeout(startLighthouseSignal, 120);
+      }
+    }
+
+    function startLighthouseSignal() {
+      if (signalActive) {
+        signalQueue = Math.min(2, signalQueue + 1);
+        screen.classList.add('is-signal-queued');
+        return;
+      }
+      if (gardenMotionIsLite() || !beam || typeof beam.animate !== 'function') {
+        screen.classList.toggle('is-lamp-off');
+        updateLabel();
+        return;
+      }
+
+      window.clearTimeout(signalFinishTimer);
+      clearSignalAnimations();
+      signalActive = true;
+      screen.classList.remove('is-lamp-off', 'is-aiming', 'is-signal-response', 'is-signal-queued');
+      screen.classList.add('is-signal-active');
+      beam.style.removeProperty('transform');
+      updateLabel();
+
+      trackSignalAnimation(lampLight, [
+        { opacity: .72, transform: 'scale(.96)', offset: 0 },
+        { opacity: .58, transform: 'scale(.9)', offset: .08 },
+        { opacity: 1, transform: 'scale(1.14)', offset: .18 },
+        { opacity: .82, transform: 'scale(1)', offset: .28 },
+        { opacity: 1, transform: 'scale(1.08)', offset: .54 },
+        { opacity: .76, transform: 'scale(1)', offset: .63 },
+        { opacity: 1, transform: 'scale(1.08)', offset: .83 },
+        { opacity: .72, transform: 'scale(.96)', offset: 1 }
+      ], { duration: 1900, easing: 'steps(16, end)', fill: 'both' });
+
+      trackSignalAnimation(beam, [
+        { opacity: 0, transform: 'rotate(-14deg) scaleX(.72)', offset: 0 },
+        { opacity: .58, transform: 'rotate(-14deg) scaleX(.94)', offset: .18 },
+        { opacity: .64, transform: 'rotate(10deg) scaleX(1)', offset: .56 },
+        { opacity: .46, transform: 'rotate(-3deg) scaleX(.98)', offset: .8 },
+        { opacity: 0, transform: 'rotate(-3deg) scaleX(.86)', offset: 1 }
+      ], { duration: 1900, easing: 'steps(18, end)', fill: 'both' });
+
+      trackSignalAnimation(reflection, [
+        { opacity: 0, transform: 'scaleY(.72)', offset: 0 },
+        { opacity: 0, transform: 'scaleY(.72)', offset: .34 },
+        { opacity: .72, transform: 'scaleY(1.1)', offset: .57 },
+        { opacity: .34, transform: 'scaleY(.9)', offset: .8 },
+        { opacity: 0, transform: 'scaleY(.76)', offset: 1 }
+      ], { duration: 1900, easing: 'steps(14, end)', fill: 'both' });
+
+      trackSignalAnimation(boatLight, [
+        { opacity: .16, transform: 'scale(.94)', offset: 0 },
+        { opacity: .16, transform: 'scale(.94)', offset: .5 },
+        { opacity: 1, transform: 'scale(1.7)', offset: .57 },
+        { opacity: .16, transform: 'scale(.94)', offset: .64 },
+        { opacity: 1, transform: 'scale(1.45)', offset: .73 },
+        { opacity: .16, transform: 'scale(.94)', offset: .82 },
+        { opacity: .16, transform: 'scale(.94)', offset: 1 }
+      ], { duration: 1900, easing: 'steps(10, end)', fill: 'both' });
+
+      trackSignalAnimation(boatBody, [
+        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 0 },
+        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: .48 },
+        { transform: 'translate3d(3px,-3px,0) rotate(3deg)', offset: .59 },
+        { transform: 'translate3d(-2px,2px,0) rotate(-2deg)', offset: .72 },
+        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: .9 },
+        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 1 }
+      ], { duration: 1900, easing: 'steps(12, end)', fill: 'both' });
+
+      signalReplyTimer = window.setTimeout(function () {
+        if (!signalActive) return;
+        screen.classList.add('is-signal-response');
+        createRipple(.29, .75, false);
+      }, 1060);
+      signalFinishTimer = window.setTimeout(finishLighthouseSignal, 1900);
+    }
+
+    function triggerLighthouseSignal(keyboardInitiated) {
+      if (!keyboardInitiated) {
+        startLighthouseSignal();
+        return;
+      }
+      if (signalActive) return;
+      screen.classList.add('is-keyboard-change');
       screen.classList.toggle('is-lamp-off');
-      var lampOff = screen.classList.contains('is-lamp-off');
-      screen.setAttribute('aria-pressed', lampOff ? 'true' : 'false');
-      if (lampOff && beam) beam.style.removeProperty('transform');
+      updateLabel();
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () { screen.classList.remove('is-keyboard-change'); });
+      });
     }
 
     if (!gardenMotionIsLite() && finePointer.matches) {
@@ -2375,17 +2590,22 @@
     }
 
     screen.addEventListener('click', function (event) {
-      if (!event.detail || gardenMotionIsLite()) {
-        toggleLamp();
+      if (!event.detail) {
+        triggerLighthouseSignal(true);
         return;
       }
       var rect = screen.getBoundingClientRect();
       var x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
       var y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
-      if (x > .72 && y > .36) toggleLamp();
-      else if (y > .64) createRipple(x, y);
-      else createMeteor(x, y);
+      var zone = getZone(x, y);
+      if (zone === 'moon') toggleWeather();
+      else if (zone === 'lamp') triggerLighthouseSignal(false);
+      else if (zone === 'water') createRipple(x, y);
+      else if (screen.classList.contains('is-clear')) createMeteor(x, y);
+      else createLightning(x);
     });
+
+    updateLabel();
 
     if (!('IntersectionObserver' in window) || gardenMotionIsLite()) {
       outro.classList.add('is-visible');
