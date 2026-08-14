@@ -716,6 +716,303 @@
     schedule();
   }
 
+  function setupKineticVeil() {
+    var canvas = document.querySelector('[data-kinetic-veil]');
+    if (!canvas || gardenMotionIsLite()) return;
+    var context = canvas.getContext('2d', { alpha: true });
+    if (!context) return;
+
+    var root = document.documentElement;
+    var width = 0;
+    var height = 0;
+    var ratio = 1;
+    var strandCount = 13;
+    var pointerX = window.innerWidth * .5;
+    var pointerY = window.innerHeight * .55;
+    var targetX = pointerX;
+    var targetY = pointerY;
+    var pointerStrength = 0;
+    var pointerInside = false;
+    var pointerSeen = false;
+    var impulses = [];
+    var frame = 0;
+    var lastFrameAt = performance.now();
+    var lastDrawAt = 0;
+    var activeUntil = 0;
+
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+    function mix(from, to, amount) { return from + (to - from) * amount; }
+    function easeOut(value) { return 1 - Math.pow(1 - value, 3); }
+
+    function isLightTheme() {
+      return root.getAttribute('data-resolved-theme') === 'light';
+    }
+
+    function basePoint(strand, x, now) {
+      var progress = strandCount <= 1 ? 0 : strand / (strandCount - 1);
+      var phase = strand * 1.618;
+      var drift = now * (.000025 + strand % 3 * .000008);
+      var baseY = height * (.08 + progress * .94);
+      var diagonal = (x - width * .5) * (-.036 + (strand % 4 - 1.5) * .004);
+      var broadWave = Math.sin(x * .00155 - phase * .37 - drift) * (17 + strand % 4 * 3.5);
+      var fineWave = Math.sin(x * .0041 + phase + drift * 2.2) * (7 + strand % 3 * 2.5);
+      return { x: x, y: baseY + diagonal + broadWave + fineWave };
+    }
+
+    function resolvePoint(strand, x, now) {
+      var point = basePoint(strand, x, now);
+      var dx = point.x - pointerX;
+      var dy = point.y - pointerY;
+      var distance = Math.sqrt(dx * dx + dy * dy) || 1;
+      var radius = clamp(Math.min(width, height) * .29, 180, 330);
+      var lens = Math.exp(-(distance * distance) / (2 * radius * radius)) * pointerStrength;
+      var side = dy / (Math.abs(dy) + 34);
+      point.x += (-dy / distance) * lens * 13;
+      point.y += side * lens * (42 + strand % 3 * 7);
+
+      impulses.forEach(function (impulse) {
+        var pulseX = point.x - impulse.x;
+        var pulseY = point.y - impulse.y;
+        var pulseDistance = Math.sqrt(pulseX * pulseX + pulseY * pulseY) || 1;
+        var radiusAtAge = impulse.age * .28;
+        var offset = pulseDistance - radiusAtAge;
+        var envelope = Math.exp(-(offset * offset) / (2 * 58 * 58));
+        var decay = Math.max(0, 1 - impulse.age / 2500);
+        var displacement = Math.sin(offset * .052) * envelope * decay * impulse.intensity * 31;
+        point.x += (pulseX / pulseDistance) * displacement * .34;
+        point.y += (pulseY / pulseDistance) * displacement;
+      });
+
+      return point;
+    }
+
+    function buildStrand(strand, now) {
+      var points = [];
+      var step = width < 720 ? 38 : 32;
+      for (var x = -96; x <= width + 96; x += step) points.push(resolvePoint(strand, x, now));
+      return points;
+    }
+
+    function traceStrand(points) {
+      if (!points.length) return;
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+      for (var index = 1; index < points.length - 1; index += 1) {
+        var point = points[index];
+        var next = points[index + 1];
+        context.quadraticCurveTo(point.x, point.y, (point.x + next.x) * .5, (point.y + next.y) * .5);
+      }
+      var last = points[points.length - 1];
+      context.lineTo(last.x, last.y);
+    }
+
+    function strandGradient(color, alpha) {
+      var gradient = context.createLinearGradient(-40, 0, width + 40, 0);
+      gradient.addColorStop(0, 'rgba(' + color + ',0)');
+      gradient.addColorStop(.12, 'rgba(' + color + ',' + (alpha * .42).toFixed(3) + ')');
+      gradient.addColorStop(.38, 'rgba(' + color + ',' + alpha.toFixed(3) + ')');
+      gradient.addColorStop(.7, 'rgba(' + color + ',' + (alpha * .82).toFixed(3) + ')');
+      gradient.addColorStop(1, 'rgba(' + color + ',0)');
+      return gradient;
+    }
+
+    function drawMotes(now, color) {
+      context.lineCap = 'round';
+      for (var index = 0; index < 9; index += 1) {
+        var strand = (index * 5 + 1) % strandCount;
+        var speed = .000018 + index % 3 * .000005;
+        var progress = (now * speed + index * .143) % 1;
+        var x = -70 + progress * (width + 140);
+        var point = resolvePoint(strand, x, now);
+        var ahead = resolvePoint(strand, x + 12, now);
+        var angle = Math.atan2(ahead.y - point.y, ahead.x - point.x);
+        var pulse = .48 + Math.sin(now * .0014 + index * 1.9) * .24;
+        context.save();
+        context.translate(point.x, point.y);
+        context.rotate(angle);
+        var trail = context.createLinearGradient(-16, 0, 4, 0);
+        trail.addColorStop(0, 'rgba(' + color + ',0)');
+        trail.addColorStop(.72, 'rgba(' + color + ',' + (.15 * pulse).toFixed(3) + ')');
+        trail.addColorStop(1, 'rgba(' + color + ',' + (.48 * pulse).toFixed(3) + ')');
+        context.strokeStyle = trail;
+        context.lineWidth = index % 3 === 0 ? 1.25 : .8;
+        context.beginPath();
+        context.moveTo(-16, 0);
+        context.lineTo(3, 0);
+        context.stroke();
+        context.fillStyle = 'rgba(' + color + ',' + (.42 * pulse).toFixed(3) + ')';
+        context.fillRect(2, -1, 2, 2);
+        context.restore();
+      }
+    }
+
+    function drawImpulseSignals(now, color) {
+      impulses.forEach(function (impulse) {
+        var progress = clamp(impulse.age / 2200, 0, 1);
+        var travel = easeOut(progress) * Math.min(width * .46, 560);
+        [-1, 1].forEach(function (direction) {
+          var signalX = impulse.x + direction * travel;
+          var point = resolvePoint(impulse.strand, signalX, now);
+          var tail = resolvePoint(impulse.strand, signalX - direction * (22 + progress * 18), now);
+          var alpha = Math.sin(progress * Math.PI) * .72;
+          var signal = context.createLinearGradient(tail.x, tail.y, point.x, point.y);
+          signal.addColorStop(0, 'rgba(' + color + ',0)');
+          signal.addColorStop(.7, 'rgba(' + color + ',' + (alpha * .3).toFixed(3) + ')');
+          signal.addColorStop(1, 'rgba(' + color + ',' + alpha.toFixed(3) + ')');
+          context.strokeStyle = signal;
+          context.lineWidth = 1.5;
+          context.beginPath();
+          context.moveTo(tail.x, tail.y);
+          context.lineTo(point.x, point.y);
+          context.stroke();
+          context.fillStyle = 'rgba(' + color + ',' + (alpha * .72).toFixed(3) + ')';
+          context.beginPath();
+          context.arc(point.x, point.y, 1.2 + alpha * 1.4, 0, Math.PI * 2);
+          context.fill();
+        });
+      });
+    }
+
+    function draw(now) {
+      if (!width || !height) return;
+      context.clearRect(0, 0, width, height);
+      var light = isLightTheme();
+      var color = light ? '41, 73, 48' : '148, 187, 157';
+      var bright = light ? '36, 82, 47' : '202, 226, 207';
+
+      if (pointerStrength > .015) {
+        var glowRadius = clamp(Math.min(width, height) * .25, 150, 280);
+        var glow = context.createRadialGradient(pointerX, pointerY, 0, pointerX, pointerY, glowRadius);
+        glow.addColorStop(0, 'rgba(' + color + ',' + (light ? .038 : .06) + ')');
+        glow.addColorStop(.48, 'rgba(' + color + ',' + (light ? .014 : .022) + ')');
+        glow.addColorStop(1, 'rgba(' + color + ',0)');
+        context.fillStyle = glow;
+        context.fillRect(0, 0, width, height);
+      }
+
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      for (var strand = 0; strand < strandCount; strand += 1) {
+        var points = buildStrand(strand, now);
+        var primary = strand % 4 === 1;
+        traceStrand(points);
+        context.strokeStyle = strandGradient(color, primary ? .045 : .024);
+        context.lineWidth = primary ? 5.2 : 3.2;
+        context.stroke();
+
+        traceStrand(points);
+        context.strokeStyle = strandGradient(color, primary ? (light ? .22 : .19) : (light ? .12 : .105));
+        context.lineWidth = primary ? 1.05 : .65;
+        context.stroke();
+      }
+
+      drawMotes(now, bright);
+      drawImpulseSignals(now, bright);
+    }
+
+    function nearestStrand(x, y, now) {
+      var nearest = 0;
+      var nearestDistance = Infinity;
+      for (var strand = 0; strand < strandCount; strand += 1) {
+        var point = resolvePoint(strand, x, now);
+        var distance = Math.abs(point.y - y);
+        if (distance < nearestDistance) {
+          nearest = strand;
+          nearestDistance = distance;
+        }
+      }
+      return nearest;
+    }
+
+    function addImpulse(x, y) {
+      var now = performance.now();
+      impulses.push({ x: x, y: y, age: 0, intensity: 1, strand: nearestStrand(x, y, now) });
+      if (impulses.length > 5) impulses.shift();
+      activeUntil = now + 2600;
+    }
+
+    function animate(now) {
+      frame = 0;
+      var delta = clamp(now - lastFrameAt, 8, 42);
+      lastFrameAt = now;
+      pointerX = mix(pointerX, targetX, .11);
+      pointerY = mix(pointerY, targetY, .11);
+      pointerStrength = mix(pointerStrength, pointerInside ? .92 : 0, pointerInside ? .11 : .055);
+      impulses.forEach(function (impulse) { impulse.age += delta; });
+      impulses = impulses.filter(function (impulse) { return impulse.age < 2500; });
+      var frameInterval = now < activeUntil || impulses.length ? 16 : 34;
+      if (now - lastDrawAt >= frameInterval) {
+        draw(now);
+        lastDrawAt = now;
+      }
+      schedule();
+    }
+
+    function schedule() {
+      if (document.hidden || frame) return;
+      frame = window.requestAnimationFrame(animate);
+    }
+
+    function resize() {
+      width = Math.max(1, window.innerWidth);
+      height = Math.max(1, window.innerHeight);
+      strandCount = width < 720 ? 9 : 13;
+      ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      if (!pointerSeen) {
+        pointerX = targetX = width * .5;
+        pointerY = targetY = height * .55;
+      } else {
+        pointerX = targetX = clamp(targetX, 0, width);
+        pointerY = targetY = clamp(targetY, 0, height);
+      }
+      draw(performance.now());
+    }
+
+    document.addEventListener('pointermove', function (event) {
+      if (event.pointerType === 'touch') return;
+      pointerSeen = true;
+      pointerInside = true;
+      targetX = event.clientX;
+      targetY = event.clientY;
+      activeUntil = performance.now() + 520;
+    }, { passive: true });
+
+    document.documentElement.addEventListener('pointerleave', function () {
+      pointerInside = false;
+    }, { passive: true });
+
+    document.addEventListener('pointerdown', function (event) {
+      if (event.button !== 0 && event.pointerType !== 'touch') return;
+      if (event.target.closest('a, button, input, textarea, select, label')) return;
+      pointerSeen = true;
+      pointerInside = event.pointerType !== 'touch';
+      pointerX = targetX = event.clientX;
+      pointerY = targetY = event.clientY;
+      addImpulse(event.clientX, event.clientY);
+    }, { passive: true });
+
+    window.addEventListener('resize', resize, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      } else if (!document.hidden) {
+        lastFrameAt = performance.now();
+        schedule();
+      }
+    });
+
+    new MutationObserver(function (mutations) {
+      if (mutations.some(function (mutation) { return mutation.attributeName === 'data-resolved-theme'; })) draw(performance.now());
+    }).observe(root, { attributes: true, attributeFilter: ['data-resolved-theme'] });
+
+    resize();
+    schedule();
+  }
+
   function setupFieldMotion() {
     var sections = Array.prototype.slice.call(document.querySelectorAll('[data-field-motion]'));
     if (!sections.length || gardenMotionIsLite()) return;
@@ -3822,6 +4119,7 @@
   setupHomeClock();
   setupContributionCalendar();
   setupWorldMotion();
+  setupKineticVeil();
   setupFieldMotion();
   setupHomeQuoteFragment();
   setupHomeWindow();
