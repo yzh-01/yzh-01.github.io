@@ -2286,6 +2286,9 @@
     var boatLight = screen.querySelector('.pixel-boat > i > em');
     var lampLight = screen.querySelector('.pixel-lighthouse > i');
     var reflection = screen.querySelector('.pixel-reflection');
+    var bleedSky = vista.querySelector('.folio-pixel-bleed-sky');
+    var bleedBeam = vista.querySelector('.folio-pixel-bleed-beam');
+    var bleedWaterLines = vista.querySelectorAll('.folio-pixel-bleed-water > i, .folio-pixel-bleed-water > b, .folio-pixel-bleed-water > em');
     var rain = screen.querySelector('.pixel-rain');
     var frame = 0;
     var pointerX = 0;
@@ -2297,6 +2300,8 @@
     var signalFinishTimer = 0;
     var signalReplyTimer = 0;
     var signalAnimations = [];
+    var bleedPulses = [];
+    var bleedBeamFrame = 0;
 
     function getZone(x, y) {
       var moonX = (x - .185) / .105;
@@ -2321,9 +2326,10 @@
       var localX = Math.max(0, Math.min(1, (pointerX - rect.left) / rect.width));
       var localY = Math.max(0, Math.min(1, (pointerY - rect.top) / rect.height));
       screen.dataset.pixelZone = getZone(localX, localY);
-      if (beam && !screen.classList.contains('is-lamp-off') && !signalActive) {
-        var lighthouseX = rect.left + rect.width * .84;
-        var lighthouseY = rect.top + rect.height * .58;
+      if (beam && lampLight && !screen.classList.contains('is-lamp-off') && !signalActive) {
+        var lampRect = lampLight.getBoundingClientRect();
+        var lighthouseX = lampRect.left + lampRect.width / 2;
+        var lighthouseY = lampRect.top + lampRect.height / 2;
         var angle = Math.atan2(lighthouseY - pointerY, lighthouseX - pointerX) * 180 / Math.PI;
         angle = Math.max(-18, Math.min(18, angle));
         beam.style.transform = 'rotate(' + angle.toFixed(2) + 'deg) scaleX(1)';
@@ -2376,6 +2382,39 @@
       });
     }
 
+    function pulseBleedWater() {
+      if (!bleedWaterLines.length || gardenMotionIsLite()) return;
+      bleedPulses.forEach(function (animation) { animation.cancel(); });
+      bleedPulses = [];
+      Array.prototype.forEach.call(bleedWaterLines, function (line, index) {
+        if (typeof line.animate !== 'function') return;
+        bleedPulses.push(line.animate([
+          { opacity: .22, transform: 'scaleX(.48)', offset: 0 },
+          { opacity: .92, transform: 'scaleX(1.16)', offset: .48 },
+          { opacity: .34, transform: 'scaleX(.82)', offset: 1 }
+        ], { duration: 560 + index * 70, delay: index * 55, easing: 'steps(7, end)' }));
+      });
+    }
+
+    function alignBleedBeam() {
+      bleedBeamFrame = 0;
+      if (!bleedBeam || !lampLight) return;
+      var bleed = bleedBeam.parentElement;
+      var bleedRect = bleed.getBoundingClientRect();
+      var lampRect = lampLight.getBoundingClientRect();
+      var beamHeight = bleedBeam.offsetHeight;
+      if (!bleedRect.width || !beamHeight) return;
+      var originX = lampRect.left + lampRect.width / 2 - bleedRect.left;
+      var originY = lampRect.top + lampRect.height / 2 - bleedRect.top;
+      bleedBeam.style.left = originX.toFixed(1) + 'px';
+      bleedBeam.style.top = (originY - beamHeight / 2).toFixed(1) + 'px';
+      bleedBeam.style.width = Math.max(96, bleedRect.width - originX + 24).toFixed(1) + 'px';
+    }
+
+    function queueBleedBeamAlignment() {
+      if (!bleedBeamFrame) bleedBeamFrame = window.requestAnimationFrame(alignBleedBeam);
+    }
+
     function createRipple(x, y, reactToBoat) {
       if (gardenMotionIsLite()) return;
       var ripple = document.createElement('span');
@@ -2389,6 +2428,7 @@
         { opacity: .62, transform: 'scale(1.28)', offset: .36 },
         { opacity: 0, transform: 'scale(3.1)', offset: 1 }
       ], { duration: 680, easing: 'steps(7, end)', fill: 'forwards' }, 820);
+      pulseBleedWater();
       if (reactToBoat !== false) nudgeBoat(x);
     }
 
@@ -2440,6 +2480,15 @@
           { opacity: .2, transform: 'translate3d(-10px,18px,0)' }
         ], { duration: 460, easing: 'steps(5, end)' });
       }
+      if (bleedSky && typeof bleedSky.animate === 'function') {
+        bleedSky.animate([
+          { opacity: .16, transform: 'scale(1)' },
+          { opacity: .88, transform: 'scale(1)' },
+          { opacity: .22, transform: 'scale(1)' },
+          { opacity: .64, transform: 'scale(1)' },
+          { opacity: .16, transform: 'scale(1)' }
+        ], { duration: 360, easing: 'steps(4, end)' });
+      }
       nudgeBoat(x);
     }
 
@@ -2465,6 +2514,7 @@
 
     function toggleWeather() {
       screen.classList.toggle('is-clear');
+      vista.classList.toggle('is-clear', screen.classList.contains('is-clear'));
       createMoonPulse();
       updateLabel();
     }
@@ -2483,6 +2533,7 @@
       window.clearTimeout(signalReplyTimer);
       signalActive = false;
       screen.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
+      vista.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
       screen.classList.add('is-lamp-off');
       clearSignalAnimations();
       updateLabel();
@@ -2496,6 +2547,7 @@
       if (signalActive) {
         signalQueue = Math.min(2, signalQueue + 1);
         screen.classList.add('is-signal-queued');
+        vista.classList.add('is-signal-queued');
         return;
       }
       if (gardenMotionIsLite() || !beam || typeof beam.animate !== 'function') {
@@ -2507,8 +2559,11 @@
       window.clearTimeout(signalFinishTimer);
       clearSignalAnimations();
       signalActive = true;
+      alignBleedBeam();
       screen.classList.remove('is-lamp-off', 'is-aiming', 'is-signal-response', 'is-signal-queued');
       screen.classList.add('is-signal-active');
+      vista.classList.remove('is-signal-response', 'is-signal-queued');
+      vista.classList.add('is-signal-active');
       beam.style.removeProperty('transform');
       updateLabel();
 
@@ -2561,6 +2616,7 @@
       signalReplyTimer = window.setTimeout(function () {
         if (!signalActive) return;
         screen.classList.add('is-signal-response');
+        vista.classList.add('is-signal-response');
         createRipple(.29, .75, false);
       }, 1060);
       signalFinishTimer = window.setTimeout(finishLighthouseSignal, 1900);
@@ -2605,6 +2661,8 @@
       else createLightning(x);
     });
 
+    alignBleedBeam();
+    window.addEventListener('resize', queueBleedBeamAlignment, { passive: true });
     updateLabel();
 
     if (!('IntersectionObserver' in window) || gardenMotionIsLite()) {
