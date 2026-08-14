@@ -246,21 +246,6 @@
   user-select: none;
   pointer-events: none;
 }
-.folio-fracture::before {
-  content: "WINTEROMEN";
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--pixel);
-  font-size: .68em;
-  letter-spacing: .1em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(165, 201, 172, .3);
-  opacity: .26;
-  transform: translate(8px, 6px);
-}
 .folio-fracture::after {
   content: "";
   position: absolute;
@@ -289,7 +274,6 @@
 .folio-omen-flake-b { right: 22%; top: 8%; opacity: .52; animation-delay: -3.8s; }
 .folio-omen-flake-c { right: 1%; bottom: 8%; opacity: .68; animation-delay: -2.3s; }
 .folio-fracture.is-struck .folio-title-omens { opacity: .94; transform: scale(1.045) rotate(.5deg); }
-.folio-fracture-base { color: transparent; opacity: .6; -webkit-text-stroke: 1px rgba(232, 240, 230, .22); }
 .folio-fracture-shard { opacity: .98; text-shadow: 2px 2px 0 rgba(102, 142, 110, .13), 0 18px 62px rgba(0, 0, 0, .58); transition: transform .7s var(--ease-out); }
 .folio-fracture .shard-a { clip-path: polygon(0 0, 35% 0, 20% 60%, 0 40%); }
 .folio-fracture .shard-b { clip-path: polygon(0 40%, 20% 60%, 10% 100%, 0 100%); }
@@ -3244,8 +3228,6 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
     linear-gradient(180deg, rgba(227, 232, 224, .04), rgba(227, 232, 224, .08) 56%, rgba(227, 232, 224, .56));
 }
 :root[data-resolved-theme="light"] .folio-cover::after { color: rgba(32, 39, 32, .28); }
-:root[data-resolved-theme="light"] .folio-fracture::before { -webkit-text-stroke-color: rgba(49, 94, 60, .28); }
-:root[data-resolved-theme="light"] .folio-fracture-base { -webkit-text-stroke-color: rgba(32, 39, 32, .24); }
 :root[data-resolved-theme="light"] .folio-fracture-shard { text-shadow: 2px 2px 0 rgba(49, 94, 60, .08), 0 18px 58px rgba(42, 56, 44, .16); }
 :root[data-resolved-theme="light"] .folio-title-omens::before { border-color: rgba(49, 94, 60, .28); border-right-color: transparent; }
 :root[data-resolved-theme="light"] .folio-title-omens::after { border-right-color: rgba(49, 94, 60, .34); background: linear-gradient(rgba(49, 94, 60, .32), rgba(49, 94, 60, .32)) right top / 72% 1px no-repeat, repeating-linear-gradient(90deg, rgba(49, 94, 60, .32) 0 1px, transparent 1px 13px) right top / 72% 9px no-repeat; }
