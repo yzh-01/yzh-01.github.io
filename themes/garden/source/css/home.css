@@ -232,22 +232,22 @@
   top: 45%;
   left: 50%;
   z-index: 4;
-  width: min(900px, calc(100vw - 50px));
+  width: min(1160px, calc(100vw - 96px));
   height: clamp(100px, 14vw, 190px);
   color: var(--bone);
-  font-family: var(--display);
-  font-size: clamp(104px, 13vw, 190px);
-  font-style: normal;
-  font-weight: 400;
+  font-family: var(--serif);
+  font-size: clamp(82px, 9.6vw, 144px);
+  font-style: italic;
+  font-weight: 700;
   line-height: .95;
-  letter-spacing: .035em;
+  letter-spacing: -.035em;
   text-align: center;
   transform: translate(-50%, -50%);
   user-select: none;
   pointer-events: none;
 }
 .folio-fracture::before {
-  content: "雨止灰茫";
+  content: "WINTEROMEN";
   position: absolute;
   inset: 0;
   display: flex;
@@ -273,7 +273,22 @@
   clip-path: polygon(0 45%, 9% 18%, 22% 60%, 35% 20%, 47% 70%, 63% 28%, 75% 66%, 89% 22%, 100% 50%, 100% 100%, 0 100%);
   transform: rotate(-.8deg);
 }
-.folio-fracture > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; will-change: transform; }
+.folio-fracture > span { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; white-space: nowrap; will-change: transform; }
+.folio-title-omens { position: absolute; inset: -31% -4% -24%; z-index: 1; opacity: .72; transform-origin: center; transition: opacity 420ms ease, transform 680ms var(--ease-out); pointer-events: none; }
+.folio-title-omens::before, .folio-title-omens::after { content: ""; position: absolute; pointer-events: none; }
+.folio-title-omens::before { left: 8%; top: 23%; width: clamp(92px, 11vw, 158px); height: clamp(40px, 5vw, 72px); border: 1px solid rgba(202, 223, 205, .26); border-right-color: transparent; border-radius: 50%; transform: rotate(-11deg) scale(.96); animation: garden-omen-sight 8.4s cubic-bezier(.45, 0, .55, 1) infinite; }
+.folio-title-omens::after { right: 4%; bottom: 21%; width: clamp(86px, 10vw, 148px); height: 28px; opacity: .62; background: linear-gradient(var(--line-strong), var(--line-strong)) right top / 72% 1px no-repeat, repeating-linear-gradient(90deg, rgba(192, 217, 197, .34) 0 1px, transparent 1px 13px) right top / 72% 9px no-repeat; border-right: 1px solid rgba(202, 223, 205, .32); transform: skewX(-14deg); }
+.folio-omen-orbit { position: absolute; left: 13%; top: 36%; width: clamp(68px, 8vw, 116px); height: clamp(27px, 3.4vw, 48px); border: 1px solid rgba(167, 201, 173, .16); border-left-color: transparent; border-radius: 50%; transform: rotate(-11deg); }
+.folio-omen-orbit b { position: absolute; right: 9%; top: 43%; width: 4px; height: 4px; border-radius: 50%; background: var(--moss-bright); box-shadow: 0 0 10px rgba(167, 201, 173, .58); transform: translateY(-50%); animation: garden-omen-pulse 3.6s cubic-bezier(.45, 0, .55, 1) infinite; }
+.folio-omen-axis { position: absolute; right: 10%; top: 21%; width: 1px; height: 42%; opacity: .38; background: linear-gradient(transparent, rgba(202, 223, 205, .72) 24% 72%, transparent); transform: rotate(8deg); }
+.folio-omen-flake { position: absolute; width: 3px; height: 3px; background: var(--bone); box-shadow: 0 0 9px rgba(209, 229, 212, .28); transform: rotate(45deg); animation: garden-omen-flake 5.8s cubic-bezier(.45, 0, .55, 1) infinite; }
+.folio-omen-flake::before, .folio-omen-flake::after { content: ""; position: absolute; left: 50%; top: 50%; background: rgba(218, 235, 220, .58); transform: translate(-50%, -50%); }
+.folio-omen-flake::before { width: 1px; height: 13px; }
+.folio-omen-flake::after { width: 13px; height: 1px; }
+.folio-omen-flake-a { left: 3%; top: 18%; animation-delay: -1.4s; }
+.folio-omen-flake-b { right: 22%; top: 8%; opacity: .52; animation-delay: -3.8s; }
+.folio-omen-flake-c { right: 1%; bottom: 8%; opacity: .68; animation-delay: -2.3s; }
+.folio-fracture.is-struck .folio-title-omens { opacity: .94; transform: scale(1.045) rotate(.5deg); }
 .folio-fracture-base { color: transparent; opacity: .6; -webkit-text-stroke: 1px rgba(232, 240, 230, .22); }
 .folio-fracture-shard { opacity: .98; text-shadow: 2px 2px 0 rgba(102, 142, 110, .13), 0 18px 62px rgba(0, 0, 0, .58); transition: transform .7s var(--ease-out); }
 .folio-fracture .shard-a { clip-path: polygon(0 0, 35% 0, 20% 60%, 0 40%); }
@@ -2649,6 +2664,9 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
 }
 @keyframes garden-world-drift { from { transform: scale(1.025) translate3d(-.35%, -.18%, 0); } to { transform: scale(1.065) translate3d(.45%, .24%, 0); } }
 @keyframes garden-cover-drift { from { transform: scale(1.035) translate3d(-.45%, -.2%, 0); } to { transform: scale(1.075) translate3d(.55%, .35%, 0); } }
+@keyframes garden-omen-sight { 0%, 100% { opacity: .32; transform: rotate(-11deg) scale(.94); } 48% { opacity: .82; transform: rotate(-8deg) scale(1.04); } }
+@keyframes garden-omen-pulse { 0%, 100% { opacity: .3; transform: translateY(-50%) scale(.72); } 50% { opacity: 1; transform: translateY(-50%) scale(1.22); } }
+@keyframes garden-omen-flake { 0%, 100% { opacity: .26; transform: translate3d(0, -4px, 0) rotate(45deg) scale(.82); } 52% { opacity: .86; transform: translate3d(3px, 5px, 0) rotate(58deg) scale(1.08); } }
 @keyframes garden-trace-breathe { from { transform: scale(1) translate3d(-2px, 3px, 0); opacity: .62; } to { transform: scale(1.012) translate3d(4px, -5px, 0); opacity: .94; } }
 @keyframes garden-field-mist { 0%, 12% { opacity: 0; transform: translate3d(0, 12vh, 0) scale(.82); } 28% { opacity: .7; } 68% { opacity: .34; } 82%, 100% { opacity: 0; transform: translate3d(132vw, -14vh, 0) scale(1.12); } }
 @keyframes garden-field-node { 0%, 12%, 100% { opacity: 0; transform: scale(.3); } 24% { opacity: .9; transform: scale(1); } 42% { opacity: .18; transform: scale(2.5); } 58% { opacity: 0; transform: scale(3.2); } }
@@ -3011,7 +3029,7 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
 
 @media (max-width: 1023px) {
   .folio { --page: min(100% - 48px, 900px); }
-  .folio-fracture { height: clamp(94px, 14vw, 138px); font-size: clamp(84px, 12vw, 122px); }
+  .folio-fracture { height: clamp(84px, 12vw, 126px); font-size: clamp(66px, 8.6vw, 102px); }
   .folio-cover-fragment { right: 64px; width: min(490px, 48vw); }
   .folio-explore-grid { grid-template-columns: 310px minmax(0, 1fr); gap: 36px; }
   .folio-profile { max-width: 310px; }
@@ -3033,7 +3051,7 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .folio-masthead { top: 72px; gap: 10px; }
   .folio-masthead span, .garden-hud-vitals { display: none; }
   .folio-cover { min-height: 100svh; }
-  .folio-fracture { top: 34%; width: calc(100vw - 28px); height: 78px; font-size: clamp(58px, 15vw, 78px); }
+  .folio-fracture { top: 34%; width: calc(100vw - 28px); height: 72px; font-size: clamp(38px, 11.2vw, 54px); letter-spacing: .025em; }
   .folio-cover-copy { bottom: 228px; }
   .folio-cover-role { margin-bottom: 17px; font-size: 13px; }
   .folio-cover-terminal { font-size: 8px; }
@@ -3053,6 +3071,10 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .folio-quote-next { width: auto; height: auto; min-height: 24px; }
   .folio-quote-progress { left: 30px; right: 69px; bottom: 5px; }
   .folio-cover-side { display: none; }
+  .folio-title-omens { inset: -38% -2% -27%; }
+  .folio-title-omens::before { left: 2%; }
+  .folio-title-omens::after { right: 1%; width: 82px; }
+  .folio-omen-axis, .folio-omen-flake-b { display: none; }
   .folio-cover-scroll { bottom: 18px; left: 20px; transform: none; }
   .folio-cover-scroll span { display: none; }
   .folio-explore { min-height: auto; padding: 72px 0 78px; }
@@ -3121,6 +3143,9 @@ html.garden-lite-motion .folio-fracture-shard,
 html.garden-lite-motion .garden-overgrowth-veil::before,
 html.garden-lite-motion .folio-field-motion { display: none; }
 html.garden-lite-motion .folio-cover-photo > img,
+html.garden-lite-motion .folio-title-omens::before,
+html.garden-lite-motion .folio-omen-orbit b,
+html.garden-lite-motion .folio-omen-flake,
 html.garden-lite-motion .folio-world-etchings,
 html.garden-lite-motion .folio-explore-traces g,
 html.garden-lite-motion .folio-articles-traces g { animation: none; }
@@ -3147,7 +3172,7 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
   .folio *, .folio *::before, .folio *::after { scroll-behavior: auto !important; }
   .folio .reveal-ready, .folio .reveal-ready.reveal-visible { opacity: 1; transform: none; transition: none; }
   .garden-boot { transition-duration: .01ms; }
-  .garden-boot::after, .garden-boot-mark span, .garden-scanlines, .garden-noise, .garden-ripple, .garden-pet.is-happy button, .garden-overgrowth.is-active, .folio-masthead a i, .folio-quote-progress i, .folio-quote-exposure, .folio-cover-scroll i, .folio-cover-photo > img, .folio-world::before, .folio-world-etchings, .folio-explore-traces g, .folio-articles-traces g, .folio-contribution-heading > span, .folio-outro-track b, .folio-outro h2 span, .folio-outro-pulse { animation: none; }
+  .garden-boot::after, .garden-boot-mark span, .garden-scanlines, .garden-noise, .garden-ripple, .garden-pet.is-happy button, .garden-overgrowth.is-active, .folio-masthead a i, .folio-quote-progress i, .folio-quote-exposure, .folio-cover-scroll i, .folio-cover-photo > img, .folio-title-omens::before, .folio-omen-orbit b, .folio-omen-flake, .folio-world::before, .folio-world-etchings, .folio-explore-traces g, .folio-articles-traces g, .folio-contribution-heading > span, .folio-outro-track b, .folio-outro h2 span, .folio-outro-pulse { animation: none; }
   .folio-quote-film { transform: none !important; transition: none; }
   .folio-outro-glyph { transform: none !important; text-shadow: none; will-change: auto; }
   .folio-outro-pulse { display: none; }
@@ -3222,6 +3247,13 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
 :root[data-resolved-theme="light"] .folio-fracture::before { -webkit-text-stroke-color: rgba(49, 94, 60, .28); }
 :root[data-resolved-theme="light"] .folio-fracture-base { -webkit-text-stroke-color: rgba(32, 39, 32, .24); }
 :root[data-resolved-theme="light"] .folio-fracture-shard { text-shadow: 2px 2px 0 rgba(49, 94, 60, .08), 0 18px 58px rgba(42, 56, 44, .16); }
+:root[data-resolved-theme="light"] .folio-title-omens::before { border-color: rgba(49, 94, 60, .28); border-right-color: transparent; }
+:root[data-resolved-theme="light"] .folio-title-omens::after { border-right-color: rgba(49, 94, 60, .34); background: linear-gradient(rgba(49, 94, 60, .32), rgba(49, 94, 60, .32)) right top / 72% 1px no-repeat, repeating-linear-gradient(90deg, rgba(49, 94, 60, .32) 0 1px, transparent 1px 13px) right top / 72% 9px no-repeat; }
+:root[data-resolved-theme="light"] .folio-omen-orbit { border-color: rgba(49, 94, 60, .18); border-left-color: transparent; }
+:root[data-resolved-theme="light"] .folio-omen-axis { background: linear-gradient(transparent, rgba(49, 94, 60, .56) 24% 72%, transparent); }
+:root[data-resolved-theme="light"] .folio-omen-flake { background: rgba(32, 39, 32, .76); box-shadow: 0 0 9px rgba(49, 94, 60, .16); }
+:root[data-resolved-theme="light"] .folio-omen-flake::before,
+:root[data-resolved-theme="light"] .folio-omen-flake::after { background: rgba(49, 94, 60, .46); }
 :root[data-resolved-theme="light"] .folio-cover-terminal { color: rgba(42, 56, 44, .56); }
 :root[data-resolved-theme="light"] .folio-quote-film::before {
   background: linear-gradient(transparent, rgba(49, 94, 60, .62) 20% 71%, transparent);
