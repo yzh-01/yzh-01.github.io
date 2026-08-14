@@ -1378,12 +1378,15 @@
     var lite = boot.querySelector('[data-motion-lite]');
     var startedAt = performance.now();
     var skipBoot = new URLSearchParams(window.location.search).has('skip-boot');
-    var duration = skipBoot ? 1 : (reduceMotion.matches ? 180 : 1750);
+    var duration = 1950;
     var finished = false;
 
     try {
       if (window.localStorage.getItem('garden-motion') === 'lite') root.classList.add('garden-lite-motion');
     } catch (error) {}
+
+    if (reduceMotion.matches) duration = 160;
+    else if (root.classList.contains('garden-lite-motion')) duration = 520;
 
     if (skipBoot) {
       boot.hidden = true;
@@ -1400,37 +1403,40 @@
       var rounded = Math.max(0, Math.min(100, Math.round(value)));
       if (progressText) progressText.textContent = String(rounded).padStart(2, '0');
       if (progressBar) progressBar.style.transform = 'scaleX(' + (rounded / 100).toFixed(3) + ')';
+      boot.classList.toggle('is-phase-one', rounded >= 18);
+      boot.classList.toggle('is-phase-two', rounded >= 52);
+      boot.classList.toggle('is-ready', rounded >= 84);
       if (!status) return;
-      if (rounded < 28) status.textContent = '正在辨认花园里的痕迹';
-      else if (rounded < 58) status.textContent = '把散落的句子接回原位';
-      else if (rounded < 86) status.textContent = '唤醒窗口边上的猫';
-      else status.textContent = '现场已接通';
+      var nextStatus = rounded < 34 ? '雾层校准' : (rounded < 78 ? '冬兆显影' : '视野接通');
+      if (status.textContent !== nextStatus) status.textContent = nextStatus;
     }
 
     function finish() {
       if (finished) return;
       finished = true;
       setProgress(100);
-      root.classList.remove('garden-booting');
-      boot.classList.add('is-leaving');
       window.setTimeout(function () {
-        boot.hidden = true;
-        if (!window.location.hash) return;
-        var anchor = document.getElementById(window.location.hash.slice(1));
-        if (!anchor) return;
-        var previousScrollBehavior = root.style.scrollBehavior;
-        root.style.scrollBehavior = 'auto';
-        anchor.scrollIntoView({ block: 'start' });
-        window.requestAnimationFrame(function () { root.style.scrollBehavior = previousScrollBehavior; });
-      }, reduceMotion.matches ? 20 : 520);
+        root.classList.remove('garden-booting');
+        boot.classList.add('is-leaving');
+        window.setTimeout(function () {
+          boot.hidden = true;
+          if (!window.location.hash) return;
+          var anchor = document.getElementById(window.location.hash.slice(1));
+          if (!anchor) return;
+          var previousScrollBehavior = root.style.scrollBehavior;
+          root.style.scrollBehavior = 'auto';
+          anchor.scrollIntoView({ block: 'start' });
+          window.requestAnimationFrame(function () { root.style.scrollBehavior = previousScrollBehavior; });
+        }, reduceMotion.matches ? 20 : 790);
+      }, reduceMotion.matches ? 0 : 90);
     }
 
     function tick(now) {
       if (finished) return;
       var linear = Math.min(1, (now - startedAt) / duration);
-      var eased = 1 - Math.pow(1 - linear, 3);
+      var eased = linear * linear * (3 - (2 * linear));
       setProgress(eased * 100);
-      if (linear >= 1) window.setTimeout(finish, reduceMotion.matches ? 0 : 230);
+      if (linear >= 1) window.setTimeout(finish, reduceMotion.matches ? 0 : 180);
       else window.requestAnimationFrame(tick);
     }
 

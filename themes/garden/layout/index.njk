@@ -31,26 +31,47 @@
       <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
   </div>
-  <section class="garden-boot" data-garden-boot aria-label="花园启动界面" hidden>
-    <div class="garden-boot-ghost" aria-hidden="true">GARDEN<br>NODE</div>
-    <div class="garden-boot-console">
-      <div class="garden-boot-mark" aria-hidden="true">
-        <span></span><span></span><span></span>
-        <b>Y</b>
+  <section class="garden-boot" data-garden-boot aria-label="WINTEROMEN 冬兆显影" hidden>
+    <div class="garden-boot-field" aria-hidden="true">
+      <img class="garden-boot-photo garden-boot-photo-light" src="{{ url_for('images/garden-bg-light-cat.jpg') }}" width="1600" height="900" alt="">
+      <img class="garden-boot-photo garden-boot-photo-dark" src="{{ url_for('images/garden-bg-dark-cat.jpg') }}" width="1600" height="900" alt="">
+      <span class="garden-boot-fog garden-boot-fog-a"></span>
+      <span class="garden-boot-fog garden-boot-fog-b"></span>
+      <span class="garden-boot-snow">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </span>
+    </div>
+
+    <div class="garden-boot-omen">
+      <p class="garden-boot-eyebrow" aria-live="polite">
+        <span><i></i> WINTER SIGNAL / 00</span>
+        <b data-boot-status>雾层校准</b>
+      </p>
+
+      <div class="garden-boot-sight" aria-hidden="true">
+        <i></i><b></b><span>44.1°N</span>
       </div>
-      <p class="garden-boot-eyebrow">PRIVATE FIELD NOTE / NO. 00</p>
-      <h2>这不是一张名片。<br><em>是我留下的现场。</em></h2>
-      <div class="garden-boot-readout" aria-live="polite">
-        <span data-boot-status>正在辨认花园里的痕迹</span>
-        <strong><i data-boot-progress>00</i>%</strong>
+
+      <h2 class="garden-boot-title" aria-label="WINTEROMEN">
+        <span class="garden-boot-title-base" aria-hidden="true">WINTEROMEN</span>
+        <span class="garden-boot-title-cut garden-boot-title-cut-a" aria-hidden="true">WINTEROMEN</span>
+        <span class="garden-boot-title-cut garden-boot-title-cut-b" aria-hidden="true">WINTEROMEN</span>
+        <span class="garden-boot-title-cut garden-boot-title-cut-c" aria-hidden="true">WINTEROMEN</span>
+      </h2>
+
+      <div class="garden-boot-readout">
+        <span aria-hidden="true">VISIBILITY / <i data-boot-progress>00</i></span>
+        <strong aria-hidden="true">LOW CLOUD</strong>
       </div>
       <div class="garden-boot-bar" aria-hidden="true"><i data-boot-bar></i></div>
       <div class="garden-boot-actions">
-        <button type="button" data-boot-enter>进入现场 <span>↗</span></button>
-        <button type="button" data-motion-lite>保持安静模式</button>
+        <button type="button" data-boot-enter>进入 <span>↗</span></button>
+        <button type="button" data-motion-lite>安静模式</button>
       </div>
     </div>
-    <p class="garden-boot-aside">代码会过期，<br>留下来的感受不会。</p>
+
+    <div class="garden-boot-shutter garden-boot-shutter-top" aria-hidden="true"></div>
+    <div class="garden-boot-shutter garden-boot-shutter-bottom" aria-hidden="true"></div>
   </section>
 
   <div class="garden-atmosphere" aria-hidden="true">
