@@ -664,7 +664,7 @@
       world.style.setProperty('--world-pointer-x', currentPointerX.toFixed(1) + 'px');
       world.style.setProperty('--world-pointer-y', currentPointerY.toFixed(1) + 'px');
       world.style.setProperty('--world-energy', currentEnergy.toFixed(3));
-      world.style.setProperty('--world-contour-opacity', (.54 + currentEnergy * .18).toFixed(3));
+      world.style.setProperty('--world-etch-opacity', (.66 + currentEnergy * .18).toFixed(3));
       world.style.setProperty('--world-rain-opacity', (.4 + currentEnergy * .14).toFixed(3));
       world.style.setProperty('--world-rain-opacity-light', (.24 + currentEnergy * .1).toFixed(3));
       world.style.setProperty('--world-brightness', (1 + currentEnergy * .22).toFixed(3));
