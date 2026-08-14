@@ -470,7 +470,7 @@
 .folio-profile-status b { color: var(--moss-bright); font-weight: 400; }
 .folio-profile-status b i { display: inline-block; width: 7px; height: 7px; margin-right: 9px; border-radius: 50%; background: var(--moss); box-shadow: 0 0 12px rgba(120, 157, 127, .8); }
 .folio-profile-id { display: flex; align-items: center; gap: 18px; margin: 34px 0 30px 40px; }
-.folio-profile-id img { width: 50px; height: 50px; padding: 4px; object-fit: cover; filter: grayscale(1) contrast(1.15); border: 1px solid rgba(236, 243, 233, .62); }
+.folio-profile-id img { width: 50px; height: 50px; padding: 4px; object-fit: cover; filter: none; border: 1px solid rgba(236, 243, 233, .62); }
 .folio-profile-id h2 { margin: 0 0 4px; color: var(--bone); font: 600 clamp(17px, 1.6vw, 23px)/1 var(--tech); letter-spacing: .015em; }
 .folio-profile-id p { margin: 0; color: var(--dim); font: 8px/1.5 var(--pixel); letter-spacing: .12em; }
 .folio-profile dl { margin: 0 0 24px 40px; padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
