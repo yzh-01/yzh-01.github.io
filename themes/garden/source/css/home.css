@@ -3252,7 +3252,145 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
   background: rgba(227, 232, 224, .72);
   border-top-color: var(--line);
 }
-:root[data-resolved-theme="light"] .folio-outro { background: rgba(227, 232, 224, .84); }
+:root[data-resolved-theme="light"] .folio-outro {
+  background:
+    radial-gradient(ellipse at 50% 58%, rgba(86, 106, 91, .09), transparent 46%),
+    rgba(227, 232, 224, .84);
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen {
+  background: #c9d2ca;
+  outline-color: rgba(63, 82, 69, .5);
+  box-shadow: 0 24px 54px rgba(43, 57, 47, .18), 0 0 0 8px rgba(78, 96, 83, .14);
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen:active {
+  box-shadow: 0 18px 42px rgba(43, 57, 47, .16), 0 0 0 8px rgba(78, 96, 83, .18);
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen .pixel-sky { background: #cbd3cc; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-sky { background: #d5dbd4; }
+:root[data-resolved-theme="light"] .pixel-sky i { background: #52675a; opacity: .34; }
+:root[data-resolved-theme="light"] .pixel-atmosphere {
+  opacity: .18;
+  background: repeating-linear-gradient(165deg, transparent 0 11%, rgba(75, 104, 84, .2) 12% 13%, transparent 14% 22%);
+}
+:root[data-resolved-theme="light"] .pixel-moon {
+  background: #eef1e9;
+  box-shadow: 8px 4px 0 #87968a, 0 0 24px rgba(88, 112, 94, .14);
+}
+:root[data-resolved-theme="light"] .pixel-moon i { background: #a8b3aa; box-shadow: -13px 11px 0 #b8c1b9, 4px 19px 0 #9eaaa0; }
+:root[data-resolved-theme="light"] .pixel-cloud { background: #9eaba1; opacity: .46; }
+:root[data-resolved-theme="light"] .pixel-rain {
+  opacity: .13;
+  background: repeating-linear-gradient(112deg, transparent 0 21px, #617568 22px 23px, transparent 24px 45px);
+}
+:root[data-resolved-theme="light"] .pixel-ridge-back { background: #87958a; }
+:root[data-resolved-theme="light"] .pixel-ridge-front { background: #68786d; }
+:root[data-resolved-theme="light"] .pixel-lake { background: #91a096; border-top-color: #667b6c; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-lake { background: #9eada3; border-color: #718777; }
+:root[data-resolved-theme="light"] .pixel-lake i,
+:root[data-resolved-theme="light"] .pixel-lake b,
+:root[data-resolved-theme="light"] .pixel-lake em { background: #61786a; }
+:root[data-resolved-theme="light"] .pixel-lighthouse::before {
+  background: #b2bcb4;
+  box-shadow: inset 6px 0 0 #86958a, inset -5px 0 0 #647568;
+}
+:root[data-resolved-theme="light"] .pixel-lighthouse i { background: #e3e9e0; border-color: #4d5f52; box-shadow: 0 0 0 3px #829087; }
+:root[data-resolved-theme="light"] .pixel-lighthouse b,
+:root[data-resolved-theme="light"] .pixel-lighthouse em { background: #4b5d50; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-lamp-off .pixel-lighthouse i { background: #839188; box-shadow: 0 0 0 3px #6e7e72; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-signal-active .pixel-lighthouse i { background: #f1f3eb; box-shadow: 0 0 18px rgba(79, 119, 88, .3), 0 0 0 3px #74877a; }
+:root[data-resolved-theme="light"] .pixel-beam {
+  background: linear-gradient(90deg, rgba(240, 244, 235, .04), rgba(222, 234, 220, .72));
+  mix-blend-mode: screen;
+}
+:root[data-resolved-theme="light"] .pixel-reflection { background: repeating-linear-gradient(180deg, #dce7da 0 3px, transparent 3px 9px); opacity: .62; }
+:root[data-resolved-theme="light"] .pixel-boat > i::before { background: #34473a; }
+:root[data-resolved-theme="light"] .pixel-boat > i > b { background: #5a6d60; }
+:root[data-resolved-theme="light"] .pixel-shore { background: #4c5e51; }
+:root[data-resolved-theme="light"] .pixel-shore i,
+:root[data-resolved-theme="light"] .pixel-shore b { background: #374a3d; }
+:root[data-resolved-theme="light"] .pixel-shore i { box-shadow: 11px 8px 0 #374a3d, 24px -3px 0 #374a3d; }
+:root[data-resolved-theme="light"] .pixel-shore b { box-shadow: -14px 5px 0 #374a3d, -27px -5px 0 #374a3d; }
+:root[data-resolved-theme="light"] .pixel-frame { border-color: #4d5e52; box-shadow: inset 0 0 0 2px #aab5ad; }
+:root[data-resolved-theme="light"] .pixel-frame::before,
+:root[data-resolved-theme="light"] .pixel-frame::after { background: #738378; }
+:root[data-resolved-theme="light"] .pixel-scan { background: #405447; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed {
+  opacity: .64;
+  -webkit-mask-image: radial-gradient(ellipse 68% 72% at 50% 58%, #000 34%, rgba(0, 0, 0, .76) 65%, transparent 100%);
+  mask-image: radial-gradient(ellipse 68% 72% at 50% 58%, #000 34%, rgba(0, 0, 0, .76) 65%, transparent 100%);
+}
+:root[data-resolved-theme="light"] .folio-pixel-bleed-mist { opacity: .3; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-mist > i,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-mist > b { background: rgba(93, 112, 98, .38); }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-water {
+  opacity: .48;
+  border-top-color: rgba(83, 105, 89, .36);
+  background: linear-gradient(180deg, rgba(115, 134, 120, .38), rgba(159, 171, 161, .12));
+}
+:root[data-resolved-theme="light"] .folio-pixel-bleed-water > i,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-water > b,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-water > em { background: rgba(75, 102, 82, .5); }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds { opacity: .5; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > i,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > b,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > em { background: #4d6152; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > i { box-shadow: 16px 24px 0 #5d7062, 33px -7px 0 #4d6152, 51px 31px 0 #687a6d; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > b { box-shadow: 20px 29px 0 #5d7062, 41px 12px 0 #4d6152; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > em { box-shadow: 15px -18px 0 #5d7062, 31px 18px 0 #4d6152; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > i::after,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > b::after,
+:root[data-resolved-theme="light"] .folio-pixel-bleed-reeds > em::after { background: #607365; box-shadow: 8px 29px 0 #718176, -5px 61px 0 #53675a; }
+:root[data-resolved-theme="light"] .folio-pixel-bleed-fireflies > i { background: #557a5e; box-shadow: 0 0 7px rgba(68, 111, 77, .22); }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) { background: #b7c1b9; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-sky { background: #acb8af; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-sky i { opacity: .16; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-atmosphere { opacity: .3; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-moon {
+  opacity: .68;
+  background: #ced5ce;
+  box-shadow: 8px 4px 0 #78887d, 0 0 0 rgba(88, 112, 94, 0);
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-cloud-a { opacity: .68; transform: none; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-cloud-b { opacity: .5; transform: none; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-rain { opacity: .27; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-ridge-back { background: #748278; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-ridge-front { background: #58695e; }
+:root[data-resolved-theme="light"] .folio-pixel-screen:not(.is-clear) .pixel-lake { background: #7c8d82; border-top-color: #566d5e; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear {
+  background: #dce2db;
+  box-shadow: 0 25px 58px rgba(55, 73, 60, .14), 0 0 0 8px rgba(95, 115, 100, .12);
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-sky { background: #e3e7e0; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-sky i { opacity: .62; background: #637a69; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-atmosphere { opacity: .07; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-moon {
+  opacity: 1;
+  background: #f5f1dc;
+  box-shadow: 8px 4px 0 #a7b1a7, 0 0 30px rgba(166, 156, 96, .2);
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-cloud-a,
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-cloud-b { opacity: .05; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-rain { opacity: 0; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-horizon-glow {
+  opacity: .82;
+  background: linear-gradient(180deg, transparent, rgba(218, 225, 195, .58));
+}
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-ridge-back { background: #a2aea5; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-ridge-front { background: #7f9084; }
+:root[data-resolved-theme="light"] .folio-pixel-screen.is-clear .pixel-lake { background: #acbbb0; border-top-color: #84998a; }
+:root[data-resolved-theme="light"] .folio-pixel-vista:not(.is-clear) .folio-pixel-bleed-sky { opacity: .12; }
+:root[data-resolved-theme="light"] .folio-pixel-vista:not(.is-clear) .folio-pixel-bleed-mist { opacity: .43; }
+:root[data-resolved-theme="light"] .folio-pixel-vista:not(.is-clear) .folio-pixel-bleed-water { opacity: .4; }
+:root[data-resolved-theme="light"] .folio-pixel-vista:not(.is-clear) .folio-pixel-bleed-fireflies { opacity: .16; }
+:root[data-resolved-theme="light"] .folio-pixel-vista.is-clear .folio-pixel-bleed-sky { opacity: .56; }
+:root[data-resolved-theme="light"] .folio-pixel-vista.is-clear .folio-pixel-bleed-mist { opacity: .1; }
+:root[data-resolved-theme="light"] .folio-pixel-vista.is-clear .folio-pixel-bleed-water {
+  opacity: .62;
+  border-top-color: rgba(91, 119, 97, .28);
+  background: linear-gradient(180deg, rgba(151, 167, 155, .34), rgba(193, 201, 193, .1));
+}
+:root[data-resolved-theme="light"] .folio-pixel-vista.is-clear .folio-pixel-bleed-reeds { opacity: .34; }
+:root[data-resolved-theme="light"] .folio-pixel-vista.is-clear .folio-pixel-bleed-fireflies { opacity: .68; }
 :root[data-resolved-theme="light"] .folio-explore::before,
 :root[data-resolved-theme="light"] .folio-articles::before {
   opacity: .56;
