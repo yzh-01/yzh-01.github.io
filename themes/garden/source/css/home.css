@@ -227,65 +227,161 @@
 .folio-masthead span { opacity: .54; }
 .folio-masthead time { margin-left: auto; color: var(--moss-bright); }
 
-.folio-fracture {
+.folio-wordmark {
+  --wordmark-ink: var(--bone);
+  --wordmark-ghost-ink: rgba(214, 228, 216, .25);
+  --wordmark-omen: rgba(167, 201, 173, .82);
+  --wordmark-void: rgba(4, 7, 5, .96);
   position: absolute;
   top: 45%;
   left: 50%;
   z-index: 4;
-  width: min(1160px, calc(100vw - 96px));
-  height: clamp(100px, 14vw, 190px);
-  color: var(--bone);
+  width: min(1220px, calc(100vw - 92px));
+  height: clamp(94px, 13vw, 176px);
+  margin: 0;
+  color: var(--wordmark-ink);
   font-family: var(--serif);
-  font-size: clamp(82px, 9.6vw, 144px);
+  font-size: clamp(76px, 8.7vw, 132px);
   font-style: italic;
   font-weight: 700;
-  line-height: .95;
-  letter-spacing: -.035em;
+  line-height: .92;
+  letter-spacing: -.047em;
   text-align: center;
   transform: translate(-50%, -50%);
   user-select: none;
   pointer-events: none;
+  isolation: isolate;
 }
-.folio-fracture::after {
+.folio-wordmark-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transform-origin: 50% 54%;
+}
+.folio-wordmark.is-tracking .folio-wordmark-layer { will-change: transform; }
+.folio-wordmark-main {
+  z-index: 2;
+  color: var(--wordmark-ink);
+  text-shadow: 1px 2px 0 rgba(101, 139, 108, .1), 0 19px 58px rgba(0, 0, 0, .56);
+  transform: translate3d(0, 0, 0);
+  -webkit-mask-image: linear-gradient(174deg, #000 0 28.7%, transparent 29.1% 32.1%, #000 32.5% 100%);
+  mask-image: linear-gradient(174deg, #000 0 28.7%, transparent 29.1% 32.1%, #000 32.5% 100%);
+}
+.folio-wordmark-ghost {
+  z-index: 1;
+  color: transparent;
+  opacity: .82;
+  -webkit-text-stroke: 1px var(--wordmark-ghost-ink);
+  transform: translate3d(4px, 5px, 0);
+}
+.folio-wordmark-run { position: relative; z-index: 2; }
+.folio-wordmark-run:first-child { margin-right: -.08em; }
+.folio-wordmark-run:last-child { margin-left: -.12em; }
+.folio-wordmark-eclipse {
+  position: relative;
+  display: inline-grid;
+  z-index: 3;
+  width: .72em;
+  place-items: center;
+  transform-origin: 50% 52%;
+}
+.folio-wordmark-ghost .folio-wordmark-eclipse { width: .72em; }
+.folio-wordmark-disc {
+  --eclipse-x: 4px;
+  --eclipse-y: -2px;
+  --eclipse-angle: -32deg;
+  position: relative;
+  z-index: 3;
+  display: block;
+  width: .64em;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--wordmark-omen) 68%, transparent);
+  border-radius: 50%;
+  background: var(--wordmark-omen);
+  box-shadow: 0 0 0 1px rgba(223, 239, 226, .05), 0 0 24px rgba(132, 178, 141, .19);
+}
+.folio-wordmark-disc::before,
+.folio-wordmark-disc::after {
   content: "";
   position: absolute;
-  left: 11%;
-  right: 8%;
-  bottom: 4%;
-  height: 2px;
-  opacity: .32;
-  background: repeating-linear-gradient(90deg, transparent 0 7px, var(--moss-bright) 8px 22px, transparent 23px 31px);
-  clip-path: polygon(0 45%, 9% 18%, 22% 60%, 35% 20%, 47% 70%, 63% 28%, 75% 66%, 89% 22%, 100% 50%, 100% 100%, 0 100%);
-  transform: rotate(-.8deg);
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  pointer-events: none;
 }
-.folio-fracture > span { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; white-space: nowrap; will-change: transform; }
-.folio-title-omens { position: absolute; inset: -31% -4% -24%; z-index: 1; opacity: .72; transform-origin: center; transition: opacity 420ms ease, transform 680ms var(--ease-out); pointer-events: none; }
-.folio-title-omens::before, .folio-title-omens::after { content: ""; position: absolute; pointer-events: none; }
-.folio-title-omens::before { left: 8%; top: 23%; width: clamp(92px, 11vw, 158px); height: clamp(40px, 5vw, 72px); border: 1px solid rgba(202, 223, 205, .26); border-right-color: transparent; border-radius: 50%; transform: rotate(-11deg) scale(.96); animation: garden-omen-sight 8.4s cubic-bezier(.45, 0, .55, 1) infinite; }
-.folio-title-omens::after { right: 4%; bottom: 21%; width: clamp(86px, 10vw, 148px); height: 28px; opacity: .62; background: linear-gradient(var(--line-strong), var(--line-strong)) right top / 72% 1px no-repeat, repeating-linear-gradient(90deg, rgba(192, 217, 197, .34) 0 1px, transparent 1px 13px) right top / 72% 9px no-repeat; border-right: 1px solid rgba(202, 223, 205, .32); transform: skewX(-14deg); }
-.folio-omen-orbit { position: absolute; left: 13%; top: 36%; width: clamp(68px, 8vw, 116px); height: clamp(27px, 3.4vw, 48px); border: 1px solid rgba(167, 201, 173, .16); border-left-color: transparent; border-radius: 50%; transform: rotate(-11deg); }
-.folio-omen-orbit b { position: absolute; right: 9%; top: 43%; width: 4px; height: 4px; border-radius: 50%; background: var(--moss-bright); box-shadow: 0 0 10px rgba(167, 201, 173, .58); transform: translateY(-50%); animation: garden-omen-pulse 3.6s cubic-bezier(.45, 0, .55, 1) infinite; }
-.folio-omen-axis { position: absolute; right: 10%; top: 21%; width: 1px; height: 42%; opacity: .38; background: linear-gradient(transparent, rgba(202, 223, 205, .72) 24% 72%, transparent); transform: rotate(8deg); }
-.folio-omen-flake { position: absolute; width: 3px; height: 3px; background: var(--bone); box-shadow: 0 0 9px rgba(209, 229, 212, .28); transform: rotate(45deg); animation: garden-omen-flake 5.8s cubic-bezier(.45, 0, .55, 1) infinite; }
-.folio-omen-flake::before, .folio-omen-flake::after { content: ""; position: absolute; left: 50%; top: 50%; background: rgba(218, 235, 220, .58); transform: translate(-50%, -50%); }
-.folio-omen-flake::before { width: 1px; height: 13px; }
-.folio-omen-flake::after { width: 13px; height: 1px; }
-.folio-omen-flake-a { left: 3%; top: 18%; animation-delay: -1.4s; }
-.folio-omen-flake-b { right: 22%; top: 8%; opacity: .52; animation-delay: -3.8s; }
-.folio-omen-flake-c { right: 1%; bottom: 8%; opacity: .68; animation-delay: -2.3s; }
-.folio-fracture.is-struck .folio-title-omens { opacity: .94; transform: scale(1.045) rotate(.5deg); }
-.folio-fracture-base { color: transparent; opacity: .6; -webkit-text-stroke: 1px rgba(232, 240, 230, .22); }
-.folio-fracture-shard { opacity: .98; text-shadow: 2px 2px 0 rgba(102, 142, 110, .13), 0 18px 62px rgba(0, 0, 0, .58); transition: transform .7s var(--ease-out); }
-.folio-fracture .shard-a { clip-path: polygon(0 0, 35% 0, 20% 60%, 0 40%); }
-.folio-fracture .shard-b { clip-path: polygon(0 40%, 20% 60%, 10% 100%, 0 100%); }
-.folio-fracture .shard-c { clip-path: polygon(35% 0, 65% 0, 55% 45%, 20% 60%); }
-.folio-fracture .shard-d { clip-path: polygon(20% 60%, 55% 45%, 62% 100%, 10% 100%); }
-.folio-fracture .shard-e { clip-path: polygon(65% 0, 100% 0, 100% 100%, 62% 100%, 55% 45%); }
-.folio-fracture.is-struck .shard-a { transform: translate(-7vw, -6vh) rotate(-7deg) !important; }
-.folio-fracture.is-struck .shard-b { transform: translate(-4vw, 8vh) rotate(4deg) !important; }
-.folio-fracture.is-struck .shard-c { transform: translate(1vw, -8vh) rotate(3deg) !important; }
-.folio-fracture.is-struck .shard-d { transform: translate(3vw, 8vh) rotate(-4deg) !important; }
-.folio-fracture.is-struck .shard-e { transform: translate(8vw, 1vh) rotate(7deg) !important; }
+.folio-wordmark-disc::before {
+  z-index: -1;
+  width: 118%;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--wordmark-omen) 34%, transparent);
+  border-left-color: transparent;
+  transform: translate(-50%, -50%) rotate(var(--eclipse-angle));
+}
+.folio-wordmark-disc::after {
+  z-index: 1;
+  width: 91%;
+  aspect-ratio: 1;
+  background: var(--wordmark-void);
+  box-shadow: inset -2px 1px 4px rgba(223, 239, 226, .04);
+  transform: translate(-50%, -50%) translate3d(var(--eclipse-x), var(--eclipse-y), 0);
+}
+.folio-wordmark-disc > b {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--wordmark-omen);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--wordmark-omen) 64%, transparent);
+  transform: translate(-50%, -50%) rotate(var(--eclipse-angle)) translateX(.4em);
+}
+.folio-wordmark-ray {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: block;
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--wordmark-omen) 74%, transparent));
+  box-shadow: 0 0 7px color-mix(in srgb, var(--wordmark-omen) 32%, transparent);
+  mix-blend-mode: screen;
+  transform: scaleX(0);
+}
+.folio-wordmark-ray-left { right: 50%; width: 4.7em; transform-origin: right center; }
+.folio-wordmark-ray-right { left: 50%; width: 2.75em; background: linear-gradient(90deg, color-mix(in srgb, var(--wordmark-omen) 74%, transparent), transparent); transform-origin: left center; }
+.folio-wordmark-chip {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--wordmark-ink) 88%, var(--wordmark-omen));
+  opacity: .64;
+  white-space: nowrap;
+  text-shadow: 0 0 12px rgba(146, 188, 154, .12);
+  pointer-events: none;
+}
+.folio-wordmark-chip-a {
+  clip-path: polygon(0 27%, 43% 30%, 43% 35%, 0 32%);
+  transform: translate3d(-8px, -5px, 0) rotate(-.38deg);
+}
+.folio-wordmark-chip-b {
+  clip-path: polygon(67% 32%, 100% 35%, 100% 40%, 67% 37%);
+  transform: translate3d(10px, -5px, 0) rotate(.42deg);
+}
+.folio-wordmark.is-signalled .folio-wordmark-ray-left { animation: garden-wordmark-ray 640ms var(--ease-out) both; }
+.folio-wordmark.is-signalled .folio-wordmark-ray-right { animation: garden-wordmark-ray 640ms var(--ease-out) 38ms both; }
+.folio-wordmark.is-signalled .folio-wordmark-ghost { animation: garden-wordmark-echo 640ms var(--ease-out) both; }
+.folio-wordmark.is-signalled .folio-wordmark-disc { animation: garden-wordmark-eclipse 640ms var(--ease-out) both; }
+.folio-wordmark.is-signalled .folio-wordmark-disc::after { animation: garden-wordmark-cover 640ms var(--ease-out) both; }
+.folio-wordmark.is-signalled .folio-wordmark-chip-a { animation: garden-wordmark-chip-a 640ms var(--ease-out) both; }
+.folio-wordmark.is-signalled .folio-wordmark-chip-b { animation: garden-wordmark-chip-b 640ms var(--ease-out) 28ms both; }
 
 .folio-cover-copy {
   position: absolute;
@@ -295,16 +391,6 @@
   width: var(--page);
   transform: translateX(-50%);
   pointer-events: none;
-}
-.folio-cover-copy h1 {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  overflow: hidden;
 }
 .folio-cover-role {
   margin: 0 0 24px;
@@ -2882,9 +2968,37 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
 }
 @keyframes garden-world-drift { from { transform: scale(1.025) translate3d(-.35%, -.18%, 0); } to { transform: scale(1.065) translate3d(.45%, .24%, 0); } }
 @keyframes garden-cover-drift { from { transform: scale(1.035) translate3d(-.45%, -.2%, 0); } to { transform: scale(1.075) translate3d(.55%, .35%, 0); } }
-@keyframes garden-omen-sight { 0%, 100% { opacity: .32; transform: rotate(-11deg) scale(.94); } 48% { opacity: .82; transform: rotate(-8deg) scale(1.04); } }
-@keyframes garden-omen-pulse { 0%, 100% { opacity: .3; transform: translateY(-50%) scale(.72); } 50% { opacity: 1; transform: translateY(-50%) scale(1.22); } }
-@keyframes garden-omen-flake { 0%, 100% { opacity: .26; transform: translate3d(0, -4px, 0) rotate(45deg) scale(.82); } 52% { opacity: .86; transform: translate3d(3px, 5px, 0) rotate(58deg) scale(1.08); } }
+@keyframes garden-wordmark-ray {
+  0% { opacity: 0; transform: scaleX(0); }
+  16% { opacity: .9; }
+  62% { opacity: .68; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1.035); }
+}
+@keyframes garden-wordmark-echo {
+  0%, 100% { opacity: .82; }
+  38% { opacity: .98; }
+}
+@keyframes garden-wordmark-eclipse {
+  0%, 100% { transform: scale(1); }
+  16% { transform: scale(.91, 1.055); }
+  46% { transform: scale(1.065, .94); }
+}
+@keyframes garden-wordmark-cover {
+  0%, 100% { transform: translate(-50%, -50%) translate3d(var(--eclipse-x), var(--eclipse-y), 0) scale(1); }
+  34% { transform: translate(-50%, -50%) translate3d(var(--eclipse-x), var(--eclipse-y), 0) scale(.9); }
+}
+@keyframes garden-wordmark-chip-a {
+  0%, 100% { opacity: .64; transform: translate3d(-8px, -5px, 0) rotate(-.38deg); }
+  18% { opacity: .76; transform: translate3d(-4px, -2px, 0) rotate(-.14deg); }
+  48% { opacity: .94; transform: translate3d(-17px, -10px, 0) rotate(-1.12deg); }
+  76% { opacity: .7; transform: translate3d(-7px, -4px, 0) rotate(-.28deg); }
+}
+@keyframes garden-wordmark-chip-b {
+  0%, 100% { opacity: .64; transform: translate3d(10px, -5px, 0) rotate(.42deg); }
+  18% { opacity: .76; transform: translate3d(5px, -2px, 0) rotate(.16deg); }
+  48% { opacity: .94; transform: translate3d(19px, -11px, 0) rotate(1.08deg); }
+  76% { opacity: .7; transform: translate3d(9px, -4px, 0) rotate(.3deg); }
+}
 @keyframes garden-trace-breathe { from { transform: scale(1) translate3d(-2px, 3px, 0); opacity: .62; } to { transform: scale(1.012) translate3d(4px, -5px, 0); opacity: .94; } }
 @keyframes garden-field-mist { 0%, 12% { opacity: 0; transform: translate3d(0, 12vh, 0) scale(.82); } 28% { opacity: .7; } 68% { opacity: .34; } 82%, 100% { opacity: 0; transform: translate3d(132vw, -14vh, 0) scale(1.12); } }
 @keyframes garden-field-node { 0%, 12%, 100% { opacity: 0; transform: scale(.3); } 24% { opacity: .9; transform: scale(1); } 42% { opacity: .18; transform: scale(2.5); } 58% { opacity: 0; transform: scale(3.2); } }
@@ -3247,7 +3361,7 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
 
 @media (max-width: 1023px) {
   .folio { --page: min(100% - 48px, 900px); }
-  .folio-fracture { height: clamp(84px, 12vw, 126px); font-size: clamp(66px, 8.6vw, 102px); }
+  .folio-wordmark { width: calc(100vw - 64px); height: clamp(80px, 12vw, 124px); font-size: clamp(62px, 8.4vw, 96px); }
   .folio-cover-fragment { right: 64px; width: min(490px, 48vw); }
   .folio-explore-grid { grid-template-columns: 310px minmax(0, 1fr); gap: 36px; }
   .folio-profile { max-width: 310px; }
@@ -3269,7 +3383,7 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .folio-masthead { top: 72px; gap: 10px; }
   .folio-masthead span, .garden-hud-vitals { display: none; }
   .folio-cover { min-height: 100svh; }
-  .folio-fracture { top: 34%; width: calc(100vw - 28px); height: 72px; font-size: clamp(38px, 11.2vw, 54px); letter-spacing: .025em; }
+  .folio-wordmark { top: 34%; width: calc(100vw - 24px); height: 72px; font-size: clamp(36px, 10.3vw, 50px); letter-spacing: -.02em; }
   .folio-cover-copy { bottom: 228px; }
   .folio-cover-role { margin-bottom: 17px; font-size: 13px; }
   .folio-cover-terminal { font-size: 8px; }
@@ -3289,10 +3403,6 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .folio-quote-next { width: auto; height: auto; min-height: 24px; }
   .folio-quote-progress { left: 30px; right: 69px; bottom: 5px; }
   .folio-cover-side { display: none; }
-  .folio-title-omens { inset: -38% -2% -27%; }
-  .folio-title-omens::before { left: 2%; }
-  .folio-title-omens::after { right: 1%; width: 82px; }
-  .folio-omen-axis, .folio-omen-flake-b { display: none; }
   .folio-cover-scroll { bottom: 18px; left: 20px; transform: none; }
   .folio-cover-scroll span { display: none; }
   .folio-explore { min-height: auto; padding: 72px 0 78px; }
@@ -3350,6 +3460,8 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
 
 @media (max-width: 480px) {
   .is-home .g-nav-links li:not(:last-child) { display: none; }
+  .folio-wordmark { width: calc(100vw - 18px); font-size: clamp(34px, 10.5vw, 44px); }
+  .folio-wordmark-disc > b { width: 2px; height: 2px; }
   .folio-quote-film { padding-left: 27px; padding-right: 3px; }
   .folio-quote-head > span { gap: 8px; }
   .folio-quote-head i { font-size: 5px; }
@@ -3361,16 +3473,12 @@ html.garden-lite-motion .garden-particles,
 html.garden-lite-motion .garden-scanlines,
 html.garden-lite-motion .garden-noise,
 html.garden-lite-motion .garden-cursor,
-html.garden-lite-motion .folio-fracture-shard,
 html.garden-lite-motion .garden-overgrowth-veil::before,
 html.garden-lite-motion .folio-field-motion { display: none; }
 html.garden-lite-motion .garden-boot *,
 html.garden-lite-motion .garden-boot *::before,
 html.garden-lite-motion .garden-boot *::after { animation: none !important; }
 html.garden-lite-motion .folio-cover-photo > img,
-html.garden-lite-motion .folio-title-omens::before,
-html.garden-lite-motion .folio-omen-orbit b,
-html.garden-lite-motion .folio-omen-flake,
 html.garden-lite-motion .folio-world-etchings,
 html.garden-lite-motion .folio-explore-traces g,
 html.garden-lite-motion .folio-articles-traces g { animation: none; }
@@ -3387,6 +3495,9 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-overgrowth-copy { o
 html.garden-lite-motion.garden-cursor-on,
 html.garden-lite-motion.garden-cursor-on a,
 html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
+html.garden-lite-motion .folio-wordmark-main { transform: none; }
+html.garden-lite-motion .folio-wordmark-ghost { transform: translate3d(4px, 5px, 0); }
+html.garden-lite-motion .folio-wordmark-ray { display: none; }
 
 @media (prefers-reduced-motion: reduce), (hover: none) {
   .garden-cursor { display: none; }
@@ -3398,13 +3509,15 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
   .folio .reveal-ready, .folio .reveal-ready.reveal-visible { opacity: 1; transform: none; transition: none; }
   .garden-boot { transition-duration: .01ms; transition-delay: 0s; }
   .garden-boot *, .garden-boot *::before, .garden-boot *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
-  .garden-boot::after, .garden-scanlines, .garden-noise, .garden-ripple, .garden-pet.is-happy button, .garden-overgrowth.is-active, .folio-masthead a i, .folio-quote-progress i, .folio-quote-exposure, .folio-cover-scroll i, .folio-cover-photo > img, .folio-title-omens::before, .folio-omen-orbit b, .folio-omen-flake, .folio-world::before, .folio-world-etchings, .folio-explore-traces g, .folio-articles-traces g, .folio-contribution-heading > span, .folio-outro-track b, .folio-outro h2 span, .folio-outro-pulse { animation: none; }
+  .garden-boot::after, .garden-scanlines, .garden-noise, .garden-ripple, .garden-pet.is-happy button, .garden-overgrowth.is-active, .folio-masthead a i, .folio-quote-progress i, .folio-quote-exposure, .folio-cover-scroll i, .folio-cover-photo > img, .folio-world::before, .folio-world-etchings, .folio-explore-traces g, .folio-articles-traces g, .folio-contribution-heading > span, .folio-outro-track b, .folio-outro h2 span, .folio-outro-pulse { animation: none; }
   .folio-quote-film { transform: none !important; transition: none; }
   .folio-outro-glyph { transform: none !important; text-shadow: none; will-change: auto; }
   .folio-outro-pulse { display: none; }
   .garden-particles, .folio-cover-lens { display: none; }
   .folio-field-motion { display: none; }
-  .folio-fracture-shard { transition: none; transform: none !important; }
+  .folio-wordmark-main { transform: none !important; }
+  .folio-wordmark-ghost { transform: translate3d(4px, 5px, 0) !important; }
+  .folio-wordmark-ray { display: none; }
   .folio-contribution-grid span, .folio-calendar-days button { transition: none; }
   .folio-contribution-grid span.is-pointed, .folio-contribution-grid span.is-near, .folio-calendar-days button.is-pointed, .folio-calendar-days button.is-near { transform: none !important; }
   .garden-overgrowth *, .garden-overgrowth::before, .garden-overgrowth::after { animation: none !important; transition: none !important; }
@@ -3470,15 +3583,14 @@ html.garden-lite-motion.garden-cursor-on button { cursor: auto !important; }
     linear-gradient(180deg, rgba(227, 232, 224, .04), rgba(227, 232, 224, .08) 56%, rgba(227, 232, 224, .56));
 }
 :root[data-resolved-theme="light"] .folio-cover::after { color: rgba(32, 39, 32, .28); }
-:root[data-resolved-theme="light"] .folio-fracture-base { -webkit-text-stroke-color: rgba(32, 39, 32, .24); }
-:root[data-resolved-theme="light"] .folio-fracture-shard { text-shadow: 2px 2px 0 rgba(49, 94, 60, .08), 0 18px 58px rgba(42, 56, 44, .16); }
-:root[data-resolved-theme="light"] .folio-title-omens::before { border-color: rgba(49, 94, 60, .28); border-right-color: transparent; }
-:root[data-resolved-theme="light"] .folio-title-omens::after { border-right-color: rgba(49, 94, 60, .34); background: linear-gradient(rgba(49, 94, 60, .32), rgba(49, 94, 60, .32)) right top / 72% 1px no-repeat, repeating-linear-gradient(90deg, rgba(49, 94, 60, .32) 0 1px, transparent 1px 13px) right top / 72% 9px no-repeat; }
-:root[data-resolved-theme="light"] .folio-omen-orbit { border-color: rgba(49, 94, 60, .18); border-left-color: transparent; }
-:root[data-resolved-theme="light"] .folio-omen-axis { background: linear-gradient(transparent, rgba(49, 94, 60, .56) 24% 72%, transparent); }
-:root[data-resolved-theme="light"] .folio-omen-flake { background: rgba(32, 39, 32, .76); box-shadow: 0 0 9px rgba(49, 94, 60, .16); }
-:root[data-resolved-theme="light"] .folio-omen-flake::before,
-:root[data-resolved-theme="light"] .folio-omen-flake::after { background: rgba(49, 94, 60, .46); }
+:root[data-resolved-theme="light"] .folio-wordmark {
+  --wordmark-ink: #202720;
+  --wordmark-ghost-ink: rgba(44, 72, 49, .24);
+  --wordmark-omen: rgba(49, 94, 60, .84);
+  --wordmark-void: rgba(225, 231, 223, .96);
+}
+:root[data-resolved-theme="light"] .folio-wordmark-main { text-shadow: 1px 2px 0 rgba(49, 94, 60, .06), 0 18px 48px rgba(42, 56, 44, .15); }
+:root[data-resolved-theme="light"] .folio-wordmark-ray { mix-blend-mode: multiply; }
 :root[data-resolved-theme="light"] .folio-cover-terminal { color: rgba(42, 56, 44, .56); }
 :root[data-resolved-theme="light"] .folio-quote-film::before {
   background: linear-gradient(transparent, rgba(49, 94, 60, .62) 20% 71%, transparent);

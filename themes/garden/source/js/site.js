@@ -2984,42 +2984,101 @@
     }, { threshold: [.14, .32] }).observe(outro);
   }
 
-  function setupFractureTitle() {
-    var fracture = document.querySelector('[data-fracture]');
+  function setupWinterWordmark() {
+    var wordmark = document.querySelector('[data-winter-wordmark]');
     var scene = document.querySelector('.folio-cover');
-    if (!fracture || !scene || gardenMotionIsLite() || !finePointer.matches) return;
-    var shards = Array.prototype.slice.call(fracture.querySelectorAll('.folio-fracture-shard'));
-    var strengths = [[-1.1, -.7], [.45, -1], [1.1, -.45], [-.75, .9], [.85, .75]];
+    if (!wordmark || !scene || gardenMotionIsLite()) return;
+    var signal = wordmark.querySelector('.folio-wordmark-chip-b');
+    var mainLayer = wordmark.querySelector('.folio-wordmark-main');
+    var ghostLayer = wordmark.querySelector('.folio-wordmark-ghost');
+    var eclipse = wordmark.querySelector('.folio-wordmark-disc');
+    if (!signal || !mainLayer || !ghostLayer || !eclipse) return;
     var frame = 0;
-    var nx = 0;
-    var ny = 0;
+    var current = { mainX: 0, mainY: 0, ghostX: 0, ghostY: 0, eclipseX: 4, eclipseY: -2, angle: -32 };
+    var target = { mainX: 0, mainY: 0, ghostX: 0, ghostY: 0, eclipseX: 4, eclipseY: -2, angle: -32 };
+
+    function mix(from, to, amount) { return from + (to - from) * amount; }
+
+    function nearestAngle(angle, reference) {
+      while (angle - reference > 180) angle -= 360;
+      while (angle - reference < -180) angle += 360;
+      return angle;
+    }
+
+    function schedule() {
+      if (frame || document.hidden) return;
+      wordmark.classList.add('is-tracking');
+      frame = window.requestAnimationFrame(render);
+    }
 
     function render() {
       frame = 0;
-      shards.forEach(function (shard, index) {
-        var strength = strengths[index];
-        var x = nx * 15 * strength[0];
-        var y = ny * 11 * strength[1];
-        var rotation = nx * strength[0] * 1.4;
-        shard.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) rotate(' + rotation.toFixed(2) + 'deg)';
-      });
+      current.mainX = mix(current.mainX, target.mainX, .14);
+      current.mainY = mix(current.mainY, target.mainY, .14);
+      current.ghostX = mix(current.ghostX, target.ghostX, .12);
+      current.ghostY = mix(current.ghostY, target.ghostY, .12);
+      current.eclipseX = mix(current.eclipseX, target.eclipseX, .15);
+      current.eclipseY = mix(current.eclipseY, target.eclipseY, .15);
+      current.angle = mix(current.angle, nearestAngle(target.angle, current.angle), .13);
+      mainLayer.style.transform = 'translate3d(' + current.mainX.toFixed(2) + 'px,' + current.mainY.toFixed(2) + 'px,0)';
+      ghostLayer.style.transform = 'translate3d(' + (4 + current.ghostX).toFixed(2) + 'px,' + (5 + current.ghostY).toFixed(2) + 'px,0)';
+      eclipse.style.setProperty('--eclipse-x', current.eclipseX.toFixed(2) + 'px');
+      eclipse.style.setProperty('--eclipse-y', current.eclipseY.toFixed(2) + 'px');
+      eclipse.style.setProperty('--eclipse-angle', current.angle.toFixed(2) + 'deg');
+
+      var unsettled = Math.abs(current.mainX - target.mainX) > .02 ||
+        Math.abs(current.mainY - target.mainY) > .02 ||
+        Math.abs(current.ghostX - target.ghostX) > .025 ||
+        Math.abs(current.ghostY - target.ghostY) > .025 ||
+        Math.abs(current.eclipseX - target.eclipseX) > .025 ||
+        Math.abs(current.eclipseY - target.eclipseY) > .025 ||
+        Math.abs(nearestAngle(target.angle, current.angle) - current.angle) > .08;
+      if (unsettled) schedule();
+      else wordmark.classList.remove('is-tracking');
     }
 
-    scene.addEventListener('pointermove', function (event) {
-      var rect = scene.getBoundingClientRect();
-      nx = ((event.clientX - rect.left) / rect.width - .5) * 2;
-      ny = ((event.clientY - rect.top) / rect.height - .5) * 2;
-      if (!frame) frame = window.requestAnimationFrame(render);
-    }, { passive: true });
-    scene.addEventListener('pointerleave', function () {
-      nx = 0;
-      ny = 0;
-      if (!frame) frame = window.requestAnimationFrame(render);
-    });
+    if (finePointer.matches) {
+      scene.addEventListener('pointermove', function (event) {
+        if (event.pointerType === 'touch') return;
+        var nx = (event.clientX / Math.max(1, window.innerWidth) - .5) * 2;
+        var ny = (event.clientY / Math.max(1, window.innerHeight) - .5) * 2;
+        target.mainX = nx * 2.4;
+        target.mainY = ny * 1.8;
+        target.ghostX = nx * -7;
+        target.ghostY = ny * -5;
+        target.eclipseX = 4 + nx * 6;
+        target.eclipseY = -2 + ny * 5;
+        target.angle = nearestAngle(Math.atan2(ny, nx) * 180 / Math.PI, current.angle);
+        schedule();
+      }, { passive: true });
+
+      scene.addEventListener('pointerleave', function () {
+        target.mainX = 0;
+        target.mainY = 0;
+        target.ghostX = 0;
+        target.ghostY = 0;
+        target.eclipseX = 4;
+        target.eclipseY = -2;
+        target.angle = nearestAngle(-32, current.angle);
+        schedule();
+      }, { passive: true });
+    }
+
     scene.addEventListener('click', function (event) {
-      if (event.target.closest('a, button')) return;
-      fracture.classList.add('is-struck');
-      window.setTimeout(function () { fracture.classList.remove('is-struck'); render(); }, 620);
+      if (event.defaultPrevented || event.target.closest('a, button, input, textarea, select, label, [data-home-quote-card]')) return;
+      if (wordmark.classList.contains('is-signalled')) return;
+      wordmark.classList.add('is-signalled');
+    });
+
+    signal.addEventListener('animationend', function (event) {
+      if (event.animationName === 'garden-wordmark-chip-b') wordmark.classList.remove('is-signalled');
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      } else if (!document.hidden) schedule();
     });
   }
 
@@ -4111,7 +4170,7 @@
   setupGardenRipples();
   setupGardenScramble();
   setupPixelOutro();
-  setupFractureTitle();
+  setupWinterWordmark();
   setupGardenParticles();
   setupGardenPet();
   setupGardenEasterEgg();
