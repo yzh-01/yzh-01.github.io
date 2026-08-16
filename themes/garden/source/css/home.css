@@ -3956,11 +3956,8 @@ html.garden-lite-motion .folio-wordmark-ray { display: none; }
 
 :root[data-resolved-theme="light"] .folio-world::before {
   opacity: .42;
-  background: url("../images/garden-ruins-field.webp") center 57% / 154% auto no-repeat;
   filter: grayscale(1) sepia(.08) saturate(.52) contrast(.96) brightness(1.08);
   mix-blend-mode: multiply;
-  transform: scale(1.01);
-  animation: garden-atmosphere-drift 54s cubic-bezier(.45, 0, .55, 1) infinite alternate;
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .1) 0, rgba(0, 0, 0, .28) 24%, rgba(0, 0, 0, .68) 48%, rgba(0, 0, 0, .92) 72%, #000 100%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, .1) 0, rgba(0, 0, 0, .28) 24%, rgba(0, 0, 0, .68) 48%, rgba(0, 0, 0, .92) 72%, #000 100%);
 }
