@@ -232,6 +232,12 @@
   --wordmark-ghost-ink: rgba(214, 228, 216, .25);
   --wordmark-omen: rgba(167, 201, 173, .82);
   --wordmark-void: rgba(4, 7, 5, .96);
+  --wordmark-chip-rest: .64;
+  --wordmark-chip-tight: .76;
+  --wordmark-chip-peak: .94;
+  --wordmark-chip-tail: .7;
+  --wordmark-ghost-opacity: .82;
+  --wordmark-ghost-peak: .98;
   position: absolute;
   top: 45%;
   left: 50%;
@@ -273,7 +279,7 @@
 .folio-wordmark-ghost {
   z-index: 1;
   color: transparent;
-  opacity: .82;
+  opacity: var(--wordmark-ghost-opacity);
   -webkit-text-stroke: 1px var(--wordmark-ghost-ink);
   transform: translate3d(4px, 5px, 0);
 }
@@ -362,7 +368,7 @@
   align-items: center;
   justify-content: center;
   color: color-mix(in srgb, var(--wordmark-ink) 88%, var(--wordmark-omen));
-  opacity: .64;
+  opacity: var(--wordmark-chip-rest);
   white-space: nowrap;
   text-shadow: 0 0 12px rgba(146, 188, 154, .12);
   pointer-events: none;
@@ -2975,8 +2981,8 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   100% { opacity: 0; transform: scaleX(1.035); }
 }
 @keyframes garden-wordmark-echo {
-  0%, 100% { opacity: .82; }
-  38% { opacity: .98; }
+  0%, 100% { opacity: var(--wordmark-ghost-opacity); }
+  38% { opacity: var(--wordmark-ghost-peak); }
 }
 @keyframes garden-wordmark-eclipse {
   0%, 100% { transform: scale(1); }
@@ -2988,16 +2994,16 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   34% { transform: translate(-50%, -50%) translate3d(var(--eclipse-x), var(--eclipse-y), 0) scale(.9); }
 }
 @keyframes garden-wordmark-chip-a {
-  0%, 100% { opacity: .64; transform: translate3d(-8px, -5px, 0) rotate(-.38deg); }
-  18% { opacity: .76; transform: translate3d(-4px, -2px, 0) rotate(-.14deg); }
-  48% { opacity: .94; transform: translate3d(-17px, -10px, 0) rotate(-1.12deg); }
-  76% { opacity: .7; transform: translate3d(-7px, -4px, 0) rotate(-.28deg); }
+  0%, 100% { opacity: var(--wordmark-chip-rest); transform: translate3d(-8px, -5px, 0) rotate(-.38deg); }
+  18% { opacity: var(--wordmark-chip-tight); transform: translate3d(-4px, -2px, 0) rotate(-.14deg); }
+  48% { opacity: var(--wordmark-chip-peak); transform: translate3d(-17px, -10px, 0) rotate(-1.12deg); }
+  76% { opacity: var(--wordmark-chip-tail); transform: translate3d(-7px, -4px, 0) rotate(-.28deg); }
 }
 @keyframes garden-wordmark-chip-b {
-  0%, 100% { opacity: .64; transform: translate3d(10px, -5px, 0) rotate(.42deg); }
-  18% { opacity: .76; transform: translate3d(5px, -2px, 0) rotate(.16deg); }
-  48% { opacity: .94; transform: translate3d(19px, -11px, 0) rotate(1.08deg); }
-  76% { opacity: .7; transform: translate3d(9px, -4px, 0) rotate(.3deg); }
+  0%, 100% { opacity: var(--wordmark-chip-rest); transform: translate3d(10px, -5px, 0) rotate(.42deg); }
+  18% { opacity: var(--wordmark-chip-tight); transform: translate3d(5px, -2px, 0) rotate(.16deg); }
+  48% { opacity: var(--wordmark-chip-peak); transform: translate3d(19px, -11px, 0) rotate(1.08deg); }
+  76% { opacity: var(--wordmark-chip-tail); transform: translate3d(9px, -4px, 0) rotate(.3deg); }
 }
 @keyframes garden-trace-breathe { from { transform: scale(1) translate3d(-2px, 3px, 0); opacity: .62; } to { transform: scale(1.012) translate3d(4px, -5px, 0); opacity: .94; } }
 @keyframes garden-field-mist { 0%, 12% { opacity: 0; transform: translate3d(0, 12vh, 0) scale(.82); } 28% { opacity: .7; } 68% { opacity: .34; } 82%, 100% { opacity: 0; transform: translate3d(132vw, -14vh, 0) scale(1.12); } }
@@ -3534,20 +3540,20 @@ html.garden-lite-motion .folio-wordmark-ray { display: none; }
 
 /* Light field: the same system wakes beneath the white cat, not a second design. */
 :root[data-resolved-theme="light"] .folio {
-  --void: #e3e8e0;
-  --carbon: #d8ddd6;
-  --panel: rgba(239, 243, 236, .74);
-  --bone: #1d241e;
-  --dim: #626d63;
-  --moss: #4e7657;
-  --moss-bright: #315e3c;
+  --void: #d6dcd4;
+  --carbon: #cbd2ca;
+  --panel: rgba(225, 231, 223, .82);
+  --bone: #222a24;
+  --dim: #58645b;
+  --moss: #496f52;
+  --moss-bright: #2f5a39;
   --rust: #86593f;
   --line: rgba(48, 63, 50, .17);
   --line-strong: rgba(48, 63, 50, .36);
 }
 
 :root[data-resolved-theme="light"] .is-home .g-nav {
-  background: rgba(227, 232, 224, .8);
+  background: rgba(214, 220, 212, .84);
   border-bottom-color: rgba(48, 63, 50, .14);
   box-shadow: 0 18px 45px rgba(42, 56, 44, .05);
 }
@@ -3559,37 +3565,47 @@ html.garden-lite-motion .folio-wordmark-ray { display: none; }
   opacity: 0;
   filter: grayscale(.84) saturate(.45) contrast(.9) brightness(1.08);
 }
-:root[data-resolved-theme="light"] .folio-world { background: #e3e8e0; }
+:root[data-resolved-theme="light"] .folio-world {
+  --world-rain-opacity-light: .16;
+  background: #d4dad2;
+}
 :root[data-resolved-theme="light"] .folio-world::before {
-  opacity: .34;
-  filter: grayscale(1) contrast(.82) brightness(1.28);
+  opacity: .4;
+  filter: grayscale(.94) contrast(.8) brightness(.96);
   mix-blend-mode: multiply;
 }
 :root[data-resolved-theme="light"] .folio-world::after {
   background-image:
-    radial-gradient(ellipse at 50% 43%, rgba(227, 232, 224, .02) 0 20%, rgba(227, 232, 224, .4) 64%, rgba(227, 232, 224, .9) 112%),
-    linear-gradient(90deg, rgba(227, 232, 224, .72), transparent 23% 77%, rgba(227, 232, 224, .76)),
+    radial-gradient(ellipse at 50% 43%, rgba(214, 220, 212, .02) 0 20%, rgba(210, 217, 209, .24) 64%, rgba(199, 207, 198, .62) 112%),
+    linear-gradient(90deg, rgba(204, 212, 203, .5), transparent 23% 77%, rgba(201, 209, 200, .54)),
     linear-gradient(rgba(48, 63, 50, .032) 1px, transparent 1px),
     linear-gradient(90deg, rgba(48, 63, 50, .032) 1px, transparent 1px),
     repeating-linear-gradient(135deg, transparent 0 7px, rgba(48, 63, 50, .014) 7px 8px);
   background-size: auto, auto, 80px 80px, 80px 80px, 8px 8px;
 }
-:root[data-resolved-theme="light"] .folio-world-etchings { color: rgba(48, 63, 50, .16); mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .folio-world-etchings { color: rgba(48, 63, 50, .13); mix-blend-mode: multiply; }
 :root[data-resolved-theme="light"] .folio-cover-lens { filter: grayscale(.3) saturate(.55) contrast(.94); }
 :root[data-resolved-theme="light"] .folio-cover-lens img { opacity: .6; }
 :root[data-resolved-theme="light"] .folio-cover-shade {
   background:
-    radial-gradient(ellipse at 50% 44%, rgba(227, 232, 224, 0) 0 20%, rgba(227, 232, 224, .16) 62%, rgba(227, 232, 224, .54) 100%),
-    linear-gradient(180deg, rgba(227, 232, 224, .04), rgba(227, 232, 224, .08) 56%, rgba(227, 232, 224, .56));
+    radial-gradient(ellipse at 50% 44%, rgba(214, 220, 212, 0) 0 22%, rgba(210, 217, 209, .1) 62%, rgba(196, 205, 196, .42) 100%),
+    linear-gradient(180deg, rgba(214, 220, 212, .02), rgba(208, 215, 207, .06) 56%, rgba(193, 202, 193, .46));
 }
 :root[data-resolved-theme="light"] .folio-cover::after { color: rgba(32, 39, 32, .28); }
 :root[data-resolved-theme="light"] .folio-wordmark {
   --wordmark-ink: #202720;
-  --wordmark-ghost-ink: rgba(44, 72, 49, .24);
-  --wordmark-omen: rgba(49, 94, 60, .84);
-  --wordmark-void: rgba(225, 231, 223, .96);
+  --wordmark-ghost-ink: rgba(44, 72, 49, .14);
+  --wordmark-omen: rgba(167, 201, 173, .82);
+  --wordmark-void: rgba(4, 7, 5, .96);
+  --wordmark-chip-rest: .4;
+  --wordmark-chip-tight: .5;
+  --wordmark-chip-peak: .7;
+  --wordmark-chip-tail: .46;
+  --wordmark-ghost-opacity: .48;
+  --wordmark-ghost-peak: .68;
 }
-:root[data-resolved-theme="light"] .folio-wordmark-main { text-shadow: 1px 2px 0 rgba(49, 94, 60, .06), 0 18px 48px rgba(42, 56, 44, .15); }
+:root[data-resolved-theme="light"] .folio-wordmark-main { text-shadow: 1px 2px 0 rgba(49, 94, 60, .045), 0 12px 34px rgba(42, 56, 44, .09); }
+:root[data-resolved-theme="light"] .folio-wordmark-disc { box-shadow: 0 0 0 1px rgba(49, 94, 60, .13), 0 0 22px rgba(75, 112, 79, .18); }
 :root[data-resolved-theme="light"] .folio-wordmark-ray { mix-blend-mode: multiply; }
 :root[data-resolved-theme="light"] .folio-cover-terminal { color: rgba(42, 56, 44, .56); }
 :root[data-resolved-theme="light"] .folio-quote-film::before {
@@ -3602,7 +3618,7 @@ html.garden-lite-motion .folio-wordmark-ray { display: none; }
 
 :root[data-resolved-theme="light"] .folio-explore,
 :root[data-resolved-theme="light"] .folio-articles {
-  background: rgba(227, 232, 224, .72);
+  background: rgba(214, 221, 213, .42);
   border-top-color: var(--line);
 }
 :root[data-resolved-theme="light"] .folio-outro {
@@ -3791,13 +3807,11 @@ html.garden-lite-motion .folio-wordmark-ray { display: none; }
 :root[data-resolved-theme="light"] .folio-calendar-days button.is-pointed { color: var(--void) !important; box-shadow: 0 0 0 1px rgba(32, 39, 32, .14), 0 0 20px rgba(49, 94, 60, .2) !important; }
 :root[data-resolved-theme="light"] .folio-articles-baseline { color: rgba(48, 63, 50, .62); }
 
-:root[data-resolved-theme="light"] .garden-particles { opacity: .24; }
+:root[data-resolved-theme="light"] .garden-particles { opacity: .16; }
 :root[data-resolved-theme="light"] .garden-scanlines {
-  opacity: .05;
-  background: linear-gradient(transparent 50%, rgba(32, 39, 32, .18) 50%) 0 0 / 100% 2px;
-  box-shadow: inset 0 0 150px rgba(42, 56, 44, .15);
+  display: none;
 }
-:root[data-resolved-theme="light"] .garden-noise { opacity: .018; mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .garden-noise { opacity: .024; mix-blend-mode: multiply; }
 :root[data-resolved-theme="light"] .garden-hud { color: rgba(48, 63, 50, .52); }
 :root[data-resolved-theme="light"] .garden-hud-scroll > span { background: rgba(48, 63, 50, .2); }
 :root[data-resolved-theme="light"] .garden-corner { border-color: rgba(48, 63, 50, .27); }
@@ -3941,25 +3955,37 @@ html.garden-lite-motion .folio-wordmark-ray { display: none; }
 .folio-field-motion { opacity: .72; }
 
 :root[data-resolved-theme="light"] .folio-world::before {
-  opacity: .27;
-  filter: grayscale(1) contrast(.88) brightness(1.18);
+  opacity: .42;
+  background: url("../images/garden-ruins-field.webp") center 57% / 154% auto no-repeat;
+  filter: grayscale(1) sepia(.08) saturate(.52) contrast(.96) brightness(1.08);
+  mix-blend-mode: multiply;
+  transform: scale(1.01);
+  animation: garden-atmosphere-drift 54s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .1) 0, rgba(0, 0, 0, .28) 24%, rgba(0, 0, 0, .68) 48%, rgba(0, 0, 0, .92) 72%, #000 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .1) 0, rgba(0, 0, 0, .28) 24%, rgba(0, 0, 0, .68) 48%, rgba(0, 0, 0, .92) 72%, #000 100%);
 }
 :root[data-resolved-theme="light"] .folio-world::after {
   background-image:
-    radial-gradient(circle 290px at var(--world-pointer-x) var(--world-pointer-y), rgba(49, 94, 60, .085), transparent 72%),
-    radial-gradient(ellipse at 50% 43%, transparent 0 18%, rgba(227, 232, 224, .26) 58%, rgba(227, 232, 224, .9) 112%),
-    linear-gradient(90deg, rgba(227, 232, 224, .62), transparent 22% 79%, rgba(227, 232, 224, .66)),
-    linear-gradient(104deg, transparent 17%, rgba(49, 94, 60, .025) 43%, transparent 61%);
+    radial-gradient(circle 290px at var(--world-pointer-x) var(--world-pointer-y), rgba(49, 94, 60, .07), transparent 72%),
+    radial-gradient(ellipse at 50% 43%, transparent 0 22%, rgba(210, 217, 209, .18) 61%, rgba(198, 206, 197, .62) 112%),
+    radial-gradient(circle, rgba(40, 62, 45, .024) 0 .7px, transparent .9px);
+  background-size: auto, auto, 13px 17px;
 }
-:root[data-resolved-theme="light"] .folio-rainfield { opacity: var(--world-rain-opacity-light); mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .folio-rainfield { opacity: .11; mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .folio-rainfield::after,
+:root[data-resolved-theme="light"] .folio-rainfield i { display: none; }
+:root[data-resolved-theme="light"] .folio-rainfield::before { opacity: .18; }
 :root[data-resolved-theme="light"] .folio-cover::before {
   border-color: rgba(49, 94, 60, .22);
   box-shadow: 0 0 0 34px rgba(49, 94, 60, .04), 0 0 0 82px rgba(49, 94, 60, .02);
 }
-:root[data-resolved-theme="light"] .folio-world-etchings { color: rgba(39, 65, 44, .24); opacity: .34; mix-blend-mode: multiply; }
-:root[data-resolved-theme="light"] .folio-kinetic-veil { opacity: .54; mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .folio-world-etchings { color: rgba(39, 65, 44, .17); opacity: .22; mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .folio-etching-fibres { opacity: .18; }
+:root[data-resolved-theme="light"] .folio-etching-branches { opacity: .38; }
+:root[data-resolved-theme="light"] .folio-kinetic-veil { opacity: .22; mix-blend-mode: multiply; }
 :root[data-resolved-theme="light"] .folio-explore-traces,
-:root[data-resolved-theme="light"] .folio-articles-traces { color: rgba(39, 76, 47, .25); opacity: .68; }
+:root[data-resolved-theme="light"] .folio-articles-traces { color: rgba(39, 76, 47, .2); opacity: .46; }
+:root[data-resolved-theme="light"] .folio-field-motion { opacity: .48; }
 
 @media (max-width: 768px) {
   .folio-rainfield i:nth-child(even) { display: none; }
