@@ -100,17 +100,19 @@
     </button>
   </div>
 
-  <div class="garden-overgrowth" data-garden-overgrowth aria-hidden="true">
+  <div class="garden-overgrowth" data-garden-overgrowth aria-hidden="true" tabindex="-1">
     <canvas class="garden-overgrowth-field" data-overgrowth-field aria-hidden="true"></canvas>
     <div class="garden-overgrowth-veil" aria-hidden="true"></div>
     <div class="garden-game-controls" data-game-controls aria-label="游戏控制">
+      <button type="button" data-game-up aria-label="向上移动">↑</button>
       <button type="button" data-game-left aria-label="向左移动">←</button>
-      <button type="button" data-game-jump aria-label="跳跃">↑</button>
+      <button type="button" data-game-shot aria-label="发射冷光弹">✦</button>
       <button type="button" data-game-right aria-label="向右移动">→</button>
+      <button type="button" data-game-down aria-label="向下移动">↓</button>
     </div>
     <div class="garden-overgrowth-copy" role="status" aria-live="polite">
       <small data-overgrowth-status>ENDLINE // 00 / 03 SIGNALS</small>
-      <span data-overgrowth-hint>点亮三座文章信标。A/D 移动，W/空格跳跃；空中按住可撑伞缓降。</span>
+      <span data-overgrowth-hint>在雾中恢复三座信标。WASD 移动，鼠标瞄准，左键发射冷光弹。</span>
       <button type="button" data-overgrowth-close>退出关卡 <b aria-hidden="true">×</b></button>
     </div>
   </div>

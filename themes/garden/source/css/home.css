@@ -3161,10 +3161,11 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   background:
     linear-gradient(90deg, rgba(255,255,255,.015), transparent 24% 76%, rgba(255,255,255,.012)),
     repeating-linear-gradient(180deg, transparent 0 3px, rgba(0, 0, 0, .15) 3px 4px);
-  opacity: .48;
+  opacity: .3;
 }
 .garden-overgrowth.is-active {
   touch-action: none;
+  cursor: none;
   transition: opacity 260ms steps(5, end), visibility 0s;
 }
 .garden-overgrowth.is-active::before,
@@ -3184,6 +3185,8 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   opacity: 1;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  backface-visibility: hidden;
+  transform: translateZ(0);
   pointer-events: none;
   transition: opacity 420ms steps(6, end);
 }
@@ -3258,6 +3261,7 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   color: rgba(201, 208, 198, .58);
   border-bottom-color: rgba(117, 131, 116, .34);
   font-family: var(--pixel);
+  cursor: pointer;
 }
 .garden-overgrowth-copy button b { transition: transform 160ms steps(3, end); }
 @media (hover: hover) and (pointer: fine) {
@@ -3316,8 +3320,9 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   bottom: max(18px, env(safe-area-inset-bottom));
   z-index: 7;
   display: none;
-  align-items: end;
-  gap: 10px;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 6px;
   transform: translateX(-50%);
 }
 .garden-game-controls button {
@@ -3334,13 +3339,20 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   font: 14px/1 var(--pixel);
   touch-action: none;
   user-select: none;
+  cursor: pointer;
 }
-.garden-game-controls [data-game-jump] {
-  width: 52px;
-  height: 52px;
-  margin-bottom: 14px;
+.garden-game-controls [data-game-up] { grid-column: 2; grid-row: 1; }
+.garden-game-controls [data-game-left] { grid-column: 1; grid-row: 2; }
+.garden-game-controls [data-game-shot] {
+  grid-column: 2;
+  grid-row: 2;
   color: var(--pixel-light);
+  background: rgba(117, 131, 116, .18);
+  font-size: 17px;
+  text-shadow: 0 0 8px rgba(201, 208, 198, .35);
 }
+.garden-game-controls [data-game-right] { grid-column: 3; grid-row: 2; }
+.garden-game-controls [data-game-down] { grid-column: 2; grid-row: 3; }
 .garden-game-controls button:active {
   color: var(--pixel-ink);
   background: var(--pixel-moss);
@@ -3351,7 +3363,7 @@ html.garden-root-impact .garden-overgrowth { animation: garden-impact-jolt 440ms
   outline-offset: 3px;
 }
 @media (hover: none), (pointer: coarse) {
-  .garden-overgrowth.is-active .garden-game-controls { display: flex; }
+  .garden-overgrowth.is-active .garden-game-controls { display: grid; }
   .garden-overgrowth .garden-overgrowth-copy {
     top: 18px;
     left: 18px;

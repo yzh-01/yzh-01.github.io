@@ -3228,7 +3228,7 @@
     }, 24000);
   }
 
-  function setupGardenEasterEgg() {
+  function setupGardenEasterEggLegacy() {
     var overlay = document.querySelector('[data-garden-overgrowth]');
     if (!overlay) return;
     var canvas = overlay.querySelector('[data-overgrowth-field]');
@@ -3270,16 +3270,19 @@
     var platforms = [];
     var signals = [];
     var hazards = [];
+    var currents = [];
     var buildings = [];
     var stars = [];
     var rain = [];
     var particles = [];
     var ripples = [];
+    var guide = { x: 24, y: 96, trail: [], phase: 0, burstUntil: 0 };
     var input = { left: false, right: false, pointer: 0, jumpBuffer: 0, jumpHeld: false };
     var player = {
       x: 18, y: 0, previousY: 0, width: 5, height: 14,
       velocityX: 0, velocityY: 0, direction: 1, onGround: false,
       coyote: 0, step: 0, squash: 0, visible: true, gliding: false,
+      inCurrent: false, invulnerableUntil: 0, dashingUntil: 0, dashCooldownUntil: 0, support: null,
       idleTime: 0, lastIdleShake: 0, shakeUntil: 0,
       signalPoseUntil: 0, landedAt: 0
     };
@@ -3343,7 +3346,7 @@
       var rect = overlay.getBoundingClientRect();
       var cssWidth = Math.max(1, Math.round(rect.width || window.innerWidth));
       var cssHeight = Math.max(1, Math.round(rect.height || window.innerHeight));
-      var pixelSize = cssWidth < 720 ? 3 : (cssWidth > 2600 ? 6 : 4);
+      var pixelSize = cssWidth < 720 ? 2 : (cssWidth > 2600 ? 4 : 3);
       logicalWidth = Math.max(128, Math.round(cssWidth / pixelSize));
       logicalHeight = Math.max(96, Math.round(cssHeight / pixelSize));
       worldWidth = Math.max(380, Math.round(logicalWidth * 2.42));
@@ -3363,6 +3366,7 @@
       platforms = [];
       signals = [];
       hazards = [];
+      currents = [];
       buildings = [];
       stars = [];
       rain = [];
@@ -3388,13 +3392,33 @@
       var memoryPlatform = { x: worldWidth * .67, y: groundY - 10, width: Math.max(25, worldWidth * .07), height: 3, elevated: true };
       platforms.push(memoryPlatform);
 
+      platforms.push({
+        x: gapCenters[0] - gapWidth * .62, y: groundY - 23, width: gapWidth * 1.24, height: 3, elevated: true,
+        moving: true, baseX: gapCenters[0] - gapWidth * .62, baseY: groundY - 23,
+        rangeX: 0, rangeY: 9, speed: .00125, phase: .4, deltaX: 0, deltaY: 0
+      });
+      platforms.push({
+        x: gapCenters[1] - gapWidth * .72, y: groundY - 31, width: gapWidth * 1.15, height: 3, elevated: true,
+        moving: true, baseX: gapCenters[1] - gapWidth * .72, baseY: groundY - 31,
+        rangeX: gapWidth * .5, rangeY: 5, speed: .00105, phase: 2.2, deltaX: 0, deltaY: 0
+      });
+      platforms.push({
+        x: gapCenters[2] - gapWidth * .55, y: groundY - 26, width: gapWidth * 1.1, height: 3, elevated: true,
+        moving: true, baseX: gapCenters[2] - gapWidth * .55, baseY: groundY - 26,
+        rangeX: gapWidth * .35, rangeY: 11, speed: .0014, phase: 4.1, deltaX: 0, deltaY: 0
+      });
+
       signals.push({ x: worldWidth * .17, y: groundY, active: false, label: 'ARTICLE', phase: random() * Math.PI * 2 });
       signals.push({ x: upper.x + upper.width * .56, y: upper.y, active: false, label: 'NOTE', phase: random() * Math.PI * 2 });
       signals.push({ x: memoryPlatform.x + memoryPlatform.width * .56, y: memoryPlatform.y, active: false, label: 'MEMORY', phase: random() * Math.PI * 2 });
 
-      hazards.push({ x: worldWidth * .355, y: groundY - 5, min: worldWidth * .325, max: worldWidth * .405, velocity: 9.5, phase: 0 });
-      hazards.push({ x: worldWidth * .615, y: groundY - 5, min: worldWidth * .59, max: worldWidth * .68, velocity: -11, phase: 1.8 });
-      hazards.push({ x: worldWidth * .835, y: groundY - 5, min: worldWidth * .815, max: worldWidth * .89, velocity: 12, phase: 3.1 });
+      hazards.push({ x: worldWidth * .355, y: groundY - 5, min: worldWidth * .325, max: worldWidth * .405, velocity: 9.5, phase: 0, disabledUntil: 0 });
+      hazards.push({ x: worldWidth * .615, y: groundY - 5, min: worldWidth * .59, max: worldWidth * .68, velocity: -11, phase: 1.8, disabledUntil: 0 });
+      hazards.push({ x: worldWidth * .835, y: groundY - 5, min: worldWidth * .815, max: worldWidth * .89, velocity: 12, phase: 3.1, disabledUntil: 0 });
+
+      currents.push({ x: gapCenters[0] + gapWidth * .2, top: groundY - 46, width: gapWidth * 1.7, strength: 1, phase: random() * Math.PI * 2 });
+      currents.push({ x: gapCenters[1] - gapWidth * .35, top: groundY - 55, width: gapWidth * 1.9, strength: 1.12, phase: random() * Math.PI * 2 });
+      currents.push({ x: gapCenters[2] + gapWidth * .1, top: groundY - 42, width: gapWidth * 1.6, strength: .92, phase: random() * Math.PI * 2 });
 
       gate.x = worldWidth - 34;
       gate.y = groundY;
@@ -3436,6 +3460,11 @@
       player.step = 0;
       player.squash = 0;
       player.gliding = false;
+      player.inCurrent = false;
+      player.invulnerableUntil = atCheckpoint ? performance.now() + 880 : 0;
+      player.dashingUntil = 0;
+      player.dashCooldownUntil = 0;
+      player.support = null;
       player.idleTime = 0;
       player.lastIdleShake = performance.now();
       player.shakeUntil = 0;
@@ -3443,6 +3472,11 @@
       player.landedAt = 0;
       player.visible = true;
       cameraX = clamp(player.x - logicalWidth * .28, 0, worldWidth - logicalWidth);
+      guide.x = player.x + 18;
+      guide.y = player.y - 10;
+      guide.trail = [];
+      guide.phase = 0;
+      guide.burstUntil = 0;
       input.jumpBuffer = 0;
     }
 
@@ -3457,7 +3491,7 @@
       gameState = 'playing';
       resetPlayer(false);
       if (status) status.textContent = 'ENDLINE // 00 / 03 SIGNALS';
-      if (hint) hint.textContent = '点亮三座文章信标。A/D 移动，W/空格跳跃；空中按住可撑伞缓降。';
+      if (hint) hint.textContent = '点亮三座文章信标。A/D 移动，W/空格跳跃并撑伞，Shift/X 冲刺。';
     }
 
     function spawnPixels(x, y, count, color, force) {
@@ -3492,6 +3526,22 @@
       if (player.velocityY < -24) player.velocityY *= .52;
     }
 
+    function queueDash() {
+      if (!active || gameState !== 'playing') return;
+      var now = performance.now();
+      if (now < player.dashCooldownUntil) return;
+      var axis = inputAxis();
+      if (axis) player.direction = axis < 0 ? -1 : 1;
+      player.dashingUntil = now + 190;
+      player.dashCooldownUntil = now + 920;
+      player.velocityX = player.direction * 82;
+      player.velocityY *= .42;
+      player.support = null;
+      player.squash = .18;
+      screenShake = Math.max(screenShake, .9);
+      spawnPixels(player.x + player.width / 2 - player.direction * 3, player.y + player.height * .58, 12, palette.moss, 17);
+    }
+
     function killPlayer(reason) {
       if (gameState !== 'playing') return;
       gameState = 'respawning';
@@ -3515,6 +3565,7 @@
       checkpoint.y = signal.y - player.height;
       screenShake = 1.1;
       player.signalPoseUntil = performance.now() + 720;
+      guide.burstUntil = performance.now() + 760;
       spawnPixels(signal.x, signal.y - 8, 22, palette.moss, 18);
       addRipple(signal.x, signal.y + 1, 1.25);
       if (status) status.textContent = signal.label + ' SIGNAL RESTORED // 0' + activatedCount + ' / 03';
@@ -3555,8 +3606,25 @@
       });
     }
 
-    function updateHazards(delta) {
+    function updatePlatforms(now) {
+      platforms.forEach(function (platform) {
+        platform.deltaX = 0;
+        platform.deltaY = 0;
+        if (!platform.moving) return;
+        var previousX = platform.x;
+        var previousY = platform.y;
+        var wave = Math.sin(now * platform.speed + platform.phase);
+        var crossWave = Math.sin(now * platform.speed * .72 + platform.phase + 1.4);
+        platform.x = platform.baseX + wave * platform.rangeX;
+        platform.y = platform.baseY + crossWave * platform.rangeY;
+        platform.deltaX = platform.x - previousX;
+        platform.deltaY = platform.y - previousY;
+      });
+    }
+
+    function updateHazards(delta, now) {
       hazards.forEach(function (hazard) {
+        if (now < hazard.disabledUntil) return;
         hazard.x += hazard.velocity * delta;
         if (hazard.x <= hazard.min || hazard.x >= hazard.max) {
           hazard.x = clamp(hazard.x, hazard.min, hazard.max);
@@ -3576,6 +3644,31 @@
       ripples = ripples.filter(function (ripple) {
         ripple.age += delta;
         return ripple.age < ripple.life;
+      });
+    }
+
+    function nextSignalTarget() {
+      for (var index = 0; index < signals.length; index += 1) {
+        if (!signals[index].active) return signals[index];
+      }
+      return gate;
+    }
+
+    function updateGuide(delta, now) {
+      var target = nextSignalTarget();
+      var distance = target.x - player.x;
+      var direction = distance < 0 ? -1 : 1;
+      var closeEnough = Math.abs(distance) < 62;
+      var targetX = closeEnough ? target.x : player.x + direction * 28;
+      var targetY = closeEnough ? target.y - 20 : player.y - 12;
+      targetY += Math.sin(now * .0032 + guide.phase) * 3;
+      guide.x += (targetX - guide.x) * Math.min(1, delta * 4.8);
+      guide.y += (targetY - guide.y) * Math.min(1, delta * 4.2);
+      guide.phase += delta * 1.4;
+      guide.trail.unshift({ x: guide.x, y: guide.y, age: 0 });
+      guide.trail = guide.trail.filter(function (point, index) {
+        point.age += delta;
+        return index < 9 && point.age < .7;
       });
     }
 
@@ -3604,15 +3697,23 @@
         return;
       }
 
+      if (player.onGround && player.support && player.support.moving) {
+        player.x += player.support.deltaX;
+        player.y += player.support.deltaY;
+      }
+
       var axis = inputAxis();
+      var dashing = now < player.dashingUntil;
       var acceleration = player.onGround ? 148 : (player.gliding ? 112 : 94);
-      if (axis) {
+      if (dashing) {
+        player.velocityX = player.direction * 82;
+      } else if (axis) {
         player.velocityX += axis * acceleration * delta;
         player.direction = axis < 0 ? -1 : 1;
       } else {
         player.velocityX *= Math.pow(player.onGround ? .0006 : .12, delta);
       }
-      var maximumSpeed = player.gliding ? 39 : 35;
+      var maximumSpeed = dashing ? 82 : (player.gliding ? 39 : 35);
       player.velocityX = clamp(player.velocityX, -maximumSpeed, maximumSpeed);
       if (Math.abs(player.velocityX) < .12) player.velocityX = 0;
       player.x = clamp(player.x + player.velocityX * delta, 0, worldWidth - player.width);
@@ -3623,6 +3724,7 @@
         input.jumpBuffer = 0;
         player.coyote = 0;
         player.onGround = false;
+        player.support = null;
         player.velocityY = -76;
         player.squash = .2;
         spawnPixels(player.x + player.width / 2, player.y + player.height, 5, palette.mist, 9);
@@ -3630,10 +3732,23 @@
 
       player.previousY = player.y;
       var previousBottom = player.y + player.height;
-      player.gliding = input.jumpHeld && !player.onGround && player.velocityY > 9;
-      var gravity = player.gliding ? 72 : 168;
-      var terminalVelocity = player.gliding ? 34 : 78;
+      player.gliding = input.jumpHeld && !player.onGround && (player.velocityY > 9 || player.inCurrent);
+      var gravity = dashing ? 48 : (player.gliding ? 72 : 168);
+      var terminalVelocity = dashing ? 42 : (player.gliding ? 34 : 78);
       player.velocityY = Math.min(terminalVelocity, player.velocityY + gravity * delta);
+      player.inCurrent = false;
+      if (player.gliding) {
+        currents.forEach(function (current) {
+          var playerCenter = player.x + player.width / 2;
+          var insideX = playerCenter > current.x - current.width / 2 && playerCenter < current.x + current.width / 2;
+          var insideY = player.y + player.height > current.top && player.y < groundY + 3;
+          if (!insideX || !insideY) return;
+          var lift = current.strength * (1 - Math.abs(playerCenter - current.x) / (current.width / 2));
+          player.velocityY = Math.max(-31, player.velocityY - (116 + lift * 42) * delta);
+          player.velocityX += Math.sin(now * .004 + current.phase) * lift * 5 * delta;
+          player.inCurrent = true;
+        });
+      }
       player.y += player.velocityY * delta;
       var nextBottom = player.y + player.height;
       var landedOn = null;
@@ -3655,8 +3770,10 @@
         }
         player.gliding = false;
         player.onGround = true;
+        player.support = landedOn;
       } else {
         player.onGround = false;
+        player.support = null;
       }
       player.squash = Math.max(0, player.squash - delta * 1.9);
       if (Math.abs(player.velocityX) > .8 && player.onGround) player.step += delta * (5.8 + Math.abs(player.velocityX) * .1);
@@ -3679,7 +3796,18 @@
 
       hazards.forEach(function (hazard) {
         if (gameState !== 'playing') return;
-        if (horizontalOverlap(player.x, player.width, hazard.x - 2, 5) && player.y + player.height > hazard.y && player.y < hazard.y + 5) killPlayer('noise');
+        if (now < hazard.disabledUntil) return;
+        if (now < player.invulnerableUntil) return;
+        if (!horizontalOverlap(player.x, player.width, hazard.x - 2, 5) || player.y + player.height <= hazard.y || player.y >= hazard.y + 5) return;
+        if (dashing) {
+          hazard.disabledUntil = now + 2400;
+          screenShake = Math.max(screenShake, 1.8);
+          spawnPixels(hazard.x, hazard.y + 2, 18, palette.light, 24);
+          addRipple(hazard.x, hazard.y + 5, .9);
+          player.velocityX *= .74;
+          return;
+        }
+        killPlayer('noise');
       });
 
       if (player.y > logicalHeight + 12) killPlayer('fall');
@@ -3707,9 +3835,11 @@
 
     function updateGame(delta, now) {
       updateRain(delta);
-      updateHazards(delta);
+      updatePlatforms(now);
+      updateHazards(delta, now);
       updateParticles(delta);
       updatePlayer(delta, now);
+      updateGuide(delta, now);
       updateCamera(delta);
     }
 
@@ -3757,6 +3887,11 @@
         pixel(x, platform.y + 3, platform.width, 1, palette.slate, .26);
         if (platform.elevated) {
           for (var brace = 4; brace < platform.width; brace += 14) pixelLine(x + brace, platform.y + 3, x + brace + 5, platform.y + 10, palette.mist, .19);
+          if (platform.moving) {
+            pixel(x + 2, platform.y - 2, 2, 1, palette.light, .42);
+            pixel(x + platform.width - 4, platform.y - 2, 2, 1, palette.light, .42);
+            pixel(x - platform.deltaX * 8, platform.y - platform.deltaY * 8 + 1, platform.width, 1, palette.moss, .08);
+          }
         } else {
           for (var sleeper = 2; sleeper < platform.width; sleeper += 15) pixel(x + sleeper, platform.y + 17, 9, 1, palette.mist, .17);
           pixel(x, platform.y + 15, platform.width, 1, palette.slate, .44);
@@ -3778,6 +3913,59 @@
       });
     }
 
+    function drawCurrents(now) {
+      currents.forEach(function (current) {
+        var center = screenX(current.x);
+        if (center + current.width < -8 || center - current.width > logicalWidth + 8) return;
+        var height = groundY - current.top;
+        for (var mote = 0; mote < 8; mote += 1) {
+          var travel = (now * (.00014 + mote * .000004) + mote * .137 + current.phase) % 1;
+          var y = groundY - travel * height;
+          var sway = Math.sin(now * .0024 + mote * 1.7 + travel * 5 + current.phase) * current.width * .28;
+          var alpha = Math.sin(travel * Math.PI) * (mote % 3 === 0 ? .22 : .11);
+          pixel(center + sway, y, mote % 3 === 0 ? 2 : 1, 1, mote % 3 === 0 ? palette.moss : palette.light, alpha);
+          if (mote % 3 === 0) pixel(center + sway - 1, y + 2, 4, 1, palette.mist, alpha * .38);
+        }
+        pixel(center - current.width * .34, groundY + 2, current.width * .68, 1, palette.moss, .08 + Math.sin(now * .003 + current.phase) * .025);
+      });
+    }
+
+    function drawSignalRoute(now) {
+      signals.forEach(function (signal, index) {
+        if (!signal.active) return;
+        var destination = index < signals.length - 1 ? signals[index + 1] : gate;
+        var distance = destination.x - signal.x;
+        var steps = Math.max(8, Math.round(Math.abs(distance) / 9));
+        var pulse = ((now - signal.activatedAt) * .00022) % 1;
+        for (var step = 0; step <= steps; step += 1) {
+          var progress = step / steps;
+          var x = signal.x + distance * progress;
+          var y = signal.y + (destination.y - signal.y) * progress - Math.sin(progress * Math.PI) * 7;
+          var screenPosition = screenX(x);
+          if (screenPosition < -4 || screenPosition > logicalWidth + 4) continue;
+          var distanceFromPulse = Math.abs(progress - pulse);
+          var glow = Math.max(0, 1 - distanceFromPulse * 12);
+          pixel(screenPosition, y, glow > .18 ? 2 : 1, 1, glow > .18 ? palette.light : palette.moss, .08 + glow * .5);
+        }
+      });
+    }
+
+    function drawGuide(now) {
+      var x = screenX(guide.x, .96);
+      var burst = clamp((guide.burstUntil - now) / 760, 0, 1);
+      guide.trail.forEach(function (point, index) {
+        var alpha = (1 - index / Math.max(1, guide.trail.length)) * .2;
+        pixel(screenX(point.x, .96), point.y, 1, 1, palette.moss, alpha);
+      });
+      var pulse = .64 + Math.sin(now * .006 + guide.phase) * .2;
+      pixel(x - 3 - burst * 3, guide.y, 2, 1, palette.moss, .08 + burst * .16);
+      pixel(x + 3 + burst * 3, guide.y, 2, 1, palette.moss, .08 + burst * .16);
+      pixel(x, guide.y - 3 - burst * 2, 1, 2, palette.light, .12 + burst * .18);
+      pixel(x, guide.y + 3 + burst * 2, 1, 2, palette.moss, .1 + burst * .16);
+      pixel(x - 1, guide.y - 1, 3, 3, palette.moss, pulse * .34);
+      pixel(x, guide.y, 1, 1, palette.bone, pulse);
+    }
+
     function drawSignal(signal, now) {
       var x = screenX(signal.x);
       if (x < -12 || x > logicalWidth + 12) return;
@@ -3795,6 +3983,12 @@
     function drawHazard(hazard, now) {
       var x = screenX(hazard.x);
       if (x < -10 || x > logicalWidth + 10) return;
+      if (now < hazard.disabledUntil) {
+        var recovery = 1 - clamp((hazard.disabledUntil - now) / 2400, 0, 1);
+        pixel(x - 4, hazard.y + 4, 9, 1, palette.moss, .08 + recovery * .14);
+        if (Math.floor(now / 130) % 3 === 0) pixel(x + Math.round(Math.sin(now * .01) * 3), hazard.y + 1, 1, 1, palette.light, .22 + recovery * .25);
+        return;
+      }
       var glitch = Math.floor(now / 110 + hazard.phase) % 3;
       pixel(x - 2, hazard.y + 2, 5, 3, palette.slate, .9);
       pixel(x - 1 + glitch, hazard.y, 3, 2, palette.mist, .72);
@@ -3819,6 +4013,7 @@
 
     function drawPlayer(now) {
       if (!player.visible) return;
+      if (now < player.invulnerableUntil && Math.floor(now / 72) % 2 === 0) return;
       var x = Math.round(screenX(player.x));
       var y = Math.round(player.y);
       var centerX = x + 2;
@@ -3834,6 +4029,7 @@
       var airborne = !player.onGround;
       var signalPose = now < player.signalPoseUntil;
       var shaking = now < player.shakeUntil;
+      var dashing = now < player.dashingUntil;
       var shake = shaking ? Math.round(Math.sin((player.shakeUntil - now) * .075) * 2) : 0;
       var foldedUmbrella = winning && now - wonAt > 260;
       var blink = Math.floor((now + player.x * 23) / 1850) % 7 === 0;
@@ -3842,6 +4038,15 @@
         var landingGlow = clamp(1 - (now - player.landedAt) / 260, 0, 1);
         pixel(centerX - 6 - landingGlow * 2, y + player.height + 2, 13 + landingGlow * 4, 1, palette.mist, .13 + landingGlow * .12);
         pixel(centerX - 3, y + player.height + 5, 7, 1, palette.moss, .07);
+      }
+
+      if (dashing) {
+        for (var echo = 1; echo <= 3; echo += 1) {
+          var echoX = centerX - direction * (4 + echo * 4);
+          pixel(echoX - 2, y + 1 + bob, 5, 4, palette.mist, .2 / echo);
+          pixel(echoX - 3, y + 5 + bob, 7, 6, palette.moss, .14 / echo);
+        }
+        pixel(centerX - direction * 15, y + 7 + bob, 11, 1, palette.light, .18);
       }
 
       var scarfLift = gliding ? -2 : clamp(Math.round(-player.velocityY * .025), -1, 2);
@@ -3949,6 +4154,10 @@
       pixel(startX, 16, 21, 1, palette.mist, .2);
       var progress = clamp(player.x / Math.max(1, gate.x), 0, 1);
       pixel(startX, 16, 21 * progress, 1, palette.moss, .56);
+      var dashReady = 1 - clamp((player.dashCooldownUntil - now) / 920, 0, 1);
+      pixel(startX, 20, 21, 1, palette.slate, .5);
+      pixel(startX, 20, 21 * dashReady, 1, dashReady >= 1 ? palette.light : palette.moss, dashReady >= 1 ? .72 : .42);
+      if (dashReady >= 1) pixel(startX + 20, 19, 1, 3, palette.bone, .56 + Math.sin(now * .006) * .12);
     }
 
     function renderGame(now) {
@@ -3959,10 +4168,13 @@
       drawSky(now);
       drawRain(false);
       drawPlatforms(now);
+      drawCurrents(now);
+      drawSignalRoute(now);
       signals.forEach(function (signal) { drawSignal(signal, now); });
       hazards.forEach(function (hazard) { drawHazard(hazard, now); });
       drawGate(now);
       drawEffects();
+      drawGuide(now);
       drawPlayer(now);
       drawRain(true);
       drawHud(now);
@@ -4060,6 +4272,11 @@
         if (event.key === 'Escape') { event.preventDefault(); finish(); return; }
         if (target && target.closest && target.closest('button') && (event.key === ' ' || event.key === 'Enter')) return;
         if (key === 'r') { event.preventDefault(); resetGame(); startedAt = performance.now() - 800; return; }
+        if (key === 'shift' || key === 'x') {
+          event.preventDefault();
+          if (!event.repeat) queueDash();
+          return;
+        }
         if (key === 'a' || event.key === 'ArrowLeft') { event.preventDefault(); input.left = true; return; }
         if (key === 'd' || event.key === 'ArrowRight') { event.preventDefault(); input.right = true; return; }
         if (key === 'w' || event.key === 'ArrowUp' || event.key === ' ') {
@@ -4127,6 +4344,8 @@
         jump.addEventListener('pointerup', releaseJump);
         jump.addEventListener('pointercancel', releaseJump);
       }
+      var dash = controls.querySelector('[data-game-dash]');
+      if (dash) dash.addEventListener('pointerdown', function (event) { event.preventDefault(); queueDash(); });
     }
     if (close) close.addEventListener('click', finish);
     window.addEventListener('resize', function () {
@@ -4137,6 +4356,852 @@
         startedAt = performance.now() - 800;
         resetGame();
         if (gardenMotionIsLite()) renderGame(performance.now());
+      }, 140);
+    }, { passive: true });
+    fitCanvas();
+  }
+
+  function setupGardenEasterEgg() {
+    var overlay = document.querySelector('[data-garden-overgrowth]');
+    if (!overlay) return;
+    var canvas = overlay.querySelector('[data-overgrowth-field]');
+    var close = overlay.querySelector('[data-overgrowth-close]');
+    var status = overlay.querySelector('[data-overgrowth-status]');
+    var hint = overlay.querySelector('[data-overgrowth-hint]');
+    var controls = overlay.querySelector('[data-game-controls]');
+    var context = canvas ? canvas.getContext('2d', { alpha: false, desynchronized: true }) : null;
+    if (!canvas || !context) return;
+
+    var sequence = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+    var palette = {
+      ink: '#050607', night: '#0b0e0f', cloud: '#14191a', slate: '#202728',
+      mist: '#3b4745', moss: '#758374', light: '#c9d0c6', bone: '#e4e6df'
+    };
+    var sequencePosition = 0;
+    var active = false;
+    var receding = false;
+    var frame = 0;
+    var resizeTimer = 0;
+    var timers = [];
+    var previousFocus = null;
+    var logicalWidth = 426;
+    var logicalHeight = 240;
+    var startedAt = 0;
+    var lastFrame = 0;
+    var gameState = 'idle';
+    var activatedCount = 0;
+    var spawnAt = 0;
+    var respawnAt = 0;
+    var wonAt = 0;
+    var winSettled = false;
+    var shotReadyAt = 0;
+    var dryNoticeAt = 0;
+    var weaponKick = 0;
+    var gateNoticeAt = 0;
+    var shadowId = 0;
+    var screenShake = 0;
+    var randomState = 0x51f15e1d;
+    var input = { left: false, right: false, up: false, down: false };
+    var pointer = { x: 0, y: 0, seen: false };
+    var player = { x: 0, y: 0, vx: 0, vy: 0, radius: 4, aim: -.3, energy: 100, health: 3, visible: true, invulnerableUntil: 0, checkpointX: 0, checkpointY: 0, winFromX: 0, winFromY: 0 };
+    var gate = { x: 0, y: 0 };
+    var beacons = [];
+    var ruins = [];
+    var shadows = [];
+    var particles = [];
+    var bullets = [];
+    var rain = [];
+    var fieldDots = [];
+    var guide = { x: 0, y: 0, trail: [] };
+
+    function clamp(value, minimum, maximum) { return Math.max(minimum, Math.min(maximum, value)); }
+    function random() {
+      randomState ^= randomState << 13;
+      randomState ^= randomState >>> 17;
+      randomState ^= randomState << 5;
+      return (randomState >>> 0) / 4294967296;
+    }
+    function distance(x0, y0, x1, y1) {
+      var dx = x1 - x0;
+      var dy = y1 - y0;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    function easeOut(value) {
+      var progress = clamp(value, 0, 1);
+      return 1 - Math.pow(1 - progress, 3);
+    }
+    function later(callback, delay) { timers.push(window.setTimeout(callback, delay)); }
+    function clearTimers() {
+      timers.forEach(function (timer) { window.clearTimeout(timer); });
+      timers = [];
+    }
+    function pixel(x, y, width, height, color, alpha) {
+      context.globalAlpha = alpha === undefined ? 1 : alpha;
+      context.fillStyle = color;
+      context.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+      context.globalAlpha = 1;
+    }
+    function pixelLine(x0, y0, x1, y1, color, alpha) {
+      var startX = Math.round(x0);
+      var startY = Math.round(y0);
+      var endX = Math.round(x1);
+      var endY = Math.round(y1);
+      var dx = Math.abs(endX - startX);
+      var sx = startX < endX ? 1 : -1;
+      var dy = -Math.abs(endY - startY);
+      var sy = startY < endY ? 1 : -1;
+      var error = dx + dy;
+      context.globalAlpha = alpha === undefined ? 1 : alpha;
+      context.fillStyle = color;
+      while (true) {
+        context.fillRect(startX, startY, 1, 1);
+        if (startX === endX && startY === endY) break;
+        var twice = error * 2;
+        if (twice >= dy) { error += dy; startX += sx; }
+        if (twice <= dx) { error += dx; startY += sy; }
+      }
+      context.globalAlpha = 1;
+    }
+    function pixelRing(x, y, radius, color, alpha) {
+      var points = Math.max(12, Math.round(radius * 1.8));
+      for (var index = 0; index < points; index += 1) {
+        var angle = index / points * Math.PI * 2;
+        pixel(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, 1, 1, color, alpha);
+      }
+    }
+    function fitCanvas() {
+      var rect = overlay.getBoundingClientRect();
+      var cssWidth = Math.max(1, Math.round(rect.width || window.innerWidth));
+      var cssHeight = Math.max(1, Math.round(rect.height || window.innerHeight));
+      var pixelSize = 2;
+      logicalWidth = Math.max(190, Math.round(cssWidth / pixelSize));
+      logicalHeight = Math.max(126, Math.round(cssHeight / pixelSize));
+      canvas.width = logicalWidth;
+      canvas.height = logicalHeight;
+      context.imageSmoothingEnabled = false;
+    }
+    function setMessage(line, detail) {
+      if (status) status.textContent = line;
+      if (hint && detail) hint.textContent = detail;
+    }
+    function circleHitsRuin(x, y, radius) {
+      for (var index = 0; index < ruins.length; index += 1) {
+        var ruin = ruins[index];
+        var nearestX = clamp(x, ruin.x, ruin.x + ruin.width);
+        var nearestY = clamp(y, ruin.y, ruin.y + ruin.height);
+        var dx = x - nearestX;
+        var dy = y - nearestY;
+        if (dx * dx + dy * dy < radius * radius) return true;
+      }
+      return false;
+    }
+    function makeWorld() {
+      randomState = 0x51f15e1d;
+      ruins = [
+        { x: logicalWidth * .31, y: logicalHeight * .08, width: Math.max(9, logicalWidth * .035), height: logicalHeight * .39 },
+        { x: logicalWidth * .31, y: logicalHeight * .61, width: Math.max(9, logicalWidth * .035), height: logicalHeight * .3 },
+        { x: logicalWidth * .56, y: logicalHeight * .26, width: logicalWidth * .22, height: Math.max(7, logicalHeight * .035) },
+        { x: logicalWidth * .56, y: logicalHeight * .56, width: logicalWidth * .22, height: Math.max(7, logicalHeight * .035) },
+        { x: logicalWidth * .46, y: logicalHeight * .4, width: logicalWidth * .045, height: logicalHeight * .2 }
+      ];
+      beacons = [
+        { x: logicalWidth * .18, y: logicalHeight * .22, charge: 0, active: false, label: 'ARTICLE', phase: random() * Math.PI * 2 },
+        { x: logicalWidth * .84, y: logicalHeight * .18, charge: 0, active: false, label: 'NOTE', phase: random() * Math.PI * 2 },
+        { x: logicalWidth * .76, y: logicalHeight * .79, charge: 0, active: false, label: 'MEMORY', phase: random() * Math.PI * 2 }
+      ];
+      gate.x = logicalWidth * .12;
+      gate.y = logicalHeight * .78;
+      player.x = gate.x + 13;
+      player.y = gate.y;
+      player.vx = player.vy = 0;
+      player.aim = -.45;
+      player.energy = 100;
+      player.health = 3;
+      player.visible = true;
+      player.invulnerableUntil = 0;
+      player.checkpointX = player.x;
+      player.checkpointY = player.y;
+      pointer.x = player.x + 60;
+      pointer.y = player.y - 28;
+      pointer.seen = false;
+      guide.x = player.x + 18;
+      guide.y = player.y - 10;
+      guide.trail = [];
+      shadows = [];
+      particles = [];
+      bullets = [];
+      rain = [];
+      fieldDots = [];
+      activatedCount = 0;
+      shadowId = 0;
+      screenShake = 0;
+      spawnAt = performance.now() + 1500;
+      shotReadyAt = 0;
+      dryNoticeAt = 0;
+      weaponKick = 0;
+      wonAt = 0;
+      winSettled = false;
+      for (var dotIndex = 0; dotIndex < Math.round(logicalWidth * logicalHeight / 560); dotIndex += 1) {
+        fieldDots.push({ x: random() * logicalWidth, y: random() * logicalHeight, alpha: .04 + random() * .08 });
+      }
+      for (var rainIndex = 0; rainIndex < Math.round(logicalWidth * .24); rainIndex += 1) {
+        rain.push({ x: random() * logicalWidth, y: random() * logicalHeight, speed: 28 + random() * 48, depth: .2 + random() * .8 });
+      }
+      setMessage('LOW TIDE // 00 / 03 SIGNALS', '在雾中恢复三座信标。WASD 移动，鼠标瞄准，左键发射冷光弹。');
+    }
+    function spawnPixels(x, y, count, color, force) {
+      for (var index = 0; index < count; index += 1) {
+        var angle = random() * Math.PI * 2;
+        var speed = 3 + random() * (force || 18);
+        particles.push({ x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, age: 0, life: .35 + random() * .65, color: color || palette.light });
+      }
+      while (particles.length > 140) particles.shift();
+    }
+    function spawnShadow(now) {
+      var edge = Math.floor(random() * 4);
+      var x = edge === 0 ? -8 : (edge === 1 ? logicalWidth + 8 : random() * logicalWidth);
+      var y = edge === 2 ? -8 : (edge === 3 ? logicalHeight + 8 : random() * logicalHeight);
+      if (distance(x, y, player.x, player.y) < logicalWidth * .34) return;
+      shadows.push({ id: ++shadowId, x: x, y: y, vx: 0, vy: 0, phase: random() * Math.PI * 2, hp: 2, stunnedUntil: 0, revealed: false });
+      spawnAt = now + Math.max(1050, 2600 - activatedCount * 420) + random() * 900;
+    }
+    function activateBeacon(beacon, now) {
+      beacon.active = true;
+      beacon.activatedAt = now;
+      beacon.charge = 1;
+      activatedCount += 1;
+      player.checkpointX = beacon.x;
+      player.checkpointY = beacon.y + 14;
+      player.energy = Math.min(100, player.energy + 34);
+      screenShake = 1.2;
+      spawnPixels(beacon.x, beacon.y, 34, palette.moss, 24);
+      setMessage(beacon.label + ' RESTORED // 0' + activatedCount + ' / 03', activatedCount === 3 ? '三座信标已连接。返回左下方入口，离开低潮区。' : '信标成为新的重组点。微光正在寻找下一段信号。');
+    }
+    function fireShot(now) {
+      if (!active || gameState !== 'playing' || now < shotReadyAt) return;
+      if (player.energy < 9) {
+        shotReadyAt = now + 180;
+        weaponKick = .3;
+        if (now >= dryNoticeAt) {
+          dryNoticeAt = now + 900;
+          setMessage('LANTERN DRAINED // HOLD THE BEAM', '停止射击片刻，或靠近已经恢复的信标补充灯能。');
+        }
+        return;
+      }
+      var aimX = Math.cos(player.aim);
+      var aimY = Math.sin(player.aim);
+      var muzzleX = player.x + aimX * 8;
+      var muzzleY = player.y + aimY * 8;
+      player.energy -= 9;
+      shotReadyAt = now + 185;
+      weaponKick = 1;
+      bullets.push({
+        x: muzzleX, y: muzzleY, vx: aimX * 154, vy: aimY * 154,
+        age: 0, life: 1.18, bounces: 1, dead: false, trail: []
+      });
+      if (bullets.length > 22) bullets.shift();
+      screenShake = Math.max(screenShake, .7);
+      spawnPixels(muzzleX, muzzleY, 6, palette.bone, 11);
+    }
+    function hurtPlayer(now) {
+      if (now < player.invulnerableUntil || gameState !== 'playing') return;
+      player.health -= 1;
+      player.invulnerableUntil = now + 1100;
+      player.energy = Math.max(0, player.energy - 18);
+      screenShake = 3.2;
+      spawnPixels(player.x, player.y, 24, palette.light, 26);
+      if (player.health > 0) {
+        setMessage('NOISE CONTACT // ' + player.health + ' LIGHTS REMAIN', '用灯束拖慢噪影，再用左键冷光弹击退它们。');
+        return;
+      }
+      gameState = 'respawning';
+      respawnAt = now + 760;
+      setMessage('SIGNAL LOST // REBUILDING', '正在最近恢复的信标处重组。已恢复的信号不会丢失。');
+    }
+    function respawnPlayer(now) {
+      player.x = player.checkpointX;
+      player.y = player.checkpointY;
+      player.vx = player.vy = 0;
+      player.health = 3;
+      player.energy = Math.max(58, player.energy);
+      player.invulnerableUntil = now + 1350;
+      shadows = shadows.filter(function (shadow) { return distance(shadow.x, shadow.y, player.x, player.y) > 72; });
+      gameState = 'playing';
+      spawnPixels(player.x, player.y, 22, palette.moss, 17);
+      setMessage('REBUILT // CHECKPOINT RESTORED', '继续搜索。微光会指向尚未恢复的信标。');
+    }
+    function nextTarget() {
+      var nearest = null;
+      var nearestDistance = Infinity;
+      beacons.forEach(function (beacon) {
+        if (beacon.active) return;
+        var gap = distance(player.x, player.y, beacon.x, beacon.y);
+        if (gap < nearestDistance) { nearest = beacon; nearestDistance = gap; }
+      });
+      return nearest || gate;
+    }
+    function updatePlayer(delta, now) {
+      if (gameState === 'respawning') {
+        if (now >= respawnAt) respawnPlayer(now);
+        return;
+      }
+      if (gameState === 'won') {
+        var departure = clamp((now - wonAt) / 980, 0, 1);
+        var easedDeparture = easeOut(departure);
+        player.x = player.winFromX + (gate.x - player.winFromX) * easedDeparture;
+        player.y = player.winFromY + (gate.y - player.winFromY) * easedDeparture;
+        player.aim += delta * (2.4 + departure * 5.2);
+        player.visible = departure < .82;
+        if (departure >= .9 && !winSettled) {
+          winSettled = true;
+          player.visible = false;
+          spawnPixels(gate.x, gate.y, 34, palette.bone, 22);
+          setMessage('LOW TIDE CLEARED // 03 / 03 SIGNALS', '角色已经穿过终点。按 R 可以重新进入，或退出返回花园。');
+        }
+        return;
+      }
+      var axisX = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+      var axisY = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+      var magnitude = Math.sqrt(axisX * axisX + axisY * axisY) || 1;
+      if (axisX || axisY) {
+        axisX /= magnitude;
+        axisY /= magnitude;
+        if (!pointer.seen) player.aim = Math.atan2(axisY, axisX);
+      }
+      var speed = 43;
+      player.vx += (axisX * speed - player.vx) * Math.min(1, delta * 9);
+      player.vy += (axisY * speed - player.vy) * Math.min(1, delta * 9);
+      if (!axisX) player.vx *= Math.pow(.012, delta);
+      if (!axisY) player.vy *= Math.pow(.012, delta);
+      var nextX = clamp(player.x + player.vx * delta, 7, logicalWidth - 7);
+      if (!circleHitsRuin(nextX, player.y, player.radius)) player.x = nextX;
+      else player.vx *= -.16;
+      var nextY = clamp(player.y + player.vy * delta, 15, logicalHeight - 9);
+      if (!circleHitsRuin(player.x, nextY, player.radius)) player.y = nextY;
+      else player.vy *= -.16;
+      if (pointer.seen) player.aim = Math.atan2(pointer.y - player.y, pointer.x - player.x);
+
+      var beamLength = Math.min(118, logicalWidth * .29);
+      var aimX = Math.cos(player.aim);
+      var aimY = Math.sin(player.aim);
+      var charging = false;
+      beacons.forEach(function (beacon) {
+        if (beacon.active) {
+          if (distance(player.x, player.y, beacon.x, beacon.y) < 28) player.energy = Math.min(100, player.energy + delta * 22);
+          return;
+        }
+        var dx = beacon.x - player.x;
+        var dy = beacon.y - player.y;
+        var gap = Math.sqrt(dx * dx + dy * dy) || 1;
+        var alignment = (dx / gap) * aimX + (dy / gap) * aimY;
+        if (gap < beamLength && alignment > .78) {
+          charging = true;
+          beacon.charge = Math.min(1, beacon.charge + delta * .74);
+          player.energy = Math.max(0, player.energy - delta * 5.5);
+          if (beacon.charge >= 1) activateBeacon(beacon, now);
+        } else {
+          beacon.charge = Math.max(0, beacon.charge - delta * .15);
+        }
+      });
+      if (!charging) player.energy = Math.min(100, player.energy + delta * 8.5);
+      if (activatedCount === beacons.length && distance(player.x, player.y, gate.x, gate.y) < 13) {
+        gameState = 'won';
+        wonAt = now;
+        winSettled = false;
+        player.winFromX = player.x;
+        player.winFromY = player.y;
+        player.vx = player.vy = 0;
+        overlay.classList.add('is-game-won');
+        shadows = [];
+        spawnPixels(gate.x, gate.y, 56, palette.bone, 31);
+        setMessage('LOW TIDE CLEARED // 03 / 03 SIGNALS', '线路已经闭合。正在穿过终点。');
+        document.dispatchEvent(new CustomEvent('garden:pet', { detail: '低潮区的三段信号已经恢复。' }));
+      } else if (activatedCount < beacons.length && distance(player.x, player.y, gate.x, gate.y) < 13 && now > gateNoticeAt) {
+        gateNoticeAt = now + 1200;
+        setMessage('EXIT LOCKED // ' + (beacons.length - activatedCount) + ' SIGNALS MISSING', '微光会指向距离最近的未恢复信标。');
+      }
+    }
+    function updateBullets(delta, now) {
+      bullets.forEach(function (bullet) {
+        if (bullet.dead) return;
+        bullet.age += delta;
+        bullet.trail.unshift({ x: bullet.x, y: bullet.y });
+        if (bullet.trail.length > 7) bullet.trail.pop();
+        var travel = Math.sqrt(bullet.vx * bullet.vx + bullet.vy * bullet.vy) * delta;
+        var steps = Math.max(1, Math.ceil(travel / 2.4));
+        var stepDelta = delta / steps;
+        for (var step = 0; step < steps && !bullet.dead; step += 1) {
+          var nextX = bullet.x + bullet.vx * stepDelta;
+          var nextY = bullet.y + bullet.vy * stepDelta;
+          var hitX = circleHitsRuin(nextX, bullet.y, 1.5);
+          var hitY = circleHitsRuin(bullet.x, nextY, 1.5);
+          if (hitX || hitY) {
+            if (bullet.bounces > 0) {
+              if (hitX) bullet.vx *= -1;
+              if (hitY) bullet.vy *= -1;
+              if (!hitX && !hitY) { bullet.vx *= -1; bullet.vy *= -1; }
+              bullet.bounces -= 1;
+              bullet.age += .08;
+              spawnPixels(bullet.x, bullet.y, 7, palette.moss, 9);
+            } else {
+              bullet.dead = true;
+              spawnPixels(bullet.x, bullet.y, 5, palette.mist, 7);
+            }
+            continue;
+          }
+          bullet.x = nextX;
+          bullet.y = nextY;
+          if (bullet.x < -4 || bullet.x > logicalWidth + 4 || bullet.y < -4 || bullet.y > logicalHeight + 4) bullet.dead = true;
+          for (var shadowIndex = 0; shadowIndex < shadows.length && !bullet.dead; shadowIndex += 1) {
+            var shadow = shadows[shadowIndex];
+            if (shadow.destroyed || distance(bullet.x, bullet.y, shadow.x, shadow.y) > 6) continue;
+            bullet.dead = true;
+            shadow.hp -= 1;
+            shadow.flashUntil = now + 150;
+            shadow.stunnedUntil = now + 310;
+            var shotMagnitude = Math.sqrt(bullet.vx * bullet.vx + bullet.vy * bullet.vy) || 1;
+            shadow.x += bullet.vx / shotMagnitude * 9;
+            shadow.y += bullet.vy / shotMagnitude * 9;
+            screenShake = Math.max(screenShake, shadow.hp <= 0 ? 2.2 : 1.2);
+            spawnPixels(shadow.x, shadow.y, shadow.hp <= 0 ? 24 : 12, shadow.hp <= 0 ? palette.light : palette.moss, shadow.hp <= 0 ? 25 : 15);
+            if (shadow.hp <= 0 && !shadow.destroyed) {
+              shadow.destroyed = true;
+              player.energy = Math.min(100, player.energy + 12);
+            }
+          }
+        }
+      });
+      bullets = bullets.filter(function (bullet) { return !bullet.dead && bullet.age < bullet.life; });
+    }
+    function updateShadows(delta, now) {
+      if (gameState !== 'playing') return;
+      var maximum = 3 + activatedCount * 2;
+      if (now >= spawnAt && shadows.length < maximum) spawnShadow(now);
+      var beamLength = Math.min(118, logicalWidth * .29);
+      var aimX = Math.cos(player.aim);
+      var aimY = Math.sin(player.aim);
+      shadows.forEach(function (shadow) {
+        if (shadow.destroyed) return;
+        var dx = player.x - shadow.x;
+        var dy = player.y - shadow.y;
+        var gap = Math.sqrt(dx * dx + dy * dy) || 1;
+        var toShadowX = -dx / gap;
+        var toShadowY = -dy / gap;
+        var alignment = toShadowX * aimX + toShadowY * aimY;
+        shadow.revealed = gap < beamLength && alignment > .82;
+        var speed = 13 + activatedCount * 2.4;
+        if (shadow.revealed) speed *= .27;
+        if (now < shadow.stunnedUntil) speed *= -.42;
+        shadow.vx += ((dx / gap) * speed - shadow.vx) * Math.min(1, delta * 4.2);
+        shadow.vy += ((dy / gap) * speed - shadow.vy) * Math.min(1, delta * 4.2);
+        shadow.x += shadow.vx * delta;
+        shadow.y += shadow.vy * delta;
+        if (gap < player.radius + 4) hurtPlayer(now);
+      });
+      shadows = shadows.filter(function (shadow) {
+        return !shadow.destroyed && shadow.hp > 0;
+      });
+    }
+    function updateGuide(delta, now) {
+      var target = nextTarget();
+      var dx = target.x - player.x;
+      var dy = target.y - player.y;
+      var gap = Math.sqrt(dx * dx + dy * dy) || 1;
+      var lead = Math.min(34, gap * .42);
+      var targetX = player.x + dx / gap * lead;
+      var targetY = player.y + dy / gap * lead - 7 + Math.sin(now * .004) * 3;
+      guide.x += (targetX - guide.x) * Math.min(1, delta * 5);
+      guide.y += (targetY - guide.y) * Math.min(1, delta * 5);
+      guide.trail.unshift({ x: guide.x, y: guide.y });
+      if (guide.trail.length > 8) guide.trail.pop();
+    }
+    function updateEffects(delta) {
+      particles = particles.filter(function (particle) {
+        particle.age += delta;
+        particle.x += particle.vx * delta;
+        particle.y += particle.vy * delta;
+        particle.vx *= Math.pow(.08, delta);
+        particle.vy *= Math.pow(.08, delta);
+        return particle.age < particle.life;
+      });
+      weaponKick *= Math.pow(.0008, delta);
+      rain.forEach(function (drop) {
+        drop.x -= drop.speed * delta * .16;
+        drop.y += drop.speed * delta;
+        if (drop.y > logicalHeight + 3 || drop.x < -3) { drop.x = random() * logicalWidth + logicalWidth * .12; drop.y = -random() * 20; }
+      });
+      screenShake = Math.max(0, screenShake - delta * 8);
+    }
+    function updateGame(delta, now) {
+      updatePlayer(delta, now);
+      updateBullets(delta, now);
+      updateShadows(delta, now);
+      updateGuide(delta, now);
+      updateEffects(delta);
+    }
+    function drawContour(centerX, centerY, radiusX, radiusY, phase, alpha) {
+      var previousX = 0;
+      var previousY = 0;
+      var points = 42;
+      for (var point = 0; point <= points; point += 1) {
+        var angle = point / points * Math.PI * 2;
+        var distortion = 1 + Math.sin(angle * 3 + phase) * .07 + Math.cos(angle * 5 - phase) * .035;
+        var x = centerX + Math.cos(angle) * radiusX * distortion;
+        var y = centerY + Math.sin(angle) * radiusY * distortion;
+        if (point) pixelLine(previousX, previousY, x, y, palette.mist, alpha);
+        previousX = x;
+        previousY = y;
+      }
+    }
+    function drawFogLayer(now, foreground) {
+      var drift = now * (foreground ? .0028 : .0015);
+      var bandCount = foreground ? 4 : 6;
+      for (var band = 0; band < bandCount; band += 1) {
+        var y = logicalHeight * ((band + (foreground ? .4 : .7)) / bandCount) + Math.sin(drift + band * 1.7) * (foreground ? 6 : 10);
+        var segmentWidth = foreground ? 32 : 46;
+        var offset = ((drift * (foreground ? 21 : 13) + band * 37) % (segmentWidth * 2)) - segmentWidth;
+        for (var x = offset; x < logicalWidth; x += segmentWidth * 1.55) {
+          var width = segmentWidth * (.72 + (band % 3) * .18);
+          pixel(x, y, width, foreground ? 2 : 1, foreground ? palette.light : palette.mist, foreground ? .024 : .055);
+          pixel(x + width * .22, y + (foreground ? 3 : 2), width * .56, 1, palette.moss, foreground ? .018 : .032);
+        }
+      }
+    }
+    function drawGround(now) {
+      pixel(0, 0, logicalWidth, logicalHeight, palette.night);
+      fieldDots.forEach(function (dot, index) {
+        var flicker = .72 + Math.sin(now * .0011 + index * 2.17) * .28;
+        pixel(dot.x, dot.y, 1, 1, palette.mist, dot.alpha * flicker);
+      });
+      for (var contour = 0; contour < 6; contour += 1) {
+        drawContour(logicalWidth * .57, logicalHeight * .47, 44 + contour * 29, 22 + contour * 17, contour * .63, .035 + contour * .006);
+      }
+      for (var tide = 0; tide < 5; tide += 1) {
+        drawContour(logicalWidth * .12, logicalHeight * .9, 22 + tide * 21, 10 + tide * 10, tide * .8, .028);
+      }
+      drawFogLayer(now, false);
+      ruins.forEach(function (ruin, index) {
+        pixel(ruin.x + 3, ruin.y + 4, ruin.width, ruin.height, palette.ink, .54);
+        pixel(ruin.x, ruin.y, ruin.width, ruin.height, palette.ink, .98);
+        pixel(ruin.x, ruin.y, ruin.width, 1, palette.mist, .42);
+        pixel(ruin.x, ruin.y, 1, ruin.height, palette.moss, .14);
+        pixel(ruin.x + ruin.width - 1, ruin.y + 3, 1, ruin.height - 3, palette.slate, .25);
+        for (var cut = 5; cut < ruin.height; cut += 13 + index) {
+          var inset = 2 + (cut + index * 3) % 5;
+          pixel(ruin.x + inset, ruin.y + cut, Math.max(2, ruin.width - inset - 3), 1, palette.slate, .38);
+          pixel(ruin.x + (cut * 3 + index) % Math.max(2, Math.round(ruin.width - 2)), ruin.y + cut - 2, 2, 2, palette.night, .82);
+        }
+      });
+      for (var puddle = 0; puddle < 8; puddle += 1) {
+        var x = logicalWidth * (.08 + puddle * .115);
+        var y = logicalHeight * (.15 + (puddle % 4) * .21);
+        var shimmer = Math.sin(now * .0017 + puddle) * 2;
+        pixel(x + shimmer, y, 14 + puddle % 3 * 7, 1, palette.mist, .12);
+        pixel(x + 5 - shimmer * .4, y + 3, 8 + puddle % 2 * 9, 1, palette.moss, .055);
+      }
+    }
+    function drawBeam(now) {
+      if (gameState === 'won') return;
+      var length = Math.min(118, logicalWidth * .29);
+      var spread = .32;
+      for (var ray = -7; ray <= 7; ray += 1) {
+        var offset = ray / 7 * spread;
+        var angle = player.aim + offset;
+        var strength = 1 - Math.abs(ray) / 9;
+        pixelLine(player.x, player.y, player.x + Math.cos(angle) * length, player.y + Math.sin(angle) * length, ray === 0 ? palette.light : palette.moss, (ray === 0 ? .17 : .025) * strength);
+      }
+      var scan = ((now - startedAt) * .00018) % 1;
+      pixel(player.x + Math.cos(player.aim) * length * scan, player.y + Math.sin(player.aim) * length * scan, 2, 2, palette.bone, .28);
+      for (var mote = 0; mote < 11; mote += 1) {
+        var travel = ((now * .00011 + mote * .087) % 1);
+        var lateral = Math.sin(mote * 8.41) * spread * travel * 15;
+        var beamX = player.x + Math.cos(player.aim) * length * travel + Math.cos(player.aim + Math.PI / 2) * lateral;
+        var beamY = player.y + Math.sin(player.aim) * length * travel + Math.sin(player.aim + Math.PI / 2) * lateral;
+        pixel(beamX, beamY, mote % 4 === 0 ? 2 : 1, 1, palette.light, .1 + (1 - travel) * .12);
+      }
+    }
+    function drawGate(now) {
+      var open = activatedCount === beacons.length;
+      var departure = gameState === 'won' ? clamp((now - wonAt) / 980, 0, 1) : 0;
+      pixel(gate.x - 8, gate.y - 9, 17, 18, palette.ink, .96);
+      pixel(gate.x - 8, gate.y - 9, 17, 1, palette.mist, .62);
+      pixel(gate.x - 8, gate.y - 9, 1, 18, palette.mist, .5);
+      pixel(gate.x + 8, gate.y - 9, 1, 18, palette.mist, .5);
+      pixel(gate.x - 4, gate.y - 5, 9, 10, open ? palette.moss : palette.slate, open ? .3 : .72);
+      if (departure > 0) {
+        pixel(gate.x - 3, gate.y - 6, 7, 12, palette.bone, .18 + Math.sin(departure * Math.PI) * .42);
+        pixelRing(gate.x, gate.y, 8 + easeOut(departure) * 19, palette.light, (1 - departure) * .42);
+      }
+      pixel(gate.x - 1, gate.y - 13, 3, 3, open ? palette.bone : palette.mist, open ? .85 + Math.sin(now * .005) * .12 : .25);
+      if (open) pixelRing(gate.x, gate.y, 13 + Math.sin(now * .004) * 2, palette.moss, .14);
+    }
+    function drawBeacons(now) {
+      beacons.forEach(function (beacon) {
+        var pulse = .68 + Math.sin(now * .003 + beacon.phase) * .2;
+        pixel(beacon.x, beacon.y - 8, 1, 17, palette.mist, beacon.active ? .7 : .38);
+        pixel(beacon.x - 3, beacon.y - 10, 7, 3, beacon.active ? palette.light : palette.slate, beacon.active ? pulse : .5);
+        pixel(beacon.x - 1, beacon.y - 11, 3, 1, beacon.active ? palette.bone : palette.mist, beacon.active ? .9 : .42);
+        if (!beacon.active && beacon.charge > 0) pixelRing(beacon.x, beacon.y - 8, 7 + beacon.charge * 8, palette.moss, .16 + beacon.charge * .44);
+        if (beacon.active) {
+          pixelRing(beacon.x, beacon.y - 8, 10 + Math.sin(now * .002 + beacon.phase) * 2, palette.moss, .16);
+          pixel(beacon.x - 8, beacon.y + 11, 17, 1, palette.moss, .16);
+        }
+      });
+    }
+    function drawGuide(now) {
+      guide.trail.forEach(function (point, index) { pixel(point.x, point.y, 1, 1, palette.moss, (1 - index / 8) * .18); });
+      pixel(guide.x - 2, guide.y, 5, 1, palette.moss, .15);
+      pixel(guide.x, guide.y - 2, 1, 5, palette.moss, .15);
+      pixel(guide.x, guide.y, 2, 2, palette.bone, .62 + Math.sin(now * .007) * .2);
+    }
+    function drawShadows(now) {
+      shadows.forEach(function (shadow) {
+        var flicker = Math.floor(now / 90 + shadow.phase * 10) % 3;
+        var hitFlash = now < (shadow.flashUntil || 0);
+        var color = hitFlash ? palette.light : (shadow.revealed ? palette.mist : palette.ink);
+        var alpha = shadow.revealed ? .92 : .72;
+        pixel(shadow.x - 3 + flicker, shadow.y - 4, 7, 9, color, hitFlash ? .96 : alpha);
+        pixel(shadow.x - 5, shadow.y - 1 + flicker, 11, 3, palette.slate, shadow.revealed ? .58 : .28);
+        pixel(shadow.x - 1, shadow.y - 2, 1, 1, shadow.revealed ? palette.bone : palette.moss, shadow.revealed ? .78 : .24);
+        pixel(shadow.x - 7 - flicker, shadow.y + 5, 3, 1, palette.mist, shadow.revealed ? .32 : .11);
+        pixel(shadow.x + 6 + flicker, shadow.y - 5, 2, 1, palette.mist, shadow.revealed ? .26 : .08);
+        if (shadow.revealed) {
+          pixel(shadow.x - 7, shadow.y + 7, 15, 1, palette.moss, .16);
+          pixelRing(shadow.x, shadow.y, 8 + Math.sin(now * .006 + shadow.phase) * 1.5, palette.moss, .1);
+        }
+      });
+    }
+    function drawBullets() {
+      bullets.forEach(function (bullet) {
+        bullet.trail.forEach(function (point, index) {
+          if (index === 0) return;
+          pixel(point.x, point.y, index < 3 ? 2 : 1, 1, index < 3 ? palette.light : palette.moss, (1 - index / bullet.trail.length) * .42);
+        });
+        var magnitude = Math.sqrt(bullet.vx * bullet.vx + bullet.vy * bullet.vy) || 1;
+        var directionX = bullet.vx / magnitude;
+        var directionY = bullet.vy / magnitude;
+        pixelLine(bullet.x - directionX * 4, bullet.y - directionY * 4, bullet.x, bullet.y, palette.bone, .9);
+        pixel(bullet.x - 1, bullet.y - 1, 3, 3, palette.light, .46);
+        pixel(bullet.x, bullet.y, 1, 1, palette.bone, 1);
+      });
+    }
+    function drawPlayer(now) {
+      if (gameState === 'respawning' || !player.visible) return;
+      if (now < player.invulnerableUntil && Math.floor(now / 75) % 2 === 0) return;
+      var moving = Math.abs(player.vx) + Math.abs(player.vy) > 3;
+      var bob = moving ? Math.floor(now / 110) % 2 : 0;
+      var aimX = Math.cos(player.aim);
+      var aimY = Math.sin(player.aim);
+      var recoilX = aimX * weaponKick * 1.7;
+      var recoilY = aimY * weaponKick * 1.7;
+      pixel(player.x - 4 - recoilX, player.y + 1 + bob - recoilY, 9, 7, palette.ink, .96);
+      pixel(player.x - 3 - recoilX, player.y + 2 + bob - recoilY, 7, 5, palette.slate, .94);
+      pixel(player.x - 2, player.y - 4 + bob, 5, 5, palette.ink, .98);
+      pixel(player.x - 1, player.y - 3 + bob, 3, 3, palette.mist, .75);
+      pixel(player.x + aimX * 2, player.y - 2 + aimY * 2 + bob, 1, 1, palette.bone, .86);
+      pixel(player.x - 5 - player.vx * .035, player.y + 4 - player.vy * .035 + bob, 5, 2, palette.moss, .62);
+      var lanternX = player.x + aimX * (7 - weaponKick * 2);
+      var lanternY = player.y + aimY * (7 - weaponKick * 2) + bob;
+      pixelLine(player.x + aimX * 2, player.y + aimY * 2 + bob, lanternX, lanternY, palette.slate, .72);
+      pixel(lanternX - 1, lanternY - 1, 3, 3, palette.moss, .74);
+      pixel(lanternX, lanternY, 1, 1, palette.bone, .96);
+    }
+    function drawEffects() {
+      particles.forEach(function (particle) {
+        var alpha = clamp(1 - particle.age / particle.life, 0, 1) * .74;
+        var magnitude = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
+        if (magnitude > 8) pixelLine(particle.x, particle.y, particle.x - particle.vx * .045, particle.y - particle.vy * .045, particle.color, alpha * .5);
+        pixel(particle.x, particle.y, 1, 1, particle.color, alpha);
+      });
+    }
+    function drawRain() {
+      rain.forEach(function (drop) { pixelLine(drop.x, drop.y, drop.x - 1, drop.y + 2 + drop.depth * 3, drop.depth > .64 ? palette.light : palette.mist, .08 + drop.depth * .12); });
+    }
+    function drawHud(now) {
+      var right = logicalWidth - 10;
+      for (var heart = 0; heart < 3; heart += 1) pixel(right - 54 + heart * 7, 9, 5, 4, heart < player.health ? palette.light : palette.slate, heart < player.health ? .78 : .48);
+      beacons.forEach(function (beacon, index) {
+        pixel(right - 25 + index * 8, 8, 5, 5, beacon.active ? palette.light : palette.slate, beacon.active ? .84 : .48);
+        pixel(right - 24 + index * 8, 9, 3, 3, beacon.active ? palette.moss : palette.ink, .72);
+      });
+      pixel(right - 54, 17, 45, 2, palette.slate, .62);
+      pixel(right - 54, 17, 45 * player.energy / 100, 2, player.energy >= 28 ? palette.moss : palette.mist, .72);
+      var shotReady = now >= shotReadyAt && player.energy >= 9;
+      pixel(right - 7, 16, 3, 4, shotReady ? palette.bone : palette.slate, shotReady ? .82 + Math.sin(now * .006) * .12 : .5);
+    }
+    function drawCrosshair(now) {
+      if (!pointer.seen || gameState !== 'playing') return;
+      var locked = shadows.some(function (shadow) { return !shadow.destroyed && distance(pointer.x, pointer.y, shadow.x, shadow.y) < 9; });
+      var radius = 5 + weaponKick * 3 + (locked ? Math.sin(now * .012) : 0);
+      var color = locked ? palette.bone : palette.moss;
+      pixel(pointer.x - radius - 3, pointer.y, 3, 1, color, locked ? .95 : .62);
+      pixel(pointer.x + radius + 1, pointer.y, 3, 1, color, locked ? .95 : .62);
+      pixel(pointer.x, pointer.y - radius - 3, 1, 3, color, locked ? .95 : .62);
+      pixel(pointer.x, pointer.y + radius + 1, 1, 3, color, locked ? .95 : .62);
+      pixel(pointer.x, pointer.y, 1, 1, palette.light, locked ? .92 : .48);
+    }
+    function renderGame(now) {
+      var shakeX = screenShake ? (random() - .5) * screenShake : 0;
+      var shakeY = screenShake ? (random() - .5) * screenShake : 0;
+      context.save();
+      context.translate(Math.round(shakeX), Math.round(shakeY));
+      drawGround(now);
+      drawBeam(now);
+      drawGate(now);
+      drawBeacons(now);
+      drawGuide(now);
+      drawShadows(now);
+      drawBullets();
+      drawEffects();
+      drawPlayer(now);
+      drawFogLayer(now, true);
+      drawRain();
+      drawHud(now);
+      drawCrosshair(now);
+      var reveal = easeOut((now - startedAt) / 720);
+      if (reveal < 1) {
+        var opening = logicalWidth * reveal;
+        pixel(opening, 0, logicalWidth - opening, logicalHeight, palette.ink);
+      }
+      context.restore();
+    }
+    function renderLoop(now) {
+      if (!active) return;
+      if (document.hidden) { lastFrame = now; frame = window.requestAnimationFrame(renderLoop); return; }
+      var elapsed = now - lastFrame;
+      if (elapsed < 1000 / 30) { frame = window.requestAnimationFrame(renderLoop); return; }
+      var delta = Math.min(.045, elapsed / 1000);
+      lastFrame = now;
+      if (!receding) updateGame(delta, now);
+      renderGame(now);
+      frame = window.requestAnimationFrame(renderLoop);
+    }
+    function stopGame() {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      input.left = input.right = input.up = input.down = false;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function resetGame() {
+      overlay.classList.remove('is-game-won');
+      gameState = 'playing';
+      makeWorld();
+      startedAt = performance.now() - 520;
+      lastFrame = performance.now();
+    }
+    function finish() {
+      if (!active || receding) return;
+      clearTimers();
+      receding = true;
+      overlay.classList.add('is-receding');
+      setMessage('LOW TIDE CLOSED // RETURNING', '正在返回花园。');
+      later(function () {
+        overlay.classList.remove('is-active', 'is-receding', 'is-game-won');
+        overlay.setAttribute('aria-hidden', 'true');
+        active = false;
+        gameState = 'idle';
+        stopGame();
+        if (previousFocus && previousFocus.focus && document.contains(previousFocus)) previousFocus.focus({ preventScroll: true });
+      }, gardenMotionIsLite() ? 20 : 440);
+    }
+    function awaken() {
+      clearTimers();
+      stopGame();
+      overlay.classList.remove('is-active', 'is-receding', 'is-game-won');
+      void overlay.offsetWidth;
+      previousFocus = document.activeElement;
+      active = true;
+      receding = false;
+      overlay.classList.add('is-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      fitCanvas();
+      resetGame();
+      overlay.focus({ preventScroll: true });
+      document.dispatchEvent(new CustomEvent('garden:pet', { detail: 'LOW TIDE 已打开：别让噪影吞掉灯光。' }));
+      if (gardenMotionIsLite()) {
+        renderGame(performance.now());
+        setMessage('STATIC LOW TIDE // MOTION REDUCED', '系统已按动态偏好展示静态彩蛋。');
+        later(finish, 5200);
+        return;
+      }
+      frame = window.requestAnimationFrame(renderLoop);
+    }
+    function isEditingTarget(target) {
+      return target && (target.matches('input, textarea, select') || target.isContentEditable);
+    }
+    function setDirection(key, pressed) {
+      if (key === 'a' || key === 'arrowleft') input.left = pressed;
+      if (key === 'd' || key === 'arrowright') input.right = pressed;
+      if (key === 'w' || key === 'arrowup') input.up = pressed;
+      if (key === 's' || key === 'arrowdown') input.down = pressed;
+    }
+    document.addEventListener('keydown', function (event) {
+      if (isEditingTarget(event.target)) return;
+      var key = event.key.toLowerCase();
+      if (active) {
+        if (event.key === 'Escape') { event.preventDefault(); finish(); return; }
+        if (event.target && event.target.closest && event.target.closest('[data-overgrowth-close]') && (event.key === ' ' || event.key === 'Enter')) return;
+        if (key === 'r') { event.preventDefault(); resetGame(); return; }
+        if (event.key === ' ') { event.preventDefault(); return; }
+        if (key === 'a' || key === 'd' || key === 'w' || key === 's' || key.indexOf('arrow') === 0) {
+          event.preventDefault();
+          setDirection(key, true);
+        }
+        return;
+      }
+      sequencePosition = key === sequence[sequencePosition] ? sequencePosition + 1 : (key === sequence[0] ? 1 : 0);
+      if (sequencePosition < sequence.length) return;
+      sequencePosition = 0;
+      awaken();
+    });
+    document.addEventListener('keyup', function (event) {
+      if (!active) return;
+      setDirection(event.key.toLowerCase(), false);
+    });
+    overlay.addEventListener('pointermove', function (event) {
+      if (!active || receding || event.pointerType === 'touch') return;
+      var rect = canvas.getBoundingClientRect();
+      pointer.x = (event.clientX - rect.left) / Math.max(1, rect.width) * logicalWidth;
+      pointer.y = (event.clientY - rect.top) / Math.max(1, rect.height) * logicalHeight;
+      pointer.seen = true;
+    }, { passive: true });
+    overlay.addEventListener('pointerdown', function (event) {
+      if (!active || receding || event.pointerType === 'touch' || event.button !== 0 || event.target.closest('button')) return;
+      event.preventDefault();
+      var rect = canvas.getBoundingClientRect();
+      pointer.x = (event.clientX - rect.left) / Math.max(1, rect.width) * logicalWidth;
+      pointer.y = (event.clientY - rect.top) / Math.max(1, rect.height) * logicalHeight;
+      pointer.seen = true;
+      player.aim = Math.atan2(pointer.y - player.y, pointer.x - player.x);
+      fireShot(performance.now());
+    });
+    function bindHold(selector, property) {
+      if (!controls) return;
+      var button = controls.querySelector(selector);
+      if (!button) return;
+      button.addEventListener('pointerdown', function (event) { event.preventDefault(); button.setPointerCapture(event.pointerId); input[property] = true; });
+      function release(event) {
+        input[property] = false;
+        if (button.hasPointerCapture && button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
+      }
+      button.addEventListener('pointerup', release);
+      button.addEventListener('pointercancel', release);
+      button.addEventListener('lostpointercapture', function () { input[property] = false; });
+    }
+    bindHold('[data-game-left]', 'left');
+    bindHold('[data-game-right]', 'right');
+    bindHold('[data-game-up]', 'up');
+    bindHold('[data-game-down]', 'down');
+    if (controls) {
+      var shot = controls.querySelector('[data-game-shot]');
+      if (shot) shot.addEventListener('pointerdown', function (event) { event.preventDefault(); fireShot(performance.now()); });
+    }
+    if (close) close.addEventListener('click', finish);
+    window.addEventListener('resize', function () {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(function () {
+        fitCanvas();
+        if (active) resetGame();
       }, 140);
     }, { passive: true });
     fitCanvas();
