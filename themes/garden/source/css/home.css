@@ -4155,9 +4155,6 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 .folio-raven-sprite--frame.is-current { opacity: 1; }
 .folio-raven-flight.is-leader .folio-raven-sprite--frame { will-change: opacity; }
 .folio-raven-atlas { pointer-events: none; }
-.folio-raven-flight.is-leader {
-  filter: drop-shadow(0 0 .75px rgba(190, 207, 205, .42));
-}
 .folio-raven-feather,
 .folio-raven-notch { fill: var(--raven-ink); stroke: var(--raven-edge); stroke-width: .45; vector-effect: non-scaling-stroke; }
 

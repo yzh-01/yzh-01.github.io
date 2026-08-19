@@ -444,7 +444,7 @@
         play(raven, frames, {
           duration: flightDuration,
           delay: launchDelay,
-          easing: 'cubic-bezier(.3,.08,.2,1)',
+          easing: 'linear',
           fill: 'both'
         });
         animateRavenFlight(raven, flightDuration, launchDelay, index);
@@ -517,7 +517,7 @@
         play(raven, makeFlightFrames(path, entry.scale, true, -1), {
           duration: 690 + index * 46,
           delay: entry.delay,
-          easing: 'cubic-bezier(.32,.08,.24,1)',
+          easing: 'linear',
           fill: 'both'
         });
         animateRavenFlight(raven, 720, entry.delay, index);
@@ -558,6 +558,19 @@
     trigger.addEventListener('pointerenter', preloadRavenAtlas, { passive: true });
     trigger.addEventListener('focus', preloadRavenAtlas);
     trigger.addEventListener('touchstart', preloadRavenAtlas, { passive: true });
+
+    var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!motionIsLite() && !(connection && connection.saveData)) {
+      if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(function () {
+          if (!document.hidden) preloadRavenAtlas();
+        }, { timeout: 2800 });
+      } else {
+        later(function () {
+          if (!document.hidden) preloadRavenAtlas();
+        }, 1800);
+      }
+    }
 
     window.addEventListener('resize', scheduleRefresh, { passive: true });
     window.addEventListener('orientationchange', scheduleRefresh, { passive: true });
