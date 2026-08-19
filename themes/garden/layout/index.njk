@@ -134,6 +134,7 @@
       </span>
     </div>
     <div class="folio-cover-shade" aria-hidden="true"></div>
+    <svg class="folio-raven-flock" data-raven-flock preserveAspectRatio="none" aria-hidden="true"></svg>
 
     <div class="folio-masthead">
       <a href="{{ url_for('/') }}" data-scramble><i aria-hidden="true"></i>SYS.ONLINE</a>
@@ -155,6 +156,58 @@
       <span class="folio-wordmark-chip folio-wordmark-chip-a" aria-hidden="true">WINTEROMEN</span>
       <span class="folio-wordmark-chip folio-wordmark-chip-b" aria-hidden="true">WINTEROMEN</span>
     </h1>
+    <button class="folio-raven-trigger" type="button" data-flock-trigger aria-label="唤起奥丁的双鸦胡金与穆宁"></button>
+    <svg class="folio-norse-sigil" data-norse-sigil viewBox="0 0 240 168" aria-hidden="true">
+      <defs>
+        <mask id="folio-yggdrasil-woodcut" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="168">
+          <rect width="240" height="168" fill="#fff"/>
+          <g fill="none" stroke="#000" stroke-linecap="square">
+            <path stroke-width="2.4" d="M115 145l11-12m-14-5 13-13m-13-5 14-14m-12-7 9-11m-11-8 8-10M96 139l10-4m-25 14 15-5m48-6 12 5m-22-19 11 5M91 87l13 4m-29-13 15 5m59 4-13 4m29-13-15 5"/>
+            <path stroke-width="1.2" d="M106 67l9 4m18 2-9 5M89 58l10 6m52-6-10 6M69 81l13 4m89-4-13 4"/>
+          </g>
+          <path fill="#000" d="M111 102l8-5-3 10zm13 18 8-6-4 11zM101 49l8-2-4 8zm34 1 8-3-5 9z"/>
+        </mask>
+      </defs>
+      <g class="folio-norse-ring" fill="none" stroke="currentColor">
+        <circle cx="120" cy="78" r="38"/>
+        <circle cx="120" cy="78" r="47"/>
+        <path d="M120 24v10m0 88v10M66 78h10m88 0h10M82 40l7 7m62 62 7 7m0-76-7 7m-62 62-7 7"/>
+      </g>
+      <g class="folio-norse-tree" fill="currentColor" stroke="none" mask="url(#folio-yggdrasil-woodcut)">
+        <path d="M109 151l-4-16 4-16-4-17 6-14-4-13 7-12-3-13 9-16 9 16-3 13 7 12-4 13 6 14-4 17 4 16-4 16 16 13-17-4-10 8-10-8-17 4z"/>
+        <path d="M114 68l-14-17-7-20-13-15 5 20 11 20 14 20zm12 0 14-17 7-20 13-15-5 20-11 20-14 20z"/>
+        <path d="M112 82L94 68 75 52 53 47l17 14 21 18 17 14zm16 0 18-14 19-16 22-5-17 14-21 18-17 14z"/>
+        <path d="M109 98L87 87 64 72l-24 5 22 8 22 15 24 11zm22 0 22-11 23-15 24 5-22 8-22 15-24 11z"/>
+        <path d="M112 126l-21 12-17 13-27 9 28-3 22-10 19-8zm16 0 21 12 17 13 27 9-28-3-22-10-19-8z"/>
+        <path d="M115 141l-10 17-16 8 20-3 11-9 11 9 20 3-16-8-10-17z"/>
+      </g>
+      <g class="folio-yggdrasil-eagle" fill="currentColor" stroke="none">
+        <path d="M120 24c-7-10-17-15-31-13l14 7-18 1 24 9 11-2 11 2 24-9-18-1 14-7c-14-2-24 3-31 13z"/>
+        <path d="M116 22l4-8 4 8-4 9z"/>
+      </g>
+      <g class="folio-yggdrasil-serpent" fill="currentColor" stroke="none">
+        <path d="M37 153c15-17 37-15 53-3 11 8 22 8 31-1l7 5c-11 14-28 15-44 4-12-9-25-10-33 1l9 1-12 7-13-8z"/>
+        <path d="M35 154l-10-4 6 9-5 7 13-4z"/>
+        <circle class="folio-yggdrasil-serpent-eye" cx="32" cy="157" r="1.2"/>
+      </g>
+      <g class="folio-norse-nodes" fill="currentColor" stroke="none">
+        <path style="--node:0" d="M120 23l4 5-4 5-4-5z"/>
+        <path style="--node:1" d="M76 39l4 5-4 5-4-5z"/>
+        <path style="--node:2" d="M164 39l4 5-4 5-4-5z"/>
+        <path style="--node:3" d="M42 72l5 5-5 5-5-5z"/>
+        <path style="--node:4" d="M198 72l5 5-5 5-5-5z"/>
+        <path style="--node:5" d="M64 80l4 5-4 5-4-5z"/>
+        <path style="--node:6" d="M176 80l4 5-4 5-4-5z"/>
+        <path style="--node:7" d="M47 155l5 5-5 5-5-5z"/>
+        <path style="--node:8" d="M193 155l5 5-5 5-5-5z"/>
+      </g>
+    </svg>
+    <div class="folio-yggdrasil-name" data-yggdrasil-name aria-hidden="true">
+      <strong>YGGDRASIL</strong><span>WORLD TREE · NINE WORLDS</span>
+    </div>
+    <div class="folio-norse-key" data-norse-key aria-hidden="true">
+      <span>HUGINN <b>THOUGHT</b></span><i></i><span>MUNINN <b>MEMORY</b></span>
+    </div>
 
     <div class="folio-cover-copy">
       <p class="folio-cover-role" aria-label="FIELD STRING CORRUPTED">
@@ -355,6 +408,7 @@
         <circle cx="459" cy="326" r="2"/><circle cx="821" cy="599" r="2"/><circle cx="1298" cy="251" r="2"/>
       </g>
     </svg>
+    <svg class="folio-raven-echo" data-flock-echo preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="folio-field-motion folio-field-motion-articles" aria-hidden="true"><i class="folio-field-sweep"></i><b></b><b></b><b></b></div>
 
     <div class="folio-articles-grid">
@@ -455,4 +509,8 @@
   </section>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('js/raven-flock.js') }}?v={{ theme.asset_version }}" defer></script>
 {% endblock %}

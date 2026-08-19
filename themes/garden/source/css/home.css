@@ -4117,3 +4117,242 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   from { opacity: .09; transform: rotate(-8deg) scale(.9); }
   to { opacity: .2; transform: rotate(-6deg) scale(1.035); }
 }
+
+/* Raven eclipse — one deliberate ink gesture, never a persistent character layer. */
+.folio-raven-flock,
+.folio-raven-echo {
+  --raven-ink: #030606;
+  --raven-edge: rgba(152, 171, 171, .16);
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  contain: layout paint;
+}
+.folio-raven-flock { z-index: 3; }
+.folio-raven-echo { z-index: 3; }
+.folio-raven-flight,
+.folio-raven-shape,
+.folio-raven-motion,
+.folio-raven-feather,
+.folio-raven-notch { transform-box: view-box; }
+.folio-raven-flight { opacity: 0; will-change: transform, opacity; }
+.folio-raven-motion {
+  transform-origin: center;
+  will-change: transform;
+}
+.folio-raven-sprite {
+  overflow: hidden;
+  pointer-events: none;
+  image-rendering: auto;
+}
+.folio-raven-sprite--frame {
+  opacity: 0;
+}
+.folio-raven-sprite--frame.is-current { opacity: 1; }
+.folio-raven-flight.is-leader .folio-raven-sprite--frame { will-change: opacity; }
+.folio-raven-atlas { pointer-events: none; }
+.folio-raven-flight.is-leader {
+  filter: drop-shadow(0 0 .75px rgba(190, 207, 205, .42));
+}
+.folio-raven-feather,
+.folio-raven-notch { fill: var(--raven-ink); stroke: var(--raven-edge); stroke-width: .45; vector-effect: non-scaling-stroke; }
+
+.folio-raven-trigger {
+  position: absolute;
+  left: var(--flock-origin-x, 50%);
+  top: var(--flock-origin-y, 45%);
+  z-index: 9;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--moss-bright);
+  background: transparent;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  touch-action: manipulation;
+}
+.folio-raven-trigger::before,
+.folio-raven-trigger::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.78) rotate(-28deg);
+  transition: opacity 180ms ease, transform 320ms cubic-bezier(.16, 1, .3, 1);
+}
+.folio-raven-trigger::after {
+  inset: 0;
+  border-color: transparent currentColor transparent transparent;
+  transform: scale(.68) rotate(12deg);
+}
+.folio-raven-trigger:focus-visible::before { opacity: .42; transform: scale(1) rotate(-8deg); }
+.folio-raven-trigger:focus-visible::after { opacity: .22; transform: scale(1.08) rotate(72deg); }
+.folio-raven-trigger:focus-visible { outline: 1px dashed color-mix(in srgb, var(--moss-bright) 74%, transparent); outline-offset: 3px; }
+.folio-raven-trigger:active { transform: translate(-50%, -50%) scale(.92, 1.06); }
+.folio-wordmark.is-flock-opening .folio-wordmark-disc { animation: garden-flock-eclipse 4300ms cubic-bezier(.16, 1, .3, 1) both; }
+.folio-wordmark.is-flock-opening .folio-wordmark-disc::before { animation: garden-flock-orbit 4300ms cubic-bezier(.16, 1, .3, 1) both; }
+
+.folio-norse-sigil {
+  position: absolute;
+  left: var(--flock-origin-x, 50%);
+  top: var(--flock-origin-y, 45%);
+  z-index: 3;
+  width: clamp(320px, 27vw, 430px);
+  height: auto;
+  color: color-mix(in srgb, var(--moss-bright) 78%, var(--bone));
+  opacity: .56;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform: translate(-50%, -45%) scale(.94);
+  transition: opacity 260ms ease, transform 420ms cubic-bezier(.16, 1, .3, 1);
+}
+.folio-norse-ring { opacity: .18; stroke-width: .7; stroke-dasharray: 2 8 22 7; transform-origin: 120px 78px; }
+.folio-norse-tree { opacity: .88; transform-origin: 120px 137px; }
+.folio-yggdrasil-eagle { opacity: .92; transform-origin: 120px 24px; }
+.folio-yggdrasil-serpent { color: color-mix(in srgb, #050706 76%, var(--moss-bright)); opacity: .94; }
+.folio-yggdrasil-serpent-eye { fill: var(--bone); }
+.folio-norse-nodes path { opacity: .96; transform-box: fill-box; transform-origin: center; }
+.folio-yggdrasil-name {
+  position: absolute;
+  left: var(--flock-origin-x, 50%);
+  top: calc(var(--flock-origin-y, 45%) - 154px);
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  color: color-mix(in srgb, var(--bone) 86%, transparent);
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 240ms ease, transform 420ms cubic-bezier(.16, 1, .3, 1), color 240ms ease;
+}
+.folio-yggdrasil-name::after { content: ""; width: 1px; height: 18px; background: linear-gradient(var(--moss-bright), transparent); opacity: .7; }
+.folio-yggdrasil-name strong { font: 600 18px/.9 var(--serif); letter-spacing: .16em; }
+.folio-yggdrasil-name span { color: var(--moss-bright); font: 500 7px/1 var(--pixel); letter-spacing: .14em; }
+.folio-yggdrasil-name.is-awake { color: var(--bone); transform: translate(-50%, -4px); }
+.folio-norse-key {
+  position: absolute;
+  left: var(--flock-origin-x, 50%);
+  top: calc(var(--flock-origin-y, 45%) + 104px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  width: 440px;
+  color: color-mix(in srgb, var(--bone) 84%, transparent);
+  letter-spacing: .13em;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: color 240ms ease;
+}
+.folio-norse-key span { display: flex; gap: 9px; align-items: baseline; font: 600 12px/1 var(--serif); white-space: nowrap; }
+.folio-norse-key b { color: var(--moss-bright); font: 400 7px/1 var(--pixel); letter-spacing: .11em; opacity: .9; }
+.folio-norse-key i { width: 32px; height: 1px; background: linear-gradient(90deg, transparent, var(--moss-bright), transparent); opacity: .62; }
+.folio-raven-trigger:focus-visible + .folio-norse-sigil,
+.folio-norse-sigil.is-awake { opacity: .72; transform: translate(-50%, -45%) scale(1); }
+.folio-raven-trigger:focus-visible ~ .folio-norse-key,
+.folio-norse-key.is-awake { color: color-mix(in srgb, var(--bone) 86%, transparent); }
+.folio-raven-trigger:focus-visible ~ .folio-yggdrasil-name { color: var(--bone); transform: translate(-50%, -4px); }
+.folio-norse-sigil.is-awake .folio-norse-ring { animation: garden-norse-ring 4300ms cubic-bezier(.16, 1, .3, 1) both; }
+.folio-norse-sigil.is-awake .folio-norse-tree { animation: garden-norse-tree 4300ms cubic-bezier(.16, 1, .3, 1) both; }
+.folio-norse-sigil.is-awake .folio-norse-nodes path { animation: garden-norse-node 1500ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(260ms + var(--node) * 72ms); }
+.folio-norse-key.is-awake span:first-child { animation: garden-norse-name 2700ms cubic-bezier(.16, 1, .3, 1) 520ms both; }
+.folio-norse-key.is-awake span:last-child { animation: garden-norse-name 2700ms cubic-bezier(.16, 1, .3, 1) 680ms both; }
+
+:root[data-resolved-theme="light"] .folio-raven-flock,
+:root[data-resolved-theme="light"] .folio-raven-echo {
+  --raven-ink: #14191a;
+  --raven-edge: rgba(30, 40, 40, .12);
+}
+:root[data-resolved-theme="light"] .folio-norse-sigil { color: #355c3d; opacity: .48; mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .folio-norse-sigil.is-awake { opacity: .7; }
+:root[data-resolved-theme="light"] .folio-yggdrasil-serpent { color: #152019; }
+:root[data-resolved-theme="light"] .folio-yggdrasil-name { color: rgba(28, 38, 31, .84); }
+
+@keyframes garden-flock-eclipse {
+  0%, 100% { transform: scale(1); }
+  7% { transform: scale(.8, 1.07); }
+  16% { transform: scale(.94); }
+  27% { transform: scale(1.075, .94); }
+  44% { transform: scale(.98); }
+}
+@keyframes garden-flock-orbit {
+  0% { opacity: .58; transform: translate(-50%, -50%) rotate(var(--eclipse-angle)) scale(1); }
+  8% { opacity: 1; transform: translate(-50%, -50%) rotate(calc(var(--eclipse-angle) - 42deg)) scale(.72); }
+  24% { opacity: .24; transform: translate(-50%, -50%) rotate(calc(var(--eclipse-angle) + 76deg)) scale(1.38); }
+  52% { opacity: .7; transform: translate(-50%, -50%) rotate(calc(var(--eclipse-angle) + 164deg)) scale(1.08); }
+  100% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--eclipse-angle)) scale(1); }
+}
+@keyframes garden-norse-ring {
+  0% { opacity: .2; transform: rotate(-12deg) scale(.82); }
+  15% { opacity: .94; transform: rotate(7deg) scale(1.04); }
+  46% { opacity: .7; transform: rotate(24deg) scale(1); }
+  100% { opacity: .58; transform: rotate(38deg) scale(.98); }
+}
+@keyframes garden-norse-tree {
+  0% { opacity: .16; transform: scale(.7, .42); }
+  17% { opacity: 1; transform: scale(1.03, 1.05); }
+  42%, 76% { opacity: .82; transform: scale(1); }
+  100% { opacity: .72; transform: scale(.98); }
+}
+@keyframes garden-norse-node {
+  0% { opacity: .1; transform: scale(.45); }
+  28% { opacity: 1; transform: scale(1.75); }
+  70%, 100% { opacity: .64; transform: scale(1); }
+}
+@keyframes garden-norse-name {
+  0% { opacity: .24; transform: translateY(3px); }
+  22%, 70% { opacity: 1; transform: translateY(0); }
+  100% { opacity: .72; transform: translateY(0); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .folio-raven-trigger:hover::before { opacity: .42; transform: scale(1) rotate(-8deg); }
+  .folio-raven-trigger:hover::after { opacity: .22; transform: scale(1.08) rotate(72deg); }
+  .folio-raven-trigger:hover + .folio-norse-sigil { opacity: .64; transform: translate(-50%, -45%) scale(1); }
+  .folio-raven-trigger:hover ~ .folio-norse-key { color: color-mix(in srgb, var(--bone) 86%, transparent); }
+  .folio-raven-trigger:hover ~ .folio-yggdrasil-name { color: var(--bone); transform: translate(-50%, -4px); }
+}
+
+@media (max-width: 768px) {
+  .folio-raven-trigger { width: 52px; height: 52px; }
+  .folio-norse-sigil { width: 250px; opacity: .34; }
+  .folio-yggdrasil-name { top: calc(var(--flock-origin-y, 45%) - 100px); gap: 4px; }
+  .folio-yggdrasil-name::after { height: 10px; }
+  .folio-yggdrasil-name strong { font-size: 13px; }
+  .folio-yggdrasil-name span { font-size: 5.5px; }
+  .folio-norse-key { top: calc(var(--flock-origin-y, 45%) + 62px); gap: 9px; width: 310px; letter-spacing: .08em; }
+  .folio-norse-key span { gap: 5px; font-size: 9px; }
+  .folio-norse-key b { font-size: 6px; }
+  .folio-norse-key i { width: 16px; }
+}
+
+html.garden-lite-motion .folio-raven-flight,
+html.garden-lite-motion .folio-raven-feather,
+html.garden-lite-motion .folio-raven-notch { will-change: auto; }
+html.garden-lite-motion .folio-wordmark.is-flock-opening .folio-wordmark-disc,
+html.garden-lite-motion .folio-wordmark.is-flock-opening .folio-wordmark-disc::before { animation-duration: 360ms; }
+html.garden-lite-motion .folio-norse-sigil.is-awake .folio-norse-ring,
+html.garden-lite-motion .folio-norse-sigil.is-awake .folio-norse-tree,
+html.garden-lite-motion .folio-norse-sigil.is-awake .folio-norse-nodes path,
+html.garden-lite-motion .folio-norse-key.is-awake span { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .folio-raven-flight,
+  .folio-raven-feather,
+  .folio-raven-notch { will-change: auto; }
+  .folio-wordmark.is-flock-opening .folio-wordmark-disc,
+  .folio-wordmark.is-flock-opening .folio-wordmark-disc::before { animation-duration: 360ms; }
+  .folio-norse-sigil.is-awake .folio-norse-ring,
+  .folio-norse-sigil.is-awake .folio-norse-tree,
+  .folio-norse-sigil.is-awake .folio-norse-nodes path,
+  .folio-norse-key.is-awake span { animation: none; }
+}
