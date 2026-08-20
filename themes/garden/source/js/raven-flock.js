@@ -3,8 +3,9 @@
 
   var SVG_NS = 'http://www.w3.org/2000/svg';
   var XLINK_NS = 'http://www.w3.org/1999/xlink';
-  var RAVEN_ATLAS_PATH = '/images/raven-atlas-v1.png?v=20260819-111';
-  var preparedRavenAtlasPath = RAVEN_ATLAS_PATH;
+  var RAVEN_ATLAS_PATH = '/images/raven-atlas-v1.png?v=20260820-113';
+  var RAVEN_CELL_SIZE = 512;
+  var preparedRavenSprites = [];
   var RAVEN_SPRITES = [
     { column: 0, row: 0, nativeDirection: 1 },
     { column: 1, row: 0, nativeDirection: 1 },
@@ -89,27 +90,42 @@
     var frames = [];
     sequence.forEach(function (spriteIndex, frameIndex) {
       var sprite = RAVEN_SPRITES[spriteIndex];
-      var spriteView = svgNode('svg', {
-        'class': 'folio-raven-sprite folio-raven-sprite--frame' + (frameIndex === 0 ? ' is-current' : ''),
-        x: isLeader ? '-102' : '-88',
-        y: isLeader ? '-102' : '-88',
-        width: isLeader ? '204' : '176',
-        height: isLeader ? '204' : '176',
-        viewBox: (sprite.column * 512) + ' ' + (sprite.row * 512) + ' 512 512',
-        preserveAspectRatio: 'xMidYMid meet',
-        overflow: 'hidden'
-      });
-      var atlas = svgNode('image', {
-        'class': 'folio-raven-atlas',
-        x: '0',
-        y: '0',
-        width: '1536',
-        height: '1024',
-        preserveAspectRatio: 'none',
-        href: preparedRavenAtlasPath
-      });
-      atlas.setAttributeNS(XLINK_NS, 'href', preparedRavenAtlasPath);
-      spriteView.appendChild(atlas);
+      var spritePath = preparedRavenSprites[spriteIndex];
+      var spriteView;
+      if (spritePath) {
+        spriteView = svgNode('image', {
+          'class': 'folio-raven-sprite folio-raven-sprite--frame' + (frameIndex === 0 ? ' is-current' : ''),
+          x: isLeader ? '-102' : '-88',
+          y: isLeader ? '-102' : '-88',
+          width: isLeader ? '204' : '176',
+          height: isLeader ? '204' : '176',
+          preserveAspectRatio: 'xMidYMid meet',
+          href: spritePath
+        });
+        spriteView.setAttributeNS(XLINK_NS, 'href', spritePath);
+      } else {
+        spriteView = svgNode('svg', {
+          'class': 'folio-raven-sprite folio-raven-sprite--frame' + (frameIndex === 0 ? ' is-current' : ''),
+          x: isLeader ? '-102' : '-88',
+          y: isLeader ? '-102' : '-88',
+          width: isLeader ? '204' : '176',
+          height: isLeader ? '204' : '176',
+          viewBox: (sprite.column * RAVEN_CELL_SIZE) + ' ' + (sprite.row * RAVEN_CELL_SIZE) + ' ' + RAVEN_CELL_SIZE + ' ' + RAVEN_CELL_SIZE,
+          preserveAspectRatio: 'xMidYMid meet',
+          overflow: 'hidden'
+        });
+        var atlas = svgNode('image', {
+          'class': 'folio-raven-atlas',
+          x: '0',
+          y: '0',
+          width: '1536',
+          height: '1024',
+          preserveAspectRatio: 'none',
+          href: RAVEN_ATLAS_PATH
+        });
+        atlas.setAttributeNS(XLINK_NS, 'href', RAVEN_ATLAS_PATH);
+        spriteView.appendChild(atlas);
+      }
       motion.appendChild(spriteView);
       frames.push(spriteView);
     });
@@ -182,12 +198,32 @@
     var echoPlaying = false;
     var articleVisible = false;
     var atlasPromise = null;
-    var atlasObjectUrl = '';
+    var spriteObjectUrls = [];
     var pendingFlight = false;
     var flightRequestToken = 0;
 
     function motionIsLite() {
       return reduceMotion.matches || root.classList.contains('garden-lite-motion');
+    }
+
+    function decodeSprite(path) {
+      return new Promise(function (resolve) {
+        if (!path) {
+          resolve();
+          return;
+        }
+        var spriteImage = new Image();
+        var settled = false;
+        var finish = function () {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+        spriteImage.addEventListener('load', finish, { once: true });
+        spriteImage.addEventListener('error', finish, { once: true });
+        spriteImage.src = path;
+        if (typeof spriteImage.decode === 'function') spriteImage.decode().then(finish, finish);
+      });
     }
 
     function preloadRavenAtlas() {
@@ -204,19 +240,54 @@
             context.drawImage(image, 0, 0);
             var raster = context.getImageData(0, 0, canvas.width, canvas.height);
             var pixels = raster.data;
-            for (var offset = 0; offset < pixels.length; offset += 4) {
-              var luminance = (pixels[offset] * 77 + pixels[offset + 1] * 150 + pixels[offset + 2] * 29) >> 8;
-              var keyedAlpha = Math.max(0, Math.min(255, Math.round((255 - luminance) * 3.5 - 148)));
-              pixels[offset + 3] = Math.min(pixels[offset + 3], keyedAlpha);
-            }
-            context.putImageData(raster, 0, 0);
-            canvas.toBlob(function (blob) {
-              if (blob) {
-                atlasObjectUrl = URL.createObjectURL(blob);
-                preparedRavenAtlasPath = atlasObjectUrl;
+            var offset = 0;
+            var keyPixels = function (deadline) {
+              var processed = 0;
+              while (offset < pixels.length && processed < 524288 && (!deadline || deadline.didTimeout || deadline.timeRemaining() > 1)) {
+                var luminance = (pixels[offset] * 77 + pixels[offset + 1] * 150 + pixels[offset + 2] * 29) >> 8;
+                var keyedAlpha = Math.max(0, Math.min(255, Math.round((255 - luminance) * 3.5 - 148)));
+                pixels[offset + 3] = Math.min(pixels[offset + 3], keyedAlpha);
+                offset += 4;
+                processed += 4;
               }
-              resolve();
-            }, 'image/png');
+              if (offset < pixels.length) {
+                if (typeof window.requestIdleCallback === 'function') {
+                  window.requestIdleCallback(keyPixels, { timeout: 34 });
+                } else {
+                  window.setTimeout(keyPixels, 0);
+                }
+                return;
+              }
+              context.putImageData(raster, 0, 0);
+              var spritePromises = RAVEN_SPRITES.map(function (sprite) {
+                return new Promise(function (resolveSprite) {
+                  var spriteCanvas = document.createElement('canvas');
+                  spriteCanvas.width = RAVEN_CELL_SIZE;
+                  spriteCanvas.height = RAVEN_CELL_SIZE;
+                  var spriteContext = spriteCanvas.getContext('2d');
+                  spriteContext.drawImage(
+                    canvas,
+                    sprite.column * RAVEN_CELL_SIZE,
+                    sprite.row * RAVEN_CELL_SIZE,
+                    RAVEN_CELL_SIZE,
+                    RAVEN_CELL_SIZE,
+                    0,
+                    0,
+                    RAVEN_CELL_SIZE,
+                    RAVEN_CELL_SIZE
+                  );
+                  spriteCanvas.toBlob(function (blob) {
+                    resolveSprite(blob ? URL.createObjectURL(blob) : '');
+                  }, 'image/png');
+                });
+              });
+              Promise.all(spritePromises).then(function (spritePaths) {
+                preparedRavenSprites = spritePaths;
+                spriteObjectUrls = spritePaths.filter(Boolean);
+                Promise.all(spritePaths.map(decodeSprite)).then(resolve, resolve);
+              }, resolve);
+            };
+            keyPixels();
           } catch (error) {
             resolve();
           }
@@ -580,7 +651,9 @@
     });
     window.addEventListener('pagehide', function () {
       cancelAll();
-      if (atlasObjectUrl) URL.revokeObjectURL(atlasObjectUrl);
+      spriteObjectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+      spriteObjectUrls = [];
+      preparedRavenSprites = [];
     }, { once: true });
 
     if (articles && echoLayer && 'IntersectionObserver' in window) {
