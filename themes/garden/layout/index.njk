@@ -134,7 +134,6 @@
       </span>
     </div>
     <div class="folio-cover-shade" aria-hidden="true"></div>
-    <svg class="folio-raven-flock" data-raven-flock preserveAspectRatio="none" aria-hidden="true"></svg>
 
     <div class="folio-masthead">
       <a href="{{ url_for('/') }}" data-scramble><i aria-hidden="true"></i>SYS.ONLINE</a>
@@ -156,57 +155,54 @@
       <span class="folio-wordmark-chip folio-wordmark-chip-a" aria-hidden="true">WINTEROMEN</span>
       <span class="folio-wordmark-chip folio-wordmark-chip-b" aria-hidden="true">WINTEROMEN</span>
     </h1>
-    <button class="folio-raven-trigger" type="button" data-flock-trigger aria-label="唤起奥丁的双鸦胡金与穆宁"></button>
-    <svg class="folio-norse-sigil" data-norse-sigil viewBox="0 0 240 168" aria-hidden="true">
-      <defs>
-        <mask id="folio-yggdrasil-woodcut" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="168">
-          <rect width="240" height="168" fill="#fff"/>
-          <g fill="none" stroke="#000" stroke-linecap="square">
-            <path stroke-width="2.4" d="M115 145l11-12m-14-5 13-13m-13-5 14-14m-12-7 9-11m-11-8 8-10M96 139l10-4m-25 14 15-5m48-6 12 5m-22-19 11 5M91 87l13 4m-29-13 15 5m59 4-13 4m29-13-15 5"/>
-            <path stroke-width="1.2" d="M106 67l9 4m18 2-9 5M89 58l10 6m52-6-10 6M69 81l13 4m89-4-13 4"/>
+    <div class="folio-ninefold" data-ninefold>
+      <div class="folio-oath-seal" aria-hidden="true">
+        <svg viewBox="0 0 240 240">
+          <circle class="folio-oath-ring folio-oath-ring-outer" cx="120" cy="120" r="103"/>
+          <circle class="folio-oath-ring folio-oath-ring-mid" cx="120" cy="120" r="85"/>
+          <circle class="folio-oath-ring folio-oath-ring-inner" cx="120" cy="120" r="58"/>
+          <g class="folio-oath-runes" fill="none" stroke="currentColor" stroke-linecap="square">
+            <path d="M120 15v18m0-14h9m-9 7h7"/>
+            <path d="M183 34v16l6 5 6-5V34"/>
+            <path d="M220 91v18m0-14 9 5-9 5"/>
+            <path d="M220 167l7-18 7 18m-11-7h8"/>
+            <path d="M183 206v-18m0 0 10 5-10 5m5-1 8 9"/>
+            <path d="M120 225v-18m0 9 10-9m-10 9 10 9"/>
+            <path d="M50 211l13-13m0 13-13-13"/>
+            <path d="M18 167l5-16 5 16 5-16 5 16"/>
+            <path d="M20 91v18m0-9 9-9m-9 9 9 9"/>
+            <path d="M57 34l13 16m0-16L57 50"/>
           </g>
-          <path fill="#000" d="M111 102l8-5-3 10zm13 18 8-6-4 11zM101 49l8-2-4 8zm34 1 8-3-5 9z"/>
-        </mask>
-      </defs>
-      <g class="folio-norse-ring" fill="none" stroke="currentColor">
-        <circle cx="120" cy="78" r="38"/>
-        <circle cx="120" cy="78" r="47"/>
-        <path d="M120 24v10m0 88v10M66 78h10m88 0h10M82 40l7 7m62 62 7 7m0-76-7 7m-62 62-7 7"/>
-      </g>
-      <g class="folio-norse-tree" fill="currentColor" stroke="none" mask="url(#folio-yggdrasil-woodcut)">
-        <path d="M109 151l-4-16 4-16-4-17 6-14-4-13 7-12-3-13 9-16 9 16-3 13 7 12-4 13 6 14-4 17 4 16-4 16 16 13-17-4-10 8-10-8-17 4z"/>
-        <path d="M114 68l-14-17-7-20-13-15 5 20 11 20 14 20zm12 0 14-17 7-20 13-15-5 20-11 20-14 20z"/>
-        <path d="M112 82L94 68 75 52 53 47l17 14 21 18 17 14zm16 0 18-14 19-16 22-5-17 14-21 18-17 14z"/>
-        <path d="M109 98L87 87 64 72l-24 5 22 8 22 15 24 11zm22 0 22-11 23-15 24 5-22 8-22 15-24 11z"/>
-        <path d="M112 126l-21 12-17 13-27 9 28-3 22-10 19-8zm16 0 21 12 17 13 27 9-28-3-22-10-19-8z"/>
-        <path d="M115 141l-10 17-16 8 20-3 11-9 11 9 20 3-16-8-10-17z"/>
-      </g>
-      <g class="folio-yggdrasil-eagle" fill="currentColor" stroke="none">
-        <path d="M120 24c-7-10-17-15-31-13l14 7-18 1 24 9 11-2 11 2 24-9-18-1 14-7c-14-2-24 3-31 13z"/>
-        <path d="M116 22l4-8 4 8-4 9z"/>
-      </g>
-      <g class="folio-yggdrasil-serpent" fill="currentColor" stroke="none">
-        <path d="M37 153c15-17 37-15 53-3 11 8 22 8 31-1l7 5c-11 14-28 15-44 4-12-9-25-10-33 1l9 1-12 7-13-8z"/>
-        <path d="M35 154l-10-4 6 9-5 7 13-4z"/>
-        <circle class="folio-yggdrasil-serpent-eye" cx="32" cy="157" r="1.2"/>
-      </g>
-      <g class="folio-norse-nodes" fill="currentColor" stroke="none">
-        <path style="--node:0" d="M120 23l4 5-4 5-4-5z"/>
-        <path style="--node:1" d="M76 39l4 5-4 5-4-5z"/>
-        <path style="--node:2" d="M164 39l4 5-4 5-4-5z"/>
-        <path style="--node:3" d="M42 72l5 5-5 5-5-5z"/>
-        <path style="--node:4" d="M198 72l5 5-5 5-5-5z"/>
-        <path style="--node:5" d="M64 80l4 5-4 5-4-5z"/>
-        <path style="--node:6" d="M176 80l4 5-4 5-4-5z"/>
-        <path style="--node:7" d="M47 155l5 5-5 5-5-5z"/>
-        <path style="--node:8" d="M193 155l5 5-5 5-5-5z"/>
-      </g>
-    </svg>
-    <div class="folio-yggdrasil-name" data-yggdrasil-name aria-hidden="true">
-      <strong>YGGDRASIL</strong><span>WORLD TREE · NINE WORLDS</span>
-    </div>
-    <div class="folio-norse-key" data-norse-key aria-hidden="true">
-      <span>HUGINN <b>THOUGHT</b></span><i></i><span>MUNINN <b>MEMORY</b></span>
+          <g class="folio-valknut" fill="none" stroke="currentColor">
+            <path d="M120 69l42 72H78z"/>
+            <path d="M95 84l83 2-43 70z"/>
+            <path d="M145 84l-83 2 43 70z"/>
+          </g>
+          <g class="folio-nine-realms" fill="currentColor">
+            <circle style="--realm:0" cx="120" cy="17" r="2.6"/>
+            <circle style="--realm:1" cx="186" cy="41" r="2.6"/>
+            <circle style="--realm:2" cx="222" cy="101" r="2.6"/>
+            <circle style="--realm:3" cx="210" cy="170" r="2.6"/>
+            <circle style="--realm:4" cx="155" cy="216" r="2.6"/>
+            <circle style="--realm:5" cx="85" cy="216" r="2.6"/>
+            <circle style="--realm:6" cx="30" cy="170" r="2.6"/>
+            <circle style="--realm:7" cx="18" cy="101" r="2.6"/>
+            <circle style="--realm:8" cx="54" cy="41" r="2.6"/>
+          </g>
+        </svg>
+      </div>
+      <div class="folio-realm-stones" aria-hidden="true">
+        <i style="--stone:0;--x:-450px;--y:-112px;--mx:-238px;--my:-188px;--rot:-19deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M8 3L35 0l10 12-4 42-12 10L5 58 1 18z"/><path class="folio-stone-face" d="M9 8l22-3 8 10-4 34-9 8-16-4-4-32z"/><path class="folio-stone-rune" d="M18 17v31m0-22 14-9m-14 9 14 10"/></svg></i>
+        <i style="--stone:1;--x:-250px;--y:-172px;--mx:-160px;--my:-232px;--rot:12deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M6 7L29 1l15 9 2 37-13 17-26-5L1 22z"/><path class="folio-stone-face" d="M9 11l19-5 11 8 1 31-10 12-18-3-5-30z"/><path class="folio-stone-rune" d="M14 18l10 30 10-30m-15 16h10"/></svg></i>
+        <i style="--stone:2;--x:0px;--y:-198px;--mx:-28px;--my:-252px;--rot:-7deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M11 2l25 3 9 16-7 38-20 6L3 52 1 15z"/><path class="folio-stone-face" d="M13 8l19 2 7 13-6 31-13 5L9 49 7 18z"/><path class="folio-stone-rune" d="M15 17v31m0-20 17-11m-17 11 17 20"/></svg></i>
+        <i style="--stone:3;--x:245px;--y:-166px;--mx:150px;--my:-231px;--rot:16deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M4 10L22 1l21 7 4 39-15 17-24-7L1 26z"/><path class="folio-stone-face" d="M9 13l15-7 14 6 3 32-11 13-17-5-6-25z"/><path class="folio-stone-rune" d="M15 18v30m0-24 17 7-17 8"/></svg></i>
+        <i style="--stone:4;--x:455px;--y:-102px;--mx:250px;--my:-185px;--rot:-14deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M10 1l26 5 10 18-8 37-25 3L2 49 4 13z"/><path class="folio-stone-face" d="M13 7l19 4 8 14-7 30-17 2-8-11 2-30z"/><path class="folio-stone-rune" d="M14 20l20 26m0-26L14 46"/></svg></i>
+        <i style="--stone:5;--x:-350px;--y:150px;--mx:-235px;--my:205px;--rot:18deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M5 5l28-3 13 15-5 42-23 6L2 50 1 18z"/><path class="folio-stone-face" d="M10 10l20-2 10 12-4 34-16 4L8 47 7 21z"/><path class="folio-stone-rune" d="M15 18v31m0-25 17-6-17 17 17 14"/></svg></i>
+        <i style="--stone:6;--x:-118px;--y:184px;--mx:-75px;--my:236px;--rot:-11deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M12 1l24 7 10 21-11 34-24-2L2 43 5 12z"/><path class="folio-stone-face" d="M14 7l18 6 8 17-9 27-16-2-7-14 3-26z"/><path class="folio-stone-rune" d="M14 19l10 28 10-28M19 34h10"/></svg></i>
+        <i style="--stone:7;--x:145px;--y:174px;--mx:88px;--my:231px;--rot:9deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M7 4l25-2 14 18-6 38-20 7L3 51 1 17z"/><path class="folio-stone-face" d="M11 9l18-2 11 15-5 31-13 5L9 48 7 20z"/><path class="folio-stone-rune" d="M15 18v31m0-17 17-14m-17 14 17 17"/></svg></i>
+        <i style="--stone:8;--x:370px;--y:136px;--mx:245px;--my:202px;--rot:-17deg"><svg viewBox="0 0 48 66"><path class="folio-stone-body" d="M9 2l29 7 8 22-12 33-25-7L1 37 3 12z"/><path class="folio-stone-face" d="M12 8l21 6 7 17-9 27-17-5-7-17 2-21z"/><path class="folio-stone-rune" d="M15 19v29m0-22 17-7-17 15 17 14"/></svg></i>
+      </div>
+      <button class="folio-ninefold-trigger" type="button" data-ninefold-trigger aria-label="展开九界符文石阵"></button>
     </div>
 
     <div class="folio-cover-copy">
@@ -408,7 +404,6 @@
         <circle cx="459" cy="326" r="2"/><circle cx="821" cy="599" r="2"/><circle cx="1298" cy="251" r="2"/>
       </g>
     </svg>
-    <svg class="folio-raven-echo" data-flock-echo preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="folio-field-motion folio-field-motion-articles" aria-hidden="true"><i class="folio-field-sweep"></i><b></b><b></b><b></b></div>
 
     <div class="folio-articles-grid">
@@ -512,5 +507,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('js/raven-flock.js') }}?v={{ theme.asset_version }}" defer></script>
+<script src="{{ url_for('js/ninefold-seal.js') }}?v={{ theme.asset_version }}" defer></script>
 {% endblock %}
