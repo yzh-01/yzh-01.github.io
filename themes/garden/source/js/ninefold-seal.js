@@ -7,12 +7,15 @@
   var wordmark = document.querySelector('[data-winter-wordmark]');
   var eclipse = wordmark && wordmark.querySelector('.folio-wordmark-disc');
   if (!ninefold || !trigger || !cover || !wordmark || !eclipse) return;
+  var stones = Array.prototype.slice.call(ninefold.querySelectorAll('.folio-realm-stone'));
 
   var root = document.documentElement;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var resizeFrame = 0;
   var finishTimer = 0;
-  var active = false;
+  var busy = false;
+  var opened = false;
+  var targetOpen = false;
 
   function isQuiet() {
     return root.classList.contains('garden-lite-motion') || reducedMotion.matches;
@@ -32,31 +35,53 @@
     resizeFrame = window.requestAnimationFrame(measure);
   }
 
-  function finish() {
+  function setStoneAccess(enabled) {
+    stones.forEach(function (stone) { stone.tabIndex = enabled ? 0 : -1; });
+  }
+
+  function finishTransition() {
     window.clearTimeout(finishTimer);
     finishTimer = 0;
-    active = false;
-    ninefold.classList.remove('is-unfolding');
-    wordmark.classList.remove('is-ninefold-open');
+    busy = false;
+    opened = targetOpen;
+    ninefold.classList.remove('is-opening', 'is-closing');
+    ninefold.classList.toggle('is-open', opened);
+    wordmark.classList.remove('is-ninefold-transition');
+    trigger.setAttribute('aria-expanded', opened ? 'true' : 'false');
     trigger.removeAttribute('aria-disabled');
+    setStoneAccess(opened);
   }
 
-  function unfold(event) {
+  function toggleNinefold(event) {
     if (event) event.stopPropagation();
-    if (active) return;
-    active = true;
+    if (busy) return;
+    busy = true;
+    targetOpen = !opened;
     measure();
-    ninefold.classList.add('is-unfolding');
-    wordmark.classList.add('is-ninefold-open');
+    ninefold.classList.remove('is-opening', 'is-closing');
+    ninefold.classList.add(targetOpen ? 'is-opening' : 'is-closing');
+    if (!targetOpen) {
+      ninefold.classList.remove('is-open');
+      setStoneAccess(false);
+      if (stones.indexOf(document.activeElement) !== -1) trigger.focus();
+    }
+    wordmark.classList.add('is-ninefold-transition');
+    trigger.setAttribute('aria-expanded', targetOpen ? 'true' : 'false');
     trigger.setAttribute('aria-disabled', 'true');
-    finishTimer = window.setTimeout(finish, isQuiet() ? 520 : 3380);
+    finishTimer = window.setTimeout(finishTransition, isQuiet() ? 80 : (targetOpen ? 1420 : 1080));
   }
 
-  trigger.addEventListener('click', unfold);
+  trigger.addEventListener('click', toggleNinefold);
+  stones.forEach(function (stone) {
+    stone.addEventListener('click', function (event) { event.stopPropagation(); });
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && opened && !busy) toggleNinefold(event);
+  });
   window.addEventListener('resize', scheduleMeasure, { passive: true });
   window.addEventListener('orientationchange', scheduleMeasure, { passive: true });
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden && active) finish();
+    if (document.hidden && busy) finishTransition();
     if (!document.hidden) scheduleMeasure();
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleMeasure);
