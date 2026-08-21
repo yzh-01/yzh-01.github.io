@@ -4193,10 +4193,11 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(0) scale(.12);
   transform-origin: center;
+  transition: opacity 180ms ease, transform 240ms cubic-bezier(.16, 1, .3, 1);
 }
 .folio-realm-stone:nth-child(3n + 2) { width: 44px; height: 62px; }
 .folio-realm-stone:nth-child(3n) { width: 53px; height: 71px; }
-.folio-realm-stones svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.folio-realm-stones svg { display: block; width: 100%; height: 100%; overflow: visible; transform-box: fill-box; transform-origin: center; }
 .folio-stone-body { fill: #101713; stroke: color-mix(in srgb, var(--bone) 48%, var(--moss)); stroke-width: .9; vector-effect: non-scaling-stroke; }
 .folio-stone-face { fill: color-mix(in srgb, #17211b 82%, var(--moss)); stroke: rgba(216, 229, 216, .12); stroke-width: .7; vector-effect: non-scaling-stroke; }
 .folio-realm-mark { fill: none; stroke: color-mix(in srgb, var(--moss-bright) 82%, var(--bone)); stroke-width: 1.75; stroke-linecap: square; stroke-linejoin: miter; vector-effect: non-scaling-stroke; opacity: .88; }
@@ -4219,10 +4220,29 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
   text-align: center;
   transform: translateX(-50%) translateY(5px);
-  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease, opacity 140ms ease, transform 220ms cubic-bezier(.16, 1, .3, 1);
 }
 .folio-realm-stone > span b { font: 650 14px/1 var(--serif); letter-spacing: .075em; white-space: nowrap; }
 .folio-realm-stone > span small { color: var(--moss-bright); font: 600 10px/1 var(--mono); letter-spacing: .1em; white-space: nowrap; }
+.folio-realm-stone > span em {
+  display: block;
+  position: absolute;
+  top: 100%;
+  right: -1px;
+  left: -1px;
+  padding: 7px 8px 8px;
+  color: color-mix(in srgb, var(--bone) 66%, var(--moss-bright));
+  border: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent);
+  border-top: 0;
+  background: color-mix(in srgb, #0b120e 94%, transparent);
+  font: 500 9px/1.5 var(--sans);
+  font-style: normal;
+  letter-spacing: .045em;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  transition: opacity 140ms ease, transform 220ms cubic-bezier(.16, 1, .3, 1), visibility 0s linear 220ms;
+}
 .folio-realm-stone:focus-visible { outline: none; }
 .folio-realm-stone:focus-visible .folio-stone-body { stroke: var(--moss-bright); stroke-width: 1.4; }
 .folio-realm-stone:focus-visible > span { color: var(--moss-bright); }
@@ -4259,6 +4279,24 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 .folio-ninefold-trigger:focus-visible::after { opacity: .28; transform: scale(1.08) rotate(62deg); }
 .folio-ninefold-trigger:active { transform: translate(-50%, -50%) scale(.91, 1.04); }
 
+.folio-ninefold-hint {
+  position: absolute;
+  left: var(--ninefold-x);
+  top: calc(var(--ninefold-y) + 286px);
+  z-index: 5;
+  margin: 0;
+  padding: 7px 15px 8px;
+  color: color-mix(in srgb, var(--moss-bright) 82%, var(--bone));
+  border-inline: 1px solid color-mix(in srgb, var(--moss-bright) 28%, transparent);
+  font: 600 9px/1 var(--mono);
+  letter-spacing: .12em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 7px);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(.16, 1, .3, 1);
+}
+.folio-ninefold-hint span:last-child { display: none; }
+
 .folio-ninefold.is-opening .folio-realm-stone {
   will-change: transform, opacity;
   animation: garden-realm-stone-open 920ms cubic-bezier(.16, 1, .3, 1) both;
@@ -4272,7 +4310,47 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   pointer-events: auto;
   transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1);
 }
-.folio-ninefold.is-open .folio-realm-stone > span { opacity: .96; transform: translateX(-50%) translateY(0); }
+.folio-ninefold.is-open .folio-realm-stone > span { opacity: 0; transform: translateX(-50%) translateY(5px); }
+.folio-ninefold.is-open .folio-realm-stone:hover > span,
+.folio-ninefold.is-open .folio-realm-stone:focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone.is-selected > span { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Labels open away from the title instead of forming a second row over it. */
+.folio-realm-stone:nth-child(-n + 4) > span,
+.folio-realm-stone:nth-child(8) > span { top: auto; bottom: calc(100% + 11px); transform: translateX(-50%) translateY(5px); }
+.folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 4):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 4):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 4).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8).is-selected > span { transform: translateX(-50%) translateY(0); }
+.folio-realm-stone:nth-child(-n + 4) > span em,
+.folio-realm-stone:nth-child(8) > span em { top: auto; bottom: 100%; border-top: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent); border-bottom: 0; }
+
+.folio-realm-stone:nth-child(5) > span,
+.folio-realm-stone:nth-child(9) > span { top: 50%; left: calc(100% + 13px); transform: translate(5px, -50%); }
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(9):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(9):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(9).is-selected > span { transform: translate(0, -50%); }
+.folio-realm-stone:nth-child(6) > span { top: 50%; right: calc(100% + 13px); left: auto; transform: translate(-5px, -50%); }
+.folio-ninefold.is-open .folio-realm-stone:nth-child(6):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(6):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(6).is-selected > span { transform: translate(0, -50%); }
+.folio-ninefold.is-open:not(.is-guiding) .folio-realm-stone > svg { animation: garden-realm-breathe 5.8s cubic-bezier(.45, 0, .55, 1) infinite; animation-delay: calc(var(--stone) * -.63s); }
+.folio-ninefold.is-open .folio-ninefold-hint { opacity: .66; transform: translate(-50%, 0); }
+.folio-ninefold.is-guiding .folio-realm-stone { animation: garden-realm-guide 520ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--stone) * 150ms); }
+.folio-ninefold.is-guiding .folio-realm-stone > span { animation: garden-realm-guide-label 520ms ease both; animation-delay: calc(var(--stone) * 150ms); }
+.folio-ninefold.has-realm-selection .folio-realm-stone:not(.is-selected) { opacity: .42; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected { z-index: 5; opacity: 1; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1.14); }
+.folio-ninefold.is-open .folio-realm-stone.is-selected > span { color: var(--moss-bright); opacity: 1; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected > span em { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected > svg { animation-play-state: paused; transform: translateY(-2px) scale(1.045); }
+.folio-ninefold.is-open .folio-realm-stone.is-selected .folio-stone-body { stroke: var(--moss-bright); stroke-width: 1.5; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected .folio-realm-mark { opacity: 1; stroke-width: 2.15; }
+.folio-ninefold.has-realm-selection .folio-oath-seal { opacity: 1; transform: translate(-50%, -50%) rotate(16deg) scale(1.075); }
 .folio-ninefold.is-open .folio-oath-seal { opacity: .92; transform: translate(-50%, -50%) rotate(12deg) scale(1.045); }
 .folio-ninefold.is-open .folio-oath-ring-outer { transform: rotate(82deg); }
 .folio-ninefold.is-open .folio-oath-ring-mid { transform: rotate(-64deg); }
@@ -4305,6 +4383,8 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   box-shadow: 0 8px 18px rgba(31, 48, 34, .12);
 }
 :root[data-resolved-theme="light"] .folio-realm-stone > span small { color: #356543; }
+:root[data-resolved-theme="light"] .folio-realm-stone > span em { color: #3f5543; border-color: rgba(41, 76, 49, .2); background: rgba(220, 229, 220, .96); }
+:root[data-resolved-theme="light"] .folio-ninefold-hint { color: #315e3c; border-color: rgba(49, 94, 60, .28); }
 
 @keyframes garden-realm-stone-open {
   0% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) rotate(0) scale(.12); }
@@ -4325,6 +4405,20 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 @keyframes garden-realm-label-close {
   from { opacity: .96; transform: translateX(-50%) translateY(0); }
   to { opacity: 0; transform: translateX(-50%) translateY(5px); }
+}
+@keyframes garden-realm-guide {
+  0%, 100% { opacity: 1; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1); }
+  28% { opacity: .94; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(calc(var(--rot) - 2deg)) scale(.96, 1.04); }
+  58% { opacity: 1; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(calc(var(--rot) + 2deg)) scale(1.14, .97); }
+}
+@keyframes garden-realm-guide-label {
+  0%, 100% { opacity: 0; }
+  24% { opacity: .2; }
+  52%, 78% { opacity: 1; }
+}
+@keyframes garden-realm-breathe {
+  0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  50% { transform: translateY(-2px) rotate(.8deg) scale(1.035, .985); }
 }
 @keyframes garden-ninefold-seal-open {
   0% { opacity: .78; transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
@@ -4355,31 +4449,52 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   .folio-ninefold-trigger:hover::after { opacity: .24; transform: scale(1.08) rotate(62deg); }
   .folio-ninefold.is-open .folio-realm-stone:hover { z-index: 4; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1.09); }
   .folio-ninefold.is-open .folio-realm-stone:hover > span { color: var(--moss-bright); opacity: 1; }
+  .folio-ninefold.is-open .folio-realm-stone:hover > span em,
+  .folio-ninefold.is-open .folio-realm-stone:focus-visible > span em { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+  .folio-ninefold.is-open:has(.folio-realm-stone:hover) .folio-realm-stone:not(:hover):not(.is-selected) { opacity: .5; }
+  .folio-ninefold.is-open:has(.folio-realm-stone:focus-visible) .folio-realm-stone:not(:focus-visible):not(.is-selected) { opacity: .5; }
+  .folio-ninefold.has-realm-selection .folio-realm-stone:hover,
+  .folio-ninefold.has-realm-selection .folio-realm-stone:focus-visible { opacity: 1; }
+  .folio-ninefold.is-open .folio-realm-stone.is-selected:hover { transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1.14); }
   .folio-ninefold.is-open .folio-realm-stone:hover .folio-stone-body { stroke: var(--moss-bright); stroke-width: 1.4; }
 }
 @media (max-width: 1100px) {
   .folio-realm-stones { transform: scale(.78); }
-  .folio-realm-stone > span { transform: translateX(-50%) translateY(5px) scale(1.16); transform-origin: top center; }
-  .folio-ninefold.is-open .folio-realm-stone > span { transform: translateX(-50%) translateY(0) scale(1.16); }
+  .folio-realm-stone > span { scale: 1.16; transform-origin: top center; }
 }
 @media (max-width: 768px) {
   .folio-ninefold { --ninefold-y: 34%; }
   .folio-oath-seal { width: clamp(174px, 48vw, 216px); opacity: .6; }
   .folio-oath-runes { stroke-width: 1.35; }
   .folio-realm-stones { transform: scale(.36); }
-  .folio-realm-stone > span { top: calc(100% + 13px); width: 144px; padding: 7px 8px; transform: translateX(-50%) translateY(5px) scale(2.05); transform-origin: top center; }
-  .folio-ninefold.is-open .folio-realm-stone > span { transform: translateX(-50%) translateY(0) scale(2.05); }
+  .folio-realm-stone > span,
+  .folio-realm-stone:nth-child(-n + 9) > span { top: calc(100% + 13px); right: auto; bottom: auto; left: 50%; width: 144px; padding: 7px 8px; scale: 2.05; transform: translateX(-50%) translateY(5px); transform-origin: top center; }
+  .folio-realm-stone:nth-child(-n + 9) > span em { top: 100%; bottom: auto; border-top: 0; border-bottom: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent); }
+  .folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 9):hover > span,
+  .folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 9):focus-visible > span,
+  .folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 9).is-selected > span { transform: translateX(-50%) translateY(0); }
   .folio-realm-stone > span b { font-size: 13px; }
   .folio-realm-stone > span small { font-size: 9px; }
+  .folio-realm-stone > span em { font-size: 8px; }
+  .folio-ninefold-hint { top: calc(var(--ninefold-y) + 154px); padding-inline: 12px; font-size: 8px; }
+  .folio-ninefold-hint span:first-child { display: none; }
+  .folio-ninefold-hint span:last-child { display: inline; }
   .folio-ninefold-trigger { width: 54px; height: 54px; }
 }
 html.garden-lite-motion .folio-ninefold.is-opening *,
 html.garden-lite-motion .folio-ninefold.is-closing *,
+html.garden-lite-motion .folio-ninefold.is-guiding *,
+html.garden-lite-motion .folio-ninefold.is-open .folio-realm-stone > svg,
 html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-disc,
 html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-ghost { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .folio-ninefold.is-opening *,
   .folio-ninefold.is-closing *,
+  .folio-ninefold.is-guiding *,
+  .folio-ninefold.is-open .folio-realm-stone > svg,
   .folio-wordmark.is-ninefold-transition .folio-wordmark-disc,
   .folio-wordmark.is-ninefold-transition .folio-wordmark-ghost { animation: none !important; }
+  .folio-realm-stone { transition: opacity 120ms ease; }
+  .folio-realm-stone > span em { transform: none; transition: opacity 120ms ease, visibility 0s linear 120ms; }
+  .folio-ninefold-hint { transform: translate(-50%, 0); transition: opacity 120ms ease; }
 }

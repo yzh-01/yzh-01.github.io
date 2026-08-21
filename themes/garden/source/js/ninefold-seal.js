@@ -13,9 +13,12 @@
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var resizeFrame = 0;
   var finishTimer = 0;
+  var guideTimer = 0;
   var busy = false;
   var opened = false;
   var targetOpen = false;
+  var selectedStone = null;
+  var hasGuided = false;
 
   function isQuiet() {
     return root.classList.contains('garden-lite-motion') || reducedMotion.matches;
@@ -39,6 +42,43 @@
     stones.forEach(function (stone) { stone.tabIndex = enabled ? 0 : -1; });
   }
 
+  function clearGuide() {
+    window.clearTimeout(guideTimer);
+    guideTimer = 0;
+    ninefold.classList.remove('is-guiding');
+  }
+
+  function startGuide() {
+    clearGuide();
+    if (isQuiet() || !opened || document.hidden || hasGuided) return;
+    hasGuided = true;
+    ninefold.classList.add('is-guiding');
+    guideTimer = window.setTimeout(clearGuide, 1900);
+  }
+
+  function clearSelection() {
+    if (selectedStone) {
+      selectedStone.classList.remove('is-selected');
+      selectedStone.setAttribute('aria-pressed', 'false');
+    }
+    selectedStone = null;
+    ninefold.classList.remove('has-realm-selection');
+  }
+
+  function selectStone(stone) {
+    clearGuide();
+    if (!opened || busy) return;
+    if (selectedStone === stone) {
+      clearSelection();
+      return;
+    }
+    clearSelection();
+    selectedStone = stone;
+    stone.classList.add('is-selected');
+    stone.setAttribute('aria-pressed', 'true');
+    ninefold.classList.add('has-realm-selection');
+  }
+
   function finishTransition() {
     window.clearTimeout(finishTimer);
     finishTimer = 0;
@@ -48,8 +88,10 @@
     ninefold.classList.toggle('is-open', opened);
     wordmark.classList.remove('is-ninefold-transition');
     trigger.setAttribute('aria-expanded', opened ? 'true' : 'false');
+    trigger.setAttribute('aria-label', opened ? '收起九界石阵' : '展开九界石阵');
     trigger.removeAttribute('aria-disabled');
     setStoneAccess(opened);
+    if (opened) startGuide();
   }
 
   function toggleNinefold(event) {
@@ -61,6 +103,8 @@
     ninefold.classList.remove('is-opening', 'is-closing');
     ninefold.classList.add(targetOpen ? 'is-opening' : 'is-closing');
     if (!targetOpen) {
+      clearGuide();
+      clearSelection();
       ninefold.classList.remove('is-open');
       setStoneAccess(false);
       if (stones.indexOf(document.activeElement) !== -1) trigger.focus();
@@ -73,15 +117,29 @@
 
   trigger.addEventListener('click', toggleNinefold);
   stones.forEach(function (stone) {
-    stone.addEventListener('click', function (event) { event.stopPropagation(); });
+    stone.addEventListener('pointerenter', clearGuide);
+    stone.addEventListener('focus', clearGuide);
+    stone.addEventListener('click', function (event) {
+      event.stopPropagation();
+      selectStone(stone);
+    });
   });
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && opened && !busy) toggleNinefold(event);
+    if (event.key !== 'Escape' || !opened || busy) return;
+    if (selectedStone) {
+      event.stopPropagation();
+      clearSelection();
+      return;
+    }
+    toggleNinefold(event);
   });
   window.addEventListener('resize', scheduleMeasure, { passive: true });
   window.addEventListener('orientationchange', scheduleMeasure, { passive: true });
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden && busy) finishTransition();
+    if (document.hidden) {
+      clearGuide();
+      if (busy) finishTransition();
+    }
     if (!document.hidden) scheduleMeasure();
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleMeasure);
