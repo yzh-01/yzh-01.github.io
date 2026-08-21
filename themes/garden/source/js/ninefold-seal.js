@@ -124,6 +124,14 @@
       selectStone(stone);
     });
   });
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!selectedStone || !opened || busy || !(target instanceof Element)) return;
+    if (ninefold.contains(target)) return;
+    if (target.closest('a, button, input, textarea, select, summary, [role="button"]')) return;
+    if (document.activeElement === selectedStone) selectedStone.blur();
+    clearSelection();
+  });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || !opened || busy) return;
     if (selectedStone) {

@@ -4315,30 +4315,69 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 .folio-ninefold.is-open .folio-realm-stone:focus-visible > span,
 .folio-ninefold.is-open .folio-realm-stone.is-selected > span { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Labels open away from the title instead of forming a second row over it. */
-.folio-realm-stone:nth-child(-n + 4) > span,
-.folio-realm-stone:nth-child(8) > span { top: auto; bottom: calc(100% + 11px); transform: translateX(-50%) translateY(5px); }
-.folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 4):hover > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 4):focus-visible > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(-n + 4).is-selected > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(8):hover > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(8):focus-visible > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(8).is-selected > span { transform: translateX(-50%) translateY(0); }
-.folio-realm-stone:nth-child(-n + 4) > span em,
-.folio-realm-stone:nth-child(8) > span em { top: auto; bottom: 100%; border-top: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent); border-bottom: 0; }
-
-.folio-realm-stone:nth-child(5) > span,
-.folio-realm-stone:nth-child(9) > span { top: 50%; left: calc(100% + 13px); transform: translate(5px, -50%); }
-.folio-ninefold.is-open .folio-realm-stone:nth-child(5):hover > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(5):focus-visible > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(5).is-selected > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(9):hover > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(9):focus-visible > span,
-.folio-ninefold.is-open .folio-realm-stone:nth-child(9).is-selected > span { transform: translate(0, -50%); }
-.folio-realm-stone:nth-child(6) > span { top: 50%; right: calc(100% + 13px); left: auto; transform: translate(-5px, -50%); }
+/* Each plaque opens toward available viewport space; top stones never escape above the cover. */
+.folio-realm-stone:nth-child(1) > span,
+.folio-realm-stone:nth-child(3) > span,
+.folio-realm-stone:nth-child(6) > span {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: calc(100% + 13px);
+  transform: translate(5px, -50%);
+}
+.folio-ninefold.is-open .folio-realm-stone:nth-child(1):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(1):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(1).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(3):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(3):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(3).is-selected > span,
 .folio-ninefold.is-open .folio-realm-stone:nth-child(6):hover > span,
 .folio-ninefold.is-open .folio-realm-stone:nth-child(6):focus-visible > span,
 .folio-ninefold.is-open .folio-realm-stone:nth-child(6).is-selected > span { transform: translate(0, -50%); }
+
+.folio-realm-stone:nth-child(2) > span,
+.folio-realm-stone:nth-child(4) > span,
+.folio-realm-stone:nth-child(5) > span,
+.folio-realm-stone:nth-child(7) > span,
+.folio-realm-stone:nth-child(8) > span {
+  top: 50%;
+  right: calc(100% + 13px);
+  bottom: auto;
+  left: auto;
+  transform: translate(-5px, -50%);
+}
+.folio-ninefold.is-open .folio-realm-stone:nth-child(2):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(2):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(2).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(4):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(4):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(4).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(7):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(7):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(7).is-selected > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8).is-selected > span { transform: translate(0, -50%); }
+
+.folio-realm-stone:nth-child(9) > span {
+  top: auto;
+  right: auto;
+  bottom: calc(100% + 11px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+}
+.folio-ninefold.is-open .folio-realm-stone:nth-child(9):hover > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(9):focus-visible > span,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(9).is-selected > span { transform: translateX(-50%) translateY(0); }
+.folio-realm-stone:nth-child(9) > span em {
+  top: auto;
+  bottom: 100%;
+  border-top: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent);
+  border-bottom: 0;
+}
 .folio-ninefold.is-open:not(.is-guiding) .folio-realm-stone > svg { animation: garden-realm-breathe 5.8s cubic-bezier(.45, 0, .55, 1) infinite; animation-delay: calc(var(--stone) * -.63s); }
 .folio-ninefold.is-open .folio-ninefold-hint { opacity: .66; transform: translate(-50%, 0); }
 .folio-ninefold.is-guiding .folio-realm-stone { animation: garden-realm-guide 520ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--stone) * 150ms); }
