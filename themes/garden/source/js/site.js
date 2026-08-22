@@ -1704,7 +1704,7 @@
       boot.classList.toggle('is-phase-two', rounded >= 52);
       boot.classList.toggle('is-ready', rounded >= 84);
       if (!status) return;
-      var nextStatus = rounded < 34 ? '雾层校准' : (rounded < 78 ? '冬兆显影' : '视野接通');
+      var nextStatus = rounded < 34 ? '雾层校准' : (rounded < 78 ? '凛冬之兆显影' : '视野接通');
       if (status.textContent !== nextStatus) status.textContent = nextStatus;
     }
 
