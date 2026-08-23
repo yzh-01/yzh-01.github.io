@@ -461,7 +461,7 @@
   <section class="folio-outro" id="the-end" data-folio-outro aria-label="页面结尾">
     <span class="folio-outro-orbit" aria-hidden="true"><i></i></span>
     <div class="folio-outro-inner">
-      <p class="folio-outro-signal"><i aria-hidden="true"></i><span>LIVE_FIELD / MOVE TO DISTURB</span></p>
+      <p class="folio-outro-signal"><i aria-hidden="true"></i><span>YGGDRASIL RELAY / MOVE TO OBSERVE</span></p>
       <div class="folio-pixel-vista" data-pixel-outro>
         <span class="folio-pixel-bleed" aria-hidden="true">
           <span class="folio-pixel-bleed-sky"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
@@ -470,31 +470,65 @@
           <span class="folio-pixel-bleed-reeds folio-pixel-bleed-reeds-left"><i></i><b></b><em></em></span>
           <span class="folio-pixel-bleed-reeds folio-pixel-bleed-reeds-right"><i></i><b></b><em></em></span>
           <span class="folio-pixel-bleed-fireflies"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          <span class="folio-pixel-bleed-beam"></span>
         </span>
-        <button class="folio-pixel-screen is-lamp-off" type="button" data-pixel-lamp aria-label="交互像素夜景：月亮、天空、湖面与灯塔均可点击">
-          <span class="pixel-sky" aria-hidden="true">
-            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-          </span>
-          <span class="pixel-atmosphere" aria-hidden="true"></span>
-          <span class="pixel-moon" aria-hidden="true"><i></i></span>
-          <span class="pixel-cloud pixel-cloud-a" aria-hidden="true"></span>
-          <span class="pixel-cloud pixel-cloud-b" aria-hidden="true"></span>
-          <span class="pixel-rain" aria-hidden="true"></span>
-          <span class="pixel-horizon-glow" aria-hidden="true"></span>
-          <span class="pixel-ridge pixel-ridge-back" aria-hidden="true"></span>
-          <span class="pixel-ridge pixel-ridge-front" aria-hidden="true"></span>
-          <span class="pixel-lake" aria-hidden="true"><i></i><b></b><em></em></span>
-          <span class="pixel-lighthouse" aria-hidden="true"><i></i><b></b><em></em></span>
-          <span class="pixel-beam" aria-hidden="true"></span>
-          <span class="pixel-beam-focus" aria-hidden="true"></span>
-          <span class="pixel-boat" aria-hidden="true"><i><b></b><em></em></i></span>
-          <span class="pixel-shore" aria-hidden="true"><i></i><b></b></span>
-          <span class="pixel-frame" aria-hidden="true"></span>
-          <span class="pixel-scan" aria-hidden="true"></span>
-          <span class="pixel-fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-          <span class="pixel-reflection" aria-hidden="true"></span>
-        </button>
+        <div class="folio-pixel-stage" data-pixel-stage>
+          <div class="folio-pixel-diorama" data-pixel-diorama>
+            <span class="folio-pixel-shell folio-pixel-shell-right" aria-hidden="true"></span>
+            <span class="folio-pixel-shell folio-pixel-shell-bottom" aria-hidden="true"></span>
+            <div class="folio-pixel-screen is-lamp-off" data-pixel-screen>
+              <span class="pixel-depth-layer pixel-depth-sky" data-pixel-depth="sky" aria-hidden="true">
+                <span class="pixel-sky">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </span>
+                <span class="pixel-atmosphere"></span>
+                <span class="pixel-aurora"><i></i><i></i><i></i></span>
+                <span class="pixel-rune-constellation"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="pixel-moon"><i></i></span>
+                <span class="pixel-cloud pixel-cloud-a"></span>
+                <span class="pixel-cloud pixel-cloud-b"></span>
+                <span class="pixel-rain"></span>
+                <span class="pixel-horizon-glow"></span>
+              </span>
+              <span class="pixel-depth-layer pixel-depth-ridge-back" data-pixel-depth="ridge-back" aria-hidden="true">
+                <span class="pixel-worldtree"><i></i><b></b><em></em><strong></strong></span>
+                <span class="pixel-ridge pixel-ridge-back"></span>
+              </span>
+              <span class="pixel-depth-layer pixel-depth-ridge-front" data-pixel-depth="ridge-front" aria-hidden="true">
+                <span class="pixel-ridge pixel-ridge-front"></span>
+                <span class="pixel-ruin-bridge"><i></i><b></b></span>
+                <span class="pixel-runestone pixel-runestone-a"><i></i></span>
+                <span class="pixel-runestone pixel-runestone-b"><i></i></span>
+              </span>
+              <span class="pixel-depth-layer pixel-depth-water" data-pixel-depth="water" aria-hidden="true">
+                <span class="pixel-lake"><i></i><b></b><em></em></span>
+                <span class="pixel-lighthouse"><i></i><b></b><em></em><strong></strong></span>
+                <span class="pixel-beam"></span>
+                <span class="pixel-root-network"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="pixel-reflection"></span>
+                <span class="pixel-beacon-target"><i></i></span>
+              </span>
+              <span class="pixel-depth-layer pixel-depth-foreground" data-pixel-depth="foreground" aria-hidden="true">
+                <span class="pixel-root-arch"><i></i><b></b><em></em></span>
+                <span class="pixel-shore"><i></i><b></b></span>
+                <span class="pixel-fireflies"><i></i><i></i><i></i><i></i><i></i></span>
+              </span>
+              <span class="pixel-frame" aria-hidden="true"></span>
+              <span class="pixel-scan" aria-hidden="true"></span>
+            </div>
+          </div>
+
+          <button class="folio-pixel-interaction" type="button" data-pixel-interaction aria-label="断联的世界树信号站。移动指针观察立体遗迹，点击画面右侧信标重新连接根网">
+            <span class="sr-only">移动指针观察立体遗迹，点击右侧信标重新连接根网</span>
+          </button>
+
+          <div class="folio-pixel-hud" data-pixel-hud aria-hidden="true">
+            <p class="folio-pixel-actionbar">
+              <i></i>
+              <strong data-pixel-status-title>点击画面右侧信标</strong>
+              <span data-pixel-status-action>发送修复脉冲，重新连接世界树根网</span>
+            </p>
+          </div>
+        </div>
       </div>
       <div class="folio-outro-meta">
         <div class="folio-outro-actions">

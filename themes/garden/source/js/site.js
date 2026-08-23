@@ -2579,247 +2579,117 @@
   function setupPixelOutro() {
     var outro = document.querySelector('[data-folio-outro]');
     var vista = outro && outro.querySelector('[data-pixel-outro]');
-    var screen = vista && vista.querySelector('[data-pixel-lamp]');
-    if (!outro || !vista || !screen) return;
-    var moon = screen.querySelector('.pixel-moon');
-    var ridges = screen.querySelectorAll('.pixel-ridge');
+    var screen = vista && vista.querySelector('[data-pixel-screen]');
+    var interaction = vista && vista.querySelector('[data-pixel-interaction]');
+    var diorama = vista && vista.querySelector('[data-pixel-diorama]');
+    if (!outro || !vista || !screen || !interaction || !diorama) return;
+    var hud = vista.querySelector('[data-pixel-hud]');
+    var zoneTitle = vista.querySelector('[data-pixel-zone-title]');
+    var zoneAction = vista.querySelector('[data-pixel-zone-action]');
+    var statusTitle = vista.querySelector('[data-pixel-status-title]');
+    var statusAction = vista.querySelector('[data-pixel-status-action]');
     var beam = screen.querySelector('.pixel-beam');
-    var beamFocus = screen.querySelector('.pixel-beam-focus');
-    var boatBody = screen.querySelector('.pixel-boat > i');
-    var boatLight = screen.querySelector('.pixel-boat > i > em');
     var lampLight = screen.querySelector('.pixel-lighthouse > i');
     var reflection = screen.querySelector('.pixel-reflection');
-    var bleedSky = vista.querySelector('.folio-pixel-bleed-sky');
-    var bleedBeam = vista.querySelector('.folio-pixel-bleed-beam');
-    var bleedWaterLines = vista.querySelectorAll('.folio-pixel-bleed-water > i, .folio-pixel-bleed-water > b, .folio-pixel-bleed-water > em');
-    var rain = screen.querySelector('.pixel-rain');
+    var rootNetwork = screen.querySelector('.pixel-root-network');
+    var treeCore = screen.querySelector('.pixel-worldtree > strong');
     var frame = 0;
-    var pointerX = 0;
-    var pointerY = 0;
+    var pointerLocalX = .5;
+    var pointerLocalY = .5;
+    var pointerInside = false;
+    var dioramaActive = false;
+    var currentPitch = 0;
+    var currentYaw = 0;
+    var targetPitch = 0;
+    var targetYaw = 0;
     var entered = false;
-    var boatReaction = null;
     var signalActive = false;
+    var linked = false;
     var signalQueue = 0;
     var signalFinishTimer = 0;
     var signalReplyTimer = 0;
     var signalAnimations = [];
-    var bleedPulses = [];
-    var bleedBeamFrame = 0;
+    var zoneCopy = {
+      scene: ['断联的世界树', '移动视角，寻找右侧发光信标'],
+      lamp: ['符文信标', '点击发送修复脉冲']
+    };
 
     function getZone(x, y) {
-      var moonX = (x - .185) / .105;
-      var moonY = (y - .19) / .13;
-      if (moonX * moonX + moonY * moonY < 1) return 'moon';
-      if (x > .73 && y > .3 && y < .79) return 'lamp';
-      if (y > .62) return 'water';
-      return 'sky';
+      if (x > .48 && y > .2 && y < .74) return 'lamp';
+      return 'scene';
+    }
+
+    function updateZoneHud(zone) {
+      var copy = zoneCopy[zone] || zoneCopy.scene;
+      if (hud) hud.dataset.zone = zone;
+      if (zoneTitle) zoneTitle.textContent = copy[0];
+      if (zoneAction) zoneAction.textContent = copy[1];
+    }
+
+    function clearZoneHud() {
+      if (hud) delete hud.dataset.zone;
+      if (zoneTitle) zoneTitle.textContent = zoneCopy.scene[0];
+      if (zoneAction) zoneAction.textContent = zoneCopy.scene[1];
+    }
+
+    function readInteractionPoint(event) {
+      var rect = interaction.getBoundingClientRect();
+      return {
+        x: Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(1, rect.width))),
+        y: Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(1, rect.height)))
+      };
+    }
+
+    function scheduleDiorama() {
+      if (!frame && !document.hidden) frame = window.requestAnimationFrame(renderPointer);
     }
 
     function renderPointer() {
       frame = 0;
-      var rect = screen.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      var nx = Math.max(-1, Math.min(1, (pointerX - (rect.left + rect.width / 2)) / (rect.width / 2)));
-      var ny = Math.max(-1, Math.min(1, (pointerY - (rect.top + rect.height / 2)) / (rect.height / 2)));
-      if (moon) moon.style.transform = 'translate3d(' + (nx * -2.4).toFixed(2) + 'px,' + (ny * -1.6).toFixed(2) + 'px,0)';
-      Array.prototype.forEach.call(ridges, function (ridge, index) {
-        ridge.style.transform = 'translate3d(' + (nx * (index ? -1.1 : -1.8)).toFixed(2) + 'px,' + (ny * (index ? -.45 : -.7)).toFixed(2) + 'px,0)';
-      });
+      var nx = (pointerLocalX - .5) * 2;
+      var ny = (pointerLocalY - .5) * 2;
 
-      var localX = Math.max(0, Math.min(1, (pointerX - rect.left) / rect.width));
-      var localY = Math.max(0, Math.min(1, (pointerY - rect.top) / rect.height));
-      screen.dataset.pixelZone = getZone(localX, localY);
-      if (beam && lampLight && !screen.classList.contains('is-lamp-off') && !signalActive) {
-        var lampRect = lampLight.getBoundingClientRect();
-        var lighthouseX = lampRect.left + lampRect.width / 2;
-        var lighthouseY = lampRect.top + lampRect.height / 2;
-        var angle = Math.atan2(lighthouseY - pointerY, lighthouseX - pointerX) * 180 / Math.PI;
-        angle = Math.max(-18, Math.min(18, angle));
-        beam.style.transform = 'rotate(' + angle.toFixed(2) + 'deg) scaleX(1)';
-        screen.classList.add('is-aiming');
-        if (beamFocus) {
-          var focusY = Math.max(rect.height * .68, Math.min(rect.height * .89, pointerY - rect.top));
-          beamFocus.style.transform = 'translate3d(' + (pointerX - rect.left).toFixed(1) + 'px,' + focusY.toFixed(1) + 'px,0)';
-        }
+      if (!gardenMotionIsLite()) {
+        targetYaw = pointerInside && dioramaActive ? 7 + nx * 17 : (dioramaActive ? 7 : 0);
+        targetPitch = dioramaActive ? -12 - (pointerInside ? ny * 9 : 0) : 0;
+        currentYaw += (targetYaw - currentYaw) * .15;
+        currentPitch += (targetPitch - currentPitch) * .15;
+        diorama.style.transform = 'rotateX(' + currentPitch.toFixed(2) + 'deg) rotateY(' + currentYaw.toFixed(2) + 'deg)';
       }
+
+      if (pointerInside) {
+        var zone = getZone(pointerLocalX, pointerLocalY);
+        screen.dataset.pixelZone = zone;
+        interaction.dataset.pixelZone = zone;
+        updateZoneHud(zone);
+      }
+
+      var unsettled = Math.abs(targetYaw - currentYaw) + Math.abs(targetPitch - currentPitch) > .025;
+      diorama.classList.toggle('is-diorama-tracking', pointerInside || unsettled);
+      if (unsettled) scheduleDiorama();
     }
 
     function resetPointer() {
-      if (moon) moon.style.transform = 'translate3d(0,0,0)';
-      Array.prototype.forEach.call(ridges, function (ridge) { ridge.style.transform = 'translate3d(0,0,0)'; });
-      if (beam) beam.style.removeProperty('transform');
-      if (beamFocus) beamFocus.style.transform = 'translate3d(-100px,-100px,0)';
-      screen.classList.remove('is-aiming');
+      pointerInside = false;
+      targetYaw = dioramaActive ? 7 : 0;
+      targetPitch = dioramaActive ? -12 : 0;
       delete screen.dataset.pixelZone;
-    }
-
-    function animateEffect(element, keyframes, options, fallback) {
-      var removed = false;
-      function remove() {
-        if (removed) return;
-        removed = true;
-        element.remove();
-      }
-      if (typeof element.animate === 'function') {
-        var animation = element.animate(keyframes, options);
-        animation.finished.then(remove, remove);
-      }
-      window.setTimeout(remove, fallback);
-    }
-
-    function nudgeBoat(x) {
-      if (!boatBody || gardenMotionIsLite() || typeof boatBody.animate !== 'function') return;
-      if (boatReaction) boatReaction.cancel();
-      var direction = x < .5 ? 1 : -1;
-      var reaction = boatBody.animate([
-        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 0 },
-        { transform: 'translate3d(' + (direction * 4) + 'px,-4px,0) rotate(' + (direction * 4) + 'deg)', offset: .34 },
-        { transform: 'translate3d(' + (direction * -2) + 'px,2px,0) rotate(' + (direction * -2) + 'deg)', offset: .7 },
-        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 1 }
-      ], { duration: 440, easing: 'steps(6, end)' });
-      boatReaction = reaction;
-      reaction.finished.then(function () {
-        if (boatReaction === reaction) boatReaction = null;
-      }, function () {
-        if (boatReaction === reaction) boatReaction = null;
-      });
-    }
-
-    function pulseBleedWater() {
-      if (!bleedWaterLines.length || gardenMotionIsLite()) return;
-      bleedPulses.forEach(function (animation) { animation.cancel(); });
-      bleedPulses = [];
-      Array.prototype.forEach.call(bleedWaterLines, function (line, index) {
-        if (typeof line.animate !== 'function') return;
-        bleedPulses.push(line.animate([
-          { opacity: .22, transform: 'scaleX(.48)', offset: 0 },
-          { opacity: .92, transform: 'scaleX(1.16)', offset: .48 },
-          { opacity: .34, transform: 'scaleX(.82)', offset: 1 }
-        ], { duration: 560 + index * 70, delay: index * 55, easing: 'steps(7, end)' }));
-      });
-    }
-
-    function alignBleedBeam() {
-      bleedBeamFrame = 0;
-      if (!bleedBeam || !lampLight) return;
-      var bleed = bleedBeam.parentElement;
-      var bleedRect = bleed.getBoundingClientRect();
-      var lampRect = lampLight.getBoundingClientRect();
-      var beamHeight = bleedBeam.offsetHeight;
-      if (!bleedRect.width || !beamHeight) return;
-      var originX = lampRect.left + lampRect.width / 2 - bleedRect.left;
-      var originY = lampRect.top + lampRect.height / 2 - bleedRect.top;
-      bleedBeam.style.left = originX.toFixed(1) + 'px';
-      bleedBeam.style.top = (originY - beamHeight / 2).toFixed(1) + 'px';
-      bleedBeam.style.width = Math.max(96, bleedRect.width - originX + 24).toFixed(1) + 'px';
-    }
-
-    function queueBleedBeamAlignment() {
-      if (!bleedBeamFrame) bleedBeamFrame = window.requestAnimationFrame(alignBleedBeam);
-    }
-
-    function createRipple(x, y, reactToBoat) {
-      if (gardenMotionIsLite()) return;
-      var ripple = document.createElement('span');
-      ripple.className = 'pixel-click-ripple';
-      ripple.style.left = (x * 100).toFixed(2) + '%';
-      ripple.style.top = (Math.max(.68, y) * 100).toFixed(2) + '%';
-      ripple.setAttribute('aria-hidden', 'true');
-      screen.appendChild(ripple);
-      animateEffect(ripple, [
-        { opacity: .88, transform: 'scale(.72)', offset: 0 },
-        { opacity: .62, transform: 'scale(1.28)', offset: .36 },
-        { opacity: 0, transform: 'scale(3.1)', offset: 1 }
-      ], { duration: 680, easing: 'steps(7, end)', fill: 'forwards' }, 820);
-      pulseBleedWater();
-      if (reactToBoat !== false) nudgeBoat(x);
-    }
-
-    function createMeteor(x, y) {
-      if (gardenMotionIsLite()) return;
-      var meteor = document.createElement('span');
-      meteor.className = 'pixel-meteor';
-      meteor.style.left = (Math.min(.72, x) * 100).toFixed(2) + '%';
-      meteor.style.top = (Math.min(.48, y) * 100).toFixed(2) + '%';
-      meteor.setAttribute('aria-hidden', 'true');
-      screen.appendChild(meteor);
-      animateEffect(meteor, [
-        { opacity: 1, transform: 'translate3d(0,0,0)', offset: 0 },
-        { opacity: 1, transform: 'translate3d(52px,27px,0)', offset: .72 },
-        { opacity: 0, transform: 'translate3d(74px,38px,0)', offset: 1 }
-      ], { duration: 520, easing: 'steps(7, end)', fill: 'forwards' }, 720);
-    }
-
-    function createLightning(x) {
-      if (gardenMotionIsLite()) return;
-      var lightning = document.createElement('span');
-      var flash = document.createElement('span');
-      lightning.className = 'pixel-lightning';
-      flash.className = 'pixel-sky-flash';
-      lightning.style.left = (Math.max(.08, Math.min(.68, x)) * 100).toFixed(2) + '%';
-      lightning.style.top = '7%';
-      lightning.setAttribute('aria-hidden', 'true');
-      flash.setAttribute('aria-hidden', 'true');
-      screen.appendChild(flash);
-      screen.appendChild(lightning);
-      animateEffect(lightning, [
-        { opacity: 0, transform: 'scaleY(.92)', offset: 0 },
-        { opacity: 1, transform: 'scaleY(1)', offset: .1 },
-        { opacity: .18, transform: 'scaleY(1)', offset: .36 },
-        { opacity: 1, transform: 'scaleY(1)', offset: .5 },
-        { opacity: 0, transform: 'scaleY(1)', offset: 1 }
-      ], { duration: 440, easing: 'steps(5, end)', fill: 'forwards' }, 600);
-      animateEffect(flash, [
-        { opacity: 0, transform: 'scale(1)', offset: 0 },
-        { opacity: .8, transform: 'scale(1)', offset: .12 },
-        { opacity: .08, transform: 'scale(1)', offset: .4 },
-        { opacity: .46, transform: 'scale(1)', offset: .52 },
-        { opacity: 0, transform: 'scale(1)', offset: 1 }
-      ], { duration: 360, easing: 'steps(4, end)', fill: 'forwards' }, 520);
-      if (rain && typeof rain.animate === 'function') {
-        rain.animate([
-          { opacity: .2, transform: 'translate3d(0,-16px,0)' },
-          { opacity: .52, transform: 'translate3d(-5px,2px,0)' },
-          { opacity: .2, transform: 'translate3d(-10px,18px,0)' }
-        ], { duration: 460, easing: 'steps(5, end)' });
-      }
-      if (bleedSky && typeof bleedSky.animate === 'function') {
-        bleedSky.animate([
-          { opacity: .16, transform: 'scale(1)' },
-          { opacity: .88, transform: 'scale(1)' },
-          { opacity: .22, transform: 'scale(1)' },
-          { opacity: .64, transform: 'scale(1)' },
-          { opacity: .16, transform: 'scale(1)' }
-        ], { duration: 360, easing: 'steps(4, end)' });
-      }
-      nudgeBoat(x);
-    }
-
-    function createMoonPulse() {
-      if (gardenMotionIsLite()) return;
-      var pulse = document.createElement('span');
-      pulse.className = 'pixel-click-ripple pixel-moon-pulse';
-      pulse.style.left = '18.5%';
-      pulse.style.top = '19%';
-      pulse.setAttribute('aria-hidden', 'true');
-      screen.appendChild(pulse);
-      animateEffect(pulse, [
-        { opacity: .82, transform: 'scale(.82)' },
-        { opacity: 0, transform: 'scale(2.6)' }
-      ], { duration: 520, easing: 'steps(6, end)', fill: 'forwards' }, 680);
+      delete interaction.dataset.pixelZone;
+      clearZoneHud();
+      scheduleDiorama();
     }
 
     function updateLabel() {
-      var weather = screen.classList.contains('is-clear') ? '晴夜' : '雨夜';
-      var lamp = signalActive ? '灯塔正在呼叫' : '灯塔等待呼叫';
-      screen.setAttribute('aria-label', '交互像素' + weather + '，' + lamp + '；月亮、天空、湖面与灯塔均可点击');
-    }
-
-    function toggleWeather() {
-      screen.classList.toggle('is-clear');
-      vista.classList.toggle('is-clear', screen.classList.contains('is-clear'));
-      createMoonPulse();
-      updateLabel();
+      var title = signalActive ? '正在发送修复脉冲' : (linked ? '根网已连接' : '点击画面右侧信标');
+      var action = signalActive ? '信号正沿根系传向世界树' : (linked ? '再次点击可以重新发送脉冲' : '重新连接世界树根网');
+      if (statusTitle) statusTitle.textContent = title;
+      if (statusAction) statusAction.textContent = action;
+      if (hud) hud.dataset.state = signalActive ? 'sending' : (linked ? 'linked' : 'offline');
+      interaction.setAttribute('aria-label', signalActive
+        ? '修复脉冲正在沿根网传向世界树'
+        : (linked
+          ? '世界树根网已连接。点击右侧符文信标可以重新发送脉冲'
+          : '断联的世界树信号站。移动指针观察立体遗迹，点击右侧符文信标重新连接根网'));
     }
 
     function trackSignalAnimation(element, keyframes, options) {
@@ -2837,7 +2707,9 @@
       signalActive = false;
       screen.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
       vista.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
-      screen.classList.add('is-lamp-off');
+      linked = true;
+      screen.classList.add('is-linked');
+      vista.classList.add('is-linked');
       clearSignalAnimations();
       updateLabel();
       if (signalQueue > 0) {
@@ -2854,7 +2726,10 @@
         return;
       }
       if (gardenMotionIsLite() || !beam || typeof beam.animate !== 'function') {
-        screen.classList.toggle('is-lamp-off');
+        linked = true;
+        screen.classList.remove('is-lamp-off');
+        screen.classList.add('is-linked');
+        vista.classList.add('is-linked');
         updateLabel();
         return;
       }
@@ -2862,7 +2737,6 @@
       window.clearTimeout(signalFinishTimer);
       clearSignalAnimations();
       signalActive = true;
-      alignBleedBeam();
       screen.classList.remove('is-lamp-off', 'is-aiming', 'is-signal-response', 'is-signal-queued');
       screen.classList.add('is-signal-active');
       vista.classList.remove('is-signal-response', 'is-signal-queued');
@@ -2882,11 +2756,11 @@
       ], { duration: 1900, easing: 'steps(16, end)', fill: 'both' });
 
       trackSignalAnimation(beam, [
-        { opacity: 0, transform: 'rotate(-14deg) scaleX(.72)', offset: 0 },
-        { opacity: .58, transform: 'rotate(-14deg) scaleX(.94)', offset: .18 },
-        { opacity: .64, transform: 'rotate(10deg) scaleX(1)', offset: .56 },
-        { opacity: .46, transform: 'rotate(-3deg) scaleX(.98)', offset: .8 },
-        { opacity: 0, transform: 'rotate(-3deg) scaleX(.86)', offset: 1 }
+        { opacity: 0, transform: 'scaleX(.08)', offset: 0 },
+        { opacity: .82, transform: 'scaleX(.3)', offset: .18 },
+        { opacity: .92, transform: 'scaleX(1)', offset: .5 },
+        { opacity: .54, transform: 'scaleX(1)', offset: .82 },
+        { opacity: .18, transform: 'scaleX(1)', offset: 1 }
       ], { duration: 1900, easing: 'steps(18, end)', fill: 'both' });
 
       trackSignalAnimation(reflection, [
@@ -2897,91 +2771,83 @@
         { opacity: 0, transform: 'scaleY(.76)', offset: 1 }
       ], { duration: 1900, easing: 'steps(14, end)', fill: 'both' });
 
-      trackSignalAnimation(boatLight, [
-        { opacity: .16, transform: 'scale(.94)', offset: 0 },
-        { opacity: .16, transform: 'scale(.94)', offset: .5 },
-        { opacity: 1, transform: 'scale(1.7)', offset: .57 },
-        { opacity: .16, transform: 'scale(.94)', offset: .64 },
-        { opacity: 1, transform: 'scale(1.45)', offset: .73 },
-        { opacity: .16, transform: 'scale(.94)', offset: .82 },
-        { opacity: .16, transform: 'scale(.94)', offset: 1 }
-      ], { duration: 1900, easing: 'steps(10, end)', fill: 'both' });
+      trackSignalAnimation(rootNetwork, [
+        { opacity: .12, transform: 'scaleX(.08)', offset: 0 },
+        { opacity: .96, transform: 'scaleX(1)', offset: .58 },
+        { opacity: .7, transform: 'scaleX(1)', offset: 1 }
+      ], { duration: 1900, easing: 'steps(14, end)', fill: 'both' });
 
-      trackSignalAnimation(boatBody, [
-        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 0 },
-        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: .48 },
-        { transform: 'translate3d(3px,-3px,0) rotate(3deg)', offset: .59 },
-        { transform: 'translate3d(-2px,2px,0) rotate(-2deg)', offset: .72 },
-        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: .9 },
-        { transform: 'translate3d(0,0,0) rotate(0deg)', offset: 1 }
+      trackSignalAnimation(treeCore, [
+        { opacity: .14, transform: 'scale(.72)', offset: 0 },
+        { opacity: .14, transform: 'scale(.72)', offset: .45 },
+        { opacity: 1, transform: 'scale(1.5)', offset: .58 },
+        { opacity: .58, transform: 'scale(1)', offset: .72 },
+        { opacity: 1, transform: 'scale(1.2)', offset: .84 },
+        { opacity: .72, transform: 'scale(1)', offset: 1 }
       ], { duration: 1900, easing: 'steps(12, end)', fill: 'both' });
 
       signalReplyTimer = window.setTimeout(function () {
         if (!signalActive) return;
         screen.classList.add('is-signal-response');
         vista.classList.add('is-signal-response');
-        createRipple(.29, .75, false);
       }, 1060);
       signalFinishTimer = window.setTimeout(finishLighthouseSignal, 1900);
     }
 
     function triggerLighthouseSignal(keyboardInitiated) {
-      if (!keyboardInitiated) {
-        startLighthouseSignal();
-        return;
-      }
-      if (signalActive) return;
-      screen.classList.add('is-keyboard-change');
-      screen.classList.toggle('is-lamp-off');
-      updateLabel();
-      window.requestAnimationFrame(function () {
-        window.requestAnimationFrame(function () { screen.classList.remove('is-keyboard-change'); });
-      });
+      if (signalActive && keyboardInitiated) return;
+      startLighthouseSignal();
     }
 
     if (!gardenMotionIsLite() && finePointer.matches) {
-      screen.addEventListener('pointermove', function (event) {
-        pointerX = event.clientX;
-        pointerY = event.clientY;
-        if (!frame) frame = window.requestAnimationFrame(renderPointer);
+      interaction.addEventListener('pointermove', function (event) {
+        var point = readInteractionPoint(event);
+        pointerLocalX = point.x;
+        pointerLocalY = point.y;
+        pointerInside = true;
+        scheduleDiorama();
       }, { passive: true });
-      screen.addEventListener('pointerleave', resetPointer);
+      interaction.addEventListener('pointerleave', resetPointer);
     }
 
-    screen.addEventListener('click', function (event) {
+    interaction.addEventListener('click', function (event) {
       if (!event.detail) {
         triggerLighthouseSignal(true);
         return;
       }
-      var rect = screen.getBoundingClientRect();
-      var x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
-      var y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
-      var zone = getZone(x, y);
-      if (zone === 'moon') toggleWeather();
-      else if (zone === 'lamp') triggerLighthouseSignal(false);
-      else if (zone === 'water') createRipple(x, y);
-      else if (screen.classList.contains('is-clear')) createMeteor(x, y);
-      else createLightning(x);
+      var point = readInteractionPoint(event);
+      var zone = getZone(point.x, point.y);
+      if (zone === 'lamp') triggerLighthouseSignal(false);
     });
 
-    alignBleedBeam();
-    window.addEventListener('resize', queueBleedBeamAlignment, { passive: true });
     updateLabel();
 
     if (!('IntersectionObserver' in window) || gardenMotionIsLite()) {
       outro.classList.add('is-visible');
+      dioramaActive = true;
       return;
     }
 
     outro.classList.add('is-motion-ready');
-    new IntersectionObserver(function (entries, observer) {
+    new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (!entry.isIntersecting || entry.intersectionRatio < .14 || entered) return;
-        entered = true;
-        outro.classList.add('is-visible');
-        observer.unobserve(outro);
+        dioramaActive = entry.isIntersecting && entry.intersectionRatio >= .08;
+        targetPitch = dioramaActive ? -12 : 0;
+        targetYaw = dioramaActive ? 7 : 0;
+        if (entry.isIntersecting && entry.intersectionRatio >= .14 && !entered) {
+          entered = true;
+          outro.classList.add('is-visible');
+        }
+        scheduleDiorama();
       });
-    }, { threshold: [.14, .32] }).observe(outro);
+    }, { threshold: [.08, .14, .32] }).observe(outro);
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      } else if (!document.hidden) scheduleDiorama();
+    });
   }
 
   function setupWinterWordmark() {
