@@ -2590,6 +2590,7 @@
     var zoneAction = vista.querySelector('[data-pixel-zone-action]');
     var statusTitle = vista.querySelector('[data-pixel-status-title]');
     var statusAction = vista.querySelector('[data-pixel-status-action]');
+    var weatherToggle = vista.querySelector('[data-pixel-weather-toggle]');
     var rootNetwork = screen.querySelector('.pixel-root-network');
     var treeCore = screen.querySelector('.pixel-worldtree > strong');
     var worldTree = screen.querySelector('.pixel-worldtree');
@@ -2630,10 +2631,14 @@
     var signalActive = false;
     var signalReplay = false;
     var linked = false;
+    var currentZone = '';
     var signalRunId = 0;
     var signalAnimations = [];
     var zoneCopy = {
-      scene: ['沉睡的世界树', '移动视角，观察九界遗迹'],
+      scene: ['世界树微缩遗迹', '移动视角，观察前后景深'],
+      sky: ['极光与九界星图', '点击左侧月亮，切换为晴夜'],
+      runes: ['守界符石', '两侧符石记录着九界根脉的回声'],
+      roots: ['九界根脉', '树心苏醒后，能量将沿九条路径扩散'],
       heart: ['世界树心', '点击唤醒九界根脉']
     };
 
@@ -2641,6 +2646,9 @@
       var dx = (x - .5) / .1;
       var dy = (y - .36) / .16;
       if (dx * dx + dy * dy < 1) return 'heart';
+      if (y < .3) return 'sky';
+      if (y > .46 && y < .79 && (x < .3 || x > .7)) return 'runes';
+      if (y > .58 && x > .2 && x < .8) return 'roots';
       return 'scene';
     }
 
@@ -2649,12 +2657,38 @@
       if (hud) hud.dataset.zone = zone;
       if (zoneTitle) zoneTitle.textContent = copy[0];
       if (zoneAction) zoneAction.textContent = copy[1];
+      if (!signalActive) {
+        if (statusTitle) statusTitle.textContent = copy[0];
+        if (statusAction) statusAction.textContent = copy[1];
+      }
     }
 
     function clearZoneHud() {
       if (hud) delete hud.dataset.zone;
       if (zoneTitle) zoneTitle.textContent = zoneCopy.scene[0];
       if (zoneAction) zoneAction.textContent = zoneCopy.scene[1];
+      currentZone = '';
+      updateLabel();
+    }
+
+    function activateZone(zone) {
+      currentZone = zone;
+      screen.dataset.pixelZone = zone;
+      stage.dataset.pixelZone = zone;
+      interaction.dataset.pixelZone = zone;
+      updateZoneHud(zone);
+    }
+
+    function updateWeatherLabel() {
+      if (!weatherToggle) return;
+      var isClear = screen.classList.contains('is-clear');
+      var label = isClear ? '点击月亮，返回雨夜' : '点击月亮，切换为晴夜';
+      zoneCopy.sky[1] = label;
+      weatherToggle.setAttribute('aria-pressed', isClear ? 'true' : 'false');
+      weatherToggle.setAttribute('aria-label', label);
+      var hiddenLabel = weatherToggle.querySelector('.sr-only');
+      if (hiddenLabel) hiddenLabel.textContent = label;
+      if (currentZone === 'sky' && !signalActive) updateZoneHud('sky');
     }
 
     function readInteractionPoint(event) {
@@ -2703,10 +2737,9 @@
 
       if (pointerInside) {
         var zone = getZone(pointerLocalX, pointerLocalY);
-        screen.dataset.pixelZone = zone;
-        stage.dataset.pixelZone = zone;
-        interaction.dataset.pixelZone = zone;
-        updateZoneHud(zone);
+        if (zone !== currentZone) {
+          activateZone(zone);
+        }
       }
 
       var unsettled = Math.abs(targetYaw - currentYaw) + Math.abs(targetPitch - currentPitch) +
@@ -3027,11 +3060,26 @@
       startTreeAwakening();
     });
     interaction.addEventListener('focus', function () {
-      updateZoneHud('heart');
+      activateZone('heart');
     });
     interaction.addEventListener('blur', function () {
       if (!pointerInside) resetPointer();
     });
+
+    if (weatherToggle) {
+      weatherToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        var isClear = !screen.classList.contains('is-clear');
+        screen.classList.toggle('is-clear', isClear);
+        vista.classList.toggle('is-clear', isClear);
+        updateWeatherLabel();
+      });
+      weatherToggle.addEventListener('focus', function () { activateZone('sky'); });
+      weatherToggle.addEventListener('blur', function () {
+        if (!pointerInside) resetPointer();
+      });
+      updateWeatherLabel();
+    }
 
     function syncMotionPreference() {
       if (!gardenMotionIsLite()) return;

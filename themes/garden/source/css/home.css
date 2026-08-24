@@ -4563,6 +4563,7 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   transform: translate(-50%, -50%);
+  transition: transform 160ms cubic-bezier(.23, 1, .32, 1);
 }
 .folio-pixel-interaction:focus-visible {
   outline: 2px solid rgba(190, 222, 196, .9);
@@ -5730,10 +5731,284 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   background: linear-gradient(180deg, transparent, rgba(227, 232, 224, .9) 46%, rgba(227, 232, 224, .98));
 }
 
+/* V139 — contextual discovery: the heart whispers; sky, stones and roots answer the pointer. */
+.pixel-tree-target {
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-width: 1px;
+  opacity: .44;
+  box-shadow: 0 0 0 4px rgba(3, 9, 6, .28), 0 0 15px rgba(150, 198, 160, .14);
+  transform: scale(.96);
+  transition: opacity 160ms ease, border-color 180ms ease, background-color 180ms ease, transform 220ms cubic-bezier(.23, 1, .32, 1);
+}
+.pixel-tree-target::before {
+  inset: 8px;
+  opacity: .48;
+}
+.pixel-tree-target::after {
+  width: 9px;
+  height: 9px;
+}
+.pixel-tree-target i {
+  left: calc(100% + 9px);
+  width: 34px;
+  opacity: 0;
+  transform: translate3d(-7px, -50%, 0);
+  transition: opacity 150ms ease, transform 220ms cubic-bezier(.23, 1, .32, 1);
+}
+.pixel-tree-target i::after { left: 40px; }
+.folio-pixel-stage[data-pixel-zone="heart"] .pixel-tree-target,
+.folio-pixel-vista.is-signal-active .pixel-tree-target {
+  opacity: 1;
+  transform: scale(1);
+}
+.folio-pixel-stage[data-pixel-zone="heart"] .pixel-tree-target i {
+  opacity: 1;
+  transform: translate3d(0, -50%, 0);
+}
+.folio-pixel-stage:has(.folio-pixel-interaction:focus-visible) .pixel-tree-target,
+.folio-pixel-stage:has(.folio-pixel-interaction:focus-visible) .pixel-tree-target i { transition: none; }
+.folio-pixel-vista.is-linked:not(.is-signal-active) .pixel-tree-target { opacity: .68; }
+
+@media (hover: hover) and (pointer: fine) {
+  .pixel-aurora,
+  .pixel-rune-constellation,
+  .pixel-rune-constellation i,
+  .pixel-runestone,
+  .pixel-ruin-bridge,
+  .pixel-root-network,
+  .pixel-root-network i,
+  .pixel-root-network i > b {
+    transition-property: opacity, transform;
+    transition-duration: 180ms, 280ms;
+    transition-timing-function: ease, cubic-bezier(.23, 1, .32, 1);
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora {
+    opacity: .5;
+    transform: skewX(-9deg) translate3d(2%, -2px, 0);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora { opacity: .76; }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation {
+    opacity: .7;
+    transform: translate3d(0, -2px, 0) scale(1.025);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation { opacity: .8; }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation i { transform: scale(1.16); }
+
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-ruin-bridge {
+    opacity: 1;
+    transform: translate3d(0, -2px, 0);
+  }
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-runestone-a {
+    opacity: 1;
+    transform: rotate(-3deg) translate3d(0, -3px, 0) scale(1.055);
+  }
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-runestone-b {
+    opacity: 1;
+    transform: rotate(3deg) translate3d(0, -3px, 0) scale(1.055);
+  }
+
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network { opacity: .84; }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active):not(.is-linked) .pixel-root-network i {
+    opacity: .5;
+    transform: rotate(var(--root-angle)) scaleX(.52);
+  }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active):not(.is-linked) .pixel-root-network i > b {
+    opacity: .74;
+    transform: translateY(-50%) rotate(45deg) scale(.88);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network { opacity: 1; }
+  .folio-pixel-screen.is-linked[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i {
+    opacity: .94;
+    transform: rotate(var(--root-angle)) scaleX(1.025);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i > b {
+    transform: translateY(-50%) rotate(45deg) scale(1.12);
+  }
+}
+
+/* V140 — remove the scanner box and turn each discovery zone into a readable pose. */
+.pixel-tree-target,
+.folio-pixel-stage[data-pixel-zone="heart"] .pixel-tree-target,
+.folio-pixel-vista.is-linked .pixel-tree-target {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.pixel-tree-target { opacity: .58; }
+.pixel-tree-target::before {
+  inset: 0;
+  border: 0;
+  opacity: 0;
+  background:
+    linear-gradient(#b8d4bd, #b8d4bd) left top / 9px 1px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) left top / 1px 9px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) right top / 9px 1px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) right top / 1px 9px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) left bottom / 9px 1px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) left bottom / 1px 9px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) right bottom / 9px 1px no-repeat,
+    linear-gradient(#b8d4bd, #b8d4bd) right bottom / 1px 9px no-repeat;
+  box-shadow: none;
+  transform: scale(.92);
+  transition: opacity 150ms ease, transform 220ms cubic-bezier(.23, 1, .32, 1);
+}
+.folio-pixel-stage[data-pixel-zone="heart"] .pixel-tree-target::before,
+.folio-pixel-vista.is-signal-active .pixel-tree-target::before {
+  opacity: .72;
+  transform: scale(1);
+}
+.folio-pixel-vista.is-linked:not(.is-signal-active) .pixel-tree-target { opacity: .72; }
+.folio-pixel-stage[data-pixel-zone="sky"]::after { content: "OBSERVE / AURORA + STAR MAP"; color: rgba(188, 220, 194, .72); }
+.folio-pixel-stage[data-pixel-zone="runes"]::after { content: "OBSERVE / GUARD STONES"; color: rgba(188, 220, 194, .72); }
+.folio-pixel-stage[data-pixel-zone="roots"]::after { content: "TRACE / NINE ROOT PATHS"; color: rgba(188, 220, 194, .72); }
+.folio-pixel-stage[data-pixel-zone="heart"]::after { content: "INTERACT / TREE HEART"; color: rgba(210, 231, 214, .84); }
+
+:root[data-resolved-theme="light"] .pixel-tree-target,
+:root[data-resolved-theme="light"] .folio-pixel-stage[data-pixel-zone="heart"] .pixel-tree-target,
+:root[data-resolved-theme="light"] .folio-pixel-vista.is-linked .pixel-tree-target {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+:root[data-resolved-theme="light"] .pixel-tree-target::before {
+  background:
+    linear-gradient(#2f6a42, #2f6a42) left top / 9px 1px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) left top / 1px 9px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) right top / 9px 1px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) right top / 1px 9px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) left bottom / 9px 1px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) left bottom / 1px 9px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) right bottom / 9px 1px no-repeat,
+    linear-gradient(#2f6a42, #2f6a42) right bottom / 1px 9px no-repeat;
+}
+:root[data-resolved-theme="light"] .folio-pixel-stage[data-pixel-zone]::after { color: rgba(39, 82, 50, .74); }
+
+@media (hover: hover) and (pointer: fine) {
+  .pixel-aurora i,
+  .pixel-moon,
+  .pixel-runestone i,
+  .pixel-root-network::before,
+  .pixel-root-network::after {
+    transition: opacity 180ms ease, transform 280ms cubic-bezier(.23, 1, .32, 1);
+  }
+  .pixel-aurora i { transform-origin: left center; }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora {
+    opacity: .72;
+    transform: skewX(-9deg) translate3d(4%, -4px, 0) scaleX(1.04);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora { opacity: .9; }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora i:nth-child(1) { transform: translate3d(5px, -2px, 0) scaleX(1.14); }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora i:nth-child(2) { transform: translate3d(-5px, 0, 0) scaleX(1.1); }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-aurora i:nth-child(3) { transform: translate3d(6px, 2px, 0) scaleX(1.16); }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation {
+    opacity: .92;
+    transform: translate3d(0, -4px, 0) scale(1.08);
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation i { transform: scale(1.42); }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-moon {
+    opacity: 1;
+    transform: translate3d(-4px, -4px, 0) scale(1.12);
+  }
+
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-ruin-bridge {
+    opacity: 1;
+    transform: translate3d(0, -5px, 0) scale(1.025);
+  }
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-runestone-a {
+    opacity: 1;
+    transform: rotate(-3deg) translate3d(0, -7px, 0) scale(1.18);
+  }
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-runestone-b {
+    opacity: 1;
+    transform: rotate(3deg) translate3d(0, -7px, 0) scale(1.18);
+  }
+  .folio-pixel-screen[data-pixel-zone="runes"]:not(.is-signal-active) .pixel-runestone i { transform: scale(1.28); }
+
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network::before {
+    opacity: 1;
+    transform: scaleY(1.28);
+    transform-origin: 50% 100%;
+  }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(45deg) scale(1.42);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i {
+    opacity: 1;
+    transform: rotate(var(--root-angle)) scaleX(1.07);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i > b {
+    opacity: 1;
+    transform: translateY(-50%) rotate(45deg) scale(1.38);
+  }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(4),
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(6) { transition-delay: 28ms; }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(3),
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(7) { transition-delay: 56ms; }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(2),
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(8) { transition-delay: 84ms; }
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(1),
+  .folio-pixel-screen[data-pixel-zone="roots"]:not(.is-signal-active) .pixel-root-network i:nth-child(9) { transition-delay: 112ms; }
+}
+
+/* V141 — the moon once again controls the miniature's weather. */
+.folio-pixel-weather-toggle {
+  position: absolute;
+  left: 18.5%;
+  top: 22%;
+  z-index: 42;
+  width: clamp(54px, 9vw, 76px);
+  aspect-ratio: 1;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  outline: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate(-50%, -50%);
+}
+.folio-pixel-weather-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(185, 215, 191, .52);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.92);
+  transition: opacity 150ms ease, transform 200ms cubic-bezier(.23, 1, .32, 1);
+}
+.folio-pixel-weather-toggle:active {
+  transform: translate(-50%, -50%) scale(.96);
+  transition-duration: 100ms;
+}
+.folio-pixel-weather-toggle:focus-visible::before {
+  opacity: .88;
+  transform: scale(1);
+  transition: none;
+}
+.folio-pixel-weather-toggle[aria-pressed="true"]::before { border-style: dashed; }
+.folio-pixel-stage:has(.folio-pixel-weather-toggle:focus-visible)::after {
+  content: "INTERACT / WEATHER";
+  color: rgba(210, 231, 214, .84);
+}
+@media (hover: hover) and (pointer: fine) {
+  .folio-pixel-weather-toggle:hover::before {
+    opacity: .7;
+    transform: scale(1);
+  }
+}
+:root[data-resolved-theme="light"] .folio-pixel-weather-toggle::before { border-color: rgba(39, 93, 55, .62); }
+:root[data-resolved-theme="light"] .folio-pixel-stage:has(.folio-pixel-weather-toggle:focus-visible)::after { color: rgba(39, 82, 50, .8); }
+
 @media (max-width: 768px), (hover: none) {
   .folio-pixel-stage { width: min(560px, 86vw); perspective: 820px; }
   .folio-pixel-diorama { transform: rotateX(0deg) rotateY(0deg); }
   .folio-pixel-interaction { width: 76px; height: 76px; }
+  .folio-pixel-weather-toggle { width: 58px; }
   .folio-pixel-brief { grid-template-columns: 1fr; gap: 10px; width: min(560px, 86vw); margin-bottom: 18px; }
   .folio-pixel-brief p { font-size: 10px; line-height: 1.65; }
   .folio-pixel-shell-right { right: -24px; width: 25px; }
@@ -5765,6 +6040,8 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 @media (prefers-reduced-motion: reduce) {
   .folio-pixel-stage,
   .folio-pixel-diorama,
+  .folio-pixel-weather-toggle,
+  .folio-pixel-weather-toggle::before,
   .pixel-tree-target,
   .pixel-heart-burst i,
   .pixel-canopy-echo i,
@@ -5780,6 +6057,8 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 
 html.garden-lite-motion .folio-pixel-stage,
 html.garden-lite-motion .folio-pixel-diorama,
+html.garden-lite-motion .folio-pixel-weather-toggle,
+html.garden-lite-motion .folio-pixel-weather-toggle::before,
 html.garden-lite-motion .pixel-tree-target,
 html.garden-lite-motion .pixel-heart-burst i,
 html.garden-lite-motion .pixel-canopy-echo i,
