@@ -1890,6 +1890,7 @@
     var status = outro.querySelector('[data-outro-status]');
     var keeper = outro.querySelector('[data-outro-keeper]');
     var returnLink = outro.querySelector('.folio-outro-actions a');
+    if (!text || !track || !meter || !status || !keeper) return;
     var target = text ? text.dataset.outroValue || text.textContent : '';
     var glyphs = '▒░▓/\\<>[]{}01?#';
     var models = [];
@@ -2581,41 +2582,65 @@
     var vista = outro && outro.querySelector('[data-pixel-outro]');
     var screen = vista && vista.querySelector('[data-pixel-screen]');
     var interaction = vista && vista.querySelector('[data-pixel-interaction]');
+    var stage = vista && vista.querySelector('[data-pixel-stage]');
     var diorama = vista && vista.querySelector('[data-pixel-diorama]');
-    if (!outro || !vista || !screen || !interaction || !diorama) return;
+    if (!outro || !vista || !screen || !interaction || !stage || !diorama) return;
     var hud = vista.querySelector('[data-pixel-hud]');
     var zoneTitle = vista.querySelector('[data-pixel-zone-title]');
     var zoneAction = vista.querySelector('[data-pixel-zone-action]');
     var statusTitle = vista.querySelector('[data-pixel-status-title]');
     var statusAction = vista.querySelector('[data-pixel-status-action]');
-    var beam = screen.querySelector('.pixel-beam');
-    var lampLight = screen.querySelector('.pixel-lighthouse > i');
-    var reflection = screen.querySelector('.pixel-reflection');
     var rootNetwork = screen.querySelector('.pixel-root-network');
     var treeCore = screen.querySelector('.pixel-worldtree > strong');
+    var worldTree = screen.querySelector('.pixel-worldtree');
+    var aurora = screen.querySelector('.pixel-aurora');
+    var auroraStrips = Array.prototype.slice.call(screen.querySelectorAll('.pixel-aurora > i'));
+    var constellation = screen.querySelector('.pixel-rune-constellation');
+    var rootBranches = rootNetwork ? Array.prototype.filter.call(rootNetwork.children, function (child) { return child.tagName === 'I'; }) : [];
+    var rootNodes = rootBranches.map(function (branch) { return branch.querySelector('b'); });
+    var canopyEchoes = Array.prototype.slice.call(screen.querySelectorAll('.pixel-canopy-echo > i'));
+    var constellationPoints = Array.prototype.slice.call(screen.querySelectorAll('.pixel-rune-constellation > i'));
+    var runestones = Array.prototype.slice.call(screen.querySelectorAll('.pixel-runestone'));
+    var depthLayers = [
+      { element: screen.querySelector('.pixel-depth-sky'), z: 0, scale: 1, travel: 0 },
+      { element: screen.querySelector('.pixel-depth-ridge-back'), z: 55, scale: .93, travel: 1.5 },
+      { element: screen.querySelector('.pixel-depth-ridge-front'), z: 110, scale: .86, travel: 3 },
+      { element: screen.querySelector('.pixel-depth-water'), z: 165, scale: .79, travel: 5 },
+      { element: screen.querySelector('.pixel-depth-foreground'), z: 220, scale: .72, travel: 7 }
+    ];
     var frame = 0;
+    var lastFrameAt = performance.now();
     var pointerLocalX = .5;
     var pointerLocalY = .5;
+    var lastPointerX = 0;
+    var lastPointerY = 0;
+    var lastPointerAt = 0;
     var pointerInside = false;
     var dioramaActive = false;
     var currentPitch = 0;
     var currentYaw = 0;
+    var currentRoll = 0;
+    var currentLift = 0;
     var targetPitch = 0;
     var targetYaw = 0;
+    var targetRoll = 0;
+    var targetLift = 0;
     var entered = false;
+    var depthMotionReadyAt = 0;
     var signalActive = false;
+    var signalReplay = false;
     var linked = false;
-    var signalQueue = 0;
-    var signalFinishTimer = 0;
-    var signalReplyTimer = 0;
+    var signalRunId = 0;
     var signalAnimations = [];
     var zoneCopy = {
-      scene: ['断联的世界树', '移动视角，寻找右侧发光信标'],
-      lamp: ['符文信标', '点击发送修复脉冲']
+      scene: ['沉睡的世界树', '移动视角，观察九界遗迹'],
+      heart: ['世界树心', '点击唤醒九界根脉']
     };
 
     function getZone(x, y) {
-      if (x > .48 && y > .2 && y < .74) return 'lamp';
+      var dx = (x - .5) / .1;
+      var dy = (y - .36) / .16;
+      if (dx * dx + dy * dy < 1) return 'heart';
       return 'scene';
     }
 
@@ -2633,7 +2658,7 @@
     }
 
     function readInteractionPoint(event) {
-      var rect = interaction.getBoundingClientRect();
+      var rect = stage.getBoundingClientRect();
       return {
         x: Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(1, rect.width))),
         y: Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(1, rect.height)))
@@ -2644,57 +2669,85 @@
       if (!frame && !document.hidden) frame = window.requestAnimationFrame(renderPointer);
     }
 
-    function renderPointer() {
+    function renderPointer(now) {
       frame = 0;
+      var elapsed = Math.min(48, Math.max(8, now - lastFrameAt));
+      var follow = 1 - Math.exp(-elapsed / 88);
+      var settle = Math.exp(-elapsed / 118);
+      lastFrameAt = now;
       var nx = (pointerLocalX - .5) * 2;
       var ny = (pointerLocalY - .5) * 2;
 
       if (!gardenMotionIsLite()) {
-        targetYaw = pointerInside && dioramaActive ? 7 + nx * 17 : (dioramaActive ? 7 : 0);
-        targetPitch = dioramaActive ? -12 - (pointerInside ? ny * 9 : 0) : 0;
-        currentYaw += (targetYaw - currentYaw) * .15;
-        currentPitch += (targetPitch - currentPitch) * .15;
-        diorama.style.transform = 'rotateX(' + currentPitch.toFixed(2) + 'deg) rotateY(' + currentYaw.toFixed(2) + 'deg)';
+        targetYaw = pointerInside && dioramaActive ? nx * 17 : 0;
+        targetPitch = pointerInside && dioramaActive ? -ny * 10 : 0;
+        currentYaw += (targetYaw - currentYaw) * follow;
+        currentPitch += (targetPitch - currentPitch) * follow;
+        currentRoll += (targetRoll - currentRoll) * follow;
+        currentLift += (targetLift - currentLift) * follow;
+        targetRoll *= settle;
+        targetLift *= settle;
+        diorama.style.transform = 'translateZ(' + currentLift.toFixed(2) + 'px) rotateX(' + currentPitch.toFixed(2) + 'deg) rotateY(' + currentYaw.toFixed(2) + 'deg) rotateZ(' + currentRoll.toFixed(2) + 'deg)';
+
+        if (entered && now >= depthMotionReadyAt) {
+          var depthX = currentYaw / 17;
+          var depthY = currentPitch / 10;
+          depthLayers.forEach(function (layer) {
+            if (!layer.element) return;
+            var shiftX = depthX * layer.travel;
+            var shiftY = depthY * layer.travel * .58;
+            layer.element.style.transform = 'translateZ(' + layer.z + 'px) scale(' + layer.scale + ') translate3d(' + shiftX.toFixed(2) + 'px,' + shiftY.toFixed(2) + 'px,0)';
+          });
+        }
       }
 
       if (pointerInside) {
         var zone = getZone(pointerLocalX, pointerLocalY);
         screen.dataset.pixelZone = zone;
+        stage.dataset.pixelZone = zone;
         interaction.dataset.pixelZone = zone;
         updateZoneHud(zone);
       }
 
-      var unsettled = Math.abs(targetYaw - currentYaw) + Math.abs(targetPitch - currentPitch) > .025;
-      diorama.classList.toggle('is-diorama-tracking', pointerInside || unsettled);
+      var unsettled = Math.abs(targetYaw - currentYaw) + Math.abs(targetPitch - currentPitch) +
+        Math.abs(targetRoll - currentRoll) + Math.abs(targetLift - currentLift) > .025;
+      diorama.classList.toggle('is-diorama-tracking', dioramaActive && (pointerInside || unsettled));
+      diorama.classList.toggle('is-depth-tracking', dioramaActive && entered && now >= depthMotionReadyAt && (pointerInside || unsettled));
       if (unsettled) scheduleDiorama();
     }
 
     function resetPointer() {
       pointerInside = false;
-      targetYaw = dioramaActive ? 7 : 0;
-      targetPitch = dioramaActive ? -12 : 0;
+      targetYaw = 0;
+      targetPitch = 0;
+      targetRoll = 0;
+      targetLift = 0;
+      lastPointerAt = 0;
       delete screen.dataset.pixelZone;
+      delete stage.dataset.pixelZone;
       delete interaction.dataset.pixelZone;
       clearZoneHud();
       scheduleDiorama();
     }
 
     function updateLabel() {
-      var title = signalActive ? '正在发送修复脉冲' : (linked ? '根网已连接' : '点击画面右侧信标');
-      var action = signalActive ? '信号正沿根系传向世界树' : (linked ? '再次点击可以重新发送脉冲' : '重新连接世界树根网');
+      var title = signalActive ? (signalReplay ? '九界根脉正在共鸣' : '世界树正在苏醒') : (linked ? '九界根脉已点亮' : '移动鼠标 · 观察立体层次');
+      var action = signalActive ? (signalReplay ? '能量正沿九条根脉再次流动' : '树心点燃 · 根脉传播 · 天空回应') : (linked ? '点击树心可再次触发九界共鸣' : '点击中央树心，唤醒九界根脉');
       if (statusTitle) statusTitle.textContent = title;
       if (statusAction) statusAction.textContent = action;
       if (hud) hud.dataset.state = signalActive ? 'sending' : (linked ? 'linked' : 'offline');
       interaction.setAttribute('aria-label', signalActive
-        ? '修复脉冲正在沿根网传向世界树'
+        ? (signalReplay ? '九界根脉正在再次共鸣' : '世界树正在苏醒，光正沿九界根脉扩散')
         : (linked
-          ? '世界树根网已连接。点击右侧符文信标可以重新发送脉冲'
-          : '断联的世界树信号站。移动指针观察立体遗迹，点击右侧符文信标重新连接根网'));
+          ? '九界根脉已点亮。点击树心可以再次触发九界共鸣'
+          : '点击树心，唤醒世界树的九界根脉'));
     }
 
     function trackSignalAnimation(element, keyframes, options) {
-      if (!element || typeof element.animate !== 'function') return;
-      signalAnimations.push(element.animate(keyframes, options));
+      if (!element || typeof element.animate !== 'function') return null;
+      var animation = element.animate(keyframes, options);
+      signalAnimations.push(animation);
+      return animation;
     }
 
     function clearSignalAnimations() {
@@ -2702,140 +2755,331 @@
       signalAnimations = [];
     }
 
-    function finishLighthouseSignal() {
-      window.clearTimeout(signalReplyTimer);
+    function setTreeAwake() {
+      signalRunId += 1;
       signalActive = false;
-      screen.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
-      vista.classList.remove('is-signal-active', 'is-signal-response', 'is-signal-queued');
+      signalReplay = false;
+      screen.classList.remove('is-dormant', 'is-signal-active', 'is-signal-response');
+      vista.classList.remove('is-signal-active', 'is-signal-response', 'is-replay-active');
       linked = true;
       screen.classList.add('is-linked');
       vista.classList.add('is-linked');
       clearSignalAnimations();
       updateLabel();
-      if (signalQueue > 0) {
-        signalQueue -= 1;
-        signalFinishTimer = window.setTimeout(startLighthouseSignal, 120);
-      }
     }
 
-    function startLighthouseSignal() {
-      if (signalActive) {
-        signalQueue = Math.min(2, signalQueue + 1);
-        screen.classList.add('is-signal-queued');
-        vista.classList.add('is-signal-queued');
+    function finishSignal(runId) {
+      if (!signalActive || runId !== signalRunId) return;
+      signalActive = false;
+      signalReplay = false;
+      screen.classList.remove('is-dormant', 'is-signal-active', 'is-signal-response');
+      vista.classList.remove('is-signal-active', 'is-signal-response', 'is-replay-active');
+      linked = true;
+      screen.classList.add('is-linked');
+      vista.classList.add('is-linked');
+      clearSignalAnimations();
+      updateLabel();
+    }
+
+    function finishAfterAnimations(runId) {
+      var animations = signalAnimations.slice();
+      if (!animations.length) {
+        finishSignal(runId);
         return;
       }
-      if (gardenMotionIsLite() || !beam || typeof beam.animate !== 'function') {
-        linked = true;
-        screen.classList.remove('is-lamp-off');
-        screen.classList.add('is-linked');
-        vista.classList.add('is-linked');
-        updateLabel();
+      Promise.all(animations.map(function (animation) {
+        return animation.finished.catch(function () { return null; });
+      })).then(function () { finishSignal(runId); });
+    }
+
+    function animateRootSequence(replay) {
+      var order = [4, 3, 5, 2, 6, 1, 7, 0, 8];
+      order.forEach(function (branchIndex, orderIndex) {
+        var branch = rootBranches[branchIndex];
+        var node = rootNodes[branchIndex];
+        if (!branch) return;
+        var angle = Number(branch.dataset.rootAngle || 90);
+        var branchDelay = (replay ? 145 : 355) + orderIndex * (replay ? 34 : 55);
+        trackSignalAnimation(branch, replay ? [
+          { opacity: .78, transform: 'rotate(' + angle + 'deg) scaleX(1)' },
+          { opacity: 1, transform: 'rotate(' + angle + 'deg) scaleX(1.035)', offset: .58 },
+          { opacity: .78, transform: 'rotate(' + angle + 'deg) scaleX(1)' }
+        ] : [
+          { opacity: .22, transform: 'rotate(' + angle + 'deg) scaleX(.34)' },
+          { opacity: 1, transform: 'rotate(' + angle + 'deg) scaleX(1.04)', offset: .82 },
+          { opacity: .78, transform: 'rotate(' + angle + 'deg) scaleX(1)' }
+        ], {
+          delay: branchDelay,
+          duration: replay ? 360 : 620,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+        trackSignalAnimation(node, replay ? [
+          { opacity: 1, transform: 'translateY(-50%) rotate(45deg) scale(1)' },
+          { opacity: 1, transform: 'translateY(-50%) rotate(45deg) scale(1.34)', offset: .55 },
+          { opacity: 1, transform: 'translateY(-50%) rotate(45deg) scale(1)' }
+        ] : [
+          { opacity: .46, transform: 'translateY(-50%) rotate(45deg) scale(.72)' },
+          { opacity: 1, transform: 'translateY(-50%) rotate(45deg) scale(1.34)', offset: .55 },
+          { opacity: 1, transform: 'translateY(-50%) rotate(45deg) scale(1)' }
+        ], {
+          delay: branchDelay + (replay ? 185 : 380),
+          duration: replay ? 210 : 300,
+          easing: 'steps(4, end)',
+          fill: 'forwards'
+        });
+      });
+    }
+
+    function animateWorldResponse(replay) {
+      canopyEchoes.forEach(function (echo, index) {
+        if (replay && index > 1) return;
+        trackSignalAnimation(echo, [
+          { opacity: 0, transform: 'scale(.96)' },
+          { opacity: replay ? .18 : .32, transform: 'scale(1.015)', offset: .16 },
+          { opacity: 0, transform: 'scale(' + (replay ? 1.12 : 1.2) + ')' }
+        ], {
+          delay: (replay ? 70 : 145) + index * (replay ? 55 : 78),
+          duration: replay ? 560 : 860,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+      });
+
+      runestones.forEach(function (stone, index) {
+        var rotation = index ? '3deg' : '-3deg';
+        var finalOpacity = index ? .78 : 1;
+        trackSignalAnimation(stone, [
+          { opacity: finalOpacity, transform: 'rotate(' + rotation + ') scale(1)' },
+          { opacity: 1, transform: 'rotate(' + rotation + ') scale(1.07)', offset: .56 },
+          { opacity: finalOpacity, transform: 'rotate(' + rotation + ') scale(1)' }
+        ], {
+          delay: (replay ? 390 : 980) + index * 90,
+          duration: replay ? 280 : 390,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+      });
+
+      trackSignalAnimation(constellation, replay ? [
+        { opacity: .68 },
+        { opacity: .82, offset: .55 },
+        { opacity: .68 }
+      ] : [
+        { opacity: .4 },
+        { opacity: .56, offset: .38 },
+        { opacity: .68 }
+      ], {
+        delay: replay ? 360 : 940,
+        duration: replay ? 430 : 560,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'forwards'
+      });
+
+      constellationPoints.forEach(function (point, index) {
+        trackSignalAnimation(point, [
+          { opacity: 1, transform: 'scale(1)' },
+          { opacity: 1, transform: 'scale(1.7)', offset: .5 },
+          { opacity: 1, transform: 'scale(1)' }
+        ], {
+          delay: (replay ? 420 : 1040) + index * 48,
+          duration: replay ? 230 : 310,
+          easing: 'steps(4, end)',
+          fill: 'forwards'
+        });
+      });
+
+      auroraStrips.forEach(function (strip, index) {
+        var finalOpacity = index === 0 ? 1 : (index === 1 ? .58 : .34);
+        trackSignalAnimation(strip, [
+          { opacity: finalOpacity, transform: 'translate3d(0,0,0) scaleX(1)' },
+          { opacity: 1, transform: 'translate3d(4px,0,0) scaleX(1.045)', offset: .58 },
+          { opacity: finalOpacity, transform: 'translate3d(0,0,0) scaleX(1)' }
+        ], {
+          delay: (replay ? 390 : 1080) + index * 72,
+          duration: replay ? 330 : 440,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+      });
+    }
+
+    function startTreeAwakening() {
+      if (signalActive) return;
+      if (gardenMotionIsLite() || !treeCore || typeof treeCore.animate !== 'function') {
+        setTreeAwake();
         return;
       }
 
-      window.clearTimeout(signalFinishTimer);
+      var replay = linked;
+      var runId = ++signalRunId;
       clearSignalAnimations();
       signalActive = true;
-      screen.classList.remove('is-lamp-off', 'is-aiming', 'is-signal-response', 'is-signal-queued');
+      signalReplay = replay;
+      screen.classList.remove('is-dormant', 'is-signal-response');
+      vista.classList.remove('is-signal-response');
       screen.classList.add('is-signal-active');
-      vista.classList.remove('is-signal-response', 'is-signal-queued');
       vista.classList.add('is-signal-active');
-      beam.style.removeProperty('transform');
+      vista.classList.toggle('is-replay-active', replay);
+      if (!replay) {
+        linked = false;
+        screen.classList.remove('is-linked');
+        vista.classList.remove('is-linked');
+      }
       updateLabel();
 
-      trackSignalAnimation(lampLight, [
-        { opacity: .72, transform: 'scale(.96)', offset: 0 },
-        { opacity: .58, transform: 'scale(.9)', offset: .08 },
-        { opacity: 1, transform: 'scale(1.14)', offset: .18 },
-        { opacity: .82, transform: 'scale(1)', offset: .28 },
-        { opacity: 1, transform: 'scale(1.08)', offset: .54 },
-        { opacity: .76, transform: 'scale(1)', offset: .63 },
-        { opacity: 1, transform: 'scale(1.08)', offset: .83 },
-        { opacity: .72, transform: 'scale(.96)', offset: 1 }
-      ], { duration: 1900, easing: 'steps(16, end)', fill: 'both' });
+      trackSignalAnimation(worldTree, replay ? [
+        { opacity: 1, transform: 'scale(1)' },
+        { opacity: 1, transform: 'scale(1.025)', offset: .48 },
+        { opacity: 1, transform: 'scale(1)' }
+      ] : [
+        { opacity: .9, transform: 'scale(1)' },
+        { opacity: .94, transform: 'scale(.975)', offset: .13 },
+        { opacity: 1, transform: 'scale(1.045)', offset: .54 },
+        { opacity: 1, transform: 'scale(1)' }
+      ], {
+        duration: replay ? 620 : 820,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'both'
+      });
 
-      trackSignalAnimation(beam, [
-        { opacity: 0, transform: 'scaleX(.08)', offset: 0 },
-        { opacity: .82, transform: 'scaleX(.3)', offset: .18 },
-        { opacity: .92, transform: 'scaleX(1)', offset: .5 },
-        { opacity: .54, transform: 'scaleX(1)', offset: .82 },
-        { opacity: .18, transform: 'scaleX(1)', offset: 1 }
-      ], { duration: 1900, easing: 'steps(18, end)', fill: 'both' });
+      trackSignalAnimation(treeCore, replay ? [
+        { opacity: .82, transform: 'scale(1)' },
+        { opacity: 1, transform: 'scale(1.55)', offset: .38 },
+        { opacity: .82, transform: 'scale(1)' }
+      ] : [
+        { opacity: .32, transform: 'scale(.86)' },
+        { opacity: .56, transform: 'scale(.72)', offset: .16 },
+        { opacity: 1, transform: 'scale(1.68)', offset: .44 },
+        { opacity: .68, transform: 'scale(.96)', offset: .67 },
+        { opacity: .82, transform: 'scale(1)' }
+      ], {
+        duration: replay ? 560 : 690,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'both'
+      });
 
-      trackSignalAnimation(reflection, [
-        { opacity: 0, transform: 'scaleY(.72)', offset: 0 },
-        { opacity: 0, transform: 'scaleY(.72)', offset: .34 },
-        { opacity: .72, transform: 'scaleY(1.1)', offset: .57 },
-        { opacity: .34, transform: 'scaleY(.9)', offset: .8 },
-        { opacity: 0, transform: 'scaleY(.76)', offset: 1 }
-      ], { duration: 1900, easing: 'steps(14, end)', fill: 'both' });
+      trackSignalAnimation(rootNetwork, replay ? [
+        { opacity: .92 },
+        { opacity: 1, offset: .48 },
+        { opacity: .92 }
+      ] : [
+        { opacity: .58 },
+        { opacity: .72, offset: .28 },
+        { opacity: .92 }
+      ], {
+        duration: replay ? 760 : 1380,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'both'
+      });
 
-      trackSignalAnimation(rootNetwork, [
-        { opacity: .12, transform: 'scaleX(.08)', offset: 0 },
-        { opacity: .96, transform: 'scaleX(1)', offset: .58 },
-        { opacity: .7, transform: 'scaleX(1)', offset: 1 }
-      ], { duration: 1900, easing: 'steps(14, end)', fill: 'both' });
+      animateRootSequence(replay);
+      animateWorldResponse(replay);
 
-      trackSignalAnimation(treeCore, [
-        { opacity: .14, transform: 'scale(.72)', offset: 0 },
-        { opacity: .14, transform: 'scale(.72)', offset: .45 },
-        { opacity: 1, transform: 'scale(1.5)', offset: .58 },
-        { opacity: .58, transform: 'scale(1)', offset: .72 },
-        { opacity: 1, transform: 'scale(1.2)', offset: .84 },
-        { opacity: .72, transform: 'scale(1)', offset: 1 }
-      ], { duration: 1900, easing: 'steps(12, end)', fill: 'both' });
+      trackSignalAnimation(aurora, replay ? [
+        { opacity: .62, transform: 'skewX(-9deg) translate3d(0,0,0)' },
+        { opacity: .82, transform: 'skewX(-9deg) translate3d(3%,0,0)', offset: .56 },
+        { opacity: .62, transform: 'skewX(-9deg) translate3d(0,0,0)' }
+      ] : [
+        { opacity: .28, transform: 'skewX(-9deg) translate3d(0,0,0)' },
+        { opacity: .84, transform: 'skewX(-9deg) translate3d(3%,0,0)', offset: .66 },
+        { opacity: .62, transform: 'skewX(-9deg) translate3d(0,0,0)' }
+      ], {
+        delay: replay ? 300 : 1000,
+        duration: replay ? 640 : 750,
+        easing: 'cubic-bezier(.77, 0, .175, 1)',
+        fill: 'forwards'
+      });
 
-      signalReplyTimer = window.setTimeout(function () {
-        if (!signalActive) return;
-        screen.classList.add('is-signal-response');
-        vista.classList.add('is-signal-response');
-      }, 1060);
-      signalFinishTimer = window.setTimeout(finishLighthouseSignal, 1900);
+      finishAfterAnimations(runId);
     }
 
-    function triggerLighthouseSignal(keyboardInitiated) {
-      if (signalActive && keyboardInitiated) return;
-      startLighthouseSignal();
-    }
-
-    if (!gardenMotionIsLite() && finePointer.matches) {
-      interaction.addEventListener('pointermove', function (event) {
+    if (finePointer.matches) {
+      vista.addEventListener('pointermove', function (event) {
+        if (gardenMotionIsLite()) return;
+        var now = performance.now();
+        if (lastPointerAt) {
+          var elapsed = Math.max(8, now - lastPointerAt);
+          var velocityX = (event.clientX - lastPointerX) / elapsed;
+          var velocityY = (event.clientY - lastPointerY) / elapsed;
+          var speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+          targetRoll = Math.max(-1.8, Math.min(1.8, velocityX * .9));
+          targetLift = Math.min(5, speed * 1.45);
+        }
+        lastPointerX = event.clientX;
+        lastPointerY = event.clientY;
+        lastPointerAt = now;
         var point = readInteractionPoint(event);
         pointerLocalX = point.x;
         pointerLocalY = point.y;
         pointerInside = true;
+        dioramaActive = true;
         scheduleDiorama();
       }, { passive: true });
-      interaction.addEventListener('pointerleave', resetPointer);
+      vista.addEventListener('pointerleave', resetPointer);
     }
 
     interaction.addEventListener('click', function (event) {
       if (!event.detail) {
-        triggerLighthouseSignal(true);
+        setTreeAwake();
         return;
       }
-      var point = readInteractionPoint(event);
-      var zone = getZone(point.x, point.y);
-      if (zone === 'lamp') triggerLighthouseSignal(false);
+      startTreeAwakening();
     });
+    interaction.addEventListener('focus', function () {
+      updateZoneHud('heart');
+    });
+    interaction.addEventListener('blur', function () {
+      if (!pointerInside) resetPointer();
+    });
+
+    function syncMotionPreference() {
+      if (!gardenMotionIsLite()) return;
+      resetPointer();
+      currentPitch = 0;
+      currentYaw = 0;
+      currentRoll = 0;
+      currentLift = 0;
+      diorama.style.removeProperty('transform');
+      depthLayers.forEach(function (layer) {
+        if (layer.element) layer.element.style.removeProperty('transform');
+      });
+      if (signalActive) setTreeAwake();
+    }
+
+    if (typeof reduceMotion.addEventListener === 'function') reduceMotion.addEventListener('change', syncMotionPreference);
+    else if (typeof reduceMotion.addListener === 'function') reduceMotion.addListener(syncMotionPreference);
+    new MutationObserver(function (mutations) {
+      if (mutations.some(function (mutation) { return mutation.attributeName === 'class'; })) syncMotionPreference();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     updateLabel();
 
-    if (!('IntersectionObserver' in window) || gardenMotionIsLite()) {
-      outro.classList.add('is-visible');
+    if (!('IntersectionObserver' in window)) {
+      outro.classList.add('is-visible', 'is-inview');
+      entered = true;
       dioramaActive = true;
       return;
     }
 
-    outro.classList.add('is-motion-ready');
+    if (gardenMotionIsLite()) {
+      outro.classList.add('is-visible');
+      entered = true;
+    } else {
+      outro.classList.add('is-motion-ready');
+    }
     new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         dioramaActive = entry.isIntersecting && entry.intersectionRatio >= .08;
-        targetPitch = dioramaActive ? -12 : 0;
-        targetYaw = dioramaActive ? 7 : 0;
+        outro.classList.toggle('is-inview', entry.isIntersecting);
+        targetPitch = 0;
+        targetYaw = 0;
+        targetRoll = 0;
+        targetLift = 0;
+        if (!dioramaActive) resetPointer();
         if (entry.isIntersecting && entry.intersectionRatio >= .14 && !entered) {
           entered = true;
+          depthMotionReadyAt = performance.now() + 1100;
           outro.classList.add('is-visible');
         }
         scheduleDiorama();
