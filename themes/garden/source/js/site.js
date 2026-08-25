@@ -2590,6 +2590,7 @@
     var zoneAction = vista.querySelector('[data-pixel-zone-action]');
     var statusTitle = vista.querySelector('[data-pixel-status-title]');
     var statusAction = vista.querySelector('[data-pixel-status-action]');
+    var realmCount = vista.querySelector('[data-pixel-realm-count]');
     var weatherToggle = vista.querySelector('[data-pixel-weather-toggle]');
     var glassGlint = vista.querySelector('[data-pixel-glint]');
     var surfaceLight = screen.querySelector('[data-pixel-surface-light]');
@@ -2601,8 +2602,10 @@
     var constellation = screen.querySelector('.pixel-rune-constellation');
     var constellationPaths = Array.prototype.slice.call(screen.querySelectorAll('.pixel-rune-constellation svg path'));
     var constellationOrbit = screen.querySelector('.pixel-rune-orbit');
+    var constellationSpokes = screen.querySelector('.pixel-rune-spokes');
     var constellationRealms = Array.prototype.slice.call(screen.querySelectorAll('.pixel-rune-realms circle'));
     var constellationReflection = screen.querySelector('.pixel-rune-reflection');
+    var crownAura = screen.querySelector('[data-pixel-crown-aura]');
     var rootBranches = rootNetwork ? Array.prototype.filter.call(rootNetwork.children, function (child) { return child.tagName === 'I'; }) : [];
     var rootNodes = rootBranches.map(function (branch) { return branch.querySelector('b'); });
     var canopyEchoes = Array.prototype.slice.call(screen.querySelectorAll('.pixel-canopy-echo > i'));
@@ -2816,6 +2819,11 @@
           : '点击树心，唤醒世界树的九界根脉'));
     }
 
+    function setRealmCount(value) {
+      if (!realmCount) return;
+      realmCount.textContent = Math.max(0, Math.min(9, value)) + ' / 9';
+    }
+
     function trackSignalAnimation(element, keyframes, options) {
       if (!element || typeof element.animate !== 'function') return null;
       var animation = element.animate(keyframes, options);
@@ -2838,6 +2846,7 @@
       screen.classList.add('is-linked');
       vista.classList.add('is-linked');
       clearSignalAnimations();
+      setRealmCount(9);
       updateLabel();
     }
 
@@ -2851,6 +2860,7 @@
       screen.classList.add('is-linked');
       vista.classList.add('is-linked');
       clearSignalAnimations();
+      setRealmCount(9);
       updateLabel();
     }
 
@@ -2904,7 +2914,7 @@
       });
     }
 
-    function animateWorldResponse(replay) {
+    function animateWorldResponse(replay, runId) {
       canopyEchoes.forEach(function (echo, index) {
         if (replay && index > 1) return;
         trackSignalAnimation(echo, [
@@ -2950,21 +2960,36 @@
       });
 
       trackSignalAnimation(constellationOrbit, replay ? [
-        { opacity: .72, strokeDashoffset: 0 },
-        { opacity: 1, strokeDashoffset: 0, offset: .5 },
-        { opacity: .72, strokeDashoffset: 0 }
+        { opacity: .72, transform: 'scale(1)' },
+        { opacity: 1, transform: 'scale(1.035)', offset: .5 },
+        { opacity: .72, transform: 'scale(1)' }
       ] : [
-        { opacity: .12, strokeDashoffset: 1 },
-        { opacity: .86, strokeDashoffset: 0 }
+        { opacity: .12, transform: 'scale(.88)' },
+        { opacity: .86, transform: 'scale(1)' }
       ], {
-        delay: replay ? 225 : 735,
-        duration: replay ? 380 : 620,
+        delay: replay ? 210 : 720,
+        duration: replay ? 340 : 520,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'forwards'
+      });
+
+      trackSignalAnimation(crownAura, replay ? [
+        { opacity: .42, transform: 'scale(1)' },
+        { opacity: .66, transform: 'scale(1.035)', offset: .5 },
+        { opacity: .42, transform: 'scale(1)' }
+      ] : [
+        { opacity: .035, transform: 'scale(.84)' },
+        { opacity: .58, transform: 'scale(1.04)', offset: .72 },
+        { opacity: .42, transform: 'scale(1)' }
+      ], {
+        delay: replay ? 170 : 580,
+        duration: replay ? 450 : 700,
         easing: 'cubic-bezier(.23, 1, .32, 1)',
         fill: 'forwards'
       });
 
       constellationRealms.forEach(function (realm, index) {
-        trackSignalAnimation(realm, replay ? [
+        var realmAnimation = trackSignalAnimation(realm, replay ? [
           { opacity: .86, transform: 'scale(1)' },
           { opacity: 1, transform: 'scale(1.72)', offset: .46 },
           { opacity: .86, transform: 'scale(1)' }
@@ -2978,19 +3003,39 @@
           easing: 'cubic-bezier(.23, 1, .32, 1)',
           fill: 'forwards'
         });
+        if (realmAnimation) {
+          realmAnimation.finished.then(function () {
+            if (signalActive && runId === signalRunId) setRealmCount(index + 1);
+          }).catch(function () { return null; });
+        }
+      });
+
+      trackSignalAnimation(constellationSpokes, replay ? [
+        { opacity: .36, transform: 'scale(1)' },
+        { opacity: .66, transform: 'scale(1.035)', offset: .5 },
+        { opacity: .36, transform: 'scale(1)' }
+      ] : [
+        { opacity: 0, transform: 'scale(.84)' },
+        { opacity: .58, transform: 'scale(1.025)', offset: .7 },
+        { opacity: .36, transform: 'scale(1)' }
+      ], {
+        delay: replay ? 410 : 1250,
+        duration: replay ? 340 : 520,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'forwards'
       });
 
       constellationPaths.forEach(function (path, index) {
         trackSignalAnimation(path, replay ? [
-          { opacity: .78, strokeDashoffset: 0 },
-          { opacity: 1, strokeDashoffset: 0, offset: .48 },
-          { opacity: .78, strokeDashoffset: 0 }
+          { opacity: .78, transform: 'scale(1)' },
+          { opacity: 1, transform: 'scale(1.035)', offset: .48 },
+          { opacity: .78, transform: 'scale(1)' }
         ] : [
-          { opacity: .08, strokeDashoffset: 1 },
-          { opacity: 1, strokeDashoffset: 0 }
+          { opacity: .08, transform: 'scale(.93)' },
+          { opacity: 1, transform: 'scale(1)' }
         ], {
-          delay: (replay ? 420 : 1030) + index * (replay ? 75 : 110),
-          duration: replay ? 340 : 520,
+          delay: (replay ? 380 : 980) + index * (replay ? 55 : 60),
+          duration: replay ? 300 : 420,
           easing: 'cubic-bezier(.23, 1, .32, 1)',
           fill: 'forwards'
         });
@@ -3005,8 +3050,8 @@
         { opacity: .24, transform: 'scaleY(-.5) translateY(1px)', offset: .56 },
         { opacity: .12, transform: 'scaleY(-.48) translateY(0)' }
       ], {
-        delay: replay ? 560 : 1440,
-        duration: replay ? 430 : 580,
+        delay: replay ? 520 : 1370,
+        duration: replay ? 360 : 460,
         easing: 'cubic-bezier(.23, 1, .32, 1)',
         fill: 'forwards'
       });
@@ -3070,6 +3115,7 @@
       clearSignalAnimations();
       signalActive = true;
       signalReplay = replay;
+      setRealmCount(0);
       screen.classList.remove('is-dormant', 'is-signal-response');
       vista.classList.remove('is-signal-response');
       screen.classList.add('is-signal-active');
@@ -3122,14 +3168,14 @@
         { opacity: .72, offset: .28 },
         { opacity: .92 }
       ], {
-        duration: replay ? 760 : 1380,
+        duration: replay ? 680 : 1180,
         easing: 'cubic-bezier(.23, 1, .32, 1)',
         fill: 'both'
       });
 
       animateRootSequence(replay);
       animateEnergyConduction(replay);
-      animateWorldResponse(replay);
+      animateWorldResponse(replay, runId);
 
       trackSignalAnimation(aurora, replay ? [
         { opacity: .62, transform: 'skewX(-9deg) translate3d(0,0,0)' },
@@ -3198,10 +3244,23 @@
     if (weatherToggle) {
       weatherToggle.addEventListener('click', function (event) {
         event.stopPropagation();
+        var keyboardChange = !event.detail;
+        if (keyboardChange) {
+          screen.classList.add('is-keyboard-change');
+          vista.classList.add('is-keyboard-change');
+        }
         var isClear = !screen.classList.contains('is-clear');
         screen.classList.toggle('is-clear', isClear);
         vista.classList.toggle('is-clear', isClear);
         updateWeatherLabel();
+        if (keyboardChange) {
+          window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(function () {
+              screen.classList.remove('is-keyboard-change');
+              vista.classList.remove('is-keyboard-change');
+            });
+          });
+        }
       });
       weatherToggle.addEventListener('focus', function () { activateZone('sky'); });
       weatherToggle.addEventListener('blur', function () {
@@ -3249,6 +3308,7 @@
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     updateLabel();
+    setRealmCount(0);
 
     if (!('IntersectionObserver' in window)) {
       outro.classList.add('is-visible', 'is-inview');
@@ -3271,7 +3331,10 @@
         targetYaw = 0;
         targetRoll = 0;
         targetLift = 0;
-        if (!dioramaActive) resetPointer();
+        if (!dioramaActive) {
+          resetPointer();
+          if (signalActive) setTreeAwake();
+        }
         if (entry.isIntersecting && entry.intersectionRatio >= .14 && !entered) {
           entered = true;
           depthMotionReadyAt = performance.now() + 1100;
@@ -3282,9 +3345,12 @@
     }, { threshold: [.08, .14, .32] }).observe(outro);
 
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden && frame) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
+      if (document.hidden) {
+        if (frame) {
+          window.cancelAnimationFrame(frame);
+          frame = 0;
+        }
+        if (signalActive) setTreeAwake();
       } else if (!document.hidden) scheduleDiorama();
     });
   }

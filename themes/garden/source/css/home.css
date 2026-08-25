@@ -5343,10 +5343,8 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 }
 .folio-pixel-vista.is-signal-active .pixel-heart-burst i:nth-child(1) { animation: garden-tree-heart-ring 880ms cubic-bezier(.23, 1, .32, 1) both; }
 .folio-pixel-vista.is-signal-active .pixel-heart-burst i:nth-child(2) { animation: garden-tree-heart-ring 1040ms cubic-bezier(.23, 1, .32, 1) 90ms both; }
-.folio-pixel-vista.is-signal-active .pixel-heart-burst i:nth-child(3) { animation: garden-tree-heart-ring 1180ms cubic-bezier(.23, 1, .32, 1) 180ms both; }
 .folio-pixel-vista.is-replay-active .pixel-heart-burst i:nth-child(1) { animation-duration: 620ms; }
 .folio-pixel-vista.is-replay-active .pixel-heart-burst i:nth-child(2) { animation-duration: 720ms; animation-delay: 55ms; }
-.folio-pixel-vista.is-replay-active .pixel-heart-burst i:nth-child(3) { animation-duration: 820ms; animation-delay: 110ms; }
 
 @keyframes garden-tree-heart-ring {
   0% { opacity: 0; transform: scale(.48) rotate(45deg); }
@@ -5359,14 +5357,6 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 .folio-pixel-screen.is-linked .pixel-root-network i > b { opacity: 1; transform: translateY(-50%) rotate(45deg) scale(1); }
 .folio-pixel-screen.is-linked .pixel-rune-constellation { opacity: .68; }
 .folio-pixel-screen.is-linked .pixel-runestone i { background: #a8c8ae; box-shadow: -5px 6px 0 #789a80, 5px 13px 0 #789a80, 0 0 12px rgba(157, 201, 166, .34); }
-.folio-outro.is-inview .folio-pixel-vista.is-linked:not(.is-signal-active) .pixel-tree-target::after {
-  animation: garden-tree-heart-idle 4.8s cubic-bezier(.77, 0, .175, 1) infinite;
-}
-@keyframes garden-tree-heart-idle {
-  0%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
-  50% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1.08); }
-}
-
 .folio-outro:not(.is-inview) .pixel-rain,
 .folio-outro:not(.is-inview) .pixel-fireflies i,
 .folio-outro:not(.is-inview) .folio-pixel-bleed-fireflies i,
@@ -5484,7 +5474,14 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   letter-spacing: .12em;
   transform: translateY(-50%);
 }
-.folio-pixel-depth-meter i { width: 22px; height: 1px; background: rgba(159, 197, 167, .2); transition: width 180ms cubic-bezier(.23, 1, .32, 1), background-color 180ms ease; }
+.folio-pixel-depth-meter i {
+  width: 38px;
+  height: 1px;
+  background: rgba(159, 197, 167, .2);
+  transform: scaleX(.58);
+  transform-origin: 100% 50%;
+  transition: transform 180ms cubic-bezier(.23, 1, .32, 1), background-color 180ms ease;
+}
 .folio-pixel-hud[data-zone="moon"] .folio-pixel-depth-meter span:first-child,
 .folio-pixel-hud[data-zone="sky"] .folio-pixel-depth-meter span:first-child,
 .folio-pixel-hud[data-zone="lamp"] .folio-pixel-depth-meter span:nth-of-type(2),
@@ -5492,7 +5489,7 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 .folio-pixel-hud[data-zone="moon"] .folio-pixel-depth-meter i:first-of-type,
 .folio-pixel-hud[data-zone="sky"] .folio-pixel-depth-meter i:first-of-type,
 .folio-pixel-hud[data-zone="lamp"] .folio-pixel-depth-meter i:nth-of-type(2),
-.folio-pixel-hud[data-zone="water"] .folio-pixel-depth-meter i:nth-of-type(3) { width: 38px; background: rgba(184, 218, 190, .72); }
+.folio-pixel-hud[data-zone="water"] .folio-pixel-depth-meter i:nth-of-type(3) { background: rgba(184, 218, 190, .72); transform: scaleX(1); }
 
 .folio-pixel-touch-hint {
   position: absolute;
@@ -5525,11 +5522,6 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 .folio-outro.is-motion-ready.is-visible .pixel-depth-ridge-front { transition-delay: 170ms; }
 .folio-outro.is-motion-ready.is-visible .pixel-depth-water { transition-delay: 215ms; }
 .folio-outro.is-motion-ready.is-visible .pixel-depth-foreground { transition-delay: 260ms; }
-
-.folio-pixel-screen[data-pixel-zone="moon"] .pixel-depth-sky { filter: brightness(1.08); }
-.folio-pixel-screen[data-pixel-zone="sky"] .pixel-depth-sky { filter: brightness(1.04); }
-.folio-pixel-screen[data-pixel-zone="lamp"] .pixel-depth-water { filter: brightness(1.09); }
-.folio-pixel-screen[data-pixel-zone="water"] .pixel-depth-water { filter: brightness(1.06); }
 
 @media (hover: hover) and (pointer: fine) {
   .folio-pixel-stage:hover .folio-pixel-zone-copy { opacity: 1; }
@@ -6172,7 +6164,7 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   border-radius: 50%;
   mix-blend-mode: screen;
   transform: translate3d(145%, 72%, 0);
-  will-change: transform, opacity;
+  will-change: auto;
 }
 .pixel-surface-light i {
   position: absolute;
@@ -6263,13 +6255,10 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   stroke-width: 2;
   stroke-linecap: square;
   stroke-linejoin: miter;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
   opacity: .08;
   vector-effect: non-scaling-stroke;
 }
 .folio-pixel-screen.is-linked .pixel-rune-constellation svg path {
-  stroke-dashoffset: 0;
   opacity: .78;
 }
 .pixel-rune-reflection {
@@ -6301,10 +6290,9 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 }
 @media (hover: hover) and (pointer: fine) {
   .pixel-rune-constellation svg path {
-    transition: opacity 180ms ease, stroke-dashoffset 360ms cubic-bezier(.23, 1, .32, 1);
+    transition: opacity 180ms ease, transform 300ms cubic-bezier(.23, 1, .32, 1);
   }
   .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-constellation svg path {
-    stroke-dashoffset: .72;
     opacity: .34;
   }
   .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation svg path { opacity: 1; }
@@ -6336,8 +6324,6 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   fill: none;
   stroke: #9fc3a6;
   stroke-width: 1.7;
-  stroke-dasharray: 1;
-  stroke-dashoffset: .82;
   opacity: .18;
   vector-effect: non-scaling-stroke;
 }
@@ -6353,7 +6339,7 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 }
 .folio-pixel-screen.is-linked .pixel-rune-constellation { opacity: .92; }
 .folio-pixel-screen.is-linked .pixel-rune-constellation svg path { opacity: .86; }
-.folio-pixel-screen.is-linked .pixel-rune-orbit { stroke-dashoffset: 0; opacity: .72; }
+.folio-pixel-screen.is-linked .pixel-rune-orbit { opacity: .72; }
 .folio-pixel-screen.is-linked .pixel-rune-realms circle { opacity: .86; transform: scale(1); }
 
 .pixel-rune-reflection {
@@ -6375,10 +6361,9 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 @media (hover: hover) and (pointer: fine) {
   .pixel-rune-orbit,
   .pixel-rune-realms circle {
-    transition: opacity 180ms ease, transform 260ms cubic-bezier(.23, 1, .32, 1), stroke-dashoffset 420ms cubic-bezier(.23, 1, .32, 1);
+    transition: opacity 180ms ease, transform 260ms cubic-bezier(.23, 1, .32, 1);
   }
   .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-orbit {
-    stroke-dashoffset: .58;
     opacity: .38;
   }
   .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-realms circle {
@@ -6403,9 +6388,167 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 :root[data-resolved-theme="light"] .pixel-rune-reflection path,
 :root[data-resolved-theme="light"] .pixel-rune-reflection circle { stroke: #356f47; }
 
+/* V146 — final motion pass: compositor-only reveals, quieter idle state and sharper input feedback. */
+.pixel-rune-constellation svg path {
+  opacity: .08;
+  transform: scale(.93);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.pixel-rune-orbit {
+  opacity: .18;
+  transform: scale(.94);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.folio-pixel-screen.is-linked .pixel-rune-constellation svg path { opacity: .86; transform: scale(1); }
+.folio-pixel-screen.is-linked .pixel-rune-orbit { opacity: .72; transform: scale(1); }
+
+.folio-pixel-vista.is-signal-active .pixel-heart-burst i:nth-child(1) { animation-duration: 760ms; }
+.folio-pixel-vista.is-signal-active .pixel-heart-burst i:nth-child(2) { animation-duration: 920ms; animation-delay: 74ms; }
+.folio-pixel-screen.is-signal-active .pixel-signal-bloom { animation-duration: 980ms; }
+.folio-pixel-vista.is-replay-active .pixel-signal-bloom { animation-duration: 680ms; }
+.pixel-fireflies i:nth-child(2n) { animation-duration: 4.8s; }
+.pixel-fireflies i:nth-child(2n + 1) { animation-duration: 5.9s; }
+.folio-pixel-screen.is-clear .pixel-sky i:nth-child(3n) { animation-duration: 4.6s; }
+.folio-pixel-bleed-fireflies > i { animation-duration: 6.2s; }
+
+.folio-pixel-diorama.is-diorama-tracking .pixel-surface-light { will-change: transform, opacity; }
+
+.folio-pixel-weather-toggle { transition: transform 140ms cubic-bezier(.23, 1, .32, 1); }
+.folio-pixel-weather-toggle:active { transition-duration: 90ms; }
+.pixel-tree-target::after { transition: transform 140ms cubic-bezier(.23, 1, .32, 1); }
+.folio-pixel-stage:has(.folio-pixel-interaction:active) .pixel-tree-target::after {
+  transform: translate(-50%, -50%) rotate(45deg) scale(.9);
+  transition-duration: 90ms;
+}
+.folio-pixel-weather-toggle:focus-visible:active {
+  transform: translate(-50%, -50%);
+  transition: none;
+}
+.folio-pixel-stage:has(.folio-pixel-interaction:focus-visible:active) .pixel-tree-target::after {
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: none;
+}
+.folio-pixel-screen.is-keyboard-change .pixel-sky,
+.folio-pixel-screen.is-keyboard-change .pixel-sky i,
+.folio-pixel-screen.is-keyboard-change .pixel-atmosphere,
+.folio-pixel-screen.is-keyboard-change .pixel-moon,
+.folio-pixel-screen.is-keyboard-change .pixel-cloud,
+.folio-pixel-screen.is-keyboard-change .pixel-rain,
+.folio-pixel-screen.is-keyboard-change .pixel-horizon-glow,
+.folio-pixel-screen.is-keyboard-change .pixel-lake,
+.folio-pixel-screen.is-keyboard-change .pixel-fireflies,
+.folio-pixel-vista.is-keyboard-change .folio-pixel-bleed-sky,
+.folio-pixel-vista.is-keyboard-change .folio-pixel-bleed-mist,
+.folio-pixel-vista.is-keyboard-change .folio-pixel-bleed-water,
+.folio-pixel-vista.is-keyboard-change .folio-pixel-bleed-fireflies {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pixel-rune-constellation svg path,
+  .pixel-rune-orbit {
+    transition: opacity 180ms ease, transform 300ms cubic-bezier(.23, 1, .32, 1);
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-constellation svg path {
+    opacity: .24;
+    transform: scale(.97);
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-orbit {
+    opacity: .38;
+    transform: scale(.98);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-orbit {
+    opacity: 1;
+    transform: scale(1.025);
+  }
+}
+
+/* V147 — a clearly visible crown field, nine inward links and explicit realm progress. */
+.pixel-crown-aura {
+  position: absolute;
+  left: 14%;
+  top: -8%;
+  z-index: 4;
+  width: 72%;
+  height: 66%;
+  opacity: .035;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 0 34%, rgba(174, 216, 181, .42) 35% 36%, transparent 37% 49%, rgba(113, 164, 123, .24) 50% 51%, transparent 52%),
+    repeating-conic-gradient(from 8deg at 50% 50%, transparent 0 8deg, rgba(164, 205, 171, .2) 9deg 11deg, transparent 12deg 20deg);
+  border-radius: 50%;
+  transform: scale(.84);
+  transform-origin: 50% 58%;
+}
+.pixel-crown-aura i,
+.pixel-crown-aura b {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+}
+.pixel-crown-aura i { inset: 19% 21%; border: 1px dashed rgba(195, 225, 200, .46); }
+.pixel-crown-aura b { inset: 31% 34%; border: 1px solid rgba(139, 187, 148, .42); }
+.folio-pixel-screen.is-linked .pixel-crown-aura { opacity: .42; transform: scale(1); }
+
+.pixel-rune-spokes {
+  opacity: 0;
+  transform: scale(.84);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.pixel-rune-spokes line {
+  stroke: #8fb797;
+  stroke-width: .85;
+  vector-effect: non-scaling-stroke;
+}
+.folio-pixel-screen.is-linked .pixel-rune-spokes { opacity: .36; transform: scale(1); }
+
+.folio-pixel-actionbar { grid-template-columns: auto minmax(0, 1fr) auto; }
+.folio-pixel-actionbar > b {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
+  min-width: 41px;
+  padding-left: 10px;
+  color: rgba(181, 210, 187, .58);
+  border-left: 1px solid rgba(151, 190, 159, .22);
+  font: 650 8px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .08em;
+  text-align: right;
+}
+.folio-pixel-hud[data-state="sending"] .folio-pixel-actionbar > b { color: #d4e7d7; }
+.folio-pixel-hud[data-state="linked"] .folio-pixel-actionbar > b { color: #b9d5bf; }
+
+@media (hover: hover) and (pointer: fine) {
+  .pixel-crown-aura,
+  .pixel-rune-spokes { transition: opacity 180ms ease, transform 320ms cubic-bezier(.23, 1, .32, 1); }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-crown-aura { opacity: .58; transform: scale(1.025); }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-spokes { opacity: .58; transform: scale(1.015); }
+}
+
+:root[data-resolved-theme="light"] .pixel-crown-aura {
+  background:
+    radial-gradient(ellipse at center, transparent 0 34%, rgba(38, 101, 56, .25) 35% 36%, transparent 37% 49%, rgba(53, 111, 70, .14) 50% 51%, transparent 52%),
+    repeating-conic-gradient(from 8deg at 50% 50%, transparent 0 8deg, rgba(42, 103, 59, .13) 9deg 11deg, transparent 12deg 20deg);
+}
+:root[data-resolved-theme="light"] .pixel-crown-aura i { border-color: rgba(39, 101, 57, .32); }
+:root[data-resolved-theme="light"] .pixel-crown-aura b { border-color: rgba(39, 101, 57, .28); }
+:root[data-resolved-theme="light"] .pixel-rune-spokes line { stroke: #3f7850; }
+:root[data-resolved-theme="light"] .folio-pixel-actionbar > b {
+  color: rgba(39, 82, 50, .62);
+  border-left-color: rgba(39, 93, 55, .2);
+}
+:root[data-resolved-theme="light"] .folio-pixel-hud[data-state="sending"] .folio-pixel-actionbar > b,
+:root[data-resolved-theme="light"] .folio-pixel-hud[data-state="linked"] .folio-pixel-actionbar > b { color: #2f6540; }
+
 @media (prefers-contrast: more) {
   .pixel-surface-light { display: none; }
   .pixel-surface-finish { opacity: .55; }
+  .pixel-crown-aura { opacity: .2; }
 }
 
 @media (max-width: 768px), (hover: none) {
@@ -6431,6 +6574,7 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   .folio-pixel-actionbar { bottom: -51px; width: 94%; padding: 8px 10px; }
   .folio-pixel-actionbar strong { font-size: 9px; }
   .folio-pixel-actionbar span { font-size: 8px; }
+  .folio-pixel-actionbar > b { min-width: 35px; padding-left: 7px; font-size: 7px; }
   .folio-pixel-beacon-callout { right: 12%; top: 31%; width: 52px; height: 52px; }
   .folio-pixel-beacon-callout::before { inset: 7px; }
   .folio-pixel-beacon-callout > i { left: -24px; width: 24px; }
@@ -6452,6 +6596,8 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   .pixel-signal-bloom,
   .pixel-surface-light,
   .pixel-surface-light i,
+  .pixel-crown-aura,
+  .pixel-rune-spokes,
   .pixel-rune-constellation svg path,
   .pixel-rune-orbit,
   .pixel-rune-realms circle,
@@ -6482,6 +6628,8 @@ html.garden-lite-motion .folio-pixel-glass-glint,
 html.garden-lite-motion .pixel-signal-bloom,
 html.garden-lite-motion .pixel-surface-light,
 html.garden-lite-motion .pixel-surface-light i,
+html.garden-lite-motion .pixel-crown-aura,
+html.garden-lite-motion .pixel-rune-spokes,
 html.garden-lite-motion .pixel-rune-constellation svg path,
 html.garden-lite-motion .pixel-rune-orbit,
 html.garden-lite-motion .pixel-rune-realms circle,
