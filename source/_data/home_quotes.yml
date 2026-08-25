@@ -1,7 +1,8 @@
-# 120 条可核验原文语录：哲学 60 / 文艺作品 36 / 宗教经典 24
+# 120 条可核验语录：哲学 52 / 文艺作品 44 / 宗教经典 24
 # text 保留所列版本的原文；work 提供作品与章节定位；source_url 指向核验页。
+# 全库仅保留 10 条英文；人物台词全部使用可核验的中文版本。
 
-# Philosophy · 60
+# Philosophy · 52
 - category: "philosophy"
   text: "由于你有可能在此刻辞世，那么相应地调节你的每一行为和思想吧。"
   author: "马可·奥勒留"
@@ -63,16 +64,16 @@
   source_url: "https://www.99csw.com/book/469/16007.htm"
 
 - category: "philosophy"
-  text: "No thing great is created suddenly, any more than a bunch of grapes or a fig."
-  author: "爱比克泰德"
-  work: "《论说集》· I.15.7"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "当对幸福的憧憬过于急切，那痛苦就在人的心灵深处升起。"
+  author: "阿尔贝·加缪"
+  work: "《西西弗斯神话》"
+  source_url: "https://zh.wikiquote.org/wiki/阿爾貝·加繆"
 
 - category: "philosophy"
-  text: "It is not death or pain that is to be feared, but the fear of pain or death."
-  author: "爱比克泰德"
-  work: "《论说集》· II.1.13"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "重要的不是治愈，而是带着病痛活下去。"
+  author: "阿尔贝·加缪"
+  work: "《西西弗斯神话》"
+  source_url: "https://zh.wikiquote.org/wiki/阿爾貝·加繆"
 
 - category: "philosophy"
   text: "只有受过教育的人才是自由的。"
@@ -81,28 +82,28 @@
   source_url: "https://zh.wikiquote.org/wiki/愛比克泰德"
 
 - category: "philosophy"
-  text: "Materials are indifferent, but the use which we make of them is not a matter of indifference."
-  author: "爱比克泰德"
-  work: "《论说集》· II.5.1"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "鸟要挣脱出壳。蛋就是世界。人要诞于世上，就得摧毁这个世界。"
+  author: "赫尔曼·黑塞"
+  work: "《德米安》"
+  source_url: "https://zh.wikiquote.org/wiki/赫尔曼·黑塞"
 
 - category: "philosophy"
-  text: "Although life is a matter of indifference, the use which you make of it is not a matter of indifference."
-  author: "爱比克泰德"
-  work: "《论说集》· II.6.2"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "我过去是，现在仍然是一个探索者，但是我不再占星问道，我开始倾听内心深处的低语。"
+  author: "赫尔曼·黑塞"
+  work: "《德米安》"
+  source_url: "https://zh.wikiquote.org/wiki/赫尔曼·黑塞"
 
 - category: "philosophy"
-  text: "It is impossible for anyone to begin to learn that which he thinks he already knows."
-  author: "爱比克泰德"
-  work: "《论说集》· II.17.1"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "啊，今天我知道，在世上，最让人畏惧的恰恰是通向自己的道路。"
+  author: "赫尔曼·黑塞"
+  work: "《德米安》"
+  source_url: "https://zh.wikiquote.org/wiki/赫尔曼·黑塞"
 
 - category: "philosophy"
-  text: "If you would be a good reader, read; if a writer, write."
-  author: "爱比克泰德"
-  work: "《论说集》· II.18.1"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "不要为自己持独特看法而感到害怕，因为我们现在所接受的常识都曾是独特看法。"
+  author: "伯特兰·罗素"
+  work: "《自由思想十诫》· 第七条"
+  source_url: "https://zh.wikiquote.org/wiki/伯特兰·罗素"
 
 - category: "philosophy"
   text: "Whatever you would make habitual, practice it."
@@ -111,16 +112,16 @@
   source_url: "https://en.wikiquote.org/wiki/Epictetus"
 
 - category: "philosophy"
-  text: "Know, first, who you are, and then adorn yourself accordingly."
-  author: "爱比克泰德"
-  work: "《论说集》· III.1.24"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "我感到兴趣的是：为所爱而生，为所爱而死。"
+  author: "阿尔贝·加缪"
+  work: "《鼠疫》"
+  source_url: "https://zh.wikiquote.org/wiki/阿爾貝·加繆"
 
 - category: "philosophy"
-  text: "It was for this that I've been training myself, it was for this that I was practising."
-  author: "爱比克泰德"
-  work: "《论说集》· III.10.7"
-  source_url: "https://en.wikiquote.org/wiki/Epictetus"
+  text: "凡事不要抱绝对肯定的态度。"
+  author: "伯特兰·罗素"
+  work: "《自由思想十诫》· 第一条"
+  source_url: "https://zh.wikiquote.org/wiki/伯特兰·罗素"
 
 - category: "philosophy"
   text: "什么造就英雄？同时面对自己至深的痛苦与至高的希望。"
@@ -183,63 +184,15 @@
   source_url: "https://zh.wikiquote.org/wiki/弗里德里希·尼采"
 
 - category: "philosophy"
-  text: "The primary indication, to my thinking, of a well-ordered mind is a man's ability to remain in one place and linger in his own company."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· 第 II 封"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
+  text: "参差多态乃是幸福的本源。"
+  author: "伯特兰·罗素"
+  work: "《西方哲学史》· 卷三"
+  source_url: "https://zh.wikiquote.org/wiki/伯特兰·罗素"
 
 - category: "philosophy"
   text: "Who is everywhere is nowhere."
   author: "塞涅卡"
   work: "《致鲁基里乌斯道德书简》· II.2"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "Withdraw into yourself, as far as you can. Associate with those who will make a better man of you."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· VII.8"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "The best ideas are common property."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· XII.11"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "There are more things, Lucilius, likely to frighten us than there are to crush us; we suffer more often in imagination than in reality."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· 第 XIII 封"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "If you would not have a man flinch when the crisis comes, train him before it comes."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· 第 XVIII 封"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "Prove your words by your deeds."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· 第 XX 封"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "Men do not care how nobly they live, but only how long."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· XXII.17"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "It is indeed foolish to be unhappy now because you may be unhappy at some future time."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· 第 XXIV 封"
-  source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
-
-- category: "philosophy"
-  text: "Therefore, my dear Lucilius, begin at once to live, and count each separate day as a separate life."
-  author: "塞涅卡"
-  work: "《致鲁基里乌斯道德书简》· 第 CI 封"
   source_url: "https://en.wikiquote.org/wiki/Seneca_the_Younger"
 
 - category: "philosophy"
@@ -362,7 +315,7 @@
   work: "《庄子》· 徐无鬼"
   source_url: "https://zh.wikisource.org/zh-hans/莊子/徐無鬼"
 
-# Fiction, games and anime · 36
+# Fiction, games and anime · 44
 - category: "fiction"
   text: "这个世界需要更多的英雄。"
   author: "猎空"
@@ -436,16 +389,16 @@
   source_url: "https://overwatch.huijiwiki.com/wiki/奥丽莎/台词和语音"
 
 - category: "fiction"
-  text: "This is... the Fist of the Kusanagi!"
+  text: "来个了断吧……八神。"
   author: "草薙京"
-  work: "《拳皇》· 战斗台词"
-  source_url: "https://snk.fandom.com/wiki/Kyo_Kusanagi/Quotes"
+  work: "《拳皇》· 对战八神庵开场台词"
+  source_url: "https://k.sina.cn/article_6593830126_18905dcee00100ilwi.html"
 
 - category: "fiction"
-  text: "Words aren't needed."
+  text: "就这样去死吧！"
   author: "八神庵"
-  work: "《拳皇 XIV》· 选人台词"
-  source_url: "https://snk.fandom.com/wiki/Iori_Yagami/Quotes"
+  work: "《拳皇》· 胜利台词"
+  source_url: "https://www.sohu.com/a/297201579_120099890"
 
 - category: "fiction"
   text: "春天，马上就要来了。让我与你相遇的春天，就要来了。再也没有你的春天，就要来了。"
@@ -454,10 +407,10 @@
   source_url: "https://www.bilibili.com/bangumi/play/ep631071"
 
 - category: "fiction"
-  text: "Hey, there! Don't give up!"
+  text: "不知火舞，在此参上！"
   author: "不知火舞"
-  work: "《拳皇》· 战斗台词"
-  source_url: "https://snk.fandom.com/wiki/Mai_Shiranui/Quotes"
+  work: "《拳皇 XIV》· 选人台词"
+  source_url: "https://www.gamersky.com/handbook/201804/1035679_5.shtml"
 
 - category: "fiction"
   text: "我想过普通的生活。"
@@ -484,10 +437,10 @@
   source_url: "https://www.bilibili.com/bangumi/play/ss2546"
 
 - category: "fiction"
-  text: "My brain hurts when I think too much."
+  text: "我是地球长大的赛亚人……！"
   author: "孙悟空"
-  work: "《龙珠》· 漫画/动画台词"
-  source_url: "https://en.wikiquote.org/wiki/Dragon_Ball_%28manga%29"
+  work: "《龙珠 Z》· 那美克星篇角色台词"
+  source_url: "https://anibase.net/zh-hans/character/lNV5w/孙悟空"
 
 - category: "fiction"
   text: "面码最喜欢仁太了，是想当仁太新娘子的那种喜欢。"
@@ -496,10 +449,10 @@
   source_url: "https://www.bilibili.com/bangumi/play/ss835"
 
 - category: "fiction"
-  text: "Kakarot, please. Destroy Frieza."
+  text: "求求你，卡卡罗特，一定要用我们赛亚人的手，打倒弗利萨！"
   author: "贝吉塔"
-  work: "《龙珠 Z》· 第 3 季第 12 集"
-  source_url: "https://en.wikiquote.org/wiki/Dragon_Ball_Z%3A_Season_3"
+  work: "《龙珠 Z》· 那美克星篇临终台词"
+  source_url: "https://www.gamersky.com/handbook/201504/555120_47.shtml"
 
 - category: "fiction"
   text: "我现在依然喜欢着你——但是我们即使发了一千封邮件，也许心的距离只能靠近一厘米左右吧。"
@@ -578,6 +531,54 @@
   author: "宫崎骏"
   work: "《风之谷》"
   source_url: "https://zh.wikiquote.org/wiki/宫崎骏"
+
+- category: "fiction"
+  text: "是我，是我先，明明都是我先来的……接吻也好，拥抱也好，还是喜欢上那家伙也好……"
+  author: "冬马和纱"
+  work: "《白色相簿2》· 角色台词"
+  source_url: "https://zh.wikiquote.org/wiki/白色相簿2"
+
+- category: "fiction"
+  text: "为什么会变成这样呢……第一次有了喜欢的人。有了能做一辈子朋友的人。两件快乐事情重合在一起。而这两份快乐，又给我带来更多的快乐。得到的，本该是像梦境一般幸福的时间……但是，为什么，会变成这样呢……"
+  author: "小木曾雪菜"
+  work: "《白色相簿2》· 角色台词"
+  source_url: "https://zh.wikiquote.org/wiki/白色相簿2"
+
+- category: "fiction"
+  text: "我深知，我们不可能一直在一起。横在我们面前的人生还漫长得仿佛没有尽头，时间茫茫无边，而我们对此束手无策。"
+  author: "远野贵树"
+  work: "《秒速五厘米》· 樱花抄"
+  source_url: "https://zh.wikiquote.org/wiki/秒速五厘米"
+
+- category: "fiction"
+  text: "即便如此，我仍会不可救药地喜欢着远野同学。不管是明天，还是后天，或是更远的将来，一心只想着远野同学。"
+  author: "澄田花苗"
+  work: "《秒速五厘米》· 宇航员"
+  source_url: "https://zh.wikiquote.org/wiki/秒速五厘米"
+
+- category: "fiction"
+  text: "我不再逃避了，我要改变，接受一切，以自己为豪，来爱龙儿。"
+  author: "逢坂大河"
+  work: "《龙与虎》· 动画第 25 集"
+  source_url: "https://zh.wikiquote.org/wiki/TIGER×DRAGON！"
+
+- category: "fiction"
+  text: "蹲着的时候，时间依然在流逝，可是时间可以解决的，只有悲伤，或是哀痛。而不是爱。"
+  author: "安达樱"
+  work: "《安达与岛村》· 角色语录"
+  source_url: "https://zh.wikiquote.org/wiki/安達與島村"
+
+- category: "fiction"
+  text: "无论是多么愉快的事。还是多么开心的事，一切，所有的一切，都在不断改变着。即便如此，你还是会喜欢这里吗？"
+  author: "古河渚"
+  work: "《CLANNAD》· 动画第 1 集"
+  source_url: "https://zh.wikiquote.org/wiki/CLANNAD"
+
+- category: "fiction"
+  text: "只要找到不就好了吗？只要找到下一件愉快和开心的事不就好了吗？"
+  author: "冈崎朋也"
+  work: "《CLANNAD》· 动画第 1 集"
+  source_url: "https://zh.wikiquote.org/wiki/CLANNAD"
 
 # Scripture and religious classics · 24
 - category: "scripture"
