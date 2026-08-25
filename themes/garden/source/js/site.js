@@ -2591,17 +2591,24 @@
     var statusTitle = vista.querySelector('[data-pixel-status-title]');
     var statusAction = vista.querySelector('[data-pixel-status-action]');
     var weatherToggle = vista.querySelector('[data-pixel-weather-toggle]');
+    var glassGlint = vista.querySelector('[data-pixel-glint]');
+    var surfaceLight = screen.querySelector('[data-pixel-surface-light]');
     var rootNetwork = screen.querySelector('.pixel-root-network');
     var treeCore = screen.querySelector('.pixel-worldtree > strong');
     var worldTree = screen.querySelector('.pixel-worldtree');
     var aurora = screen.querySelector('.pixel-aurora');
     var auroraStrips = Array.prototype.slice.call(screen.querySelectorAll('.pixel-aurora > i'));
     var constellation = screen.querySelector('.pixel-rune-constellation');
+    var constellationPaths = Array.prototype.slice.call(screen.querySelectorAll('.pixel-rune-constellation svg path'));
+    var constellationOrbit = screen.querySelector('.pixel-rune-orbit');
+    var constellationRealms = Array.prototype.slice.call(screen.querySelectorAll('.pixel-rune-realms circle'));
+    var constellationReflection = screen.querySelector('.pixel-rune-reflection');
     var rootBranches = rootNetwork ? Array.prototype.filter.call(rootNetwork.children, function (child) { return child.tagName === 'I'; }) : [];
     var rootNodes = rootBranches.map(function (branch) { return branch.querySelector('b'); });
     var canopyEchoes = Array.prototype.slice.call(screen.querySelectorAll('.pixel-canopy-echo > i'));
-    var constellationPoints = Array.prototype.slice.call(screen.querySelectorAll('.pixel-rune-constellation > i'));
     var runestones = Array.prototype.slice.call(screen.querySelectorAll('.pixel-runestone'));
+    var sapLines = Array.prototype.slice.call(screen.querySelectorAll('.pixel-tree-sap > i, .pixel-tree-sap > b'));
+    var lakeSignalWaves = Array.prototype.slice.call(screen.querySelectorAll('.pixel-lake-signal > i, .pixel-lake-signal > b, .pixel-lake-signal > em'));
     var depthLayers = [
       { element: screen.querySelector('.pixel-depth-sky'), z: 0, scale: 1, travel: 0 },
       { element: screen.querySelector('.pixel-depth-ridge-back'), z: 55, scale: .93, travel: 1.5 },
@@ -2626,6 +2633,16 @@
     var targetYaw = 0;
     var targetRoll = 0;
     var targetLift = 0;
+    var currentGlintX = 130;
+    var targetGlintX = 130;
+    var currentGlintOpacity = 0;
+    var targetGlintOpacity = 0;
+    var currentLightX = 145;
+    var currentLightY = 72;
+    var targetLightX = 145;
+    var targetLightY = 72;
+    var currentLightOpacity = 0;
+    var targetLightOpacity = 0;
     var entered = false;
     var depthMotionReadyAt = 0;
     var signalActive = false;
@@ -2721,7 +2738,22 @@
         currentLift += (targetLift - currentLift) * follow;
         targetRoll *= settle;
         targetLift *= settle;
+        targetGlintOpacity = Math.max(pointerInside && dioramaActive ? .045 : 0, targetGlintOpacity * settle);
+        targetLightOpacity = Math.max(pointerInside && dioramaActive ? .07 : 0, targetLightOpacity * settle);
+        currentGlintX += (targetGlintX - currentGlintX) * (1 - Math.exp(-elapsed / 74));
+        currentGlintOpacity += (targetGlintOpacity - currentGlintOpacity) * (1 - Math.exp(-elapsed / 68));
+        currentLightX += (targetLightX - currentLightX) * (1 - Math.exp(-elapsed / 118));
+        currentLightY += (targetLightY - currentLightY) * (1 - Math.exp(-elapsed / 148));
+        currentLightOpacity += (targetLightOpacity - currentLightOpacity) * (1 - Math.exp(-elapsed / 96));
         diorama.style.transform = 'translateZ(' + currentLift.toFixed(2) + 'px) rotateX(' + currentPitch.toFixed(2) + 'deg) rotateY(' + currentYaw.toFixed(2) + 'deg) rotateZ(' + currentRoll.toFixed(2) + 'deg)';
+        if (glassGlint) {
+          glassGlint.style.opacity = currentGlintOpacity.toFixed(3);
+          glassGlint.style.transform = 'translate3d(' + currentGlintX.toFixed(2) + '%,0,0) skewX(-13deg)';
+        }
+        if (surfaceLight) {
+          surfaceLight.style.opacity = currentLightOpacity.toFixed(3);
+          surfaceLight.style.transform = 'translate3d(' + currentLightX.toFixed(2) + '%,' + currentLightY.toFixed(2) + '%,0)';
+        }
 
         if (entered && now >= depthMotionReadyAt) {
           var depthX = currentYaw / 17;
@@ -2743,7 +2775,10 @@
       }
 
       var unsettled = Math.abs(targetYaw - currentYaw) + Math.abs(targetPitch - currentPitch) +
-        Math.abs(targetRoll - currentRoll) + Math.abs(targetLift - currentLift) > .025;
+        Math.abs(targetRoll - currentRoll) + Math.abs(targetLift - currentLift) +
+        Math.abs(targetGlintOpacity - currentGlintOpacity) * 10 + Math.abs(targetGlintX - currentGlintX) / 80 +
+        Math.abs(targetLightOpacity - currentLightOpacity) * 10 + Math.abs(targetLightX - currentLightX) / 90 +
+        Math.abs(targetLightY - currentLightY) / 90 > .025;
       diorama.classList.toggle('is-diorama-tracking', dioramaActive && (pointerInside || unsettled));
       diorama.classList.toggle('is-depth-tracking', dioramaActive && entered && now >= depthMotionReadyAt && (pointerInside || unsettled));
       if (unsettled) scheduleDiorama();
@@ -2755,6 +2790,11 @@
       targetPitch = 0;
       targetRoll = 0;
       targetLift = 0;
+      targetGlintX = 130;
+      targetGlintOpacity = 0;
+      targetLightX = 145;
+      targetLightY = 72;
+      targetLightOpacity = 0;
       lastPointerAt = 0;
       delete screen.dataset.pixelZone;
       delete stage.dataset.pixelZone;
@@ -2764,15 +2804,15 @@
     }
 
     function updateLabel() {
-      var title = signalActive ? (signalReplay ? '九界根脉正在共鸣' : '世界树正在苏醒') : (linked ? '九界根脉已点亮' : '移动鼠标 · 观察立体层次');
-      var action = signalActive ? (signalReplay ? '能量正沿九条根脉再次流动' : '树心点燃 · 根脉传播 · 天空回应') : (linked ? '点击树心可再次触发九界共鸣' : '点击中央树心，唤醒九界根脉');
+      var title = signalActive ? (signalReplay ? '九界星环正在共鸣' : '世界树正在苏醒') : (linked ? '九界星环已完成' : '移动鼠标 · 观察立体层次');
+      var action = signalActive ? (signalReplay ? '九个界域节点正在依次回应' : '树心点燃 · 根脉上行 · 九界成环') : (linked ? '星环与世界树已连接；点击可再次共鸣' : '点击中央树心，唤醒九界根脉');
       if (statusTitle) statusTitle.textContent = title;
       if (statusAction) statusAction.textContent = action;
       if (hud) hud.dataset.state = signalActive ? 'sending' : (linked ? 'linked' : 'offline');
       interaction.setAttribute('aria-label', signalActive
-        ? (signalReplay ? '九界根脉正在再次共鸣' : '世界树正在苏醒，光正沿九界根脉扩散')
+        ? (signalReplay ? '九界星环正在再次共鸣' : '世界树正在苏醒，九个界域节点将依次点亮并形成星环')
         : (linked
-          ? '九界根脉已点亮。点击树心可以再次触发九界共鸣'
+          ? '九界星环已完成。点击树心可以再次触发九界共鸣'
           : '点击树心，唤醒世界树的九界根脉'));
     }
 
@@ -2895,31 +2935,80 @@
       });
 
       trackSignalAnimation(constellation, replay ? [
-        { opacity: .68 },
-        { opacity: .82, offset: .55 },
-        { opacity: .68 }
+        { opacity: .92 },
+        { opacity: 1, offset: .55 },
+        { opacity: .92 }
       ] : [
-        { opacity: .4 },
-        { opacity: .56, offset: .38 },
-        { opacity: .68 }
+        { opacity: .34 },
+        { opacity: .72, offset: .38 },
+        { opacity: .92 }
       ], {
-        delay: replay ? 360 : 940,
-        duration: replay ? 430 : 560,
+        delay: replay ? 210 : 690,
+        duration: replay ? 480 : 760,
         easing: 'cubic-bezier(.23, 1, .32, 1)',
         fill: 'forwards'
       });
 
-      constellationPoints.forEach(function (point, index) {
-        trackSignalAnimation(point, [
-          { opacity: 1, transform: 'scale(1)' },
-          { opacity: 1, transform: 'scale(1.7)', offset: .5 },
-          { opacity: 1, transform: 'scale(1)' }
+      trackSignalAnimation(constellationOrbit, replay ? [
+        { opacity: .72, strokeDashoffset: 0 },
+        { opacity: 1, strokeDashoffset: 0, offset: .5 },
+        { opacity: .72, strokeDashoffset: 0 }
+      ] : [
+        { opacity: .12, strokeDashoffset: 1 },
+        { opacity: .86, strokeDashoffset: 0 }
+      ], {
+        delay: replay ? 225 : 735,
+        duration: replay ? 380 : 620,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'forwards'
+      });
+
+      constellationRealms.forEach(function (realm, index) {
+        trackSignalAnimation(realm, replay ? [
+          { opacity: .86, transform: 'scale(1)' },
+          { opacity: 1, transform: 'scale(1.72)', offset: .46 },
+          { opacity: .86, transform: 'scale(1)' }
+        ] : [
+          { opacity: .06, transform: 'scale(.32)' },
+          { opacity: 1, transform: 'scale(1.62)', offset: .58 },
+          { opacity: .86, transform: 'scale(1)' }
         ], {
-          delay: (replay ? 420 : 1040) + index * 48,
-          duration: replay ? 230 : 310,
-          easing: 'steps(4, end)',
+          delay: (replay ? 290 : 870) + index * (replay ? 34 : 62),
+          duration: replay ? 240 : 320,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
           fill: 'forwards'
         });
+      });
+
+      constellationPaths.forEach(function (path, index) {
+        trackSignalAnimation(path, replay ? [
+          { opacity: .78, strokeDashoffset: 0 },
+          { opacity: 1, strokeDashoffset: 0, offset: .48 },
+          { opacity: .78, strokeDashoffset: 0 }
+        ] : [
+          { opacity: .08, strokeDashoffset: 1 },
+          { opacity: 1, strokeDashoffset: 0 }
+        ], {
+          delay: (replay ? 420 : 1030) + index * (replay ? 75 : 110),
+          duration: replay ? 340 : 520,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+      });
+
+      trackSignalAnimation(constellationReflection, replay ? [
+        { opacity: .12, transform: 'scaleY(-.48) translateY(0)' },
+        { opacity: .26, transform: 'scaleY(-.52) translateY(2px)', offset: .5 },
+        { opacity: .12, transform: 'scaleY(-.48) translateY(0)' }
+      ] : [
+        { opacity: 0, transform: 'scaleY(-.28) translateY(-4px)' },
+        { opacity: .24, transform: 'scaleY(-.5) translateY(1px)', offset: .56 },
+        { opacity: .12, transform: 'scaleY(-.48) translateY(0)' }
+      ], {
+        delay: replay ? 560 : 1440,
+        duration: replay ? 430 : 580,
+        easing: 'cubic-bezier(.23, 1, .32, 1)',
+        fill: 'forwards'
       });
 
       auroraStrips.forEach(function (strip, index) {
@@ -2931,6 +3020,38 @@
         ], {
           delay: (replay ? 390 : 1080) + index * 72,
           duration: replay ? 330 : 440,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+      });
+    }
+
+    function animateEnergyConduction(replay) {
+      sapLines.forEach(function (line, index) {
+        trackSignalAnimation(line, replay ? [
+          { opacity: .18, transform: 'scaleY(1)' },
+          { opacity: 1, transform: 'scaleY(1.045)', offset: .46 },
+          { opacity: .18, transform: 'scaleY(1)' }
+        ] : [
+          { opacity: 0, transform: 'scaleY(.08)' },
+          { opacity: 1, transform: 'scaleY(1)', offset: .58 },
+          { opacity: .18, transform: 'scaleY(1)' }
+        ], {
+          delay: (replay ? 55 : 125) + index * (replay ? 35 : 55),
+          duration: replay ? 480 : 780,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
+          fill: 'forwards'
+        });
+      });
+
+      lakeSignalWaves.forEach(function (wave, index) {
+        trackSignalAnimation(wave, [
+          { opacity: 0, transform: 'translateX(-50%) scaleX(.38)' },
+          { opacity: replay ? .62 : .88, transform: 'translateX(-50%) scaleX(1)', offset: .34 },
+          { opacity: 0, transform: 'translateX(-50%) scaleX(1.72)' }
+        ], {
+          delay: (replay ? 430 : 910) + index * (replay ? 55 : 82),
+          duration: replay ? 430 : 620,
           easing: 'cubic-bezier(.23, 1, .32, 1)',
           fill: 'forwards'
         });
@@ -3007,6 +3128,7 @@
       });
 
       animateRootSequence(replay);
+      animateEnergyConduction(replay);
       animateWorldResponse(replay);
 
       trackSignalAnimation(aurora, replay ? [
@@ -3031,11 +3153,13 @@
       vista.addEventListener('pointermove', function (event) {
         if (gardenMotionIsLite()) return;
         var now = performance.now();
+        var pointerSpeed = 0;
         if (lastPointerAt) {
           var elapsed = Math.max(8, now - lastPointerAt);
           var velocityX = (event.clientX - lastPointerX) / elapsed;
           var velocityY = (event.clientY - lastPointerY) / elapsed;
           var speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+          pointerSpeed = speed;
           targetRoll = Math.max(-1.8, Math.min(1.8, velocityX * .9));
           targetLift = Math.min(5, speed * 1.45);
         }
@@ -3045,6 +3169,11 @@
         var point = readInteractionPoint(event);
         pointerLocalX = point.x;
         pointerLocalY = point.y;
+        targetGlintX = 40 + point.x * 220;
+        targetGlintOpacity = Math.min(.26, .055 + pointerSpeed * .11);
+        targetLightX = 20 + point.x * 250;
+        targetLightY = 15 + point.y * 115;
+        targetLightOpacity = Math.min(.2, .07 + pointerSpeed * .055);
         pointerInside = true;
         dioramaActive = true;
         scheduleDiorama();
@@ -3092,6 +3221,24 @@
       depthLayers.forEach(function (layer) {
         if (layer.element) layer.element.style.removeProperty('transform');
       });
+      currentGlintX = 130;
+      targetGlintX = 130;
+      currentGlintOpacity = 0;
+      targetGlintOpacity = 0;
+      currentLightX = 145;
+      currentLightY = 72;
+      targetLightX = 145;
+      targetLightY = 72;
+      currentLightOpacity = 0;
+      targetLightOpacity = 0;
+      if (glassGlint) {
+        glassGlint.style.removeProperty('opacity');
+        glassGlint.style.removeProperty('transform');
+      }
+      if (surfaceLight) {
+        surfaceLight.style.removeProperty('opacity');
+        surfaceLight.style.removeProperty('transform');
+      }
       if (signalActive) setTreeAwake();
     }
 

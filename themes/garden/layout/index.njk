@@ -489,7 +489,25 @@
                 </span>
                 <span class="pixel-atmosphere"></span>
                 <span class="pixel-aurora"><i></i><i></i><i></i></span>
-                <span class="pixel-rune-constellation"><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="pixel-rune-constellation">
+                  <svg viewBox="0 0 100 100" aria-hidden="true">
+                    <circle class="pixel-rune-orbit" pathLength="1" cx="50" cy="51" r="43"></circle>
+                    <path pathLength="1" d="M9 47 L34 32 L48 9 L56 72 L92 29"></path>
+                    <path pathLength="1" d="M48 9 L19 18 M48 9 L77 16 M34 32 L24 53 M56 72 L78 48"></path>
+                    <path pathLength="1" d="M56 72 L33 91 M56 72 L56 94 M56 72 L77 91"></path>
+                    <g class="pixel-rune-realms">
+                      <circle cx="50" cy="8" r="2.2"></circle>
+                      <circle cx="77" cy="17" r="2.2"></circle>
+                      <circle cx="92" cy="39" r="2.2"></circle>
+                      <circle cx="88" cy="67" r="2.2"></circle>
+                      <circle cx="68" cy="88" r="2.2"></circle>
+                      <circle cx="40" cy="92" r="2.2"></circle>
+                      <circle cx="17" cy="77" r="2.2"></circle>
+                      <circle cx="8" cy="50" r="2.2"></circle>
+                      <circle cx="20" cy="23" r="2.2"></circle>
+                    </g>
+                  </svg>
+                </span>
                 <span class="pixel-moon"><i></i></span>
                 <span class="pixel-cloud pixel-cloud-a"></span>
                 <span class="pixel-cloud pixel-cloud-b"></span>
@@ -499,6 +517,7 @@
               <span class="pixel-depth-layer pixel-depth-ridge-back" data-pixel-depth="ridge-back" aria-hidden="true">
                 <span class="pixel-canopy-echo"><i></i><i></i><i></i></span>
                 <span class="pixel-worldtree"><i></i><b></b><em></em><strong></strong></span>
+                <span class="pixel-tree-sap"><i></i><b></b></span>
                 <span class="pixel-ridge pixel-ridge-back"></span>
               </span>
               <span class="pixel-depth-layer pixel-depth-ridge-front" data-pixel-depth="ridge-front" aria-hidden="true">
@@ -509,6 +528,13 @@
               </span>
               <span class="pixel-depth-layer pixel-depth-water" data-pixel-depth="water" aria-hidden="true">
                 <span class="pixel-lake"><i></i><b></b><em></em></span>
+                <span class="pixel-lake-signal"><i></i><b></b><em></em></span>
+                <svg class="pixel-rune-reflection" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle cx="50" cy="51" r="43"></circle>
+                  <path d="M9 47 L34 32 L48 9 L56 72 L92 29"></path>
+                  <path d="M48 9 L19 18 M48 9 L77 16 M34 32 L24 53 M56 72 L78 48"></path>
+                  <path d="M56 72 L33 91 M56 72 L56 94 M56 72 L77 91"></path>
+                </svg>
                 <span class="pixel-root-network">
                   <i data-root-angle="151"><b></b></i>
                   <i data-root-angle="137"><b></b></i>
@@ -526,11 +552,15 @@
                 <span class="pixel-shore"><i></i><b></b></span>
                 <span class="pixel-fireflies"><i></i><i></i><i></i><i></i><i></i></span>
               </span>
+              <span class="pixel-signal-bloom" aria-hidden="true"><i></i><b></b></span>
+              <span class="pixel-surface-light" data-pixel-surface-light aria-hidden="true"><i></i></span>
+              <span class="pixel-surface-finish" aria-hidden="true"></span>
               <span class="pixel-frame" aria-hidden="true"></span>
               <span class="pixel-scan" aria-hidden="true"></span>
             </div>
           </div>
 
+          <span class="folio-pixel-glass-glint" data-pixel-glint aria-hidden="true"></span>
           <span class="pixel-tree-target" aria-hidden="true"><i></i></span>
           <span class="pixel-heart-burst" aria-hidden="true"><i></i><i></i><i></i></span>
           <button class="folio-pixel-weather-toggle" type="button" data-pixel-weather-toggle aria-pressed="false" aria-label="点击月亮，切换为晴夜">

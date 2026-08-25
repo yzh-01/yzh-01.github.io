@@ -6004,11 +6004,417 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 :root[data-resolved-theme="light"] .folio-pixel-weather-toggle::before { border-color: rgba(39, 93, 55, .62); }
 :root[data-resolved-theme="light"] .folio-pixel-stage:has(.folio-pixel-weather-toggle:focus-visible)::after { color: rgba(39, 82, 50, .8); }
 
+/* V142 — spectral sap, lake echo and a velocity-aware glass highlight. */
+.pixel-tree-sap {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+.pixel-tree-sap i,
+.pixel-tree-sap b {
+  position: absolute;
+  left: calc(50% - 1px);
+  width: 3px;
+  opacity: 0;
+  background: repeating-linear-gradient(180deg, #d6ead9 0 5px, #7ca986 5px 9px, transparent 9px 13px);
+  box-shadow: 0 0 8px rgba(174, 218, 181, .44);
+  transform: scaleY(.08);
+}
+.pixel-tree-sap i {
+  bottom: 64%;
+  height: 24%;
+  transform-origin: 50% 100%;
+}
+.pixel-tree-sap b {
+  top: 36%;
+  height: 29%;
+  transform-origin: 50% 0;
+}
+.folio-pixel-screen.is-linked .pixel-tree-sap i,
+.folio-pixel-screen.is-linked .pixel-tree-sap b {
+  opacity: .18;
+  transform: scaleY(1);
+}
+.folio-pixel-screen.is-linked[data-pixel-zone="roots"] .pixel-tree-sap i,
+.folio-pixel-screen.is-linked[data-pixel-zone="roots"] .pixel-tree-sap b { opacity: .38; }
+
+.pixel-lake-signal {
+  position: absolute;
+  inset: 67% 0 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pixel-lake-signal i,
+.pixel-lake-signal b,
+.pixel-lake-signal em {
+  position: absolute;
+  left: 50%;
+  height: 2px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, #b8d8be 22% 78%, transparent);
+  transform: translateX(-50%) scaleX(.38);
+  transform-origin: center;
+}
+.pixel-lake-signal i { top: 18%; width: 24%; }
+.pixel-lake-signal b { top: 43%; width: 34%; }
+.pixel-lake-signal em { top: 69%; width: 46%; }
+
+.folio-pixel-glass-glint {
+  position: absolute;
+  left: -45%;
+  top: -7%;
+  z-index: 25;
+  width: 45%;
+  height: 114%;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(102deg, transparent 0 34%, rgba(217, 238, 221, .08) 43%, rgba(231, 245, 234, .7) 50%, rgba(174, 214, 182, .12) 57%, transparent 68%);
+  mix-blend-mode: screen;
+  transform: translate3d(130%, 0, 0) skewX(-13deg);
+  backface-visibility: hidden;
+}
+
+.folio-pixel-actionbar {
+  background: rgba(3, 9, 6, .76);
+  border: 1px solid rgba(160, 198, 167, .34);
+  border-top-color: rgba(205, 227, 209, .54);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .22);
+  backdrop-filter: blur(14px) saturate(1.16);
+  -webkit-backdrop-filter: blur(14px) saturate(1.16);
+}
+.folio-pixel-hud[data-state="linked"] .folio-pixel-actionbar {
+  background: rgba(8, 21, 13, .76);
+  border-color: rgba(160, 198, 167, .38);
+  border-top-color: rgba(205, 227, 209, .58);
+}
+:root[data-resolved-theme="light"] .pixel-tree-sap i,
+:root[data-resolved-theme="light"] .pixel-tree-sap b {
+  background: repeating-linear-gradient(180deg, #2f6a42 0 5px, #6a9273 5px 9px, transparent 9px 13px);
+  box-shadow: 0 0 7px rgba(39, 103, 59, .24);
+}
+:root[data-resolved-theme="light"] .pixel-lake-signal i,
+:root[data-resolved-theme="light"] .pixel-lake-signal b,
+:root[data-resolved-theme="light"] .pixel-lake-signal em {
+  background: linear-gradient(90deg, transparent, #2f6a42 22% 78%, transparent);
+}
+:root[data-resolved-theme="light"] .folio-pixel-glass-glint {
+  background: linear-gradient(102deg, transparent 0 34%, rgba(255, 255, 255, .06) 43%, rgba(255, 255, 255, .68) 50%, rgba(39, 93, 55, .08) 57%, transparent 68%);
+  mix-blend-mode: soft-light;
+}
+:root[data-resolved-theme="light"] .folio-pixel-actionbar {
+  background: rgba(231, 237, 229, .78);
+  border-color: rgba(39, 93, 55, .3);
+  border-top-color: rgba(255, 255, 255, .72);
+  box-shadow: 0 14px 30px rgba(42, 57, 46, .12);
+}
+:root[data-resolved-theme="light"] .folio-pixel-hud[data-state="linked"] .folio-pixel-actionbar {
+  background: rgba(220, 231, 220, .8);
+  border-color: rgba(39, 93, 55, .34);
+  border-top-color: rgba(255, 255, 255, .76);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .folio-pixel-actionbar {
+    background: #07100b;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  :root[data-resolved-theme="light"] .folio-pixel-actionbar { background: #e7ede5; }
+}
+
+/* V143 — a lagging local light, restrained signal bloom and finished glass edge. */
+.pixel-signal-bloom {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 36%, rgba(224, 242, 227, .72) 0 2%, rgba(139, 191, 149, .22) 9%, rgba(75, 124, 84, .08) 24%, transparent 47%);
+  mix-blend-mode: screen;
+  transform: scale(.78);
+  transform-origin: 50% 36%;
+}
+.pixel-signal-bloom i {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  width: 20%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238, 248, 239, .76), rgba(162, 210, 171, .2) 28%, transparent 70%);
+  transform: translate(-50%, -50%);
+}
+.pixel-signal-bloom b {
+  position: absolute;
+  left: 24%;
+  right: 24%;
+  top: 63%;
+  height: 18%;
+  background: linear-gradient(180deg, rgba(188, 224, 194, .18), rgba(115, 169, 125, .04) 40%, transparent 78%);
+  clip-path: polygon(46% 0, 54% 0, 70% 100%, 30% 100%);
+}
+.folio-pixel-screen.is-signal-active .pixel-signal-bloom {
+  animation: garden-tree-environment-bloom 1180ms cubic-bezier(.23, 1, .32, 1) both;
+}
+.folio-pixel-vista.is-replay-active .pixel-signal-bloom { animation-duration: 760ms; }
+
+.pixel-surface-light {
+  position: absolute;
+  left: -18%;
+  top: -28%;
+  z-index: 8;
+  width: 38%;
+  height: 72%;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(223, 240, 226, .82) 0, rgba(156, 199, 163, .28) 24%, rgba(92, 139, 101, .08) 47%, transparent 72%);
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transform: translate3d(145%, 72%, 0);
+  will-change: transform, opacity;
+}
+.pixel-surface-light i {
+  position: absolute;
+  left: 36%;
+  top: 72%;
+  width: 28%;
+  height: 44%;
+  opacity: .48;
+  background: linear-gradient(180deg, rgba(214, 237, 218, .68), rgba(126, 177, 136, .12) 48%, transparent);
+  clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+  transform: scaleY(1.08);
+  transform-origin: 50% 0;
+  transition: opacity 180ms ease, transform 280ms cubic-bezier(.23, 1, .32, 1);
+}
+.folio-pixel-screen[data-pixel-zone="sky"] .pixel-surface-light i { opacity: .22; transform: scaleY(.86); }
+.folio-pixel-screen[data-pixel-zone="roots"] .pixel-surface-light i { opacity: .78; transform: scaleY(1.3); }
+
+.pixel-surface-finish {
+  position: absolute;
+  inset: 6px;
+  z-index: 9;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(226, 239, 228, .055), transparent 19%),
+    radial-gradient(ellipse at 50% 42%, transparent 45%, rgba(1, 5, 3, .12) 76%, rgba(1, 4, 2, .34) 100%);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(221, 238, 224, .12);
+}
+.pixel-surface-finish::before {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 0;
+  height: 1px;
+  opacity: .54;
+  background: linear-gradient(90deg, transparent, rgba(211, 231, 214, .42) 18% 82%, transparent);
+}
+
+@keyframes garden-tree-environment-bloom {
+  0% { opacity: 0; transform: scale(.78); }
+  12% { opacity: .12; transform: scale(.72); }
+  34% { opacity: .78; transform: scale(1); }
+  62% { opacity: .26; transform: scale(1.08); }
+  100% { opacity: 0; transform: scale(1.17); }
+}
+
+:root[data-resolved-theme="light"] .pixel-signal-bloom {
+  background: radial-gradient(circle at 50% 36%, rgba(245, 249, 242, .82) 0 2%, rgba(62, 126, 78, .22) 10%, rgba(48, 101, 61, .07) 26%, transparent 48%);
+  mix-blend-mode: soft-light;
+}
+:root[data-resolved-theme="light"] .pixel-signal-bloom i {
+  background: radial-gradient(circle, rgba(255, 255, 250, .82), rgba(65, 132, 82, .17) 30%, transparent 70%);
+}
+:root[data-resolved-theme="light"] .pixel-signal-bloom b {
+  background: linear-gradient(180deg, rgba(45, 111, 62, .16), rgba(45, 111, 62, .03) 48%, transparent 80%);
+}
+:root[data-resolved-theme="light"] .pixel-surface-light {
+  background: radial-gradient(ellipse, rgba(255, 255, 250, .86) 0, rgba(77, 132, 89, .2) 26%, rgba(55, 108, 68, .055) 48%, transparent 72%);
+  mix-blend-mode: soft-light;
+}
+:root[data-resolved-theme="light"] .pixel-surface-light i {
+  background: linear-gradient(180deg, rgba(255, 255, 250, .58), rgba(55, 113, 69, .1) 50%, transparent);
+}
+:root[data-resolved-theme="light"] .pixel-surface-finish {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .22), transparent 20%),
+    radial-gradient(ellipse at 50% 42%, transparent 51%, rgba(42, 61, 47, .06) 79%, rgba(42, 61, 47, .14) 100%);
+  box-shadow: inset 0 0 24px rgba(45, 62, 49, .1), inset 0 1px 0 rgba(255, 255, 255, .54);
+}
+:root[data-resolved-theme="light"] .pixel-surface-finish::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .74) 18% 82%, transparent);
+}
+
+/* V144 — the awakened roots continue upward and draw a Yggdrasil rune map. */
+.pixel-rune-constellation::before,
+.pixel-rune-constellation::after { opacity: 0; }
+.pixel-rune-constellation svg {
+  position: absolute;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  overflow: visible;
+  pointer-events: none;
+}
+.pixel-rune-constellation svg path {
+  fill: none;
+  stroke: #aac8b0;
+  stroke-width: 2;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: .08;
+  vector-effect: non-scaling-stroke;
+}
+.folio-pixel-screen.is-linked .pixel-rune-constellation svg path {
+  stroke-dashoffset: 0;
+  opacity: .78;
+}
+.pixel-rune-reflection {
+  position: absolute;
+  left: 39%;
+  top: 82%;
+  z-index: 3;
+  width: 24%;
+  height: 28%;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleY(-.28) translateY(-4px);
+  transform-origin: 50% 0;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .9), transparent 84%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .9), transparent 84%);
+}
+.pixel-rune-reflection path {
+  fill: none;
+  stroke: #91b399;
+  stroke-width: 2;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
+.folio-pixel-screen.is-linked .pixel-rune-reflection {
+  opacity: .12;
+  transform: scaleY(-.48) translateY(0);
+}
+@media (hover: hover) and (pointer: fine) {
+  .pixel-rune-constellation svg path {
+    transition: opacity 180ms ease, stroke-dashoffset 360ms cubic-bezier(.23, 1, .32, 1);
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-constellation svg path {
+    stroke-dashoffset: .72;
+    opacity: .34;
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation svg path { opacity: 1; }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-reflection { opacity: .22; }
+}
+:root[data-resolved-theme="light"] .pixel-rune-constellation svg path { stroke: #2f6a42; }
+:root[data-resolved-theme="light"] .pixel-rune-reflection path { stroke: #356f47; }
+
+/* V145 — replace the tiny star mark with a visible nine-realm orbit behind the crown. */
+.pixel-rune-constellation {
+  left: 20%;
+  top: 2%;
+  width: 60%;
+  height: 48%;
+  opacity: .34;
+}
+.pixel-rune-constellation svg {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 4px rgba(160, 207, 169, .26));
+}
+.pixel-rune-constellation svg path {
+  stroke: #b8d5bd;
+  stroke-width: 2.2;
+  opacity: .1;
+}
+.pixel-rune-orbit {
+  fill: none;
+  stroke: #9fc3a6;
+  stroke-width: 1.7;
+  stroke-dasharray: 1;
+  stroke-dashoffset: .82;
+  opacity: .18;
+  vector-effect: non-scaling-stroke;
+}
+.pixel-rune-realms circle {
+  fill: #d5e7d8;
+  stroke: #668c6e;
+  stroke-width: 1;
+  opacity: .08;
+  transform: scale(.72);
+  transform-box: fill-box;
+  transform-origin: center;
+  vector-effect: non-scaling-stroke;
+}
+.folio-pixel-screen.is-linked .pixel-rune-constellation { opacity: .92; }
+.folio-pixel-screen.is-linked .pixel-rune-constellation svg path { opacity: .86; }
+.folio-pixel-screen.is-linked .pixel-rune-orbit { stroke-dashoffset: 0; opacity: .72; }
+.folio-pixel-screen.is-linked .pixel-rune-realms circle { opacity: .86; transform: scale(1); }
+
+.pixel-rune-reflection {
+  left: 27%;
+  top: 86%;
+  width: 46%;
+  height: 34%;
+}
+.pixel-rune-reflection path,
+.pixel-rune-reflection circle {
+  fill: none;
+  stroke: #91b399;
+  stroke-width: 1.7;
+  vector-effect: non-scaling-stroke;
+}
+.pixel-rune-reflection circle { opacity: .64; }
+.folio-pixel-screen.is-linked .pixel-rune-reflection { opacity: .18; }
+
+@media (hover: hover) and (pointer: fine) {
+  .pixel-rune-orbit,
+  .pixel-rune-realms circle {
+    transition: opacity 180ms ease, transform 260ms cubic-bezier(.23, 1, .32, 1), stroke-dashoffset 420ms cubic-bezier(.23, 1, .32, 1);
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-orbit {
+    stroke-dashoffset: .58;
+    opacity: .38;
+  }
+  .folio-pixel-screen[data-pixel-zone="sky"]:not(.is-linked):not(.is-signal-active) .pixel-rune-realms circle {
+    opacity: .28;
+    transform: scale(.9);
+  }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-constellation { opacity: 1; }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-orbit { opacity: 1; }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-realms circle { opacity: 1; transform: scale(1.18); }
+  .folio-pixel-screen.is-linked[data-pixel-zone="sky"]:not(.is-signal-active) .pixel-rune-reflection { opacity: .3; }
+}
+
+:root[data-resolved-theme="light"] .pixel-rune-constellation svg {
+  filter: drop-shadow(0 0 3px rgba(39, 103, 58, .16));
+}
+:root[data-resolved-theme="light"] .pixel-rune-constellation svg path,
+:root[data-resolved-theme="light"] .pixel-rune-orbit { stroke: #2f6a42; }
+:root[data-resolved-theme="light"] .pixel-rune-realms circle {
+  fill: #2d6640;
+  stroke: #f0f4ec;
+}
+:root[data-resolved-theme="light"] .pixel-rune-reflection path,
+:root[data-resolved-theme="light"] .pixel-rune-reflection circle { stroke: #356f47; }
+
+@media (prefers-contrast: more) {
+  .pixel-surface-light { display: none; }
+  .pixel-surface-finish { opacity: .55; }
+}
+
 @media (max-width: 768px), (hover: none) {
   .folio-pixel-stage { width: min(560px, 86vw); perspective: 820px; }
   .folio-pixel-diorama { transform: rotateX(0deg) rotateY(0deg); }
   .folio-pixel-interaction { width: 76px; height: 76px; }
   .folio-pixel-weather-toggle { width: 58px; }
+  .folio-pixel-glass-glint { display: none; }
+  .pixel-surface-light { display: none; }
   .folio-pixel-brief { grid-template-columns: 1fr; gap: 10px; width: min(560px, 86vw); margin-bottom: 18px; }
   .folio-pixel-brief p { font-size: 10px; line-height: 1.65; }
   .folio-pixel-shell-right { right: -24px; width: 25px; }
@@ -6042,6 +6448,19 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   .folio-pixel-diorama,
   .folio-pixel-weather-toggle,
   .folio-pixel-weather-toggle::before,
+  .folio-pixel-glass-glint,
+  .pixel-signal-bloom,
+  .pixel-surface-light,
+  .pixel-surface-light i,
+  .pixel-rune-constellation svg path,
+  .pixel-rune-orbit,
+  .pixel-rune-realms circle,
+  .pixel-rune-reflection,
+  .pixel-tree-sap i,
+  .pixel-tree-sap b,
+  .pixel-lake-signal i,
+  .pixel-lake-signal b,
+  .pixel-lake-signal em,
   .pixel-tree-target,
   .pixel-heart-burst i,
   .pixel-canopy-echo i,
@@ -6059,6 +6478,19 @@ html.garden-lite-motion .folio-pixel-stage,
 html.garden-lite-motion .folio-pixel-diorama,
 html.garden-lite-motion .folio-pixel-weather-toggle,
 html.garden-lite-motion .folio-pixel-weather-toggle::before,
+html.garden-lite-motion .folio-pixel-glass-glint,
+html.garden-lite-motion .pixel-signal-bloom,
+html.garden-lite-motion .pixel-surface-light,
+html.garden-lite-motion .pixel-surface-light i,
+html.garden-lite-motion .pixel-rune-constellation svg path,
+html.garden-lite-motion .pixel-rune-orbit,
+html.garden-lite-motion .pixel-rune-realms circle,
+html.garden-lite-motion .pixel-rune-reflection,
+html.garden-lite-motion .pixel-tree-sap i,
+html.garden-lite-motion .pixel-tree-sap b,
+html.garden-lite-motion .pixel-lake-signal i,
+html.garden-lite-motion .pixel-lake-signal b,
+html.garden-lite-motion .pixel-lake-signal em,
 html.garden-lite-motion .pixel-tree-target,
 html.garden-lite-motion .pixel-heart-burst i,
 html.garden-lite-motion .pixel-canopy-echo i,
