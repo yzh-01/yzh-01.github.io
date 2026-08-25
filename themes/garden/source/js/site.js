@@ -2594,6 +2594,9 @@
     var weatherToggle = vista.querySelector('[data-pixel-weather-toggle]');
     var glassGlint = vista.querySelector('[data-pixel-glint]');
     var surfaceLight = screen.querySelector('[data-pixel-surface-light]');
+    var surround = stage.querySelector('.folio-pixel-surround');
+    var outerRunestones = surround ? Array.prototype.slice.call(surround.querySelectorAll('.folio-rootgarden-stone')) : [];
+    var outerRipple = surround && surround.querySelector('.folio-rootgarden-ripple');
     var rootNetwork = screen.querySelector('.pixel-root-network');
     var treeCore = screen.querySelector('.pixel-worldtree > strong');
     var worldTree = screen.querySelector('.pixel-worldtree');
@@ -2608,16 +2611,17 @@
     var crownAura = screen.querySelector('[data-pixel-crown-aura]');
     var rootBranches = rootNetwork ? Array.prototype.filter.call(rootNetwork.children, function (child) { return child.tagName === 'I'; }) : [];
     var rootNodes = rootBranches.map(function (branch) { return branch.querySelector('b'); });
+    var rootEnergyHeads = rootBranches.map(function (branch) { return branch.querySelector('em'); });
     var canopyEchoes = Array.prototype.slice.call(screen.querySelectorAll('.pixel-canopy-echo > i'));
     var runestones = Array.prototype.slice.call(screen.querySelectorAll('.pixel-runestone'));
     var sapLines = Array.prototype.slice.call(screen.querySelectorAll('.pixel-tree-sap > i, .pixel-tree-sap > b'));
     var lakeSignalWaves = Array.prototype.slice.call(screen.querySelectorAll('.pixel-lake-signal > i, .pixel-lake-signal > b, .pixel-lake-signal > em'));
     var depthLayers = [
-      { element: screen.querySelector('.pixel-depth-sky'), z: 0, scale: 1, travel: 0 },
-      { element: screen.querySelector('.pixel-depth-ridge-back'), z: 55, scale: .93, travel: 1.5 },
-      { element: screen.querySelector('.pixel-depth-ridge-front'), z: 110, scale: .86, travel: 3 },
-      { element: screen.querySelector('.pixel-depth-water'), z: 165, scale: .79, travel: 5 },
-      { element: screen.querySelector('.pixel-depth-foreground'), z: 220, scale: .72, travel: 7 }
+      { element: screen.querySelector('.pixel-depth-sky'), z: -90, scale: 1.22, travelX: -24, travelY: -10, lag: 176, x: 0, y: 0 },
+      { element: screen.querySelector('.pixel-depth-ridge-back'), z: 30, scale: 1, travelX: -10, travelY: -5, lag: 142, x: 0, y: 0 },
+      { element: screen.querySelector('.pixel-depth-ridge-front'), z: 110, scale: .92, travelX: 8, travelY: 5, lag: 108, x: 0, y: 0 },
+      { element: screen.querySelector('.pixel-depth-water'), z: 190, scale: .82, travelX: 30, travelY: 16, lag: 82, x: 0, y: 0 },
+      { element: screen.querySelector('.pixel-depth-foreground'), z: 260, scale: .74, travelX: 58, travelY: 32, lag: 58, x: 0, y: 0 }
     ];
     var frame = 0;
     var lastFrameAt = performance.now();
@@ -2627,6 +2631,10 @@
     var lastPointerY = 0;
     var lastPointerAt = 0;
     var pointerInside = false;
+    var activeOuterStone = -1;
+    var outerRippleTimer = 0;
+    var currentOuterEnergy = 0;
+    var targetOuterEnergy = 0;
     var dioramaActive = false;
     var currentPitch = 0;
     var currentYaw = 0;
@@ -2655,7 +2663,7 @@
     var signalRunId = 0;
     var signalAnimations = [];
     var zoneCopy = {
-      scene: ['世界树微缩遗迹', '移动视角，观察前后景深'],
+      scene: ['五层世界树遗迹', '左右移动鼠标，观察近远层反向分离'],
       sky: ['极光与九界星图', '点击左侧月亮，切换为晴夜'],
       runes: ['守界符石', '两侧符石记录着九界根脉的回声'],
       roots: ['九界根脉', '树心苏醒后，能量将沿九条路径扩散'],
@@ -2719,8 +2727,72 @@
       };
     }
 
+    function readOuterPoint(event) {
+      if (!surround) return { x: .5, y: .5 };
+      var rect = surround.getBoundingClientRect();
+      return {
+        x: Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(1, rect.width))),
+        y: Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(1, rect.height)))
+      };
+    }
+
+    function setOuterStone(point) {
+      if (!outerRunestones.length) return;
+      var stonePoints = [.102, .176, .25, .326, .5, .674, .75, .824, .898];
+      var nextIndex = -1;
+      var closest = .085;
+      if (point.y > .42 && point.y < .82) {
+        stonePoints.forEach(function (stoneX, index) {
+          var distance = Math.abs(point.x - stoneX);
+          if (distance < closest) {
+            closest = distance;
+            nextIndex = index;
+          }
+        });
+      }
+      if (nextIndex === activeOuterStone) return;
+      activeOuterStone = nextIndex;
+      outerRunestones.forEach(function (stone, index) {
+        stone.classList.toggle('is-pointer-lit', index === nextIndex);
+      });
+    }
+
+    function updateOuterPointer(event, speed) {
+      if (!surround) return;
+      var point = readOuterPoint(event);
+      surround.style.setProperty('--rootgarden-pointer-x', (point.x * 100).toFixed(2) + '%');
+      surround.style.setProperty('--rootgarden-pointer-y', (point.y * 100).toFixed(2) + '%');
+      targetOuterEnergy = Math.min(1, .46 + speed * .32);
+      setOuterStone(point);
+    }
+
+    function clearOuterPointer() {
+      targetOuterEnergy = 0;
+      activeOuterStone = -1;
+      outerRunestones.forEach(function (stone) { stone.classList.remove('is-pointer-lit'); });
+    }
+
+    function triggerOuterRipple(event) {
+      if (!surround || !outerRipple) return;
+      var point = readOuterPoint(event);
+      surround.style.setProperty('--rootgarden-ripple-x', (point.x * 100).toFixed(2) + '%');
+      surround.style.setProperty('--rootgarden-ripple-y', (point.y * 100).toFixed(2) + '%');
+      window.clearTimeout(outerRippleTimer);
+      vista.classList.remove('is-rootgarden-ripple');
+      void outerRipple.offsetWidth;
+      vista.classList.add('is-rootgarden-ripple');
+      outerRippleTimer = window.setTimeout(function () {
+        vista.classList.remove('is-rootgarden-ripple');
+      }, 980);
+    }
+
     function scheduleDiorama() {
       if (!frame && !document.hidden) frame = window.requestAnimationFrame(renderPointer);
+    }
+
+    function shapeDepthInput(value) {
+      var direction = value < 0 ? -1 : 1;
+      return direction * Math.pow(Math.min(1, Math.abs(value)), .72);
     }
 
     function renderPointer(now) {
@@ -2731,23 +2803,25 @@
       lastFrameAt = now;
       var nx = (pointerLocalX - .5) * 2;
       var ny = (pointerLocalY - .5) * 2;
+      var depthUnsettled = 0;
 
       if (!gardenMotionIsLite()) {
-        targetYaw = pointerInside && dioramaActive ? nx * 17 : 0;
-        targetPitch = pointerInside && dioramaActive ? -ny * 10 : 0;
+        targetYaw = pointerInside && dioramaActive ? nx * 19 : 0;
+        targetPitch = pointerInside && dioramaActive ? -ny * 11.5 : 0;
         currentYaw += (targetYaw - currentYaw) * follow;
         currentPitch += (targetPitch - currentPitch) * follow;
         currentRoll += (targetRoll - currentRoll) * follow;
         currentLift += (targetLift - currentLift) * follow;
         targetRoll *= settle;
         targetLift *= settle;
-        targetGlintOpacity = Math.max(pointerInside && dioramaActive ? .045 : 0, targetGlintOpacity * settle);
-        targetLightOpacity = Math.max(pointerInside && dioramaActive ? .07 : 0, targetLightOpacity * settle);
+        targetGlintOpacity = Math.max(pointerInside && dioramaActive ? .065 : 0, targetGlintOpacity * settle);
+        targetLightOpacity = Math.max(pointerInside && dioramaActive ? .1 : 0, targetLightOpacity * settle);
         currentGlintX += (targetGlintX - currentGlintX) * (1 - Math.exp(-elapsed / 74));
         currentGlintOpacity += (targetGlintOpacity - currentGlintOpacity) * (1 - Math.exp(-elapsed / 68));
         currentLightX += (targetLightX - currentLightX) * (1 - Math.exp(-elapsed / 118));
         currentLightY += (targetLightY - currentLightY) * (1 - Math.exp(-elapsed / 148));
         currentLightOpacity += (targetLightOpacity - currentLightOpacity) * (1 - Math.exp(-elapsed / 96));
+        currentOuterEnergy += (targetOuterEnergy - currentOuterEnergy) * (1 - Math.exp(-elapsed / 92));
         diorama.style.transform = 'translateZ(' + currentLift.toFixed(2) + 'px) rotateX(' + currentPitch.toFixed(2) + 'deg) rotateY(' + currentYaw.toFixed(2) + 'deg) rotateZ(' + currentRoll.toFixed(2) + 'deg)';
         if (glassGlint) {
           glassGlint.style.opacity = currentGlintOpacity.toFixed(3);
@@ -2758,15 +2832,30 @@
           surfaceLight.style.transform = 'translate3d(' + currentLightX.toFixed(2) + '%,' + currentLightY.toFixed(2) + '%,0)';
         }
 
-        if (entered && now >= depthMotionReadyAt) {
-          var depthX = currentYaw / 17;
-          var depthY = currentPitch / 10;
+        if (finePointer.matches && entered && now >= depthMotionReadyAt) {
+          var depthX = shapeDepthInput(currentYaw / 19);
+          var depthY = shapeDepthInput(currentPitch / 11.5);
           depthLayers.forEach(function (layer) {
             if (!layer.element) return;
-            var shiftX = depthX * layer.travel;
-            var shiftY = depthY * layer.travel * .58;
-            layer.element.style.transform = 'translateZ(' + layer.z + 'px) scale(' + layer.scale + ') translate3d(' + shiftX.toFixed(2) + 'px,' + shiftY.toFixed(2) + 'px,0)';
+            var shiftX = depthX * layer.travelX;
+            var shiftY = depthY * layer.travelY;
+            var layerFollow = 1 - Math.exp(-elapsed / layer.lag);
+            layer.x += (shiftX - layer.x) * layerFollow;
+            layer.y += (shiftY - layer.y) * layerFollow;
+            depthUnsettled += Math.abs(shiftX - layer.x) + Math.abs(shiftY - layer.y);
+            layer.element.style.transform = 'translateZ(' + layer.z + 'px) scale(' + layer.scale + ') translate3d(' + layer.x.toFixed(2) + 'px,' + layer.y.toFixed(2) + 'px,0)';
           });
+          if (surround) {
+            surround.style.setProperty('--surround-back-x', (depthLayers[1].x * 1.35).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-back-y', (depthLayers[1].y * 1.05).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-ridge-x', (depthLayers[2].x * 1.65).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-ridge-y', (depthLayers[2].y * 1.25).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-shore-x', (depthLayers[4].x * 1.08).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-shore-y', (depthLayers[4].y * .82).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-water-x', (depthLayers[3].x * .84).toFixed(2) + 'px');
+            surround.style.setProperty('--surround-water-y', (depthLayers[3].y * .62).toFixed(2) + 'px');
+            surround.style.setProperty('--rootgarden-energy', currentOuterEnergy.toFixed(3));
+          }
         }
       }
 
@@ -2781,7 +2870,7 @@
         Math.abs(targetRoll - currentRoll) + Math.abs(targetLift - currentLift) +
         Math.abs(targetGlintOpacity - currentGlintOpacity) * 10 + Math.abs(targetGlintX - currentGlintX) / 80 +
         Math.abs(targetLightOpacity - currentLightOpacity) * 10 + Math.abs(targetLightX - currentLightX) / 90 +
-        Math.abs(targetLightY - currentLightY) / 90 > .025;
+        Math.abs(targetLightY - currentLightY) / 90 + Math.abs(targetOuterEnergy - currentOuterEnergy) * 8 + depthUnsettled / 80 > .025;
       diorama.classList.toggle('is-diorama-tracking', dioramaActive && (pointerInside || unsettled));
       diorama.classList.toggle('is-depth-tracking', dioramaActive && entered && now >= depthMotionReadyAt && (pointerInside || unsettled));
       if (unsettled) scheduleDiorama();
@@ -2789,6 +2878,7 @@
 
     function resetPointer() {
       pointerInside = false;
+      vista.classList.remove('is-rootgarden-pressed');
       targetYaw = 0;
       targetPitch = 0;
       targetRoll = 0;
@@ -2799,6 +2889,7 @@
       targetLightY = 72;
       targetLightOpacity = 0;
       lastPointerAt = 0;
+      clearOuterPointer();
       delete screen.dataset.pixelZone;
       delete stage.dataset.pixelZone;
       delete interaction.dataset.pixelZone;
@@ -2808,14 +2899,14 @@
 
     function updateLabel() {
       var title = signalActive ? (signalReplay ? '九界星环正在共鸣' : '世界树正在苏醒') : (linked ? '九界星环已完成' : '移动鼠标 · 观察立体层次');
-      var action = signalActive ? (signalReplay ? '九个界域节点正在依次回应' : '树心点燃 · 根脉上行 · 九界成环') : (linked ? '星环与世界树已连接；点击可再次共鸣' : '点击中央树心，唤醒九界根脉');
+      var action = signalActive ? (signalReplay ? '树心冲击 · 根脉扫光 · 九界重连' : '树心点燃 · 根脉上行 · 九界成环') : (linked ? '点击画像任意区域，可再次触发完整共鸣' : '点击中央树心，唤醒九界根脉');
       if (statusTitle) statusTitle.textContent = title;
       if (statusAction) statusAction.textContent = action;
       if (hud) hud.dataset.state = signalActive ? 'sending' : (linked ? 'linked' : 'offline');
       interaction.setAttribute('aria-label', signalActive
         ? (signalReplay ? '九界星环正在再次共鸣' : '世界树正在苏醒，九个界域节点将依次点亮并形成星环')
         : (linked
-          ? '九界星环已完成。点击树心可以再次触发九界共鸣'
+          ? '九界星环已完成。点击画像任意区域可以再次触发完整共鸣'
           : '点击树心，唤醒世界树的九界根脉'));
     }
 
@@ -2826,9 +2917,13 @@
 
     function trackSignalAnimation(element, keyframes, options) {
       if (!element || typeof element.animate !== 'function') return null;
-      var animation = element.animate(keyframes, options);
-      signalAnimations.push(animation);
-      return animation;
+      try {
+        var animation = element.animate(keyframes, options);
+        signalAnimations.push(animation);
+        return animation;
+      } catch (error) {
+        return null;
+      }
     }
 
     function clearSignalAnimations() {
@@ -2870,9 +2965,12 @@
         finishSignal(runId);
         return;
       }
-      Promise.all(animations.map(function (animation) {
-        return animation.finished.catch(function () { return null; });
-      })).then(function () { finishSignal(runId); });
+      Promise.race([
+        Promise.all(animations.map(function (animation) {
+          return animation.finished.catch(function () { return null; });
+        })),
+        new Promise(function (resolve) { window.setTimeout(resolve, 2600); })
+      ]).then(function () { finishSignal(runId); });
     }
 
     function animateRootSequence(replay) {
@@ -2880,6 +2978,7 @@
       order.forEach(function (branchIndex, orderIndex) {
         var branch = rootBranches[branchIndex];
         var node = rootNodes[branchIndex];
+        var energy = rootEnergyHeads[branchIndex];
         if (!branch) return;
         var angle = Number(branch.dataset.rootAngle || 90);
         var branchDelay = (replay ? 145 : 355) + orderIndex * (replay ? 34 : 55);
@@ -2909,6 +3008,16 @@
           delay: branchDelay + (replay ? 185 : 380),
           duration: replay ? 210 : 300,
           easing: 'steps(4, end)',
+          fill: 'forwards'
+        });
+        trackSignalAnimation(energy, [
+          { opacity: 0, transform: 'translateY(-50%) scaleX(.08)' },
+          { opacity: 1, transform: 'translateY(-50%) scaleX(.76)', offset: .62 },
+          { opacity: 0, transform: 'translateY(-50%) scaleX(1)' }
+        ], {
+          delay: branchDelay + (replay ? 24 : 120),
+          duration: replay ? 420 : 540,
+          easing: 'cubic-bezier(.23, 1, .32, 1)',
           fill: 'forwards'
         });
       });
@@ -3206,8 +3315,8 @@
           var velocityY = (event.clientY - lastPointerY) / elapsed;
           var speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
           pointerSpeed = speed;
-          targetRoll = Math.max(-1.8, Math.min(1.8, velocityX * .9));
-          targetLift = Math.min(5, speed * 1.45);
+          targetRoll = Math.max(-2.2, Math.min(2.2, velocityX * 1.1));
+          targetLift = Math.min(7, speed * 1.9);
         }
         lastPointerX = event.clientX;
         lastPointerY = event.clientY;
@@ -3216,10 +3325,11 @@
         pointerLocalX = point.x;
         pointerLocalY = point.y;
         targetGlintX = 40 + point.x * 220;
-        targetGlintOpacity = Math.min(.26, .055 + pointerSpeed * .11);
+        targetGlintOpacity = Math.min(.32, .075 + pointerSpeed * .14);
         targetLightX = 20 + point.x * 250;
         targetLightY = 15 + point.y * 115;
-        targetLightOpacity = Math.min(.2, .07 + pointerSpeed * .055);
+        targetLightOpacity = Math.min(.27, .1 + pointerSpeed * .075);
+        updateOuterPointer(event, pointerSpeed);
         pointerInside = true;
         dioramaActive = true;
         scheduleDiorama();
@@ -3227,11 +3337,27 @@
       vista.addEventListener('pointerleave', resetPointer);
     }
 
+    vista.addEventListener('pointerdown', function (event) {
+      if (event.target.closest && event.target.closest('[data-pixel-diorama], button, a')) return;
+      vista.classList.add('is-rootgarden-pressed');
+      if (!gardenMotionIsLite()) triggerOuterRipple(event);
+    });
+    vista.addEventListener('pointerup', function () { vista.classList.remove('is-rootgarden-pressed'); });
+    vista.addEventListener('pointercancel', function () { vista.classList.remove('is-rootgarden-pressed'); });
+    vista.addEventListener('click', function (event) {
+      if (event.target.closest && event.target.closest('[data-pixel-diorama], button, a')) return;
+      if (gardenMotionIsLite()) triggerOuterRipple(event);
+    });
+
     interaction.addEventListener('click', function (event) {
       if (!event.detail) {
         setTreeAwake();
         return;
       }
+      startTreeAwakening();
+    });
+    screen.addEventListener('click', function (event) {
+      if (!event.detail) return;
       startTreeAwakening();
     });
     interaction.addEventListener('focus', function () {
@@ -3278,6 +3404,8 @@
       currentLift = 0;
       diorama.style.removeProperty('transform');
       depthLayers.forEach(function (layer) {
+        layer.x = 0;
+        layer.y = 0;
         if (layer.element) layer.element.style.removeProperty('transform');
       });
       currentGlintX = 130;
@@ -3298,6 +3426,13 @@
         surfaceLight.style.removeProperty('opacity');
         surfaceLight.style.removeProperty('transform');
       }
+      if (surround) {
+        ['--surround-back-x', '--surround-back-y', '--surround-ridge-x', '--surround-ridge-y', '--surround-shore-x', '--surround-shore-y', '--surround-water-x', '--surround-water-y', '--rootgarden-pointer-x', '--rootgarden-pointer-y', '--rootgarden-energy'].forEach(function (property) {
+          surround.style.removeProperty(property);
+        });
+      }
+      clearOuterPointer();
+      vista.classList.remove('is-rootgarden-pressed', 'is-rootgarden-ripple');
       if (signalActive) setTreeAwake();
     }
 
