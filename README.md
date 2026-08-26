@@ -20,7 +20,7 @@
 - 文章页提供成长状态、更新时间、相关笔记、反向链接、TOC、标题锚点、阅读时间和代码复制
 - macOS 风格代码块，使用本地 Maple Mono 字体
 - 桌面 TOC 支持鼠标、触控笔和键盘调宽，并只展开当前二级章节下的三级标题；移动端目录并入统一底部工具栏
-- 归档页支持分类、标签入口和当前页面即时筛选
+- 归档页支持分类、标签入口、分页导航和当前页面即时筛选
 - 全站搜索覆盖文章标题、摘要、标签、分类与正文，按相关度排序并支持 `/` 快捷键
 - Garden Log 按月记录花园的新增、修整与重新思考
 - 同源页面使用渐进增强的 View Transition，文章标题在首页与正文之间保持视觉连续
@@ -94,6 +94,7 @@ npm install
 npm run server        # 本地预览：http://localhost:4000
 npm run clean         # 清理 public/ 与 Hexo 缓存
 npm run build         # 生成 public/
+npm run test:inner    # 构建并回归检查内页目录、搜索、复制、分页及本地链接
 ```
 
 正式提交前建议运行：
@@ -101,7 +102,10 @@ npm run build         # 生成 public/
 ```bash
 npm run clean
 npm run build
+npm run test:inner
 ```
+
+内页自动测试复用现有 Hexo 依赖中的 JSDOM 与 Nunjucks，不增加客户端依赖；桌面排版仍需在浏览器中检查深浅色主题、长文目录跳转和表格/代码横向滚动。
 
 ## 新建文章
 

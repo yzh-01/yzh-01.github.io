@@ -1588,6 +1588,7 @@
 
     var posts = Array.prototype.slice.call(list.querySelectorAll('.archive-post'));
     var years = Array.prototype.slice.call(list.querySelectorAll('.archive-year'));
+    var isPaginated = list.closest('[data-archive-paginated="true"]');
 
     function normalize(value) {
       var text = String(value || '');
@@ -1614,8 +1615,8 @@
 
       empty.hidden = visibleCount !== 0;
       status.textContent = terms.length
-        ? '找到 ' + visibleCount + ' 篇文章'
-        : '显示全部 ' + posts.length + ' 篇文章';
+        ? (isPaginated ? '本页找到 ' : '找到 ') + visibleCount + ' 篇文章'
+        : '显示' + (isPaginated ? '本页 ' : '全部 ') + posts.length + ' 篇文章';
     }
 
     input.addEventListener('input', filterPosts);

@@ -14,7 +14,7 @@
 {%- endif %}
 
 {% block content %}
-<div class="archive g-wide">
+<div class="archive g-wide" data-archive-paginated="{{ 'true' if page.total > 1 else 'false' }}">
   <header class="archive-header">
     {%- if not is_root_archive %}
     <a class="archive-back" href="{{ url_for('archives/') }}">← 全部内容</a>
@@ -23,7 +23,7 @@
     <h1>{{ archive_title }}</h1>
     {%- set archive_posts = page.posts.toArray() if page.posts else site.posts.toArray() %}
     <p class="sub">
-      {{ archive_posts.length }} 篇文章
+      {{ '本页 ' if page.total > 1 else '' }}{{ archive_posts.length }} 篇文章
       {%- if is_root_archive %} · {{ site.categories.length }} 个分类 · {{ site.tags.length }} 个标签{% endif %}
     </p>
   </header>
@@ -71,14 +71,14 @@
       <input
         id="archive-filter-input"
         type="search"
-        placeholder="按标题、标签或分类筛选"
+        placeholder="{{ '筛选本页文章（跨页查找请使用搜索）' if page.total > 1 else '按标题、标签或分类筛选' }}"
         autocomplete="off"
         spellcheck="false"
         aria-describedby="archive-filter-status"
       >
     </div>
     <p class="archive-filter-status" id="archive-filter-status" aria-live="polite">
-      显示全部 {{ archive_posts.length }} 篇文章
+      显示{{ '本页' if page.total > 1 else '全部' }} {{ archive_posts.length }} 篇文章
     </p>
   </div>
   {%- endif %}
@@ -122,6 +122,14 @@
     <p>没有找到匹配的文章。</p>
     <span>换一个标题、标签或分类试试。</span>
   </div>
+  {%- endif %}
+
+  {%- if page.total > 1 %}
+  <nav class="archive-pagination" aria-label="归档分页">
+    {%- if page.prev %}<a href="{{ url_for(page.prev_link) }}" rel="prev">← 上一页</a>{% endif %}
+    <span>第 {{ page.current }} / {{ page.total }} 页</span>
+    {%- if page.next %}<a href="{{ url_for(page.next_link) }}" rel="next">下一页 →</a>{% endif %}
+  </nav>
   {%- endif %}
 </div>
 {% endblock %}

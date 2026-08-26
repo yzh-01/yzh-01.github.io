@@ -5,7 +5,7 @@
   var articleBody = document.querySelector('.article-body');
   if (!wrap || !articleBody) return;
 
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var mobileQuery = window.matchMedia('(max-width: 1023px)');
   var tocEnabled = wrap.dataset.tocEnabled === 'true';
   var toc = document.getElementById('article-toc');
@@ -39,8 +39,10 @@
     var target = document.getElementById(id);
     if (!target) return;
     history.replaceState(null, '', '#' + id);
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
     target.scrollIntoView({
-      behavior: reduceMotion ? 'auto' : 'smooth',
+      behavior: reduceMotion.matches || document.documentElement.classList.contains('garden-lite-motion') ? 'instant' : 'smooth',
       block: 'start'
     });
   }
@@ -53,9 +55,11 @@
     return clone.textContent.trim();
   }
 
-  headings.forEach(function (heading, index) {
+  articleBody.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(function (heading, index) {
     var headingText = getHeadingText(heading);
     heading.dataset.tocText = headingText;
+    // The anchor has its own accessible label; do not repeat it in the heading name.
+    heading.setAttribute('aria-label', headingText);
 
     if (!heading.id) {
       var slug = headingText
@@ -140,29 +144,47 @@
       tocNav.appendChild(link);
     });
 
-    if ('IntersectionObserver' in window) {
-      var tocLinks = tocNav.querySelectorAll('a');
-      var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          var activeParent = entry.target.tagName.toLowerCase() === 'h2'
-            ? entry.target.id
-            : entry.target.dataset.tocParent;
-          tocLinks.forEach(function (link) {
-            link.classList.remove('active');
-            if (link.classList.contains('toc-h3') && !link.classList.contains('toc-orphan')) {
-              link.classList.toggle('toc-context', link.dataset.tocParent === activeParent);
-            }
-          });
-          var active = tocNav.querySelector('a[href="#' + CSS.escape(entry.target.id) + '"]');
-          if (active) {
-            active.classList.add('active');
-            active.scrollIntoView({ block: 'nearest' });
-          }
-        });
-      }, { rootMargin: '-20% 0px -70% 0px' });
-      headings.forEach(function (heading) { observer.observe(heading); });
+    var tocLinks = tocNav.querySelectorAll('a');
+    var activeIndex = -1;
+    var scrollFrame = 0;
+
+    function updateActiveHeading() {
+      scrollFrame = 0;
+      var nextIndex = 0;
+      // Track the reading line, including long sections with no heading in view.
+      for (var index = 0; index < headings.length; index += 1) {
+        if (headings[index].getBoundingClientRect().top > 112) break;
+        nextIndex = index;
+      }
+      if (nextIndex === activeIndex) return;
+      activeIndex = nextIndex;
+      var heading = headings[nextIndex];
+      var activeParent = heading.tagName.toLowerCase() === 'h2' ? heading.id : heading.dataset.tocParent;
+      tocLinks.forEach(function (link, index) {
+        link.classList.toggle('active', index === nextIndex);
+        if (index === nextIndex) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+        if (link.classList.contains('toc-h3') && !link.classList.contains('toc-orphan')) {
+          link.classList.toggle('toc-context', link.dataset.tocParent === activeParent);
+        }
+      });
+      // Scroll only the sidebar. scrollIntoView also scrolls its document ancestors
+      // and used to interrupt the article's smooth anchor navigation.
+      if (!mobileQuery.matches || toc.classList.contains('mobile-open')) {
+        var activeRect = tocLinks[nextIndex].getBoundingClientRect();
+        var tocRect = toc.getBoundingClientRect();
+        if (activeRect.top < tocRect.top + 16) toc.scrollTop += activeRect.top - tocRect.top - 16;
+        else if (activeRect.bottom > tocRect.bottom - 16) toc.scrollTop += activeRect.bottom - tocRect.bottom + 16;
+      }
     }
+
+    function scheduleActiveHeading() {
+      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateActiveHeading);
+    }
+    window.addEventListener('scroll', scheduleActiveHeading, { passive: true });
+    window.addEventListener('resize', scheduleActiveHeading);
+    if ('ResizeObserver' in window) new ResizeObserver(scheduleActiveHeading).observe(articleBody);
+    updateActiveHeading();
 
     if (tocToggle) {
       tocToggle.addEventListener('click', function () {
@@ -263,6 +285,7 @@
 
     function fallbackCopy(text) {
       return new Promise(function (resolve, reject) {
+        var previousFocus = document.activeElement;
         var textarea = document.createElement('textarea');
         textarea.value = text;
         textarea.setAttribute('readonly', '');
@@ -270,11 +293,16 @@
         textarea.style.opacity = '0';
         textarea.style.pointerEvents = 'none';
         document.body.appendChild(textarea);
-        textarea.select();
-        var copied = document.execCommand('copy');
-        textarea.remove();
-        if (copied) resolve();
-        else reject(new Error('Copy command failed'));
+        try {
+          textarea.select();
+          if (document.execCommand('copy')) resolve();
+          else reject(new Error('Copy command failed'));
+        } catch (error) {
+          reject(error);
+        } finally {
+          textarea.remove();
+          if (previousFocus) previousFocus.focus({ preventScroll: true });
+        }
       });
     }
 
@@ -293,6 +321,13 @@
       language.textContent = languageName || 'text';
       container.appendChild(language);
 
+      var feedback = document.createElement('span');
+      feedback.className = 'code-copy-status';
+      feedback.setAttribute('role', 'status');
+      container.appendChild(feedback);
+      var feedbackTimer = 0;
+      var copying = false;
+
       var button = document.createElement('button');
       button.className = 'code-copy';
       button.type = 'button';
@@ -300,15 +335,32 @@
       button.title = '复制代码';
       button.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
       button.addEventListener('click', function () {
+        if (copying) return;
+        copying = true;
+        window.clearTimeout(feedbackTimer);
+        button.classList.remove('copied');
+        language.hidden = true;
+        feedback.textContent = '正在复制…';
+        button.setAttribute('aria-busy', 'true');
         copyCodeText(getCodeText()).then(function () {
           button.classList.add('copied');
           button.setAttribute('aria-label', '代码已复制');
           button.title = '代码已复制';
-          window.setTimeout(function () {
+          feedback.textContent = '已复制';
+        }).catch(function () {
+          feedback.textContent = '复制失败，请手动选择';
+          button.setAttribute('aria-label', '复制失败，点击重试');
+          button.title = '复制失败，点击重试';
+        }).finally(function () {
+          copying = false;
+          button.removeAttribute('aria-busy');
+          feedbackTimer = window.setTimeout(function () {
+            feedback.textContent = '';
+            language.hidden = false;
             button.classList.remove('copied');
             button.setAttribute('aria-label', '复制代码');
             button.title = '复制代码';
-          }, 1800);
+          }, 3000);
         });
       });
       container.appendChild(button);
@@ -320,6 +372,12 @@
       }) || 'text';
       var codeCell = figure.querySelector('td.code') || figure.querySelector('.code');
       if (!codeCell) return;
+      var codeScroller = figure.querySelector('table');
+      if (codeScroller) {
+        codeScroller.tabIndex = 0;
+        codeScroller.setAttribute('role', 'region');
+        codeScroller.setAttribute('aria-label', '可横向滚动的代码');
+      }
 
       addWindowControls(figure, languageName, function () {
         var lines = codeCell.querySelectorAll('.line');
@@ -334,6 +392,7 @@
       if (pre.closest('figure.highlight')) return;
       var code = pre.querySelector('code');
       if (!code) return;
+      pre.tabIndex = 0;
 
       var languageMatch = (code.className || '').match(/language-([\w-]+)/);
       addWindowControls(pre, languageMatch ? languageMatch[1] : 'text', function () {

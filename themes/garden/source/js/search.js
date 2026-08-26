@@ -12,6 +12,9 @@
   var suggestions = page.querySelectorAll('[data-search-suggestion]');
   var records = [];
   var timer = 0;
+  var loadState = 'loading';
+  input.value = new URL(window.location.href).searchParams.get('q') || '';
+  results.setAttribute('aria-busy', 'true');
 
   function normalize(value) {
     return String(value || '')
@@ -105,10 +108,18 @@
   }
 
   function runSearch(options) {
+    window.clearTimeout(timer);
     var query = input.value.trim();
     if (!options || options.updateUrl !== false) updateUrl(query);
     results.replaceChildren();
     empty.hidden = true;
+
+    if (loadState !== 'ready') {
+      status.textContent = loadState === 'loading'
+        ? '正在整理花园索引，加载完成后会搜索当前关键词…'
+        : '搜索索引暂时无法读取，请刷新页面后重试。';
+      return;
+    }
 
     if (!query) {
       status.textContent = '索引已就绪，共 ' + records.length + ' 篇文章。输入关键词开始搜索。';
@@ -161,11 +172,14 @@
     })
     .then(function (data) {
       records = Array.isArray(data.posts) ? data.posts : [];
-      var initialQuery = new URL(window.location.href).searchParams.get('q') || '';
-      input.value = initialQuery;
-      runSearch({ updateUrl: false });
+      loadState = 'ready';
+      results.setAttribute('aria-busy', 'false');
+      runSearch();
     })
     .catch(function () {
+      loadState = 'error';
+      window.clearTimeout(timer);
+      results.setAttribute('aria-busy', 'false');
       status.textContent = '搜索索引暂时无法读取，请刷新页面后重试。';
       form.classList.add('is-unavailable');
       input.disabled = true;
