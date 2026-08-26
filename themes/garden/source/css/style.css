@@ -5245,6 +5245,9 @@ body.is-inner .garden-theme-options button:hover, body.is-inner .garden-theme-op
   body.is-inner .archive-filter-field input,
   body.is-inner .search-hint button { font-size: 13px; line-height: 1.5; }
   body.is-inner .taxonomy-links small { font-size: 11px; }
+  /* Display-font numerals can exceed 150px; size the year track from its content. */
+  body.is-inner .archive-year { grid-template-columns: max-content minmax(0, 1fr); column-gap: clamp(28px, 3vw, 44px); }
+  body.is-inner .archive-year h2 { white-space: nowrap; }
   body.is-inner .archive-post { grid-template-columns: 80px minmax(0, 1fr) minmax(140px, 26%); gap: 20px; transition: background 180ms ease; }
   body.is-inner .archive-post:hover { padding-inline: 8px; }
   body.is-inner .archive-post-title,
