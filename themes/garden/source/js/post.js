@@ -151,10 +151,18 @@
     function updateActiveHeading() {
       scrollFrame = 0;
       var nextIndex = 0;
-      // Track the reading line, including long sections with no heading in view.
-      for (var index = 0; index < headings.length; index += 1) {
-        if (headings[index].getBoundingClientRect().top > 112) break;
-        nextIndex = index;
+      // Headings follow document order. Binary search keeps long-note scrolling
+      // to a handful of geometry reads instead of scanning every prior heading.
+      var low = 0;
+      var high = headings.length - 1;
+      while (low <= high) {
+        var middle = Math.floor((low + high) / 2);
+        if (headings[middle].getBoundingClientRect().top <= 112) {
+          nextIndex = middle;
+          low = middle + 1;
+        } else {
+          high = middle - 1;
+        }
       }
       if (nextIndex === activeIndex) return;
       activeIndex = nextIndex;

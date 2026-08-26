@@ -124,7 +124,7 @@
     </div>
   </div>
 
-  <section class="folio-cover" id="hello" data-home-window aria-labelledby="folio-title">
+  <section class="folio-cover" id="hello" data-home-window data-motion-section aria-labelledby="folio-title">
     <div class="folio-cover-photo" aria-hidden="true">
       <img class="folio-photo-light" src="{{ url_for('images/garden-bg-light-cat.jpg') }}" width="1600" height="900" alt="">
       <img class="folio-photo-dark" src="{{ url_for('images/garden-bg-dark-cat.jpg') }}" width="1600" height="900" alt="">
@@ -248,7 +248,7 @@
     <a class="folio-cover-scroll" href="#explore"><span>沿着痕迹往下</span><i aria-hidden="true"></i></a>
   </section>
 
-  <section class="folio-explore" id="explore" aria-labelledby="folio-explore-title" data-field-motion>
+  <section class="folio-explore" id="explore" aria-labelledby="folio-explore-title" data-field-motion data-motion-section>
     <svg class="folio-explore-traces" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
       <g class="folio-trace-roots" fill="none" stroke="currentColor" stroke-width="1">
         <path d="M-40 846C157 788 203 668 365 645s214-95 333-202 237-88 342-189 204-132 438-158"/>
@@ -311,7 +311,7 @@
   </section>
 
   {%- if latest_posts.length %}
-  <section class="folio-articles" id="articles" aria-labelledby="folio-articles-title" data-field-motion>
+  <section class="folio-articles" id="articles" aria-labelledby="folio-articles-title" data-field-motion data-motion-section>
     <svg class="folio-articles-traces" viewBox="0 0 1440 820" preserveAspectRatio="none" aria-hidden="true">
       <g class="folio-trace-roots" fill="none" stroke="currentColor" stroke-width="1">
         <path d="M184 870C210 732 164 654 226 537s17-205 65-324 18-174-3-261"/>
@@ -381,7 +381,7 @@
   </section>
   {%- endif %}
 
-  <section class="folio-outro" id="the-end" data-folio-outro aria-label="页面结尾">
+  <section class="folio-outro" id="the-end" data-folio-outro data-motion-section aria-label="页面结尾">
     <span class="folio-outro-orbit" aria-hidden="true"><i></i></span>
     <div class="folio-outro-inner">
       <p class="folio-outro-signal"><i aria-hidden="true"></i><span>NINE REALMS / MOVE ANYWHERE TO OBSERVE</span></p>

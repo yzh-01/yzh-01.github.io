@@ -5,6 +5,7 @@
   "scripts": {
     "build": "hexo generate",
     "test:inner": "npm run build && node --test tests/inner-pages.test.cjs",
+    "test:motion": "node --test tests/motion.test.cjs",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
     "draft:new": "hexo new draft",

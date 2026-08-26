@@ -3641,6 +3641,29 @@ body.is-home .garden-controls:focus-within { opacity: 1; }
   font-size: 10px;
   line-height: 1.5;
 }
+.garden-performance-settings { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--g-border); }
+.garden-performance-options button { min-height: 36px; padding: 8px; }
+
+/* Pause invisible scenes without changing their layout or interaction targets. */
+html.garden-page-hidden *, html.garden-page-hidden *::before, html.garden-page-hidden *::after,
+[data-motion-section][data-motion-visible="false"],
+[data-motion-section][data-motion-visible="false"] *,
+[data-motion-section][data-motion-visible="false"]::before,
+[data-motion-section][data-motion-visible="false"]::after,
+[data-motion-section][data-motion-visible="false"] *::before,
+[data-motion-section][data-motion-visible="false"] *::after { animation-play-state: paused !important; }
+
+html[data-render-quality="economy"] body.is-inner .site-backdrop::before,
+html[data-render-quality="economy"] .inner-atmosphere::before,
+html[data-render-quality="economy"] .inner-atmosphere > i,
+html.garden-lite-motion body.is-inner .site-backdrop::before,
+html.garden-lite-motion .inner-atmosphere::before,
+html.garden-lite-motion .inner-atmosphere > i { animation: none !important; will-change: auto; }
+html[data-render-quality="economy"] body.is-inner :is(.article, .article-toc, .g-nav, .garden-settings, .garden-control-button) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--os-panel-solid);
+}
 
 /* ===== TOC Sidebar ===== */
 .article-wrap {

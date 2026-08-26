@@ -25,6 +25,8 @@
 - Garden Log 按月记录花园的新增、修整与重新思考
 - 同源页面使用渐进增强的 View Transition，文章标题在首页与正文之间保持视觉连续
 - 尊重 `prefers-reduced-motion`，关闭非必要动画并保留静态内容
+- 动效性能支持自动 / 完整 / 节能；支持电池状态 API 的浏览器在电池供电时自动节能，无法检测时可手动选择；只在本地读取充电状态，不上传电池数据
+- 离屏和后台场景暂停；Canvas 共用限帧时钟，节能模式降低流线数量与像素密度、停止重复粒子层，并保留月亮切换、树心共鸣和立体互动
 - RSS、Sitemap、Open Graph、Canonical URL 和语义化页面结构
 - 支持使用 Obsidian 管理草稿和文章
 
@@ -73,6 +75,7 @@
 │       ├── css/style.css        # 全站 Token、组件、动效与响应式样式
 │       ├── css/home.css         # 首页凛冬之兆场景、石阵、HUD 与像素终章
 │       └── js/
+│           ├── motion.js        # 本地电源策略、共享限帧时钟与离屏暂停
 │           ├── site.js          # 全站交互、首页环境、贡献墙与渐进增强
 │           ├── ninefold-seal.js # 九界石阵定位、展开与无障碍交互
 │           ├── garden-game.js   # LOW TIDE 程序化单关卡（按需加载）
@@ -95,6 +98,7 @@ npm run server        # 本地预览：http://localhost:4000
 npm run clean         # 清理 public/ 与 Hexo 缓存
 npm run build         # 生成 public/
 npm run test:inner    # 构建并回归检查内页目录、搜索、复制、分页及本地链接
+npm run test:motion   # 检查电源切换、限帧、离屏/后台暂停、Canvas 绘制与减弱动态
 ```
 
 正式提交前建议运行：
@@ -103,9 +107,21 @@ npm run test:inner    # 构建并回归检查内页目录、搜索、复制、�
 npm run clean
 npm run build
 npm run test:inner
+npm run test:motion
 ```
 
 内页自动测试复用现有 Hexo 依赖中的 JSDOM 与 Nunjucks，不增加客户端依赖；桌面排版仍需在浏览器中检查深浅色主题、长文目录跳转和表格/代码横向滚动。
+
+### 动效性能
+
+右下角设置 → 动效性能：默认“自动”，也可强制“完整”或“节能”，选择会保存在当前浏览器。节能不等于安静模式：前者降低背景开销，后者遵循减少动态的阅读偏好。
+
+- 完整模式：流场空闲最高 24fps、互动最高 60fps；首屏粒子最高 24fps，离屏即停。
+- 节能模式：停用独立粒子层，流场空闲最高 12fps、互动最高 30fps，DPR 上限为 1；滚动期间暂停背景绘制，观看像素场景时停掉两张背景 Canvas。
+- 像素场景鼠标事件按帧合并，立体层次和重复点击仍可用；离屏动画和后台循环暂停，恢复时不补跑积压帧。
+- 自动检测采用 [Battery Status API](https://www.w3.org/TR/battery-status/)，仅在接口可用且允许访问时使用。浏览器自身的[节能限帧](https://developer.chrome.com/blog/memory-and-energy-saver-mode)仍可能影响实际刷新率；网页不会修改系统或浏览器的电源设置。
+
+`test:motion` 使用可控时钟模拟 144Hz 屏幕、电源状态切换和后台恢复，验证实际 Canvas 代码的绘制次数；它不是实际硬件的耗电量或 FPS 基准测试。
 
 ## 新建文章
 

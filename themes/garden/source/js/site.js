@@ -5,6 +5,7 @@
   var articleBackTop = document.querySelector('.article-back-top');
   var scrollProgress = document.getElementById('g-scroll-progress');
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var motion = window.GardenMotion;
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   var gardenRoute = document.querySelector('.garden-route');
   var gardenRouteFill = gardenRoute ? gardenRoute.querySelector('.garden-route-track i') : null;
@@ -641,12 +642,18 @@
     var lastPointerY = currentPointerY;
     var lastScrollY = window.scrollY;
     var frame = 0;
+    var cover = document.querySelector('.folio-cover');
+
+    function enabled() {
+      return !gardenMotionIsLite() && (!motion || (motion.canAnimate() && !motion.isEconomy() && motion.isVisible(cover)));
+    }
 
     function mix(from, to, amount) { return from + (to - from) * amount; }
     function near(a, b) { return Math.abs(a - b) < .025; }
 
     function render() {
       frame = 0;
+      if (!enabled()) return;
       currentX = mix(currentX, targetX, .105);
       currentY = mix(currentY, targetY, .105);
       currentScroll = mix(currentScroll, targetScroll, .09);
@@ -674,10 +681,11 @@
     }
 
     function schedule() {
-      if (!frame) frame = window.requestAnimationFrame(render);
+      if (!frame && enabled()) frame = window.requestAnimationFrame(render);
     }
 
     document.addEventListener('pointermove', function (event) {
+      if (!enabled()) return;
       var dx = event.clientX - lastPointerX;
       var dy = event.clientY - lastPointerY;
       targetX = (event.clientX / Math.max(1, window.innerWidth) - .5) * 30;
@@ -713,12 +721,19 @@
       schedule();
     }, { passive: true });
 
+    if (motion) motion.subscribe(function () {
+      if (enabled()) return;
+      window.cancelAnimationFrame(frame);
+      frame = 0;
+      currentX = targetX = currentY = targetY = currentScroll = targetScroll = currentEnergy = targetEnergy = 0;
+      world.removeAttribute('style');
+    });
     schedule();
   }
 
   function setupKineticVeil() {
     var canvas = document.querySelector('[data-kinetic-veil]');
-    if (!canvas || gardenMotionIsLite()) return;
+    if (!canvas || !motion || gardenMotionIsLite()) return;
     var context = canvas.getContext('2d', { alpha: true });
     if (!context) return;
 
@@ -735,10 +750,9 @@
     var pointerInside = false;
     var pointerSeen = false;
     var impulses = [];
-    var frame = 0;
-    var lastFrameAt = performance.now();
-    var lastDrawAt = 0;
     var activeUntil = 0;
+    var pixelOutro = document.querySelector('[data-folio-outro]');
+    var previousEconomy = motion.isEconomy();
 
     function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
     function mix(from, to, amount) { return from + (to - from) * amount; }
@@ -788,7 +802,7 @@
 
     function buildStrand(strand, now) {
       var points = [];
-      var step = width < 720 ? 38 : 32;
+      var step = motion.isEconomy() ? 52 : (width < 720 ? 38 : 32);
       for (var x = -96; x <= width + 96; x += step) points.push(resolvePoint(strand, x, now));
       return points;
     }
@@ -818,7 +832,7 @@
 
     function drawMotes(now, color) {
       context.lineCap = 'round';
-      for (var index = 0; index < 9; index += 1) {
+      for (var index = 0; index < (motion.isEconomy() ? 4 : 9); index += 1) {
         var strand = (index * 5 + 1) % strandCount;
         var speed = .000018 + index % 3 * .000005;
         var progress = (now * speed + index * .143) % 1;
@@ -931,33 +945,21 @@
       activeUntil = now + 2600;
     }
 
-    function animate(now) {
-      frame = 0;
-      var delta = clamp(now - lastFrameAt, 8, 42);
-      lastFrameAt = now;
-      pointerX = mix(pointerX, targetX, .11);
-      pointerY = mix(pointerY, targetY, .11);
-      pointerStrength = mix(pointerStrength, pointerInside ? .92 : 0, pointerInside ? .11 : .055);
+    function animate(now, delta) {
+      var follow = 1 - Math.exp(-delta / 140);
+      pointerX = mix(pointerX, targetX, follow);
+      pointerY = mix(pointerY, targetY, follow);
+      pointerStrength = mix(pointerStrength, pointerInside ? .92 : 0, 1 - Math.exp(-delta / (pointerInside ? 140 : 290)));
       impulses.forEach(function (impulse) { impulse.age += delta; });
       impulses = impulses.filter(function (impulse) { return impulse.age < 2500; });
-      var frameInterval = now < activeUntil || impulses.length ? 16 : 34;
-      if (now - lastDrawAt >= frameInterval) {
-        draw(now);
-        lastDrawAt = now;
-      }
-      schedule();
-    }
-
-    function schedule() {
-      if (document.hidden || frame) return;
-      frame = window.requestAnimationFrame(animate);
+      draw(now);
     }
 
     function resize() {
       width = Math.max(1, window.innerWidth);
       height = Math.max(1, window.innerHeight);
-      strandCount = width < 720 ? 9 : 13;
-      ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      strandCount = motion.isEconomy() ? 7 : (width < 720 ? 9 : 13);
+      ratio = Math.min(window.devicePixelRatio || 1, motion.isEconomy() ? 1 : 1.5);
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -995,13 +997,10 @@
     }, { passive: true });
 
     window.addEventListener('resize', resize, { passive: true });
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden && frame) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-      } else if (!document.hidden) {
-        lastFrameAt = performance.now();
-        schedule();
+    motion.subscribe(function () {
+      if (previousEconomy !== motion.isEconomy()) {
+        previousEconomy = motion.isEconomy();
+        resize();
       }
     });
 
@@ -1009,8 +1008,18 @@
       if (mutations.some(function (mutation) { return mutation.attributeName === 'data-resolved-theme'; })) draw(performance.now());
     }).observe(root, { attributes: true, attributeFilter: ['data-resolved-theme'] });
 
+    var loop = motion.createLoop(animate, {
+      fps: function () {
+        var active = performance.now() < activeUntil || impulses.length;
+        return motion.isEconomy() ? (active ? 30 : 12) : (active ? 60 : 24);
+      },
+      enabled: function () {
+        return !root.classList.contains('garden-booting') &&
+          !(pixelOutro && motion.isVisible(pixelOutro)) && !(motion.isEconomy() && motion.isScrolling());
+      }
+    });
     resize();
-    schedule();
+    loop.start();
   }
 
   function setupFieldMotion() {
@@ -1041,6 +1050,7 @@
 
     function render() {
       frame = 0;
+      if (motion && (motion.isEconomy() || !motion.canAnimate())) return;
       states.forEach(function (state) {
         if (!state.active) return;
         var rect = state.section.getBoundingClientRect();
@@ -1052,6 +1062,7 @@
     }
 
     function scheduleRender() {
+      if (motion && (motion.isEconomy() || !motion.canAnimate())) return;
       if (!frame) frame = window.requestAnimationFrame(render);
     }
 
@@ -1130,6 +1141,11 @@
     var changeTimer = 0;
     var revealTimer = 0;
     var interval = 10500;
+    var quoteSection = card.closest('[data-motion-section]');
+
+    function canRotate() {
+      return !document.hidden && (!motion || (motion.isVisible(quoteSection) && !motion.isEconomy()));
+    }
 
     function getItemData(item, itemIndex) {
       var named = Boolean(item.dataset.quoteAuthor);
@@ -1173,14 +1189,17 @@
 
     function schedule() {
       window.clearTimeout(timer);
+      if (!canRotate()) {
+        if (progress) progress.style.animation = 'none';
+        return;
+      }
       if (progress) {
         progress.style.animation = 'none';
         void progress.offsetWidth;
         progress.style.animation = gardenMotionIsLite() ? 'none' : 'garden-quote-progress ' + interval + 'ms linear forwards';
       }
       timer = window.setTimeout(function () {
-        if (!document.hidden) showNext();
-        else schedule();
+        if (canRotate()) showNext();
       }, interval);
     }
 
@@ -1295,6 +1314,7 @@
       }
     });
 
+    if (motion) motion.subscribe(schedule);
     sessionOrder = shuffledOrder(previousIndex());
     renderItem(sessionOrder[0], true);
     cyclePosition = 1;
@@ -1313,6 +1333,7 @@
 
     function renderLens() {
       frame = 0;
+      if (gardenMotionIsLite() || (motion && motion.isEconomy())) return;
       var rect = scene.getBoundingClientRect();
       var x = Math.max(0, Math.min(rect.width, pointerX - rect.left));
       var y = Math.max(0, Math.min(rect.height, pointerY - rect.top));
@@ -1321,6 +1342,7 @@
     }
 
     function moveLens(event) {
+      if (gardenMotionIsLite() || (motion && motion.isEconomy())) return;
       pointerX = event.clientX;
       pointerY = event.clientY;
       if (!frame) frame = window.requestAnimationFrame(renderLens);
@@ -2626,6 +2648,12 @@
     ];
     var frame = 0;
     var lastFrameAt = performance.now();
+    var pendingPointer = null;
+    var pointerLoop = motion && motion.createLoop(renderPointer, {
+      continuous: false,
+      fps: function () { return motion.isEconomy() ? 30 : 60; },
+      enabled: function () { return motion.isVisible(outro); }
+    });
     var pointerLocalX = .5;
     var pointerLocalY = .5;
     var lastPointerX = 0;
@@ -2788,7 +2816,8 @@
     }
 
     function scheduleDiorama() {
-      if (!frame && !document.hidden) frame = window.requestAnimationFrame(renderPointer);
+      if (pointerLoop) pointerLoop.start();
+      else if (!frame && !document.hidden) frame = window.requestAnimationFrame(renderPointer);
     }
 
     function shapeDepthInput(value) {
@@ -2798,6 +2827,10 @@
 
     function renderPointer(now) {
       frame = 0;
+      if (pendingPointer) {
+        updatePointerTargets(pendingPointer);
+        pendingPointer = null;
+      }
       var elapsed = Math.min(48, Math.max(8, now - lastFrameAt));
       var follow = 1 - Math.exp(-elapsed / 88);
       var settle = Math.exp(-elapsed / 118);
@@ -2878,6 +2911,7 @@
     }
 
     function resetPointer() {
+      pendingPointer = null;
       pointerInside = false;
       vista.classList.remove('is-rootgarden-pressed');
       targetYaw = 0;
@@ -3305,34 +3339,38 @@
       finishAfterAnimations(runId);
     }
 
+    function updatePointerTargets(event) {
+      var now = performance.now();
+      var pointerSpeed = 0;
+      if (lastPointerAt) {
+        var elapsed = Math.max(8, now - lastPointerAt);
+        var velocityX = (event.clientX - lastPointerX) / elapsed;
+        var velocityY = (event.clientY - lastPointerY) / elapsed;
+        var speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
+        pointerSpeed = speed;
+        targetRoll = Math.max(-2.2, Math.min(2.2, velocityX * 1.1));
+        targetLift = Math.min(7, speed * 1.9);
+      }
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      lastPointerAt = now;
+      var point = readInteractionPoint(event);
+      pointerLocalX = point.x;
+      pointerLocalY = point.y;
+      targetGlintX = 40 + point.x * 220;
+      targetGlintOpacity = Math.min(.32, .075 + pointerSpeed * .14);
+      targetLightX = 20 + point.x * 250;
+      targetLightY = 15 + point.y * 115;
+      targetLightOpacity = Math.min(.27, .1 + pointerSpeed * .075);
+      updateOuterPointer(event, pointerSpeed);
+      pointerInside = true;
+      dioramaActive = true;
+    }
+
     if (finePointer.matches) {
       vista.addEventListener('pointermove', function (event) {
         if (gardenMotionIsLite()) return;
-        var now = performance.now();
-        var pointerSpeed = 0;
-        if (lastPointerAt) {
-          var elapsed = Math.max(8, now - lastPointerAt);
-          var velocityX = (event.clientX - lastPointerX) / elapsed;
-          var velocityY = (event.clientY - lastPointerY) / elapsed;
-          var speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-          pointerSpeed = speed;
-          targetRoll = Math.max(-2.2, Math.min(2.2, velocityX * 1.1));
-          targetLift = Math.min(7, speed * 1.9);
-        }
-        lastPointerX = event.clientX;
-        lastPointerY = event.clientY;
-        lastPointerAt = now;
-        var point = readInteractionPoint(event);
-        pointerLocalX = point.x;
-        pointerLocalY = point.y;
-        targetGlintX = 40 + point.x * 220;
-        targetGlintOpacity = Math.min(.32, .075 + pointerSpeed * .14);
-        targetLightX = 20 + point.x * 250;
-        targetLightY = 15 + point.y * 115;
-        targetLightOpacity = Math.min(.27, .1 + pointerSpeed * .075);
-        updateOuterPointer(event, pointerSpeed);
-        pointerInside = true;
-        dioramaActive = true;
+        pendingPointer = { clientX: event.clientX, clientY: event.clientY };
         scheduleDiorama();
       }, { passive: true });
       vista.addEventListener('pointerleave', resetPointer);
@@ -3482,6 +3520,7 @@
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
+        if (pointerLoop) pointerLoop.stop();
         if (frame) {
           window.cancelAnimationFrame(frame);
           frame = 0;
@@ -3513,7 +3552,7 @@
     }
 
     function schedule() {
-      if (frame || document.hidden) return;
+      if (frame || document.hidden || gardenMotionIsLite() || (motion && !motion.isVisible(scene))) return;
       wordmark.classList.add('is-tracking');
       frame = window.requestAnimationFrame(render);
     }
@@ -3592,7 +3631,7 @@
   function setupGardenParticles() {
     var canvas = document.querySelector('[data-garden-particles]');
     var cover = document.querySelector('.folio-cover');
-    if (!canvas || !cover || gardenMotionIsLite()) return;
+    if (!canvas || !cover || !motion || gardenMotionIsLite()) return;
     var context = canvas.getContext('2d');
     if (!context) return;
     var particles = [];
@@ -3600,16 +3639,15 @@
     var height = 0;
     var scale = 1;
     var pointer = { x: -1000, y: -1000 };
-    var visible = true;
 
     function resize() {
-      scale = Math.min(2, window.devicePixelRatio || 1);
+      scale = Math.min(1.25, window.devicePixelRatio || 1);
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = Math.round(width * scale);
       canvas.height = Math.round(height * scale);
       context.setTransform(scale, 0, 0, scale, 0, 0);
-      var wanted = Math.max(24, Math.min(58, Math.floor(width / 24)));
+      var wanted = Math.max(20, Math.min(40, Math.floor(width / 32)));
       while (particles.length < wanted) particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -3621,52 +3659,56 @@
       particles.length = wanted;
     }
 
-    function draw(time) {
+    function draw(time, elapsed) {
       context.clearRect(0, 0, width, height);
-      if (visible && !document.hidden) {
-        particles.forEach(function (particle, index) {
-          var dx = particle.x - pointer.x;
-          var dy = particle.y - pointer.y;
-          var distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 115 && distance > 0) {
-            particle.x += dx / distance * (115 - distance) * .012;
-            particle.y += dy / distance * (115 - distance) * .012;
-          }
-          particle.x += particle.vx + Math.sin(time * .00035 + particle.phase) * .06;
-          particle.y += particle.vy;
-          if (particle.y < -10) { particle.y = height + 10; particle.x = Math.random() * width; }
-          if (particle.x < -10) particle.x = width + 10;
-          if (particle.x > width + 10) particle.x = -10;
-          context.beginPath();
-          context.fillStyle = 'rgba(196, 225, 199,' + (.25 + .2 * Math.sin(time * .001 + particle.phase)).toFixed(3) + ')';
-          context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-          context.fill();
+      var step = elapsed / (1000 / 60);
+      particles.forEach(function (particle, index) {
+        var dx = particle.x - pointer.x;
+        var dy = particle.y - pointer.y;
+        var distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 115 && distance > 0) {
+          particle.x += dx / distance * (115 - distance) * .012 * step;
+          particle.y += dy / distance * (115 - distance) * .012 * step;
+        }
+        particle.x += (particle.vx + Math.sin(time * .00035 + particle.phase) * .06) * step;
+        particle.y += particle.vy * step;
+        if (particle.y < -10) { particle.y = height + 10; particle.x = Math.random() * width; }
+        if (particle.x < -10) particle.x = width + 10;
+        if (particle.x > width + 10) particle.x = -10;
+        context.beginPath();
+        context.fillStyle = 'rgba(196, 225, 199,' + (.25 + .2 * Math.sin(time * .001 + particle.phase)).toFixed(3) + ')';
+        context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        context.fill();
 
-          for (var j = index + 1; j < Math.min(particles.length, index + 5); j += 1) {
-            var other = particles[j];
-            var lx = other.x - particle.x;
-            var ly = other.y - particle.y;
-            var lineDistance = Math.sqrt(lx * lx + ly * ly);
-            if (lineDistance > 92) continue;
-            context.beginPath();
-            context.strokeStyle = 'rgba(168, 207, 174,' + ((1 - lineDistance / 92) * .12).toFixed(3) + ')';
-            context.moveTo(particle.x, particle.y);
-            context.lineTo(other.x, other.y);
-            context.stroke();
-          }
-        });
-      }
-      window.requestAnimationFrame(draw);
+        for (var j = index + 1; j < Math.min(particles.length, index + 5); j += 1) {
+          var other = particles[j];
+          var lx = other.x - particle.x;
+          var ly = other.y - particle.y;
+          var lineDistance = Math.sqrt(lx * lx + ly * ly);
+          if (lineDistance > 92) continue;
+          context.beginPath();
+          context.strokeStyle = 'rgba(168, 207, 174,' + ((1 - lineDistance / 92) * .12).toFixed(3) + ')';
+          context.moveTo(particle.x, particle.y);
+          context.lineTo(other.x, other.y);
+          context.stroke();
+        }
+      });
     }
 
     cover.addEventListener('pointermove', function (event) { pointer.x = event.clientX; pointer.y = event.clientY; }, { passive: true });
     cover.addEventListener('pointerleave', function () { pointer.x = -1000; pointer.y = -1000; });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; canvas.style.opacity = visible ? '.42' : '0'; }, { threshold: .02 }).observe(cover);
+    function syncVisibility() {
+      canvas.hidden = !motion.isVisible(cover) || motion.isEconomy();
     }
+    motion.subscribe(syncVisibility);
+    var loop = motion.createLoop(draw, {
+      fps: 24,
+      enabled: function () { return !motion.isEconomy() && motion.isVisible(cover) && !document.documentElement.classList.contains('garden-booting'); }
+    });
     window.addEventListener('resize', resize, { passive: true });
     resize();
-    window.requestAnimationFrame(draw);
+    syncVisibility();
+    loop.start();
   }
 
   function setupGardenPet() {

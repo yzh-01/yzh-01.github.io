@@ -41,6 +41,15 @@
         </button>
       </div>
       <p class="garden-theme-status" data-theme-status aria-live="polite"></p>
+      <div class="garden-performance-settings">
+        <p class="garden-settings-copy" id="garden-performance-label">动效性能</p>
+        <div class="garden-theme-options garden-performance-options" role="group" aria-labelledby="garden-performance-label">
+          <button type="button" data-performance-choice="auto" aria-pressed="true"><span>自动</span></button>
+          <button type="button" data-performance-choice="full" aria-pressed="false"><span>完整</span></button>
+          <button type="button" data-performance-choice="economy" aria-pressed="false"><span>节能</span></button>
+        </div>
+        <p class="garden-theme-status" data-performance-status aria-live="polite">自动平衡背景动效与交互性能。</p>
+      </div>
     </section>
     <div class="garden-control-actions">
       {%- if is_post() and theme.post.back_to_top %}
@@ -57,6 +66,7 @@
     </div>
   </div>
 
+  <script src="{{ url_for('js/motion.js') }}?v={{ theme.asset_version }}" defer></script>
   <script src="{{ url_for('js/site.js') }}?v={{ theme.asset_version }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>

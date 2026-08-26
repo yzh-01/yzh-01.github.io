@@ -8331,3 +8331,41 @@ html.garden-lite-motion .folio-pixel-screen.is-lamp-off .pixel-lighthouse i,
 html.garden-lite-motion .pixel-depth-layer { animation: none !important; transition: none !important; }
 html.garden-lite-motion .folio-pixel-diorama { transform: rotateX(0deg) rotateY(0deg) !important; }
 html.garden-lite-motion .folio-pixel-stage .folio-pixel-screen { transform: none !important; }
+
+/* Power-aware rendering: keep the scene and deliberate interactions, reduce the
+   large composited surfaces and secondary ambient loops on battery power. */
+html[data-render-quality="economy"] .garden-particles,
+html[data-render-quality="economy"] .garden-noise,
+html[data-render-quality="economy"] .garden-scanlines,
+html[data-render-quality="economy"] .folio-cover-lens,
+html[data-render-quality="economy"] .folio-field-sweep,
+html[data-render-quality="economy"] .folio-pixel-glass-glint,
+html[data-render-quality="economy"] .pixel-surface-light { display: none !important; }
+html[data-render-quality="economy"] .folio-world::before,
+html[data-render-quality="economy"] .folio-world-etchings,
+html[data-render-quality="economy"] .folio-cover-photo > img,
+html[data-render-quality="economy"] .folio-cover::before,
+html[data-render-quality="economy"] .folio-rainfield::before,
+html[data-render-quality="economy"] .folio-pixel-ambient > *,
+html[data-render-quality="economy"] .folio-rootgarden-motes rect,
+html[data-render-quality="economy"] .folio-rootgarden-moss,
+html[data-render-quality="economy"] .folio-rootgarden-roots { animation: none !important; will-change: auto; }
+html[data-render-quality="economy"] .folio-rainfield i:nth-child(even) { display: none; }
+html[data-render-quality="economy"] .folio-rainfield { filter: none; will-change: auto; }
+html[data-render-quality="economy"] .pixel-depth-layer,
+html[data-render-quality="economy"] .folio-pixel-vista { filter: none !important; }
+html[data-render-quality="economy"] .is-home .g-nav,
+html[data-render-quality="economy"] .is-home .garden-settings,
+html[data-render-quality="economy"] .folio-pixel-hud {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-render-quality="economy"] .is-home .g-nav { background: var(--g-bg); }
+html[data-render-quality="economy"].garden-is-scrolling .folio-world::before,
+html[data-render-quality="economy"].garden-is-scrolling .folio-world *,
+html[data-render-quality="economy"].garden-is-scrolling .folio-world *::before,
+html[data-render-quality="economy"].garden-is-scrolling .folio-world *::after { animation-play-state: paused !important; }
+html.garden-overrun [data-motion-section],
+html.garden-overrun [data-motion-section] *,
+html.garden-overrun [data-motion-section] *::before,
+html.garden-overrun [data-motion-section] *::after { animation-play-state: paused !important; }
