@@ -133,19 +133,21 @@
 .is-home .g-nav-logo { color: var(--bone); font-weight: 700; }
 .is-home .g-nav-logo::before { content: "■"; margin-right: 9px; color: var(--moss); font-size: 8px; }
 .is-home .g-nav-links { gap: clamp(15px, 2.2vw, 34px); }
-.is-home .g-nav-command { display: flex; align-items: center; gap: 8px; }
+.is-home .g-nav-command { display: flex; align-items: center; gap: 7px; }
 .is-home .g-nav-command-hint {
-  padding: 5px 7px;
-  color: color-mix(in srgb, var(--dim) 78%, transparent);
-  background: rgba(255, 255, 255, .018);
-  border: 1px solid var(--line);
-  border-radius: 2px;
+  padding: 0;
+  color: color-mix(in srgb, var(--dim) 62%, transparent);
+  background: transparent;
+  border: 0;
   font: 6px/1 var(--mono);
-  letter-spacing: .08em;
+  letter-spacing: .06em;
   white-space: nowrap;
-  transition: color 160ms ease, border-color 160ms ease;
+  transition: color 160ms ease;
 }
-.is-home .g-nav-command:hover .g-nav-command-hint { color: var(--moss-bright); border-color: var(--line-strong); }
+.is-home .g-nav-command:hover .g-nav-command-hint { color: var(--moss-bright); }
+@media (max-width: 1200px) {
+  .is-home .g-nav-command-hint { display: none; }
+}
 .is-home .g-nav-links a.active,
 .is-home .g-nav-links a:hover { color: var(--bone); }
 .is-home .g-nav-links a.active::before { content: ">"; margin-right: 5px; color: var(--moss-bright); }
@@ -3469,7 +3471,6 @@ html.garden-lite-motion .garden-overgrowth.is-active .garden-game-controls { dis
   .is-home .g-nav-inner { min-height: 54px; }
   .is-home .g-nav-links li:nth-child(3), .is-home .g-nav-links li:nth-child(4) { display: none; }
   .is-home .g-nav-logo, .is-home .g-nav-links a { font-size: 9px; }
-  .is-home .g-nav-command-hint { display: none; }
   .folio-command { width: calc(100vw - 24px); max-height: calc(100svh - 24px); }
   .folio-command-shell { max-height: calc(100svh - 24px); }
   .folio-command-head { min-height: 40px; padding-inline: 13px; }
