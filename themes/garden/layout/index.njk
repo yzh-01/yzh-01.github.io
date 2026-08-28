@@ -91,6 +91,76 @@
 
   <div class="garden-ripple-layer" data-ripple-layer aria-hidden="true"></div>
 
+  <dialog class="folio-command" data-garden-command aria-labelledby="folio-command-title">
+    <div class="folio-command-shell">
+      <header class="folio-command-head">
+        <p id="folio-command-title"><i aria-hidden="true"></i> GARDEN COMMAND</p>
+        <button type="button" data-command-close aria-label="关闭命令面板">ESC</button>
+      </header>
+
+      <div class="folio-command-search" role="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="m16 16 4 4"></path>
+        </svg>
+        <label class="sr-only" for="folio-command-input">搜索文章或跳转位置</label>
+        <input
+          id="folio-command-input"
+          type="search"
+          placeholder="搜索文章，或输入页面名称…"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="folio-command-results"
+          aria-expanded="false"
+        >
+        <kbd data-command-shortcut aria-hidden="true">Ctrl K</kbd>
+      </div>
+
+      <div class="folio-command-status" data-command-status role="status" aria-live="polite">快速移动到花园中的任意坐标</div>
+      <ol class="folio-command-results" id="folio-command-results" role="listbox" aria-label="可用命令">
+        <li data-command-item data-command-default role="option">
+          <a href="#hello"><small>HOME / 01</small><strong>返回封面</strong><span>WINTEROMEN / 起始坐标</span><b aria-hidden="true">↵</b></a>
+        </li>
+        <li data-command-item data-command-default role="option">
+          <a href="#explore"><small>HOME / 02</small><strong>探索目录</strong><span>档案、日志与个人入口</span><b aria-hidden="true">↵</b></a>
+        </li>
+        {%- if latest_posts.length %}
+        <li data-command-item data-command-default role="option">
+          <a href="#articles"><small>HOME / 03</small><strong>最近文章</strong><span>抵达最新留下的三条记录</span><b aria-hidden="true">↵</b></a>
+        </li>
+        {%- endif %}
+        <li data-command-item data-command-default role="option">
+          <a href="{{ url_for('archives/') }}"><small>PAGE / ARCHIVE</small><strong>全部归档</strong><span>按年份浏览所有文章</span><b aria-hidden="true">↗</b></a>
+        </li>
+        <li data-command-item data-command-default role="option">
+          <a href="{{ url_for('garden-log/') }}"><small>PAGE / LOG</small><strong>花园日志</strong><span>每月维护记录与片段</span><b aria-hidden="true">↗</b></a>
+        </li>
+        <li data-command-item data-command-default role="option">
+          <a href="{{ url_for('about/') }}"><small>PAGE / PROFILE</small><strong>关于我</strong><span>个人档案与此刻状态</span><b aria-hidden="true">↗</b></a>
+        </li>
+        {%- for post in all_posts %}
+        <li data-command-item data-command-note role="option" hidden>
+          <a href="{{ url_for(post.path) }}" data-post-transition>
+            <small>NOTE / {{ post.date.format('YYYY.MM.DD') }}</small>
+            <strong data-post-transition-title>{{ post.title }}</strong>
+            <span>{{ post.description if post.description else '花园文章' }}{% for category in post.categories.toArray() %} · {{ category.name }}{% endfor %}{% for tag in post.tags.toArray() %} · #{{ tag.name }}{% endfor %}</span>
+            <b aria-hidden="true">↗</b>
+          </a>
+        </li>
+        {%- endfor %}
+      </ol>
+      <p class="folio-command-empty" data-command-empty hidden><strong>没有找到对应坐标</strong><span>换一个更短的关键词试试。</span></p>
+
+      <footer class="folio-command-foot" aria-hidden="true">
+        <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+        <span><kbd>Enter</kbd> 打开</span>
+        <span><kbd>Esc</kbd> 关闭</span>
+      </footer>
+    </div>
+  </dialog>
+
   <div class="garden-pet" data-garden-pet data-post-count="{{ all_posts.length }}">
     <p data-pet-bubble aria-live="polite">嘘，花园刚刚醒。</p>
     <button type="button" data-pet-button aria-label="和花园里的猫打个招呼">
@@ -584,4 +654,5 @@
 
 {% block scripts %}
 <script src="{{ url_for('js/ninefold-seal.js') }}?v={{ theme.asset_version }}" defer></script>
+<script src="{{ url_for('js/command.js') }}?v={{ theme.asset_version }}" defer></script>
 {% endblock %}

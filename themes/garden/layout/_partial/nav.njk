@@ -6,7 +6,8 @@
       <li><a href="{{ url_for('archives/') }}" data-scramble {% if is_archive() or is_tag() or is_category() %}class="active"{% endif %}>archive</a></li>
       <li><a href="{{ url_for('garden-log/') }}" data-scramble {% if page.path == 'garden-log/index.html' %}class="active"{% endif %}>log</a></li>
       <li><a href="{{ url_for('about/') }}" data-scramble {% if page.path == 'about/index.html' %}class="active"{% endif %}>about</a></li>
-      <li>
+      <li class="g-nav-command">
+        {%- if is_home() %}<kbd class="g-nav-command-hint" data-command-shortcut aria-hidden="true">Ctrl K</kbd>{%- endif %}
         <a
           class="g-nav-search{% if page.path == 'search/index.html' %} active{% endif %}"
           href="{{ url_for('search/') }}"
