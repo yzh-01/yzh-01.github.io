@@ -4132,13 +4132,15 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   pointer-events: none;
   overflow: hidden;
 }
+.folio-cover:has(.folio-ninefold.is-opening) .folio-cover-lens,
+.folio-cover:has(.folio-ninefold.is-open) .folio-cover-lens { opacity: 0; }
 
 .folio-oath-seal {
   position: absolute;
   left: var(--ninefold-x);
   top: var(--ninefold-y);
   z-index: 2;
-  width: clamp(220px, 20.5vw, 310px);
+  width: clamp(200px, 18.5vw, 280px);
   aspect-ratio: 1;
   color: inherit;
   opacity: .78;
@@ -4151,20 +4153,33 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   position: absolute;
   inset: 5%;
   background:
-    radial-gradient(circle at 42% 36%, rgba(167, 201, 173, .13), transparent 27%),
-    radial-gradient(circle at 58% 62%, rgba(0, 0, 0, .54), transparent 52%),
-    repeating-conic-gradient(from 17deg, rgba(210, 225, 210, .035) 0 3deg, transparent 3deg 19deg),
-    rgba(5, 8, 6, .72);
+    radial-gradient(circle at 39% 32%, rgba(214, 226, 215, .12), transparent 22%),
+    radial-gradient(circle at 58% 62%, rgba(0, 0, 0, .62), transparent 55%),
+    repeating-conic-gradient(from 17deg, rgba(210, 225, 210, .032) 0 2deg, transparent 2deg 17deg),
+    rgba(5, 8, 6, .56);
   border: 1px solid color-mix(in srgb, currentColor 38%, transparent);
   clip-path: polygon(50% 0,61% 3%,70% 1%,78% 7%,87% 9%,91% 18%,97% 25%,96% 36%,100% 46%,97% 56%,99% 67%,92% 75%,89% 86%,78% 90%,70% 97%,59% 95%,49% 100%,39% 96%,29% 98%,21% 91%,11% 87%,9% 77%,2% 69%,5% 58%,0 48%,4% 38%,2% 28%,10% 20%,14% 10%,25% 8%,33% 2%,43% 4%);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, .42);
+  box-shadow:
+    inset 1px 2px 0 rgba(223, 235, 224, .07),
+    inset -10px -14px 34px rgba(0, 0, 0, .48),
+    0 0 0 1px rgba(6, 10, 7, .36);
 }
-.folio-oath-seal svg { position: relative; z-index: 1; display: block; width: 100%; height: 100%; overflow: visible; }
+.folio-oath-seal::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  z-index: 0;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 50%;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, .22);
+  opacity: .72;
+}
+.folio-oath-seal svg { position: relative; z-index: 1; display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 2px rgba(194, 221, 198, .12)); }
 .folio-oath-ring { fill: none; stroke: currentColor; vector-effect: non-scaling-stroke; transform-origin: 120px 120px; }
-.folio-oath-ring-outer { stroke-width: 1.15; stroke-dasharray: 4 7 24 6; opacity: .82; }
-.folio-oath-ring-mid { stroke-width: .75; stroke-dasharray: 1 6 13 5; opacity: .56; }
-.folio-oath-ring-inner { stroke-width: 1; opacity: .48; }
-.folio-oath-runes { opacity: .78; stroke-width: 1.7; }
+.folio-oath-ring-outer { stroke-width: 1.05; stroke-dasharray: 4 7 24 6; opacity: .72; }
+.folio-oath-ring-mid { stroke-width: .7; stroke-dasharray: 1 6 13 5; opacity: .46; }
+.folio-oath-ring-inner { stroke-width: .85; opacity: .4; }
+.folio-oath-runes { opacity: .64; stroke-width: 1.55; }
 .folio-oath-runes path, .folio-valknut path { vector-effect: non-scaling-stroke; }
 .folio-valknut { opacity: .27; stroke-width: 1.15; }
 .folio-nine-realms circle { opacity: .48; transform-box: fill-box; transform-origin: center; }
@@ -4179,32 +4194,60 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   pointer-events: none;
   transform-origin: 0 0;
 }
+.folio-realm-stones::before,
+.folio-realm-stones::after {
+  content: "";
+  position: absolute;
+  left: -72px;
+  top: -5px;
+  z-index: 0;
+  width: 780px;
+  height: 408px;
+  border: 1px solid color-mix(in srgb, var(--bone) 14%, transparent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(-5deg) scale(.94);
+  transition: opacity 520ms ease, transform 900ms cubic-bezier(.16, 1, .3, 1);
+}
+.folio-realm-stones::after {
+  left: -30px;
+  top: 1px;
+  width: 582px;
+  height: 316px;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--moss-bright) 16%, transparent);
+  transform: translate(-50%, -50%) rotate(7deg) scale(.9);
+}
 .folio-realm-stone {
   position: absolute;
   left: 0;
   top: 0;
   display: block;
-  width: 49px;
-  height: 67px;
+  z-index: 1;
+  width: 58px;
+  height: 78px;
   padding: 0;
   border: 0;
   color: var(--bone);
   background: transparent;
   cursor: pointer;
   opacity: 0;
-  filter: drop-shadow(0 9px 9px rgba(0, 0, 0, .44));
+  filter: drop-shadow(0 12px 11px rgba(0, 0, 0, .5)) drop-shadow(0 0 9px rgba(112, 150, 119, .08));
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(0) scale(.12);
   transform-origin: center;
   transition: opacity 180ms ease, transform 240ms cubic-bezier(.16, 1, .3, 1);
 }
-.folio-realm-stone:nth-child(3n + 2) { width: 44px; height: 62px; }
-.folio-realm-stone:nth-child(3n) { width: 53px; height: 71px; }
-.folio-realm-stones svg { display: block; width: 100%; height: 100%; overflow: visible; transform-box: fill-box; transform-origin: center; }
-.folio-stone-body { fill: #101713; stroke: color-mix(in srgb, var(--bone) 48%, var(--moss)); stroke-width: .9; vector-effect: non-scaling-stroke; }
-.folio-stone-face { fill: color-mix(in srgb, #17211b 82%, var(--moss)); stroke: rgba(216, 229, 216, .12); stroke-width: .7; vector-effect: non-scaling-stroke; }
-.folio-realm-mark { fill: none; stroke: color-mix(in srgb, var(--moss-bright) 82%, var(--bone)); stroke-width: 1.75; stroke-linecap: square; stroke-linejoin: miter; vector-effect: non-scaling-stroke; opacity: .88; }
-.folio-realm-stone > span {
+.folio-realm-stone:nth-child(3n + 2) { width: 53px; height: 73px; }
+.folio-realm-stone:nth-child(3n) { width: 63px; height: 84px; }
+.folio-realm-stones svg { display: block; width: 100%; height: 100%; overflow: visible; transform-box: fill-box; transform-origin: center; transition: transform 220ms cubic-bezier(.16, 1, .3, 1); }
+.folio-stone-body { fill: url("#realm-stone-shell") #101713; stroke: color-mix(in srgb, var(--bone) 54%, var(--moss)); stroke-width: 1.05; vector-effect: non-scaling-stroke; }
+.folio-stone-face { fill: url("#realm-stone-face") #17211b; stroke: rgba(216, 229, 216, .17); stroke-width: .75; vector-effect: non-scaling-stroke; }
+.folio-stone-sigil { fill: none; stroke: color-mix(in srgb, var(--bone) 30%, var(--moss-bright)); stroke-width: .62; stroke-dasharray: 1.1 2.7; vector-effect: non-scaling-stroke; opacity: .64; }
+.folio-stone-grain { fill: none; stroke: rgba(221, 232, 222, .29); stroke-width: .62; stroke-linecap: round; stroke-linejoin: bevel; vector-effect: non-scaling-stroke; opacity: .76; }
+.folio-realm-mark { fill: none; stroke: color-mix(in srgb, var(--bone) 78%, var(--moss-bright)); stroke-width: 1.7; stroke-linecap: square; stroke-linejoin: miter; vector-effect: non-scaling-stroke; opacity: .92; filter: drop-shadow(0 0 2px rgba(151, 195, 159, .34)); }
+.folio-realm-caption {
   --plaque-hidden-transform: translateX(-50%) translateY(5px);
   --plaque-visible-transform: translateX(-50%) translateY(0);
   --plaque-enter-transform: translateX(-50%) translateY(12px);
@@ -4213,24 +4256,23 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   top: calc(100% + 11px);
   display: grid;
   justify-items: center;
-  gap: 5px;
-  width: 154px;
-  padding: 8px 10px 9px;
-  border: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent);
-  border-left-color: color-mix(in srgb, var(--moss-bright) 72%, transparent);
+  gap: 0;
+  width: 164px;
+  padding: 7px 11px 8px;
+  border-block: 1px solid transparent;
+  border-left: 2px solid transparent;
   color: var(--bone);
   opacity: 0;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, #08100c 91%, transparent), color-mix(in srgb, #101a14 74%, transparent) 76%, transparent),
-    repeating-linear-gradient(0deg, rgba(220, 232, 220, .025) 0 1px, transparent 1px 4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
-  text-align: center;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+  rotate: calc(0deg - var(--rot));
   transform: var(--plaque-hidden-transform);
-  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease, opacity 140ms ease, transform 220ms cubic-bezier(.16, 1, .3, 1);
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, gap 180ms ease, opacity 140ms ease, transform 220ms cubic-bezier(.16, 1, .3, 1);
 }
-.folio-realm-stone > span b { font: 650 14px/1 var(--serif); letter-spacing: .075em; white-space: nowrap; }
-.folio-realm-stone > span small { color: var(--moss-bright); font: 600 10px/1 var(--mono); letter-spacing: .1em; white-space: nowrap; }
-.folio-realm-stone > span em {
+.folio-realm-caption b { font: italic 700 15px/.95 var(--serif); letter-spacing: .045em; white-space: nowrap; text-shadow: 0 5px 18px rgba(0, 0, 0, .42); }
+.folio-realm-caption small { height: 0; color: var(--moss-bright); font: 500 10px/1 var(--serif); letter-spacing: .13em; opacity: 0; overflow: hidden; white-space: nowrap; transform: translateY(-3px); transition: height 180ms ease, opacity 150ms ease, transform 180ms ease; }
+.folio-realm-caption em {
   display: block;
   position: absolute;
   top: 100%;
@@ -4238,9 +4280,9 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   left: -1px;
   padding: 7px 8px 8px;
   color: color-mix(in srgb, var(--bone) 66%, var(--moss-bright));
-  border: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--moss-bright) 22%, transparent);
   border-top: 0;
-  background: color-mix(in srgb, #0b120e 94%, transparent);
+  background: color-mix(in srgb, #080d0a 94%, transparent);
   font: 500 9px/1.5 var(--sans);
   font-style: normal;
   letter-spacing: .045em;
@@ -4251,7 +4293,7 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 }
 .folio-realm-stone:focus-visible { outline: none; }
 .folio-realm-stone:focus-visible .folio-stone-body { stroke: var(--moss-bright); stroke-width: 1.4; }
-.folio-realm-stone:focus-visible > span { color: var(--moss-bright); }
+.folio-realm-stone:focus-visible .folio-realm-caption { color: var(--moss-bright); }
 
 .folio-ninefold-trigger {
   position: absolute;
@@ -4302,6 +4344,8 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   transition: opacity 180ms ease, transform 260ms cubic-bezier(.16, 1, .3, 1);
 }
 .folio-ninefold-hint span:last-child { display: none; }
+.folio-realm-readout { display: none; }
+.folio-realm-readout[hidden] { display: none; }
 
 .folio-ninefold.is-opening .folio-realm-stone {
   will-change: transform, opacity;
@@ -4314,15 +4358,33 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   pointer-events: auto;
   transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1);
 }
-.folio-ninefold.is-open .folio-realm-stone > span { opacity: 0; transform: var(--plaque-hidden-transform); }
-.folio-ninefold.is-open .folio-realm-stone:hover > span,
-.folio-ninefold.is-open .folio-realm-stone:focus-visible > span,
-.folio-ninefold.is-open .folio-realm-stone.is-selected > span { opacity: 1; transform: var(--plaque-visible-transform); }
+.folio-ninefold.is-opening .folio-realm-stones::before,
+.folio-ninefold.is-open .folio-realm-stones::before { opacity: .34; transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
+.folio-ninefold.is-opening .folio-realm-stones::after,
+.folio-ninefold.is-open .folio-realm-stones::after { opacity: .42; transform: translate(-50%, -50%) rotate(7deg) scale(1); }
+.folio-ninefold.is-open .folio-realm-caption { opacity: .46; transform: var(--plaque-visible-transform); }
+.folio-ninefold.is-open .folio-realm-stone:hover .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:focus-visible .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone.is-selected .folio-realm-caption {
+  gap: 5px;
+  color: var(--bone);
+  border-block-color: color-mix(in srgb, var(--moss-bright) 20%, transparent);
+  border-left-color: color-mix(in srgb, var(--moss-bright) 68%, transparent);
+  opacity: 1;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, #07100b 94%, transparent), color-mix(in srgb, #101a14 78%, transparent) 78%, transparent),
+    repeating-linear-gradient(0deg, rgba(220, 232, 220, .025) 0 1px, transparent 1px 4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+  transform: var(--plaque-visible-transform);
+}
+.folio-ninefold.is-open .folio-realm-stone:hover .folio-realm-caption small,
+.folio-ninefold.is-open .folio-realm-stone:focus-visible .folio-realm-caption small,
+.folio-ninefold.is-open .folio-realm-stone.is-selected .folio-realm-caption small { height: 10px; opacity: 1; transform: translateY(0); }
 
 /* Each plaque opens toward available viewport space; top stones never escape above the cover. */
-.folio-realm-stone:nth-child(1) > span,
-.folio-realm-stone:nth-child(3) > span,
-.folio-realm-stone:nth-child(6) > span {
+.folio-realm-stone:nth-child(1) > .folio-realm-caption,
+.folio-realm-stone:nth-child(3) > .folio-realm-caption,
+.folio-realm-stone:nth-child(6) > .folio-realm-caption {
   --plaque-hidden-transform: translate(5px, -50%);
   --plaque-visible-transform: translate(0, -50%);
   --plaque-enter-transform: translate(13px, -50%);
@@ -4333,11 +4395,11 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   transform: var(--plaque-hidden-transform);
 }
 
-.folio-realm-stone:nth-child(2) > span,
-.folio-realm-stone:nth-child(4) > span,
-.folio-realm-stone:nth-child(5) > span,
-.folio-realm-stone:nth-child(7) > span,
-.folio-realm-stone:nth-child(8) > span {
+.folio-realm-stone:nth-child(2) > .folio-realm-caption,
+.folio-realm-stone:nth-child(4) > .folio-realm-caption,
+.folio-realm-stone:nth-child(5) > .folio-realm-caption,
+.folio-realm-stone:nth-child(7) > .folio-realm-caption,
+.folio-realm-stone:nth-child(8) > .folio-realm-caption {
   --plaque-hidden-transform: translate(-5px, -50%);
   --plaque-visible-transform: translate(0, -50%);
   --plaque-enter-transform: translate(-13px, -50%);
@@ -4345,10 +4407,34 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   right: calc(100% + 13px);
   bottom: auto;
   left: auto;
+  justify-items: end;
+  border-right: 2px solid transparent;
+  border-left-width: 0;
+  text-align: right;
   transform: var(--plaque-hidden-transform);
 }
+.folio-ninefold.is-open .folio-realm-stone:nth-child(2):hover > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(2):focus-visible > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(2).is-selected > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(4):hover > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(4):focus-visible > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(4).is-selected > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5):hover > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5):focus-visible > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(5).is-selected > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(7):hover > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(7):focus-visible > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(7).is-selected > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8):hover > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8):focus-visible > .folio-realm-caption,
+.folio-ninefold.is-open .folio-realm-stone:nth-child(8).is-selected > .folio-realm-caption {
+  border-right-color: color-mix(in srgb, var(--moss-bright) 68%, transparent);
+  background:
+    linear-gradient(270deg, color-mix(in srgb, #07100b 94%, transparent), color-mix(in srgb, #101a14 78%, transparent) 78%, transparent),
+    repeating-linear-gradient(0deg, rgba(220, 232, 220, .025) 0 1px, transparent 1px 4px);
+}
 
-.folio-realm-stone:nth-child(9) > span {
+.folio-realm-stone:nth-child(9) > .folio-realm-caption {
   --plaque-hidden-transform: translateX(-50%) translateY(5px);
   --plaque-visible-transform: translateX(-50%) translateY(0);
   --plaque-enter-transform: translateX(-50%) translateY(12px);
@@ -4356,27 +4442,33 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   right: auto;
   bottom: calc(100% + 11px);
   left: 50%;
+  justify-items: center;
+  border-left-width: 1px;
+  text-align: center;
   transform: var(--plaque-hidden-transform);
 }
-.folio-realm-stone:nth-child(9) > span em {
+.folio-realm-stone:nth-child(9) > .folio-realm-caption em {
   top: auto;
   bottom: 100%;
   border-top: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent);
   border-bottom: 0;
 }
-.folio-ninefold.is-open:not(.is-guiding) .folio-realm-stone > svg { animation: garden-realm-breathe 5.8s cubic-bezier(.45, 0, .55, 1) infinite; animation-delay: calc(var(--stone) * -.63s); }
 .folio-ninefold.is-open .folio-ninefold-hint { opacity: .66; transform: translate(-50%, 0); }
 .folio-ninefold.is-guiding .folio-realm-stone { animation: garden-realm-guide 520ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--stone) * 150ms); }
-.folio-ninefold.is-guiding .folio-realm-stone > span { animation: garden-realm-guide-label 520ms ease both; animation-delay: calc(var(--stone) * 150ms); }
-.folio-ninefold.has-realm-selection .folio-realm-stone:not(.is-selected) { opacity: .42; }
+.folio-ninefold.has-realm-selection .folio-realm-stone:not(.is-selected) { opacity: .6; }
+.folio-ninefold.has-realm-selection .folio-realm-stones::before { opacity: .46; }
+.folio-ninefold.has-realm-selection .folio-realm-stones::after { opacity: .58; }
+.folio-ninefold.has-realm-selection .folio-ninefold-hint { opacity: 0; }
 .folio-ninefold.is-open .folio-realm-stone.is-selected { z-index: 5; opacity: 1; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1.14); }
-.folio-ninefold.is-open .folio-realm-stone.is-selected > span { color: var(--moss-bright); opacity: 1; }
-.folio-ninefold.is-open .folio-realm-stone.is-selected > span em { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected > .folio-realm-caption { color: var(--bone); opacity: 1; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected > .folio-realm-caption em { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
 .folio-ninefold.is-open .folio-realm-stone.is-selected > svg { animation-play-state: paused; transform: translateY(-2px) scale(1.045); }
 .folio-ninefold.is-open .folio-realm-stone.is-selected .folio-stone-body { stroke: var(--moss-bright); stroke-width: 1.5; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected .folio-stone-sigil { stroke: var(--moss-bright); stroke-width: .85; opacity: .92; }
+.folio-ninefold.is-open .folio-realm-stone.is-selected .folio-stone-grain { opacity: .88; }
 .folio-ninefold.is-open .folio-realm-stone.is-selected .folio-realm-mark { opacity: 1; stroke-width: 2.15; }
-.folio-ninefold.has-realm-selection .folio-oath-seal { opacity: 1; transform: translate(-50%, -50%) rotate(16deg) scale(1.075); }
-.folio-ninefold.is-open .folio-oath-seal { opacity: .92; transform: translate(-50%, -50%) rotate(12deg) scale(1.045); }
+.folio-ninefold.has-realm-selection .folio-oath-seal { opacity: .84; transform: translate(-50%, -50%) rotate(16deg) scale(1.055); }
+.folio-ninefold.is-open .folio-oath-seal { opacity: .76; transform: translate(-50%, -50%) rotate(12deg) scale(1.035); }
 .folio-ninefold.is-open .folio-oath-ring-outer { transform: rotate(82deg); }
 .folio-ninefold.is-open .folio-oath-ring-mid { transform: rotate(-64deg); }
 .folio-ninefold.is-open .folio-nine-realms circle { opacity: 1; transform: scale(1.5); }
@@ -4397,18 +4489,45 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 }
 :root[data-resolved-theme="light"] .folio-stone-body { fill: #425549; stroke: rgba(26, 47, 31, .78); }
 :root[data-resolved-theme="light"] .folio-stone-face { fill: #64776a; stroke: rgba(241, 246, 241, .28); }
-:root[data-resolved-theme="light"] .folio-realm-mark { stroke: #e8eee8; }
-:root[data-resolved-theme="light"] .folio-realm-stone > span {
+:root[data-resolved-theme="light"] .folio-stone-sigil { stroke: rgba(229, 238, 230, .38); }
+:root[data-resolved-theme="light"] .folio-stone-grain { stroke: rgba(243, 248, 243, .28); }
+:root[data-resolved-theme="light"] .folio-realm-mark { stroke: #dce7dd; filter: drop-shadow(0 0 1px rgba(24, 49, 30, .28)); }
+:root[data-resolved-theme="light"] .folio-realm-caption {
   color: #17251b;
-  border-color: rgba(41, 76, 49, .2);
-  border-left-color: rgba(41, 91, 52, .76);
-  background:
-    linear-gradient(90deg, rgba(229, 235, 228, .94), rgba(220, 229, 220, .82) 78%, rgba(220, 229, 220, .18)),
-    repeating-linear-gradient(0deg, rgba(36, 58, 41, .025) 0 1px, transparent 1px 4px);
-  box-shadow: 0 8px 18px rgba(31, 48, 34, .12);
+  text-shadow: none;
 }
-:root[data-resolved-theme="light"] .folio-realm-stone > span small { color: #356543; }
-:root[data-resolved-theme="light"] .folio-realm-stone > span em { color: #3f5543; border-color: rgba(41, 76, 49, .2); background: rgba(220, 229, 220, .96); }
+:root[data-resolved-theme="light"] .folio-realm-caption b { text-shadow: none; }
+:root[data-resolved-theme="light"] .folio-realm-caption small { color: #356543; }
+:root[data-resolved-theme="light"] .folio-realm-caption em { color: #304735; border-color: rgba(41, 76, 49, .18); background: rgba(178, 198, 181, .96); }
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:hover .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:focus-visible .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone.is-selected .folio-realm-caption {
+  color: #17251b;
+  border-block-color: rgba(41, 76, 49, .2);
+  background:
+    linear-gradient(90deg, rgba(165, 184, 168, .93), rgba(192, 207, 194, .7) 74%, rgba(216, 226, 217, .06)),
+    repeating-linear-gradient(0deg, rgba(36, 58, 41, .025) 0 1px, transparent 1px 4px);
+  box-shadow: 0 8px 18px rgba(31, 48, 34, .08);
+}
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(2):hover > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(2):focus-visible > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(2).is-selected > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(4):hover > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(4):focus-visible > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(4).is-selected > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(5):hover > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(5):focus-visible > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(5).is-selected > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(7):hover > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(7):focus-visible > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(7).is-selected > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(8):hover > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(8):focus-visible > .folio-realm-caption,
+:root[data-resolved-theme="light"] .folio-ninefold.is-open .folio-realm-stone:nth-child(8).is-selected > .folio-realm-caption {
+  background:
+    linear-gradient(270deg, rgba(165, 184, 168, .93), rgba(192, 207, 194, .7) 74%, rgba(216, 226, 217, .06)),
+    repeating-linear-gradient(0deg, rgba(36, 58, 41, .025) 0 1px, transparent 1px 4px);
+}
 :root[data-resolved-theme="light"] .folio-ninefold-hint { color: #315e3c; border-color: rgba(49, 94, 60, .28); }
 
 @keyframes garden-realm-stone-open {
@@ -4437,16 +4556,20 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
   0%, 100% { transform: translateY(0) rotate(0) scale(1); }
   50% { transform: translateY(-2px) rotate(.8deg) scale(1.035, .985); }
 }
+@keyframes garden-realm-readout-in {
+  from { opacity: 0; transform: translate(-50%, 7px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
 @keyframes garden-ninefold-seal-open {
-  0% { opacity: .78; transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
-  14% { opacity: 1; transform: translate(-50%, -50%) rotate(-10deg) scale(.91, 1.07); }
-  72% { opacity: .96; transform: translate(-50%, -50%) rotate(16deg) scale(1.07); }
-  100% { opacity: .92; transform: translate(-50%, -50%) rotate(12deg) scale(1.045); }
+  0% { opacity: .68; transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
+  14% { opacity: .86; transform: translate(-50%, -50%) rotate(-10deg) scale(.93, 1.05); }
+  72% { opacity: .8; transform: translate(-50%, -50%) rotate(16deg) scale(1.055); }
+  100% { opacity: .76; transform: translate(-50%, -50%) rotate(12deg) scale(1.035); }
 }
 @keyframes garden-ninefold-seal-close {
-  0% { opacity: .92; transform: translate(-50%, -50%) rotate(12deg) scale(1.045); }
-  68% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(.95, 1.04); }
-  100% { opacity: .78; transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
+  0% { opacity: .76; transform: translate(-50%, -50%) rotate(12deg) scale(1.035); }
+  68% { opacity: .84; transform: translate(-50%, -50%) rotate(-8deg) scale(.96, 1.035); }
+  100% { opacity: .68; transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
 }
 @keyframes garden-ninefold-eclipse {
   0%, 100% { transform: scale(1); }
@@ -4461,36 +4584,78 @@ html.garden-lite-motion .folio-kinetic-veil { display: none; }
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .folio-ninefold:has(.folio-ninefold-trigger:hover) .folio-oath-seal { opacity: .96; transform: translate(-50%, -50%) rotate(2deg) scale(1.025); }
+  .folio-ninefold:has(.folio-ninefold-trigger:hover) .folio-oath-seal { opacity: .86; transform: translate(-50%, -50%) rotate(2deg) scale(1.02); }
   .folio-ninefold-trigger:hover::before { opacity: .52; transform: scale(1) rotate(-5deg); }
   .folio-ninefold-trigger:hover::after { opacity: .24; transform: scale(1.08) rotate(62deg); }
   .folio-ninefold.is-open .folio-realm-stone:hover { z-index: 4; transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1.09); }
-  .folio-ninefold.is-open .folio-realm-stone:hover > span { color: var(--moss-bright); opacity: 1; }
-  .folio-ninefold.is-open .folio-realm-stone:hover > span em,
-  .folio-ninefold.is-open .folio-realm-stone:focus-visible > span em { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
+  .folio-ninefold.is-open .folio-realm-stone:hover > svg { transform: translateY(-2px) scale(1.035); }
+  .folio-ninefold.is-open .folio-realm-stone:hover > .folio-realm-caption { color: var(--bone); opacity: 1; }
+  .folio-ninefold.is-open .folio-realm-stone:hover > .folio-realm-caption em,
+  .folio-ninefold.is-open .folio-realm-stone:focus-visible > .folio-realm-caption em { opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
   .folio-ninefold.is-open:has(.folio-realm-stone:hover) .folio-realm-stone:not(:hover):not(.is-selected) { opacity: .5; }
   .folio-ninefold.is-open:has(.folio-realm-stone:focus-visible) .folio-realm-stone:not(:focus-visible):not(.is-selected) { opacity: .5; }
   .folio-ninefold.has-realm-selection .folio-realm-stone:hover,
   .folio-ninefold.has-realm-selection .folio-realm-stone:focus-visible { opacity: 1; }
   .folio-ninefold.is-open .folio-realm-stone.is-selected:hover { transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--rot)) scale(1.14); }
   .folio-ninefold.is-open .folio-realm-stone:hover .folio-stone-body { stroke: var(--moss-bright); stroke-width: 1.4; }
+  .folio-ninefold.is-open .folio-realm-stone:hover .folio-stone-sigil { stroke: var(--moss-bright); opacity: .86; }
 }
 @media (max-width: 1100px) {
   .folio-realm-stones { transform: scale(.78); }
-  .folio-realm-stone > span { scale: 1.16; transform-origin: top center; }
+  .folio-realm-caption { scale: 1.16; transform-origin: top center; }
 }
 @media (max-width: 768px) {
   .folio-ninefold { --ninefold-y: 34%; }
-  .folio-oath-seal { width: clamp(174px, 48vw, 216px); opacity: .6; }
+  .folio-oath-seal { width: clamp(112px, 32vw, 132px); opacity: .5; }
   .folio-oath-runes { stroke-width: 1.35; }
-  .folio-realm-stones { transform: scale(.36); }
-  .folio-realm-stone > span,
-  .folio-realm-stone:nth-child(-n + 9) > span { --plaque-hidden-transform: translateX(-50%) translateY(5px); --plaque-visible-transform: translateX(-50%) translateY(0); --plaque-enter-transform: translateX(-50%) translateY(12px); top: calc(100% + 13px); right: auto; bottom: auto; left: 50%; width: 144px; padding: 7px 8px; scale: 2.05; transform: var(--plaque-hidden-transform); transform-origin: top center; }
-  .folio-realm-stone:nth-child(-n + 9) > span em { top: 100%; bottom: auto; border-top: 0; border-bottom: 1px solid color-mix(in srgb, var(--moss-bright) 24%, transparent); }
-  .folio-realm-stone > span b { font-size: 13px; }
-  .folio-realm-stone > span small { font-size: 9px; }
-  .folio-realm-stone > span em { font-size: 8px; }
-  .folio-ninefold-hint { top: calc(var(--ninefold-y) + 154px); padding-inline: 12px; font-size: 8px; }
+  .folio-realm-stones { transform: none; }
+  .folio-realm-stones::before { left: -5px; top: -2px; width: 260px; height: 184px; }
+  .folio-realm-stones::after { left: 0; top: 1px; width: 190px; height: 134px; }
+  .folio-realm-stone { --rot: 0deg !important; width: 46px; height: 62px; }
+  .folio-realm-stone:nth-child(3n + 2) { width: 44px; height: 60px; }
+  .folio-realm-stone:nth-child(3n) { width: 50px; height: 66px; }
+  .folio-realm-stone:nth-child(1) { --x: -118px !important; --y: -52px !important; --mx: -74px !important; --my: -72px !important; }
+  .folio-realm-stone:nth-child(2) { --x: -62px !important; --y: -84px !important; --mx: -42px !important; --my: -108px !important; }
+  .folio-realm-stone:nth-child(3) { --x: 0px !important; --y: -92px !important; --mx: 0px !important; --my: -118px !important; }
+  .folio-realm-stone:nth-child(4) { --x: 58px !important; --y: -82px !important; --mx: 39px !important; --my: -106px !important; }
+  .folio-realm-stone:nth-child(5) { --x: 110px !important; --y: -48px !important; --mx: 70px !important; --my: -70px !important; }
+  .folio-realm-stone:nth-child(6) { --x: -110px !important; --y: 48px !important; --mx: -70px !important; --my: 68px !important; }
+  .folio-realm-stone:nth-child(7) { --x: -54px !important; --y: 78px !important; --mx: -36px !important; --my: 100px !important; }
+  .folio-realm-stone:nth-child(8) { --x: 10px !important; --y: 86px !important; --mx: 7px !important; --my: 110px !important; }
+  .folio-realm-stone:nth-child(9) { --x: 96px !important; --y: 52px !important; --mx: 62px !important; --my: 74px !important; }
+  .folio-ninefold.is-open .folio-realm-stone { transform: translate(-50%, -50%) translate(var(--x), var(--y)) scale(1); }
+  .folio-ninefold.is-open .folio-realm-stone.is-selected { transform: translate(-50%, -50%) translate(var(--x), var(--y)) scale(1.08); }
+  .folio-realm-caption { display: none; }
+  .folio-realm-readout:not([hidden]) {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--ninefold-y, 34%) + 120px);
+    z-index: 8;
+    display: grid;
+    justify-items: center;
+    width: min(292px, calc(100vw - 32px));
+    padding: 11px 15px 13px;
+    color: var(--bone);
+    border-block: 1px solid color-mix(in srgb, var(--moss-bright) 22%, transparent);
+    border-left: 2px solid color-mix(in srgb, var(--moss-bright) 72%, transparent);
+    background:
+      linear-gradient(110deg, rgba(5, 9, 6, .985), rgba(10, 16, 12, .96)),
+      repeating-linear-gradient(0deg, rgba(220, 232, 220, .025) 0 1px, transparent 1px 4px);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .32);
+    pointer-events: none;
+    text-align: center;
+    transform: translateX(-50%);
+    animation: garden-realm-readout-in 220ms cubic-bezier(.16, 1, .3, 1) both;
+  }
+  .folio-realm-readout > span { color: color-mix(in srgb, var(--moss-bright) 70%, var(--bone)); font: 600 7px/1 var(--mono); letter-spacing: .2em; }
+  .folio-realm-readout > b { margin-top: 7px; font: italic 700 19px/1 var(--serif); letter-spacing: .045em; }
+  .folio-realm-readout > small { margin-top: 4px; color: var(--moss-bright); font: 500 11px/1 var(--serif); letter-spacing: .14em; }
+  .folio-realm-readout > p { width: 100%; margin: 9px 0 0; padding-top: 8px; color: color-mix(in srgb, var(--bone) 70%, var(--moss-bright)); border-top: 1px solid color-mix(in srgb, var(--moss-bright) 18%, transparent); font: 500 11px/1.5 var(--sans); letter-spacing: .045em; }
+  :root[data-resolved-theme="light"] .folio-realm-readout:not([hidden]) { color: #17251b; border-color: rgba(41, 76, 49, .22); border-left-color: rgba(41, 91, 52, .74); background: rgba(224, 232, 224, .98); box-shadow: 0 14px 30px rgba(31, 48, 34, .15); }
+  :root[data-resolved-theme="light"] .folio-realm-readout > span,
+  :root[data-resolved-theme="light"] .folio-realm-readout > small { color: #356543; }
+  :root[data-resolved-theme="light"] .folio-realm-readout > p { color: #3f5543; border-color: rgba(41, 76, 49, .18); }
+  .folio-ninefold-hint { top: calc(var(--ninefold-y) + 184px); padding-inline: 12px; font-size: 8px; }
   .folio-ninefold-hint span:first-child { display: none; }
   .folio-ninefold-hint span:last-child { display: inline; }
   .folio-ninefold-trigger { width: 54px; height: 54px; }
@@ -4509,7 +4674,8 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
   .folio-wordmark.is-ninefold-transition .folio-wordmark-disc,
   .folio-wordmark.is-ninefold-transition .folio-wordmark-ghost { animation: none !important; }
   .folio-realm-stone { transition: opacity 120ms ease; }
-  .folio-realm-stone > span em { transform: none; transition: opacity 120ms ease, visibility 0s linear 120ms; }
+  .folio-realm-caption em { transform: none; transition: opacity 120ms ease, visibility 0s linear 120ms; }
+  .folio-realm-readout { animation: none !important; }
   .folio-ninefold-hint { transform: translate(-50%, 0); transition: opacity 120ms ease; }
 }
 
@@ -5265,7 +5431,8 @@ html.garden-lite-motion .folio-wordmark.is-ninefold-transition .folio-wordmark-g
 
 .pixel-root-arch::after {
   width: 9%;
-  opacity: .78;
+  opacity: .68;
+  filter: drop-shadow(0 22px 30px rgba(0, 0, 0, .28));
   clip-path: polygon(46% 0, 100% 0, 100% 100%, 50% 100%, 50% 72%, 28% 72%, 28% 46%, 46% 46%);
 }
 .pixel-root-arch b { right: 3%; height: 23%; opacity: .62; box-shadow: none; }

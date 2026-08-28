@@ -8,6 +8,10 @@
   var eclipse = wordmark && wordmark.querySelector('.folio-wordmark-disc');
   if (!ninefold || !trigger || !cover || !wordmark || !eclipse) return;
   var stones = Array.prototype.slice.call(ninefold.querySelectorAll('.folio-realm-stone'));
+  var readout = document.querySelector('[data-realm-readout]');
+  var readoutName = readout && readout.querySelector('[data-realm-readout-name]');
+  var readoutLocal = readout && readout.querySelector('[data-realm-readout-local]');
+  var readoutDescription = readout && readout.querySelector('[data-realm-readout-description]');
 
   var root = document.documentElement;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -29,8 +33,11 @@
     var coverRect = cover.getBoundingClientRect();
     var eclipseRect = eclipse.getBoundingClientRect();
     if (!coverRect.width || !coverRect.height || !eclipseRect.width) return;
-    ninefold.style.setProperty('--ninefold-x', (eclipseRect.left + eclipseRect.width / 2 - coverRect.left).toFixed(2) + 'px');
-    ninefold.style.setProperty('--ninefold-y', (eclipseRect.top + eclipseRect.height / 2 - coverRect.top).toFixed(2) + 'px');
+    var centerX = (eclipseRect.left + eclipseRect.width / 2 - coverRect.left).toFixed(2) + 'px';
+    var centerY = (eclipseRect.top + eclipseRect.height / 2 - coverRect.top).toFixed(2) + 'px';
+    ninefold.style.setProperty('--ninefold-x', centerX);
+    ninefold.style.setProperty('--ninefold-y', centerY);
+    cover.style.setProperty('--ninefold-y', centerY);
   }
 
   function scheduleMeasure() {
@@ -63,6 +70,20 @@
     }
     selectedStone = null;
     ninefold.classList.remove('has-realm-selection');
+    if (readout) readout.hidden = true;
+  }
+
+  function updateReadout(stone) {
+    if (!readout || !readoutName || !readoutLocal || !readoutDescription) return;
+    var caption = stone.querySelector('.folio-realm-caption');
+    if (!caption) return;
+    var name = caption.querySelector('b');
+    var local = caption.querySelector('small');
+    var description = caption.querySelector('em');
+    readoutName.textContent = name ? name.textContent : '';
+    readoutLocal.textContent = local ? local.textContent : '';
+    readoutDescription.textContent = description ? description.textContent : '';
+    readout.hidden = false;
   }
 
   function selectStone(stone) {
@@ -77,6 +98,7 @@
     stone.classList.add('is-selected');
     stone.setAttribute('aria-pressed', 'true');
     ninefold.classList.add('has-realm-selection');
+    updateReadout(stone);
   }
 
   function finishTransition() {
