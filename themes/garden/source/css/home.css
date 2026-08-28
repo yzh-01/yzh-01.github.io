@@ -133,21 +133,6 @@
 .is-home .g-nav-logo { color: var(--bone); font-weight: 700; }
 .is-home .g-nav-logo::before { content: "■"; margin-right: 9px; color: var(--moss); font-size: 8px; }
 .is-home .g-nav-links { gap: clamp(15px, 2.2vw, 34px); }
-.is-home .g-nav-command { display: flex; align-items: center; gap: 7px; }
-.is-home .g-nav-command-hint {
-  padding: 0;
-  color: color-mix(in srgb, var(--dim) 62%, transparent);
-  background: transparent;
-  border: 0;
-  font: 6px/1 var(--mono);
-  letter-spacing: .06em;
-  white-space: nowrap;
-  transition: color 160ms ease;
-}
-.is-home .g-nav-command:hover .g-nav-command-hint { color: var(--moss-bright); }
-@media (max-width: 1200px) {
-  .is-home .g-nav-command-hint { display: none; }
-}
 .is-home .g-nav-links a.active,
 .is-home .g-nav-links a:hover { color: var(--bone); }
 .is-home .g-nav-links a.active::before { content: ">"; margin-right: 5px; color: var(--moss-bright); }
