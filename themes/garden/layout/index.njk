@@ -2,6 +2,7 @@
 
 {% block head_extra %}
 <link rel="stylesheet" href="{{ url_for('css/home.css') }}?v={{ theme.asset_version }}">
+<link rel="stylesheet" href="{{ url_for('css/norse-omen.css') }}?v={{ theme.asset_version }}">
 {% endblock %}
 
 {%- set all_posts = site.posts.toArray() -%}
@@ -211,10 +212,7 @@
       <time data-home-clock data-clock-prefix="T: ">T: --:--</time>
     </div>
 
-    <h1 class="folio-wordmark" id="folio-title" data-winter-wordmark aria-label="WINTEROMEN — ZIHY 的个人数字花园">
-      <span class="folio-wordmark-layer folio-wordmark-ghost" aria-hidden="true">
-        <span class="folio-wordmark-run">WINTER</span><span class="folio-wordmark-eclipse"><span>O</span></span><span class="folio-wordmark-run">MEN</span>
-      </span>
+    <h1 class="folio-wordmark folio-wordmark-norse" id="folio-title" data-winter-wordmark aria-label="WINTEROMEN — ZIHY 的个人数字花园">
       <span class="folio-wordmark-layer folio-wordmark-main" aria-hidden="true">
         <span class="folio-wordmark-run">WINTER</span><span class="folio-wordmark-eclipse">
           <span class="folio-wordmark-disc"><b></b></span>
@@ -222,10 +220,9 @@
           <i class="folio-wordmark-ray folio-wordmark-ray-right"></i>
         </span><span class="folio-wordmark-run">MEN</span>
       </span>
-      <span class="folio-wordmark-chip folio-wordmark-chip-a" aria-hidden="true">WINTEROMEN</span>
-      <span class="folio-wordmark-chip folio-wordmark-chip-b" aria-hidden="true">WINTEROMEN</span>
     </h1>
     <div class="folio-ninefold" data-ninefold>
+      {{ partial('_partial/norse-omen.njk') }}
       <div class="folio-oath-seal" aria-hidden="true">
         <svg viewBox="0 0 240 240">
           <defs>
@@ -287,6 +284,13 @@
       </div>
       <p class="folio-ninefold-hint" aria-hidden="true"><span>移近界石 · 读取铭文</span><span>轻触界石 · 读取铭文</span></p>
       <button class="folio-ninefold-trigger" type="button" data-ninefold-trigger aria-label="展开九界石阵" aria-expanded="false"></button>
+    </div>
+    <div class="norse-invocation">
+      <span class="norse-invocation-label">YGGDRASIL / 根系相连，万物生长</span>
+      <button type="button" class="norse-awaken" data-norse-awaken aria-pressed="false" aria-controls="norse-worldtree" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M12 11 5 5m7 6 7-6M12 16l-5 5m5-5 5 5"/></svg>
+        <span data-norse-action>唤醒世界树</span><b aria-hidden="true">↗</b>
+      </button>
     </div>
     <aside class="folio-realm-readout" data-realm-readout hidden aria-live="polite" aria-atomic="true">
       <span aria-hidden="true">REALM / INSCRIPTION</span>
@@ -673,5 +677,6 @@
 
 {% block scripts %}
 <script src="{{ url_for('js/ninefold-seal.js') }}?v={{ theme.asset_version }}" defer></script>
+<script src="{{ url_for('js/norse-omen.js') }}?v={{ theme.asset_version }}" defer></script>
 <script src="{{ url_for('js/command.js') }}?v={{ theme.asset_version }}" defer></script>
 {% endblock %}

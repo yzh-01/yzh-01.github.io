@@ -1,0 +1,158 @@
+/* World ash / winter omen. Scoped to the homepage's existing eclipse and seal. */
+.folio-cover {
+  --g-norse-ink: #b6cbb0;
+  --g-norse-glow: rgba(138, 175, 147, .16);
+}
+:root[data-resolved-theme="light"] .folio-cover {
+  --g-norse-ink: #3b6046;
+  --g-norse-glow: rgba(71, 119, 90, .12);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-resolved-theme]) .folio-cover {
+    --g-norse-ink: #3b6046;
+    --g-norse-glow: rgba(71, 119, 90, .12);
+  }
+}
+.folio-wordmark-norse .folio-wordmark-main {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.folio-wordmark-norse .folio-wordmark-ray { display: none; }
+.folio-cover:has(.norse-worldtree) .folio-cover-lens { display: none; }
+.folio-cover:has(.norse-worldtree) .folio-oath-seal {
+  opacity: .4;
+  width: clamp(160px, 16vw, 228px);
+}
+.folio-cover:has(.norse-worldtree) .folio-oath-seal::before,
+.folio-cover:has(.norse-worldtree) .folio-oath-seal::after,
+.folio-cover:has(.norse-worldtree) .folio-valknut { display: none; }
+.norse-worldtree {
+  position: absolute;
+  left: var(--ninefold-x);
+  top: var(--ninefold-y);
+  width: min(740px, 85vw);
+  aspect-ratio: 800 / 520;
+  color: var(--g-norse-ink);
+  transform: translate(-50%, -49%);
+  pointer-events: none;
+}
+.norse-tree-drift { position: relative; width: 100%; height: 100%; }
+.norse-tree { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
+.norse-aureole {
+  position: absolute;
+  inset: 8% 7%;
+  background: radial-gradient(ellipse at 50% 46%, var(--g-norse-glow), transparent 66%);
+  opacity: .65;
+  transform: scale(.92);
+  transition: opacity 900ms ease, transform 1400ms cubic-bezier(.22, 1, .36, 1);
+}
+.norse-orbits { opacity: .2; }
+.norse-bark { opacity: .7; }
+.norse-sap { opacity: .08; transition: opacity 1200ms ease; }
+.norse-realms circle {
+  opacity: .48;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: norse-realm-breathe 7s ease-in-out infinite;
+  animation-delay: calc(var(--n) * -.73s);
+}
+.norse-ravens { opacity: .52; }
+.norse-raven-a { animation: norse-raven-drift 12s ease-in-out infinite; }
+.norse-raven-b { animation: norse-raven-drift 15s ease-in-out -6s infinite reverse; }
+.norse-seeds circle {
+  opacity: 0;
+  animation: norse-seed-rise 9s ease-in-out infinite;
+  animation-delay: calc(var(--n) * -1.4s);
+}
+.norse-invocation {
+  position: absolute;
+  z-index: 5;
+  top: calc(45% + 83px);
+  left: max(42px, calc(50% - 390px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  width: max-content;
+  max-width: calc(100% - 40px);
+  color: var(--g-norse-ink);
+}
+.norse-invocation-label { font: 9px/1.6 var(--mono); letter-spacing: .14em; opacity: .74; }
+.norse-awaken {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--void) 45%, transparent);
+  color: inherit;
+  font: 10px/1 var(--mono);
+  letter-spacing: .1em;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+.norse-awaken[hidden] { display: none; }
+.norse-awaken svg { width: 17px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.1; }
+.norse-awaken b { margin-left: 7px; font-weight: 400; }
+.norse-awaken:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.norse-awaken[aria-pressed="true"] { border-color: currentColor; background: var(--g-norse-glow); }
+@media (hover: hover) {
+  .norse-awaken:hover { border-color: currentColor; background: var(--g-norse-glow); }
+}
+.folio-cover.is-norse-awake .norse-sap { opacity: .9; }
+.folio-cover.is-norse-awake .norse-aureole { opacity: 1; transform: scale(1.2); }
+.folio-cover.is-norse-awake .norse-realms { filter: drop-shadow(0 0 4px currentColor); }
+.folio-cover.is-norse-awake .folio-oath-seal { opacity: .68; }
+.folio-cover:has(.folio-ninefold.is-open) .norse-invocation,
+.folio-cover:has(.folio-ninefold.is-opening) .norse-invocation { visibility: hidden; }
+.folio-cover:has(.folio-ninefold.is-open) .norse-worldtree { opacity: .45; }
+/* The lower stones occupy the same space as the quote card while unfolded. */
+.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .folio-cover-fragment,
+.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .folio-cover-copy {
+  visibility: hidden;
+  pointer-events: none;
+}
+@keyframes norse-realm-breathe {
+  0%, 100% { opacity: .35; transform: scale(.85); }
+  50% { opacity: .9; transform: scale(1.15); }
+}
+@keyframes norse-raven-drift {
+  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+  50% { transform: translate(9px, -7px) rotate(3deg); }
+}
+@keyframes norse-seed-rise {
+  0%, 100% { opacity: 0; transform: translate(0, 12px); }
+  35% { opacity: .65; }
+  80% { opacity: 0; transform: translate(12px, -26px); }
+}
+/* Ambient work stops outside the cover, in hidden tabs and while a game is open. */
+.folio-cover[data-norse-paused="true"] .norse-worldtree *,
+html.garden-page-hidden .norse-worldtree *,
+html.garden-overrun .norse-worldtree * { animation-play-state: paused !important; }
+html[data-render-quality="economy"] .norse-seeds { display: none; }
+html[data-render-quality="economy"] .norse-worldtree * { animation: none !important; }
+html.garden-lite-motion .norse-worldtree *,
+html.garden-lite-motion .norse-awaken { animation: none !important; transition: none !important; }
+html.garden-lite-motion .norse-tree-drift { transform: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .norse-worldtree *, .norse-awaken { animation: none !important; transition: none !important; }
+  .norse-tree-drift { transform: none !important; }
+}
+@media (max-width: 1023px) {
+  .norse-invocation { top: calc(45% + 70px); gap: 9px; }
+  .norse-worldtree { width: 92vw; }
+}
+@media (max-width: 768px) {
+  .norse-worldtree { width: 118vw; }
+  .norse-invocation { top: calc(34% + 69px); left: 50%; transform: translateX(-50%); align-items: center; gap: 7px; }
+  .norse-invocation-label { font-size: 8px; letter-spacing: .08em; }
+  .norse-awaken { font-size: 9px; }
+  .norse-seeds circle:nth-child(even) { display: none; }
+}
+@media (max-width: 480px) {
+  .norse-worldtree { width: 135vw; }
+  .norse-orbits { opacity: .12; }
+}
