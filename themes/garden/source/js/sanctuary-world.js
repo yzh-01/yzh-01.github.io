@@ -1,5 +1,17 @@
 import * as T from './vendor/norse-engine.mjs';
 
+const REALMS = [
+  {id:'asgard', name:'阿斯加德', label:'ÁSGARÐR', story:'神明的居所。金色根脉穿过寒雾，通向高处的殿堂。'},
+  {id:'midgard', name:'米德加尔德', label:'MIÐGARÐR', story:'人间的庭院。再漫长的夜，也有人为归途留一盏灯。'},
+  {id:'vanaheim', name:'华纳海姆', label:'VANAHEIMR', story:'华纳神族的故乡。丰饶与生长，藏在雨后的苔色里。'},
+  {id:'jotunheim', name:'约顿海姆', label:'JÖTUNHEIMR', story:'巨人的旷野。古老山石沉默着，记得世界最初的回声。'},
+  {id:'alfheim', name:'亚尔夫海姆', label:'ÁLFHEIMR', story:'光之精灵的国度。一片叶缘，也能收藏微小而明亮的光。'},
+  {id:'svartalfheim', name:'斯瓦塔尔夫海姆', label:'SVARTÁLFAHEIMR', story:'深处的匠作之境。炉火与巧手，把故事锻进金属的纹理。'},
+  {id:'niflheim', name:'尼福尔海姆', label:'NIFLHEIMR', story:'雾与寒霜的世界。泉水从寂静中涌出，沿树根缓缓流淌。'},
+  {id:'muspelheim', name:'穆斯贝尔海姆', label:'MÚSPELLSHEIMR', story:'火焰的国度。寒夜中的一线暖色，仍记得最初的炽热。'},
+  {id:'helheim', name:'赫尔海姆', label:'HELHEIMR', story:'长夜深处的归所。世界树记得每一个曾经走过的名字。'}
+];
+
 // A self-contained, original miniature: Yggdrasil, the well and nine realm stones.
 // The renderer is loaded only near the footer; no network textures or models.
 export function createSanctuary(host, options = {}) {
@@ -24,7 +36,10 @@ export function createSanctuary(host, options = {}) {
   const motion = options.motion || window.GardenMotion;
   let active = false, disposed = false, contextLost = false, time = 0, last = 0;
   let fallbackFrame = 0, fallbackTimer = 0, width = 1, height = 1, frameCount = 0;
-  let awake = false, drag = false;
+  let awake = false, drag = false, exploring = false, rainEnabled = true, lanternsOn = true;
+  let selectedRealm = -1, hoverRealm = -1, reportedZoom = -1, lastHover = 0, echoStarted = -10, echoCount = 0;
+  const visited = new Set();
+  host.dataset.exploring='false'; host.dataset.weather='rain'; host.dataset.visitedCount='0'; host.dataset.lanterns='true';
   const pickers = [], runes = [], glowSprites = [], ripples = [], resources = new Set();
   const materials = new Map();
   let seed = 9743;
@@ -211,14 +226,14 @@ export function createSanctuary(host, options = {}) {
   const auroraGeometry=own(new T.BufferGeometry());
   auroraGeometry.setAttribute('position',new T.Float32BufferAttribute(auroraPositions,3));
   auroraGeometry.setAttribute('uv',new T.Float32BufferAttribute(auroraUvs,2));auroraGeometry.setIndex(auroraIndices);
-  const auroraMaterial=own(new T.ShaderMaterial({uniforms:{uTime:{value:0}},transparent:true,depthWrite:false,
+  const auroraMaterial=own(new T.ShaderMaterial({uniforms:{uTime:{value:0},uAwake:{value:0}},transparent:true,depthWrite:false,
     side:T.DoubleSide,blending:T.AdditiveBlending,toneMapped:false,
     vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-    fragmentShader:`varying vec2 vUv; uniform float uTime;
+    fragmentShader:`varying vec2 vUv; uniform float uTime; uniform float uAwake;
       void main(){float veil=pow(sin(vUv.x*3.14159),.8)*pow(sin(vUv.y*3.14159),1.6);
       float ray=.7+.3*sin(vUv.x*94.0+sin(vUv.x*12.0+uTime*.16)*2.0);
       vec3 ink=mix(vec3(.2,.63,.49),vec3(.49,.61,.36),vUv.y);
-      gl_FragColor=vec4(ink,veil*ray*.38);}`
+      gl_FragColor=vec4(ink,veil*ray*.38*(1.0+uAwake*.55));}`
   }));
   const aurora=new T.Mesh(auroraGeometry,auroraMaterial);world.add(aurora);
   const mist=[];
@@ -254,7 +269,7 @@ export function createSanctuary(host, options = {}) {
     const h=1.13+(i%3)*.2;
     cylinder(.49,.6,.13,palette.slate,0,.07,0,7,group);
     const stone=mesh(new T.IcosahedronGeometry(1,0),i%2?palette.rock:palette.pale,0,h*.55,0,group);
-    stone.scale.set(.4,h*.57,.33); stone.userData.interact='tree'; stone.userData.static=false; pickers.push(stone);
+    stone.scale.set(.4,h*.57,.33); stone.userData.interact='realm'; stone.userData.realm=i; stone.userData.static=false; pickers.push(stone);
     const tex=document.createElement('canvas'); tex.width=128; tex.height=256;
     const ctx=tex.getContext('2d'); ctx.strokeStyle='#b6e3cb'; ctx.lineWidth=7; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.beginPath(); glyphs[i].forEach(([x,y],n)=>n?ctx.lineTo(64+x*70,128-y*80):ctx.moveTo(64+x*70,128-y*80)); ctx.stroke();
@@ -282,6 +297,7 @@ export function createSanctuary(host, options = {}) {
   const water=new T.Reflector(own(new T.ShapeGeometry(lakeShape)),{textureWidth:512,textureHeight:512,multisample:0,
     color:0x538182,clipBias:.004,shader:reflectionShader});
   water.rotation.x=-Math.PI/2; water.position.set(-.25,.245,3.35); world.add(water);
+  water.userData.interact='well'; pickers.push(water);
   const reflect=water.onBeforeRender.bind(water);
   let reflectionDirty=true;
   water.onBeforeRender=(r,s,c)=>{ if(reflectionDirty || !economy() || frameCount%3===0) {reflect(r,s,c);reflectionDirty=false;} };
@@ -291,6 +307,8 @@ export function createSanctuary(host, options = {}) {
     ripple.rotation.x=-Math.PI/2; ripple.userData.static=false;
     ripples.push({mesh:ripple,phase:range(0,1),speed:range(.22,.42)});
   }
+  const wellEcho=mesh(new T.RingGeometry(.85,1,48),ink(0x9bd6cf,.45),-.65,.263,3.7,world,false);
+  wellEcho.rotation.x=-Math.PI/2; wellEcho.userData.static=false; wellEcho.visible=false;
   // The golden thread of Bifrost is deliberately restrained to the site's moss/rust palette.
   for(let i=0;i<5;i++) {
     const stone=box(.92,.1,.42,palette.pale,-2.95+i*.12,.37,5.07-i*.5); stone.rotation.y=.16;
@@ -313,21 +331,26 @@ export function createSanctuary(host, options = {}) {
   box(.52,.15,.69,palette.moss,-.58,2.4,.03,gate);
   for(let i=0;i<3;i++) box(.32,.09,.62,palette.rock,-.55+i*.55,.03,.64,gate);
   const hall=new T.Group(); hall.position.set(3.62,.2,-3.76); hall.rotation.y=-.24; world.add(hall);
-  box(1.76,1.22,1.87,palette.darkWood,0,.75,0,hall);
+  const hallWall=box(1.76,1.22,1.87,palette.darkWood,0,.75,0,hall);
+  hallWall.userData.static=false; hallWall.userData.interact='lantern'; pickers.push(hallWall);
   box(2,.24,2.1,palette.slate,0,.08,0,hall);
   for(let i=0;i<6;i++) box(1.8,.026,1.9,palette.wood,0,.29+i*.19,0,hall);
   const roofShape=new T.Shape(); roofShape.moveTo(-1.11,0); roofShape.lineTo(0,.84); roofShape.lineTo(1.11,0); roofShape.closePath();
-  mesh(new T.ExtrudeGeometry(roofShape,{depth:2.35,bevelEnabled:false}),palette.roof,0,1.4,-1.17,hall);
+  const hallRoof=mesh(new T.ExtrudeGeometry(roofShape,{depth:2.35,bevelEnabled:false}),palette.roof,0,1.4,-1.17,hall);
+  hallRoof.userData.static=false; hallRoof.userData.interact='lantern'; pickers.push(hallRoof);
   tube([[-1.16,1.39,1.22],[0,2.3,1.22],[1.16,1.39,1.22]],.055,palette.bronze,hall);
   tube([[0,2.26,-1.24],[0,2.32,0],[0,2.26,1.24]],.048,palette.darkWood,hall);
+  const windowLight=ink(0xffc281);
   for(const x of [-.53,.53]) {
-    box(.39,.49,.025,palette.gold,x,.89,.952,hall);
+    const pane=box(.39,.49,.025,windowLight,x,.89,.952,hall);
+    pane.userData.static=false; pane.userData.interact='lantern'; pickers.push(pane);
     for(const dx of [-.21,.21]) box(.035,.57,.035,palette.bronze,x+dx,.89,.975,hall);
     box(.39,.033,.036,palette.bronze,x,.89,.985,hall);
   }
   box(.34,.64,.055,palette.wood,0,.58,.974,hall);
   box(.048,.04,.02,palette.gold,.1,.64,1.01,hall);
-  glow(0xffc68a,2.5,0,1,1.01,.32,hall);
+  const hallGlow=glow(0xffc68a,2.5,0,1,1.01,.32,hall);
+  const hallGlowState=glowSprites.find(item=>item.sprite===hallGlow);
   const shrineLight=new T.PointLight(0xffbe81,5,5,2); shrineLight.position.set(3.55,1.1,-2.54); scene.add(shrineLight);
   for(let i=0;i<3;i++) {
     const x=-4.75+i*.68,z=-.6+i*.7;
@@ -421,6 +444,8 @@ export function createSanctuary(host, options = {}) {
     camera.lookAt(target);
     host.dataset.orbit=orbit.azimuth.toFixed(3);
     host.dataset.zoom=orbit.zoom.toFixed(3);
+    const percent=Math.round(100/orbit.zoom);
+    if(percent!==reportedZoom) {reportedZoom=percent;options.onViewChange?.(percent);}
   }
   function draw(immediate=true) {
     if(disposed||contextLost||!active||document.hidden) return;
@@ -436,8 +461,8 @@ export function createSanctuary(host, options = {}) {
     water.material.uniforms.uTime.value=time;
     auroraMaterial.uniforms.uTime.value=time;
     mist.forEach(({puff,x,phase})=>{puff.position.x=x+Math.sin(time*.11+phase)*.23;});
-    rain.visible=true; sparks.visible=true;
-    const count=economy()?80:rainCount;
+    rain.visible=rainEnabled; sparks.visible=true;
+    const count=rainEnabled?(economy()?80:rainCount):0;
     rainGeometry.setDrawRange(0,count*2);
     for(let i=0;i<count;i++) {
       const d=rainData[i]; d.y-=d.speed*Math.min(elapsed,80)/1000;
@@ -446,16 +471,17 @@ export function createSanctuary(host, options = {}) {
       rainPositions[offset]=d.x; rainPositions[offset+1]=d.y; rainPositions[offset+2]=d.z;
       rainPositions[offset+3]=d.x-.045; rainPositions[offset+4]=d.y+.2; rainPositions[offset+5]=d.z;
     }
-    rainGeometry.attributes.position.needsUpdate=true;
+    if(count) rainGeometry.attributes.position.needsUpdate=true;
     ripples.forEach(({mesh,phase,speed})=>{
       const life=(time*speed+phase)%1; mesh.scale.setScalar(.06+life*.48);
-      mesh.material.opacity=Math.sin(life*Math.PI)*.2;
+      mesh.material.opacity=Math.sin(life*Math.PI)*(rainEnabled?.2:.09);
     });
     glowSprites.forEach(({sprite,opacity,phase})=>{sprite.material.opacity=opacity*(.92+Math.sin(time*1.3+phase)*.08);});
-    runes.forEach(({rune,halo,phase})=>{
-      rune.material.opacity=awake?.94:.54;
-      halo.material.opacity=(awake?.55:.15)*(1+Math.sin(time*1.2+phase)*.12);
-    });
+    lightRunes(true);
+    const echoLife=(time-echoStarted)/2.1;
+    wellEcho.visible=echoLife>=0&&echoLife<1;
+    if(wellEcho.visible) {wellEcho.scale.setScalar(.12+echoLife*1.55);wellEcho.material.opacity=Math.sin(echoLife*Math.PI)*.45;}
+    wellLight.intensity=8+Math.max(0,1-echoLife)*7;
     for(let i=0;i<fireflyCount;i++) {
       const d=fireflies[i]; dummy.position.set(d.x+Math.sin(time*.21+d.phase)*.23,
         d.y+Math.sin(time*.35+d.phase)*.17,d.z+Math.cos(time*.2+d.phase)*.2);
@@ -491,7 +517,8 @@ export function createSanctuary(host, options = {}) {
     if(disposed||contextLost) return;
     host.dataset.modelMotion=canAnimate()?'running':'paused';
     host.dataset.modelQuality=economy()?'economy':'full';
-    rain.visible=canAnimate(); sparks.visible=canAnimate();
+    rain.visible=canAnimate()&&rainEnabled; sparks.visible=canAnimate();
+    if(!active||document.hidden) setExploring(false);
     const reflectionSize=economy()?256:512;
     const reflectionTarget=water.getRenderTarget();
     if(reflectionTarget.width!==reflectionSize) {reflectionTarget.setSize(reflectionSize,reflectionSize);reflectionDirty=true;}
@@ -501,18 +528,62 @@ export function createSanctuary(host, options = {}) {
     else { loop?.stop(); stopFallback(); draw(); }
   }
   function setActive(value) { active=Boolean(value); policy(); }
+  function setExploring(value) {
+    const next=Boolean(value)&&!disposed&&!contextLost;
+    if(next===exploring) return;
+    exploring=next;host.dataset.exploring=String(exploring);options.onExplore?.(exploring);
+  }
+  function zoomBy(factor) {orbit.zoom=T.MathUtils.clamp(orbit.zoom/factor,.61,1.75);draw();}
+  function lightRunes(animated=false) {
+    runes.forEach(({rune,halo,phase},i)=>{
+      const selected=i===selectedRealm, hovered=i===hoverRealm;
+      rune.material.opacity=(awake||selected)?.94:visited.has(i)?.78:.54;
+      const strength=selected?.7:hovered?.55:awake?.55:visited.has(i)?.32:.15;
+      halo.material.opacity=strength*(animated?1+Math.sin(time*1.2+phase)*.12:1);
+    });
+  }
   function toggleAwake() {
     awake=!awake; host.dataset.awake=String(awake);
-    runes.forEach(({rune,halo})=>{rune.material.opacity=awake?.94:.54; halo.material.opacity=awake?.55:.15;});
+    lightRunes();auroraMaterial.uniforms.uAwake.value=awake?1:0;
     heartLight.intensity=awake?24:16;
     options.onAwake?.(awake); draw();
+  }
+  function selectRealm(index) {
+    if(!Number.isInteger(index)||index<0||index>=REALMS.length) return;
+    const fresh=!visited.has(index);
+    selectedRealm=index;visited.add(index);host.dataset.realm=REALMS[index].id;host.dataset.visitedCount=String(visited.size);
+    if(fresh&&visited.size===REALMS.length&&!awake) toggleAwake();
+    lightRunes();options.onRealm?.({...REALMS[index],index,visited:visited.size,total:REALMS.length});draw();
+  }
+  function nextRealm() {selectRealm((selectedRealm+1)%REALMS.length);}
+  function setRain(value) {
+    rainEnabled=Boolean(value);host.dataset.weather=rainEnabled?'rain':'clear';
+    rain.visible=canAnimate()&&rainEnabled;options.onWeather?.(rainEnabled);draw();
+  }
+  function echoWell() {
+    echoStarted=time;host.dataset.wellEcho=String(++echoCount);
+    wellEcho.visible=true;wellEcho.scale.setScalar(canAnimate()?.18:1.1);wellEcho.material.opacity=.45;wellLight.intensity=15;
+    options.onInteract?.({kind:'well',label:'URÐARBRUNNR',title:'乌尔德之泉',story:'泉水替你接住一段回声。过去、现在与将来，在树根下轻轻相逢。'});draw();
+  }
+  function toggleLanterns() {
+    lanternsOn=!lanternsOn;host.dataset.lanterns=String(lanternsOn);
+    windowLight.color.setHex(lanternsOn?0xffc281:0x273c3e);shrineLight.intensity=lanternsOn?5:0;
+    hallGlowState.opacity=lanternsOn?.32:0;hallGlow.material.opacity=hallGlowState.opacity;
+    options.onInteract?.({kind:'lantern',label:'A LIGHT AT THE ROOTS',title:lanternsOn?'为归途留一盏灯':'让木屋歇一会儿',story:lanternsOn?'暖灯重新亮起，寒夜里有了一处可以停留的地方。':'灯火暂歇，月色和树心的微光仍守着这片小小遗迹。'});draw();
   }
   const raycaster=new T.Raycaster(), pointer=new T.Vector2();
   function pick(x,y) {
     const bounds=canvas.getBoundingClientRect();
     pointer.set((x-bounds.left)/bounds.width*2-1,-(y-bounds.top)/bounds.height*2+1);
     raycaster.setFromCamera(pointer,camera);
-    return raycaster.intersectObjects(pickers,false).length>0;
+    return raycaster.intersectObjects(pickers,false)[0]?.object;
+  }
+  function interact(item) {
+    if(!item) return;
+    if(item.userData.interact==='realm') selectRealm(item.userData.realm);
+    else if(item.userData.interact==='well') echoWell();
+    else if(item.userData.interact==='lantern') toggleLanterns();
+    else toggleAwake();
   }
   const pointers=new Map();
   let anchor=null, pinchDistance=0, moved=false;
@@ -520,7 +591,7 @@ export function createSanctuary(host, options = {}) {
     if(event.button!==undefined&&event.button>2) return;
     pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
     anchor={x:event.clientX,y:event.clientY,azimuth:orbit.azimuth,polar:orbit.polar,button:event.button,type:event.pointerType};
-    drag=true; moved=false;
+    drag=true; moved=pointers.size>1;
     if(event.pointerType!=='touch') canvas.setPointerCapture?.(event.pointerId);
     canvas.dataset.dragging='true';
     if(pointers.size===2) {
@@ -528,7 +599,15 @@ export function createSanctuary(host, options = {}) {
     }
   }
   function pointerMove(event) {
-    if(!drag||!pointers.has(event.pointerId)||!anchor) return;
+    if(!drag) {
+      if(event.pointerType==='touch'||performance.now()-lastHover<65||!active||contextLost) return;
+      lastHover=performance.now();const hit=pick(event.clientX,event.clientY);
+      canvas.dataset.hovering=String(!!hit);
+      const next=hit?.userData.interact==='realm'?hit.userData.realm:-1;
+      if(next!==hoverRealm) {hoverRealm=next;lightRunes();draw();}
+      return;
+    }
+    if(!pointers.has(event.pointerId)||!anchor) return;
     const dx=event.clientX-anchor.x,dy=event.clientY-anchor.y;
     pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
     if(pointers.size>1) return; // Touch Events own the two-finger gesture.
@@ -545,13 +624,20 @@ export function createSanctuary(host, options = {}) {
     draw();
   }
   function pointerUp(event) {
+    const tracked=pointers.has(event.pointerId);
     pointers.delete(event.pointerId);
-    if(event.type==='pointerup'&&!moved&&anchor&&pick(event.clientX,event.clientY)) toggleAwake();
+    if(tracked&&event.type==='pointerup'&&!moved&&anchor&&!pointers.size) interact(pick(event.clientX,event.clientY));
     if(!pointers.size) {drag=false;anchor=null;canvas.dataset.dragging='false';}
+    else if(pointers.size===1) {const [p]=pointers.values();anchor={...p,azimuth:orbit.azimuth,polar:orbit.polar,button:0,type:'touch'};}
     pinchDistance=0;
   }
   function wheel(event) {
-    event.preventDefault(); orbit.zoom=T.MathUtils.clamp(orbit.zoom*Math.exp(event.deltaY*.0011),.61,1.75); draw();
+    // The wheel belongs to the page until exploration is explicit. Browser zoom stays native.
+    if(event.ctrlKey||event.metaKey||(!exploring&&!event.shiftKey)) return;
+    let delta=event.deltaY||event.deltaX;
+    if(event.deltaMode===1) delta*=16;
+    if(event.deltaMode===2) delta*=height;
+    event.preventDefault();zoomBy(Math.exp(-delta*.0011));
   }
   function touchMove(event) {
     if(event.touches.length!==2) return;
@@ -561,11 +647,12 @@ export function createSanctuary(host, options = {}) {
     pinchDistance=distance;
   }
   function contextMenu(event) { event.preventDefault(); }
-  function reset() { orbit.azimuth=.72;orbit.polar=1.02;orbit.zoom=1;target.set(0,1.65,0);draw(); }
+  function reset() { orbit.azimuth=.72;orbit.polar=1.02;orbit.zoom=1;target.set(0,1.65,0);setExploring(false);draw(); }
   function keydown(event) {
-    const keys=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','_',' ','r','R','Home'];
+    const keys=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','_',' ','r','R','Home','Escape','n','N','w','W','l','L'];
+    if(/^[1-9]$/.test(event.key)) {event.preventDefault();event.stopPropagation();selectRealm(Number(event.key)-1);return;}
     if(!keys.includes(event.key)) return;
-    event.preventDefault();
+    event.preventDefault();event.stopPropagation();
     if(event.key==='ArrowLeft') orbit.azimuth-=.16;
     if(event.key==='ArrowRight') orbit.azimuth+=.16;
     if(event.key==='ArrowUp') orbit.polar=T.MathUtils.clamp(orbit.polar-.1,.56,1.43);
@@ -574,18 +661,23 @@ export function createSanctuary(host, options = {}) {
     if(event.key==='-'||event.key==='_') orbit.zoom=T.MathUtils.clamp(orbit.zoom*1.1,.61,1.75);
     if(event.key===' ') toggleAwake();
     if(event.key==='r'||event.key==='R'||event.key==='Home') reset();
+    if(event.key==='Escape') setExploring(false);
+    if(event.key.toLowerCase()==='n') nextRealm();
+    if(event.key.toLowerCase()==='w') setRain(!rainEnabled);
+    if(event.key.toLowerCase()==='l') toggleLanterns();
     draw();
   }
+  function pointerLeave() {canvas.dataset.hovering='false';if(hoverRealm!==-1) {hoverRealm=-1;lightRunes();draw();}}
   const bindings=[['pointerdown',pointerDown],['pointermove',pointerMove],['pointerup',pointerUp],
     ['pointercancel',pointerUp],['lostpointercapture',pointerUp],['wheel',wheel,{passive:false}],
-    ['touchmove',touchMove,{passive:false}],['contextmenu',contextMenu],['keydown',keydown]];
+    ['pointerleave',pointerLeave],['touchmove',touchMove,{passive:false}],['contextmenu',contextMenu],['keydown',keydown]];
   bindings.forEach(([name,fn,config])=>canvas.addEventListener(name,fn,config));
   const resizeObserver=new ResizeObserver(resize); resizeObserver.observe(host);
   const themeObserver=new MutationObserver(()=>{
     renderer.toneMappingExposure=document.documentElement.dataset.resolvedTheme==='light'?1.02:1.12; draw();
   });
   themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['data-resolved-theme']});
-  const onLost=event=>{event.preventDefault();contextLost=true;loop?.stop();stopFallback();options.onFallback?.();};
+  const onLost=event=>{event.preventDefault();contextLost=true;setExploring(false);loop?.stop();stopFallback();options.onFallback?.();};
   const onRestored=()=>{contextLost=false;renderer.shadowMap.needsUpdate=true;options.onReady?.();policy();};
   canvas.addEventListener('webglcontextlost',onLost);canvas.addEventListener('webglcontextrestored',onRestored);
   const onVisibility=()=>policy();
@@ -605,5 +697,5 @@ export function createSanctuary(host, options = {}) {
   active=true;renderer.shadowMap.needsUpdate=true;resize();render(performance.now(),33);
   ripples.forEach(({mesh,phase})=>{mesh.scale.setScalar(.08+phase*.35);mesh.material.opacity=.12;});
   draw();options.onReady?.();policy();
-  return {setActive,destroy,reset,policy,toggleAwake};
+  return {setActive,destroy,reset,policy,toggleAwake,setExploring,zoomBy,nextRealm,selectRealm,setRain,echoWell,toggleLanterns};
 }
