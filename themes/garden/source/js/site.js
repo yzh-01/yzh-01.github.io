@@ -1864,6 +1864,7 @@
     if (!layer || gardenMotionIsLite()) return;
     document.addEventListener('pointerdown', function (event) {
       if (event.button !== 0) return;
+      if (event.target.closest && event.target.closest('[data-ash-canvas]')) return;
       var ripple = document.createElement('span');
       ripple.className = 'garden-ripple';
       ripple.textContent = '[+]';

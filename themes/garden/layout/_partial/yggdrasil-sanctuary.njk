@@ -1,27 +1,16 @@
 <section class="ash-sanctuary" id="the-end" data-ash-sanctuary data-folio-outro data-motion-section aria-labelledby="ash-title">
   <header class="ash-heading">
-    <div class="ash-chapter"><span>IV / THE LIVING ARCHIVE</span><i></i><span>一切生长，皆有回声</span></div>
+    <div class="ash-chapter"><span><b aria-hidden="true">&gt;</b> THE LIVING ARCHIVE</span><i></i><span>04 / THE NINE WORLDS</span></div>
     <div class="ash-heading-row">
-      <div><p class="ash-eyebrow">YGGDRASIL</p><h2 id="ash-title">万物，于此相连<span>。</span></h2></div>
-      <p class="ash-intro">文字落下，像种子进入泥土。<br>在花园的尽头，留一棵缓慢生长的世界树。</p>
+      <div><p class="ash-eyebrow">AT THE ROOTS OF THE WORLD</p><h2 id="ash-title">YGGDRASIL<span>.</span></h2></div>
+      <p class="ash-intro"><span>在世界树的根系间，留一盏灯。</span>拖动，绕行九界；滚轮或双指，靠近这片寒夜。</p>
     </div>
   </header>
-  <div class="ash-landscape" data-ash-landscape data-awake="false" data-weather="mist" data-paused="true">
-    {{ partial('_partial/yggdrasil-art.njk') }}
-    <div class="ash-aurora" aria-hidden="true"><i></i><b></b></div>
-    <div class="ash-mist" aria-hidden="true"><i></i><b></b></div>
-    <div class="ash-landscape-grain" aria-hidden="true"></div>
-    <span class="ash-scene-label" aria-hidden="true"><i></i> THE ROOTS REMEMBER</span>
-    <span class="ash-scene-coordinate" aria-hidden="true">ROOT / 09<br>∞ / GROWTH</span>
-    <button class="ash-heart" data-ash-heart type="button" aria-label="唤醒世界树" aria-pressed="false" hidden><span aria-hidden="true"></span></button>
-    <p class="ash-scene-name" aria-hidden="true"><span>THE WORLD ASH</span><b>世界之树</b></p>
+  <div class="ash-landscape" data-ash-landscape data-awake="false" data-model-state="idle" data-world-module="{{ url_for('js/sanctuary-world.js') }}?v={{ theme.asset_version }}">
+    <img class="ash-model-poster" src="{{ url_for('images/yggdrasil-diorama.webp') }}?v={{ theme.asset_version }}" alt="方形遗迹底座上的世界树，九界符文石围绕树根，泉水映着暖光，断桥、石阶和乌鸦隐在寒夜中。" width="1400" height="1000" loading="lazy" decoding="async">
+    <canvas class="ash-model-canvas" data-ash-canvas tabindex="-1" role="img" aria-hidden="true" aria-label="可旋转的世界树与九界微缩景观" aria-describedby="ash-model-help"></canvas>
   </div>
-  <div class="ash-observatory">
-    <div class="ash-state" role="status" aria-live="polite" aria-atomic="true"><i aria-hidden="true"></i><span data-ash-status>林谷沉睡，静候一束微光。</span><b data-ash-count>0 / 9</b></div>
-    <div class="ash-controls" data-ash-controls hidden>
-      <button type="button" class="ash-weather" data-ash-weather aria-pressed="false"><span aria-hidden="true">☾</span><span data-ash-weather-label>拨开薄雾</span></button>
-      <button type="button" class="ash-awaken" data-ash-awaken aria-pressed="false"><span data-ash-action>唤醒世界树</span><span aria-hidden="true">↗</span></button>
-    </div>
-  </div>
-  <footer class="ash-colophon"><span>THE GARDEN CONTINUES.</span><a href="#hello">回到故事的开头 <span aria-hidden="true">↑</span></a></footer>
+  <p class="sr-only" id="ash-model-help">鼠标拖拽旋转，滚轮缩放，右键拖拽平移。手机横向拖动旋转，双指缩放，纵向滑动仍可浏览页面。键盘方向键旋转，加减键缩放，空格唤醒九界，R 键复位。也可轻触树心或符文石点亮九界。</p>
+  <p class="sr-only" data-ash-status role="status" aria-live="polite">世界树的根系相连，九界静候微光。</p>
+  <footer class="ash-colophon"><span>THE ROOTS REMEMBER. THE GARDEN CONTINUES.</span><a href="#hello">回到故事的开头 <span aria-hidden="true">↑</span></a></footer>
 </section>
