@@ -1,0 +1,23 @@
+<div class="norse-horizon" aria-hidden="true">
+  <svg class="norse-aurora" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="norse-aurora-light" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="currentColor" stop-opacity="0"/>
+        <stop offset=".48" stop-color="currentColor" stop-opacity=".03"/>
+        <stop offset=".82" stop-color="currentColor" stop-opacity=".46"/>
+        <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="norse-aurora-fade">
+        <stop stop-color="white" stop-opacity="0"/><stop offset=".2" stop-color="white"/>
+        <stop offset=".8" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+      <mask id="norse-aurora-mist"><rect width="1440" height="700" fill="url(#norse-aurora-fade)"/></mask>
+      <filter id="norse-aurora-soft" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+    </defs>
+    <g mask="url(#norse-aurora-mist)" fill="url(#norse-aurora-light)" filter="url(#norse-aurora-soft)">
+      <path data-aurora-layer="0" d="M-200 210C160 65 350 356 700 225S1200 65 1640 190L1640 272C1200 147 1050 246 700 307S160 147-200 292Z"/>
+      <path data-aurora-layer="1" d="M-200 230C160 320 350 215 700 155S1200 330 1640 220L1640 320C1200 430 1050 196 700 255S160 420-200 330Z" opacity=".58"/>
+      <path data-aurora-layer="2" d="M-200 265C160 420 350 280 700 235S1200 165 1640 305L1640 395C1200 255 1050 280 700 325S160 510-200 355Z" opacity=".3"/>
+    </g>
+  </svg>
+</div>

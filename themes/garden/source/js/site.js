@@ -1144,7 +1144,9 @@
     var quoteSection = card.closest('[data-motion-section]');
 
     function canRotate() {
-      return !document.hidden && (!motion || (motion.isVisible(quoteSection) && !motion.isEconomy()));
+      return !document.hidden && !gardenMotionIsLite() &&
+        !card.matches(':hover, :focus-within') &&
+        (!motion || (motion.canAnimate() && motion.isVisible(quoteSection) && !motion.isEconomy()));
     }
 
     function getItemData(item, itemIndex) {
@@ -1248,6 +1250,11 @@
     nextButton.addEventListener('click', function () {
       showNext();
     });
+
+    card.addEventListener('pointerenter', schedule);
+    card.addEventListener('pointerleave', schedule);
+    card.addEventListener('focusin', schedule);
+    card.addEventListener('focusout', function () { window.setTimeout(schedule, 0); });
 
     if (film && !gardenMotionIsLite() && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       var motionFrame = 0;

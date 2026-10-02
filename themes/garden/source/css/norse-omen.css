@@ -1,158 +1,188 @@
-/* World ash / winter omen. Scoped to the homepage's existing eclipse and seal. */
+/* Northern cover: one flowing composition, with the eclipse as its quiet centre. */
 .folio-cover {
   --g-norse-ink: #b6cbb0;
   --g-norse-glow: rgba(138, 175, 147, .16);
-}
-:root[data-resolved-theme="light"] .folio-cover {
-  --g-norse-ink: #3b6046;
-  --g-norse-glow: rgba(71, 119, 90, .12);
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-resolved-theme]) .folio-cover {
-    --g-norse-ink: #3b6046;
-    --g-norse-glow: rgba(71, 119, 90, .12);
-  }
-}
-.folio-wordmark-norse .folio-wordmark-main {
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-.folio-wordmark-norse .folio-wordmark-ray { display: none; }
-.folio-cover:has(.norse-worldtree) .folio-cover-lens { display: none; }
-.folio-cover:has(.norse-worldtree) .folio-oath-seal {
-  opacity: .4;
-  width: clamp(160px, 16vw, 228px);
-}
-.folio-cover:has(.norse-worldtree) .folio-oath-seal::before,
-.folio-cover:has(.norse-worldtree) .folio-oath-seal::after,
-.folio-cover:has(.norse-worldtree) .folio-valknut { display: none; }
-.norse-worldtree {
-  position: absolute;
-  left: var(--ninefold-x);
-  top: var(--ninefold-y);
-  width: min(740px, 85vw);
-  aspect-ratio: 800 / 520;
-  color: var(--g-norse-ink);
-  transform: translate(-50%, -49%);
-  pointer-events: none;
-}
-.norse-tree-drift { position: relative; width: 100%; height: 100%; }
-.norse-tree { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
-.norse-aureole {
-  position: absolute;
-  inset: 8% 7%;
-  background: radial-gradient(ellipse at 50% 46%, var(--g-norse-glow), transparent 66%);
-  opacity: .65;
-  transform: scale(.92);
-  transition: opacity 900ms ease, transform 1400ms cubic-bezier(.22, 1, .36, 1);
-}
-.norse-orbits { opacity: .2; }
-.norse-bark { opacity: .7; }
-.norse-sap { opacity: .08; transition: opacity 1200ms ease; }
-.norse-realms circle {
-  opacity: .48;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: norse-realm-breathe 7s ease-in-out infinite;
-  animation-delay: calc(var(--n) * -.73s);
-}
-.norse-ravens { opacity: .52; }
-.norse-raven-a { animation: norse-raven-drift 12s ease-in-out infinite; }
-.norse-raven-b { animation: norse-raven-drift 15s ease-in-out -6s infinite reverse; }
-.norse-seeds circle {
-  opacity: 0;
-  animation: norse-seed-rise 9s ease-in-out infinite;
-  animation-delay: calc(var(--n) * -1.4s);
-}
-.norse-invocation {
-  position: absolute;
-  z-index: 5;
-  top: calc(45% + 83px);
-  left: max(42px, calc(50% - 390px));
+  --cover-width: min(1160px, calc(100% - 112px));
+  --cover-drift-x: 0px;
+  --cover-drift-y: 0px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 9px;
-  width: max-content;
-  max-width: calc(100% - 40px);
-  color: var(--g-norse-ink);
+  min-height: max(800px, 94svh);
+  background: linear-gradient(180deg, rgba(9, 11, 10, .18), transparent 65%, rgba(9, 11, 10, .36));
 }
-.norse-invocation-label { font: 9px/1.6 var(--mono); letter-spacing: .14em; opacity: .74; }
-.norse-awaken {
-  display: inline-flex;
+.folio-cover::before, .folio-cover::after { display: none; }
+.folio-cover-shade {
+  background: radial-gradient(ellipse at 55% 38%, transparent, rgba(6, 12, 9, .28) 68%),
+    linear-gradient(180deg, rgba(9, 11, 10, .3), transparent 35%, rgba(9, 11, 10, .32));
+}
+/* The navigation uses the same margins as the cover and settles on scroll. */
+.is-home .g-nav {
+  background: transparent;
+  border-bottom-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background 400ms ease, border-color 400ms ease;
+}
+.is-home .g-nav-inner { width: min(1160px, calc(100% - 112px)); min-height: 80px; margin-inline: auto; }
+.is-home .g-nav-logo, .is-home .g-nav-links a { font-family: var(--g-font-mono); color: var(--g-text-soft); }
+.is-home .g-nav-logo, .is-home .g-nav-links a:is(.active, :hover) { color: var(--g-text); }
+.is-home .g-nav-logo::before { color: var(--g-accent); content: "·"; font-size: 20px; vertical-align: -2px; }
+.is-home .g-nav-links a.active::before { content: none; }
+.is-home .g-nav.scrolled {
+  background: color-mix(in srgb, var(--g-bg) 91%, transparent);
+  border-bottom-color: var(--g-accent-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+/* The former system readouts compete with the much quieter cover. */
+.is-home .garden-hud-system, .is-home .garden-hud-vitals { display: none; }
+.is-home .garden-hud-scroll { opacity: .4; }
+.folio-cover-main {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   align-items: center;
-  gap: 9px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--void) 45%, transparent);
-  color: inherit;
-  font: 10px/1 var(--mono);
-  letter-spacing: .1em;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: background 180ms ease, border-color 180ms ease;
-}
-.norse-awaken[hidden] { display: none; }
-.norse-awaken svg { width: 17px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.1; }
-.norse-awaken b { margin-left: 7px; font-weight: 400; }
-.norse-awaken:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
-.norse-awaken[aria-pressed="true"] { border-color: currentColor; background: var(--g-norse-glow); }
-@media (hover: hover) {
-  .norse-awaken:hover { border-color: currentColor; background: var(--g-norse-glow); }
-}
-.folio-cover.is-norse-awake .norse-sap { opacity: .9; }
-.folio-cover.is-norse-awake .norse-aureole { opacity: 1; transform: scale(1.2); }
-.folio-cover.is-norse-awake .norse-realms { filter: drop-shadow(0 0 4px currentColor); }
-.folio-cover.is-norse-awake .folio-oath-seal { opacity: .68; }
-.folio-cover:has(.folio-ninefold.is-open) .norse-invocation,
-.folio-cover:has(.folio-ninefold.is-opening) .norse-invocation { visibility: hidden; }
-.folio-cover:has(.folio-ninefold.is-open) .norse-worldtree { opacity: .45; }
-/* The lower stones occupy the same space as the quote card while unfolded. */
-.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .folio-cover-fragment,
-.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .folio-cover-copy {
-  visibility: hidden;
+  justify-content: center;
+  width: var(--cover-width);
+  margin-inline: auto;
+  padding: 178px 0 116px;
   pointer-events: none;
 }
-@keyframes norse-realm-breathe {
-  0%, 100% { opacity: .35; transform: scale(.85); }
-  50% { opacity: .9; transform: scale(1.15); }
+.norse-edition {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 34px;
+  color: var(--g-norse-ink);
+  font: 9px/1.5 var(--mono);
+  letter-spacing: .24em;
 }
-@keyframes norse-raven-drift {
-  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
-  50% { transform: translate(9px, -7px) rotate(3deg); }
+.norse-edition i { width: 24px; height: 1px; background: currentColor; opacity: .6; }
+.folio-cover .folio-wordmark {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: auto;
+  font-size: clamp(62px, 8.9vw, 132px);
+  line-height: 1.12;
+  transform: none;
 }
-@keyframes norse-seed-rise {
-  0%, 100% { opacity: 0; transform: translate(0, 12px); }
-  35% { opacity: .65; }
-  80% { opacity: 0; transform: translate(12px, -26px); }
+.folio-cover .folio-wordmark-layer { position: relative; inset: auto; }
+.folio-cover .folio-wordmark-main { -webkit-mask-image: none; mask-image: none; }
+.folio-cover .folio-wordmark-disc { transition: box-shadow 1800ms ease; }
+.folio-cover.is-norse-awake .folio-wordmark-disc { box-shadow: 0 0 0 1px rgba(190, 216, 191, .16), 0 0 38px rgba(143, 187, 153, .35); }
+.norse-invocation { display: flex; flex-direction: column; align-items: center; margin-top: 20px; gap: 26px; color: var(--g-norse-ink); }
+.norse-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 30px; pointer-events: auto; }
+.norse-read, .norse-awaken, .norse-path { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; font: 11px/1.5 var(--sans); letter-spacing: .08em; }
+.folio .norse-read { padding: 2px 23px; border: 1px solid color-mix(in srgb, var(--g-norse-ink) 34%, transparent); border-radius: 3px; background: color-mix(in srgb, var(--void) 58%, transparent); color: var(--bone); transition: background 240ms ease, border-color 240ms ease; }
+.norse-read span, .norse-path span { transition: transform 300ms ease; }
+.norse-awaken { padding: 0 3px; border: 0; background: transparent; color: var(--g-norse-ink); text-shadow: 0 0 8px var(--void), 0 1px 8px var(--void); cursor: pointer; touch-action: manipulation; transition: color 240ms ease; }
+.norse-awaken[hidden] { display: none; }
+.norse-awaken svg { width: 17px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.1; transition: filter 600ms ease; }
+.norse-awaken[aria-pressed="true"] svg { filter: drop-shadow(0 0 5px currentColor); }
+.norse-read:focus-visible, .norse-awaken:focus-visible, .norse-path:focus-visible { outline: 2px solid var(--g-norse-ink); outline-offset: 5px; }
+@media (hover: hover) {
+  .folio .norse-read:hover { background: color-mix(in srgb, var(--g-norse-ink) 16%, transparent); border-color: var(--g-norse-ink); }
+  .norse-read:hover span, .norse-path:hover span { transform: translateY(3px); }
+  .norse-awaken:hover { color: var(--bone); }
 }
-/* Ambient work stops outside the cover, in hidden tabs and while a game is open. */
-.folio-cover[data-norse-paused="true"] .norse-worldtree *,
-html.garden-page-hidden .norse-worldtree *,
-html.garden-overrun .norse-worldtree * { animation-play-state: paused !important; }
-html[data-render-quality="economy"] .norse-seeds { display: none; }
-html[data-render-quality="economy"] .norse-worldtree * { animation: none !important; }
-html.garden-lite-motion .norse-worldtree *,
-html.garden-lite-motion .norse-awaken { animation: none !important; transition: none !important; }
-html.garden-lite-motion .norse-tree-drift { transform: none !important; }
+/* The corona belongs to the O; the aurora is light in the existing fog field. */
+.norse-horizon { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: .65; transform: translate3d(calc(var(--cover-drift-x) * -.6), calc(var(--cover-drift-y) * -.6), 0); transition: opacity 1800ms ease; }
+.norse-aurora { display: block; width: 100%; height: min(740px, 100%); color: #a1c3a5; }
+.norse-sky { position: absolute; left: var(--ninefold-x); top: var(--ninefold-y); width: clamp(250px, 30vw, 420px); aspect-ratio: 1; color: var(--g-norse-ink); transform: translate(-50%, -50%); pointer-events: none; }
+.norse-sky-drift { position: relative; width: 100%; height: 100%; transform: translate3d(var(--cover-drift-x), var(--cover-drift-y), 0); }
+.norse-corona { position: absolute; inset: -18%; border-radius: 50%; background: radial-gradient(circle, transparent 0 13%, var(--g-norse-glow) 18%, rgba(167, 201, 173, .045) 33%, transparent 62%); opacity: .7; transition: opacity 1800ms ease, scale 2200ms ease; }
+.norse-orbit { position: relative; display: block; width: 100%; height: 100%; }
+.norse-realms { opacity: .55; transition: opacity 1800ms ease; }
+.norse-realms circle { opacity: .4; transform-box: fill-box; transform-origin: center; animation: norse-realm-breathe 9s ease-in-out infinite; animation-delay: calc(var(--n) * -.9s); }
+.folio-cover .folio-oath-seal { opacity: 0; width: clamp(160px, 16vw, 228px); }
+.folio-cover .folio-oath-seal::before, .folio-cover .folio-oath-seal::after, .folio-cover .folio-valknut { display: none; }
+.folio-cover.is-norse-awake .norse-horizon { opacity: 1; }
+.folio-cover.is-norse-awake .norse-corona { opacity: 1; scale: 1.12; }
+.folio-cover.is-norse-awake .norse-realms { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+/* Notes share a baseline and a single soft divider, without floating panels. */
+.folio-cover-notes { position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1.25fr; gap: 80px; width: var(--cover-width); margin: 0 auto; padding: 28px 0 58px; border-top: 1px solid var(--line); }
+.folio-cover .folio-cover-copy { position: static; width: auto; transform: none; pointer-events: auto; }
+.folio-cover .folio-cover-role { margin: 0 0 7px; color: var(--bone); font: 15px/1.8 var(--sans); letter-spacing: .1em; }
+.folio-cover-description { margin: 0; color: var(--dim); font: 12px/1.9 var(--sans); }
+.folio .norse-path { margin-top: 14px; color: var(--g-norse-ink); font-size: 10px; }
+.folio-cover .folio-cover-fragment { position: relative; inset: auto; width: auto; min-width: 0; min-height: 170px; perspective: none; }
+.folio-cover .folio-cover-fragment::before, .folio-cover .folio-cover-fragment::after,
+.folio-cover .folio-quote-film::before, .folio-cover .folio-quote-film::after,
+.folio-cover .folio-cover-fragment blockquote::before, .folio-cover .folio-cover-fragment blockquote span::after { display: none; }
+.folio-cover .folio-quote-film { min-height: 0; padding: 0 0 38px; transform: none; }
+.folio-cover .folio-quote-head { padding: 0; font: 9px/1.5 var(--mono); letter-spacing: .1em; }
+.folio-cover .folio-quote-head b { font-weight: 400; }
+.folio-cover .folio-quote-head b::before { content: none; }
+.folio-cover .folio-cover-fragment blockquote { max-width: none; min-height: 58px; margin: 15px 0 14px; padding: 0; border: 0; background: transparent; color: var(--bone); font: 400 19px/1.7 var(--quote); letter-spacing: .025em; text-shadow: none; }
+.folio-cover .folio-quote-meta { flex-wrap: wrap; gap: 5px 10px; }
+.folio-cover .folio-quote-meta strong { font-size: 11px; }
+.folio-cover .folio-quote-meta cite { font-size: 9px; white-space: normal; line-height: 1.7; }
+.folio-cover .folio-quote-rail { right: 0; bottom: -4px; }
+.folio-cover .folio-quote-next { min-height: 44px; padding-left: 12px; font-size: 9px; }
+.folio-cover .folio-cover-fragment.is-changing blockquote span,
+.folio-cover .folio-cover-fragment.is-changing .folio-quote-meta { filter: none; clip-path: none; transform: translateY(3px); }
+.folio-cover-rootline { position: relative; z-index: 2; display: block; height: 48px; width: 1px; margin: -26px auto 0; background: linear-gradient(var(--g-norse-ink), transparent); opacity: .45; }
+.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .norse-invocation,
+.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .norse-edition,
+.folio-cover:has(.folio-ninefold:is(.is-open, .is-opening)) .folio-cover-notes { visibility: hidden; pointer-events: none; }
+.folio-cover:has(.folio-ninefold.is-open) .norse-sky { opacity: .45; }
+/* Entrance waits for the optional boot screen. Content is visible without JS. */
+.folio-cover.is-cover-entered .norse-edition { animation: norse-cover-arrive 1400ms ease both; }
+.folio-cover.is-cover-entered .folio-wordmark { animation: norse-title-arrive 1800ms ease 100ms both; }
+.folio-cover.is-cover-entered .norse-invocation { animation: norse-cover-arrive 1600ms ease 260ms both; }
+.folio-cover.is-cover-entered .folio-cover-notes { animation: norse-cover-arrive 1500ms ease 420ms both; }
+@keyframes norse-cover-arrive { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+@keyframes norse-title-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes norse-realm-breathe { 0%, 100% { opacity: .3; transform: scale(.9); } 50% { opacity: .75; transform: scale(1.08); } }
+:root[data-resolved-theme="light"] .folio-cover { --g-norse-ink: #3b6046; --g-norse-glow: rgba(71, 119, 90, .12); background: linear-gradient(180deg, rgba(222, 229, 218, .18), transparent 65%, rgba(222, 229, 218, .34)); }
+:root[data-resolved-theme="light"] .folio-cover-shade { background: radial-gradient(ellipse at 55% 38%, transparent, rgba(213, 223, 208, .34) 70%); }
+:root[data-resolved-theme="light"] .is-home .g-nav:not(.scrolled) { background: transparent; border-color: transparent; box-shadow: none; }
+:root[data-resolved-theme="light"] .norse-horizon { mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .norse-aurora { color: #51745d; }
+:root[data-resolved-theme="light"] .folio-cover .folio-oath-seal { opacity: 0; }
+/* Stop all cover motion when hidden, quiet or on the economy setting. */
+.folio-cover[data-norse-paused="true"] *, html.garden-page-hidden .folio-cover *, html.garden-overrun .folio-cover * { animation-play-state: paused !important; }
+html[data-render-quality="economy"] .folio-cover *, html.garden-lite-motion .folio-cover * { animation: none !important; transition: none !important; }
+html.garden-lite-motion .is-home .g-nav { transition: none; }
 @media (prefers-reduced-motion: reduce) {
-  .norse-worldtree *, .norse-awaken { animation: none !important; transition: none !important; }
-  .norse-tree-drift { transform: none !important; }
+  .folio-cover *, .is-home .g-nav { animation: none !important; transition: none !important; }
 }
 @media (max-width: 1023px) {
-  .norse-invocation { top: calc(45% + 70px); gap: 9px; }
-  .norse-worldtree { width: 92vw; }
+  .folio-cover { --cover-width: calc(100% - 64px); }
+  .is-home .g-nav-inner { width: calc(100% - 64px); }
+  .folio-cover-notes { gap: 40px; }
 }
 @media (max-width: 768px) {
-  .norse-worldtree { width: 118vw; }
-  .norse-invocation { top: calc(34% + 69px); left: 50%; transform: translateX(-50%); align-items: center; gap: 7px; }
-  .norse-invocation-label { font-size: 8px; letter-spacing: .08em; }
-  .norse-awaken { font-size: 9px; }
-  .norse-seeds circle:nth-child(even) { display: none; }
+  .folio-cover { --cover-width: calc(100% - 48px); min-height: 100svh; }
+  .is-home .g-nav-inner { width: calc(100% - 48px); min-height: 68px; }
+  .is-home .g-nav-links li:not(:last-child) { display: block; }
+  .is-home .g-nav-links li:nth-child(3), .is-home .g-nav-links li:nth-child(4) { display: none; }
+  .is-home .g-nav-links { gap: 18px; }
+  .folio-cover-main { padding: 150px 0 82px; }
+  .norse-edition { margin-bottom: 30px; font-size: 7px; letter-spacing: .16em; gap: 10px; }
+  .norse-edition i { width: 16px; }
+  .folio-cover .folio-wordmark { font-size: 10.6vw; }
+  .norse-invocation { margin-top: 22px; gap: 24px; }
+  .norse-actions { gap: 20px; }
+  .norse-sky { width: 238px; }
+  .norse-aurora { height: 480px; }
+  .norse-read, .norse-awaken { font-size: 10px; }
+  .folio-cover-notes { grid-template-columns: 1fr; gap: 25px; padding: 24px 0 60px; }
+  .folio-cover .folio-cover-role { font-size: 14px; margin-bottom: 4px; }
+  .folio-cover-description { font-size: 11px; }
+  .folio .norse-path { margin-top: 3px; }
+  .folio-cover .folio-cover-fragment { min-height: 172px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .folio-cover .folio-cover-fragment blockquote { font-size: 17px; line-height: 1.8; min-height: 62px; }
+  .folio-cover .folio-quote-head { font-size: 8px; }
+  .folio-cover .folio-quote-meta cite { font-size: 8px; }
+  .folio-cover-rootline { height: 32px; }
+  .is-home .garden-hud-scroll { display: none; }
 }
-@media (max-width: 480px) {
-  .norse-worldtree { width: 135vw; }
-  .norse-orbits { opacity: .12; }
+@media (max-width: 360px) {
+  .norse-edition { font-size: 6px; }
+  .norse-actions { gap: 14px; }
+  .folio .norse-read { padding-inline: 17px; }
 }

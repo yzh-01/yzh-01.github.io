@@ -173,5 +173,11 @@
     if (!document.hidden) scheduleMeasure();
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleMeasure);
+  // Flowing cover copy and font swaps can move the eclipse without a window resize.
+  if ('ResizeObserver' in window) {
+    var coverLayout = cover.querySelector('.folio-cover-main');
+    var layoutObserver = new ResizeObserver(scheduleMeasure);
+    layoutObserver.observe(coverLayout || wordmark);
+  }
   scheduleMeasure();
 })();

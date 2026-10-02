@@ -1,24 +1,5 @@
 /* The same northern light opens the garden and settles at its roots. */
 .folio { --g-ash-accent: #bac3a4; --g-ash-rule: rgba(184, 204, 172, .19); }
-.folio-cover .norse-aureole {
-  background: radial-gradient(ellipse at 50% 42%, rgba(156, 184, 151, .23), transparent 66%);
-}
-.norse-horizon { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-.norse-horizon i, .norse-horizon b {
-  position: absolute; left: 14%; top: 16%; width: 75%; height: 24%; border-radius: 50%;
-  background: linear-gradient(175deg, transparent 33%, rgba(139, 174, 155, .08) 47%, rgba(134, 176, 151, .025) 65%, transparent 80%);
-  transform: rotate(-14deg); animation: ash-northern-light 18s ease-in-out infinite;
-}
-.norse-horizon b { top: 20%; left: 31%; opacity: .55; animation-delay: -8s; }
-.norse-edition { position: absolute; top: 23%; left: max(42px, calc(50% - 390px)); z-index: 4; display: flex; align-items: center; gap: 12px; color: var(--g-norse-ink); font: 8px/1.5 var(--mono); letter-spacing: .24em; opacity: .7; }
-.norse-edition i { width: 27px; height: 1px; background: currentColor; }
-.norse-invocation { gap: 13px; }
-.norse-actions { display: flex; align-items: center; gap: 22px; }
-.norse-path { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: var(--g-norse-ink); font: 9px/1.5 var(--mono); letter-spacing: .08em; }
-.norse-path:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
-.norse-awaken { border-radius: 3px; background: color-mix(in srgb, var(--void) 66%, transparent); }
-.norse-awaken:active { transform: scale(.97); }
-.norse-invocation-label { letter-spacing: .18em; }
 .folio-explore, .folio-articles { border-top: 1px solid var(--g-ash-rule); }
 .folio-directory > a { border-color: var(--g-ash-rule); }
 .folio-articles-list { border-color: var(--g-ash-rule); }
@@ -81,19 +62,13 @@ html.garden-cursor-on .ash-model-canvas[data-dragging="true"] { cursor: grabbing
 @media (hover: hover) { .ash-colophon a:hover { color: var(--moss-bright); } .ash-actions button:hover { color: var(--bone); background: color-mix(in srgb, var(--bone) 5%, transparent); } }
 @media (hover: none) { .ash-desktop-help, .ash-actions .ash-explore { display: none; } .ash-touch-help { display: block; } }
 :root[data-resolved-theme="light"] .folio { --g-ash-rule: rgba(59, 83, 52, .18); }
-:root[data-resolved-theme="light"] .norse-horizon { mix-blend-mode: multiply; }
-.folio-cover[data-norse-paused="true"] .norse-horizon *, html.garden-page-hidden .norse-horizon *, html.garden-overrun .norse-horizon * { animation-play-state: paused !important; }
-html[data-render-quality="economy"] .norse-horizon *, html.garden-lite-motion .norse-horizon * { animation: none !important; }
-@keyframes ash-northern-light { 0%, 100% { transform: translateX(-2%) rotate(-15deg); opacity: .55; } 50% { transform: translateX(3%) rotate(-11deg); opacity: 1; } }
 html.garden-lite-motion .ash-sanctuary * { transition: none !important; }
-@media (prefers-reduced-motion: reduce) { .ash-sanctuary *, .norse-horizon * { animation: none !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { .ash-sanctuary * { animation: none !important; transition: none !important; } }
 @media (max-width: 1023px) {
   .ash-sanctuary { width: calc(100% - 56px); padding-top: 44px; }
   .ash-heading-row { gap: 20px; }
 }
 @media (max-width: 768px) {
-  .norse-edition { top: 15%; left: 22px; font-size: 7px; }
-  .norse-horizon i { top: 18%; height: 30%; }
   .ash-sanctuary { width: calc(100% - 36px); padding-top: 36px; padding-bottom: 80px; }
   .ash-chapter { font-size: 6px; gap: 12px; letter-spacing: .08em; }
   .ash-heading-row { align-items: center; gap: 16px; padding-top: 20px; }
