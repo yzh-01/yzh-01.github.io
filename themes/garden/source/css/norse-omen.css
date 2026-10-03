@@ -207,23 +207,44 @@ html:has(.folio-cover.is-window-wiping) .garden-cursor { opacity: 0; }
 :root[data-resolved-theme="light"] .folio-cover { --g-norse-ink: #3b6046; --g-norse-glow: rgba(71, 119, 90, .12); background: linear-gradient(180deg, rgba(222, 229, 218, .18), transparent 65%, rgba(222, 229, 218, .34)); }
 :root[data-resolved-theme="light"] .folio-cover-shade { background: radial-gradient(ellipse at 55% 38%, transparent, rgba(213, 223, 208, .34) 70%); }
 :root[data-resolved-theme="light"] .is-home .g-nav:not(.scrolled) { background: transparent; border-color: transparent; box-shadow: none; }
-:root[data-resolved-theme="light"] .norse-horizon { mix-blend-mode: normal; }
-:root[data-resolved-theme="light"] .norse-horizon::before { background: radial-gradient(ellipse at 28% 29%, rgba(217, 239, 230, .2), transparent 38%), radial-gradient(ellipse at 71% 33%, rgba(239, 231, 216, .16), transparent 32%); }
-:root[data-resolved-theme="light"] .norse-aurora { --aurora-mint: #7aaea7; --aurora-ice: #8daec5; --aurora-pearl: #e0caa4; opacity: 1; }
-:root[data-resolved-theme="light"] .norse-aurora-mint-peak { stop-opacity: .84; }
-:root[data-resolved-theme="light"] .norse-aurora-ice-peak { stop-opacity: .78; }
-:root[data-resolved-theme="light"] .norse-aurora-pearl-peak { stop-opacity: .68; }
-:root[data-resolved-theme="light"] .norse-aurora-volume { opacity: .56; }
-:root[data-resolved-theme="light"] .norse-aurora-rays-back { opacity: .62; }
-:root[data-resolved-theme="light"] .norse-aurora-rays-front { opacity: .88; }
-:root[data-resolved-theme="light"] .norse-aurora-folds { opacity: .66; }
+/* Deeper translucent pigments keep the curtain visible in the pale fog. */
+:root[data-resolved-theme="light"] .norse-horizon { mix-blend-mode: multiply; }
+:root[data-resolved-theme="light"] .norse-horizon::before { background: radial-gradient(ellipse at 28% 29%, rgba(83, 155, 146, .12), transparent 38%), radial-gradient(ellipse at 71% 33%, rgba(121, 135, 181, .1), transparent 32%); }
+:root[data-resolved-theme="light"] .norse-aurora { --aurora-mint: #478b80; --aurora-ice: #627fa8; --aurora-pearl: #a294ad; opacity: 1; }
+:root[data-resolved-theme="light"] .norse-aurora-mint-peak { stop-opacity: .96; }
+:root[data-resolved-theme="light"] .norse-aurora-ice-peak { stop-opacity: .9; }
+:root[data-resolved-theme="light"] .norse-aurora-pearl-peak { stop-opacity: .8; }
+:root[data-resolved-theme="light"] .norse-aurora-volume { opacity: .84; }
+:root[data-resolved-theme="light"] .norse-aurora-rays-back { opacity: .9; }
+:root[data-resolved-theme="light"] .norse-aurora-rays-front { opacity: 1; }
+:root[data-resolved-theme="light"] .norse-aurora-folds { opacity: .9; }
 :root[data-resolved-theme="light"] .norse-aurora-ray-peak { stop-opacity: .94; }
-:root[data-resolved-theme="light"] .norse-aurora-traces { opacity: .18; }
-:root[data-resolved-theme="light"] .norse-corona { background: radial-gradient(ellipse at 43% 43%, rgba(226, 246, 235, .64), rgba(219, 235, 239, .22) 28%, transparent 57%), radial-gradient(ellipse at 60% 57%, rgba(235, 228, 210, .36), transparent 48%); }
+:root[data-resolved-theme="light"] .norse-aurora-traces { opacity: .26; }
+:root[data-resolved-theme="light"] .norse-corona { background: radial-gradient(ellipse at 43% 43%, rgba(80, 139, 123, .2), rgba(85, 127, 158, .09) 28%, transparent 57%), radial-gradient(ellipse at 60% 57%, rgba(151, 130, 168, .14), transparent 48%); }
 :root[data-resolved-theme="light"] .folio-cover.is-norse-awake .folio-wordmark-main { text-shadow: 0 0 28px rgba(238, 248, 239, .22), 0 12px 34px rgba(42, 56, 44, .09); }
 :root[data-resolved-theme="light"] .folio-cover .folio-wordmark-disc { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-norse-ink) 12%, transparent); }
-:root[data-resolved-theme="light"] .folio-cover.is-norse-awake .folio-wordmark-disc { box-shadow: 0 0 0 1px rgba(214, 237, 223, .72), 0 0 24px rgba(221, 244, 232, .74), 0 0 54px rgba(197, 220, 227, .32); }
+:root[data-resolved-theme="light"] .folio-cover.is-norse-awake .folio-wordmark-disc { box-shadow: 0 0 0 1px rgba(62, 114, 98, .5), 0 0 24px rgba(84, 153, 135, .34), 0 0 54px rgba(106, 141, 176, .22); }
 :root[data-resolved-theme="light"] .folio-cover .folio-oath-seal { opacity: 0; }
+/* Solid ink keeps small cover copy readable against the pale atmospheric field. */
+:root[data-resolved-theme="light"] .folio-cover .folio-wordmark-main { color: #14221a; }
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-fragment blockquote,
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-role em { color: #1b2b21; }
+:root[data-resolved-theme="light"] .folio-cover :is(.norse-edition, .norse-awaken, .norse-path),
+:root[data-resolved-theme="light"] .folio-cover .folio-quote-head b,
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-terminal b { color: #2d533d; }
+:root[data-resolved-theme="light"] .folio-cover .norse-awaken { text-shadow: none; }
+:root[data-resolved-theme="light"] .folio-cover .norse-read { color: #203b2b; border-color: rgba(42, 73, 52, .48); background: rgba(236, 243, 231, .64); }
+:root[data-resolved-theme="light"] .folio-cover :is(.folio-cover-role, .folio-cover-terminal, .folio-quote-head, .folio-quote-head i, .folio-quote-index, .folio-quote-meta cite, .folio-quote-next) { color: #43564a; }
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-terminal span { opacity: 1; }
+:root[data-resolved-theme="light"] .folio-cover .folio-window-guide { color: #405448; opacity: 1; }
+:root[data-resolved-theme="light"] .folio-cover .folio-quote-meta strong { color: #2a4032; font-weight: 500; }
+:root[data-resolved-theme="light"] .is-home .g-nav:not(.scrolled) .g-nav-links a { color: #3c5143; }
+:root[data-resolved-theme="light"] .is-home .g-nav:not(.scrolled) .g-nav-logo,
+:root[data-resolved-theme="light"] .is-home .g-nav:not(.scrolled) .g-nav-links a:is(.active, :hover) { color: #1d3426; }
+@media (hover: hover) {
+  :root[data-resolved-theme="light"] .folio-cover :is(.norse-awaken, .norse-path, .folio-quote-next):hover { color: #172d20; }
+  :root[data-resolved-theme="light"] .folio-cover .norse-read:hover { background: rgba(221, 234, 217, .82); border-color: #355b40; }
+}
 /* Stop all cover motion when hidden, quiet or on the economy setting. */
 .folio-cover[data-norse-paused="true"] *, html.garden-page-hidden .folio-cover *, html.garden-overrun .folio-cover * { animation-play-state: paused !important; }
 html[data-render-quality="economy"] .folio-cover *, html.garden-lite-motion .folio-cover * { animation: none !important; transition: none !important; }
