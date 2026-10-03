@@ -19,19 +19,29 @@
   clip-path: none;
   -webkit-mask-image: none;
   mask-image: none;
-  filter: saturate(.88) contrast(1.03);
+  filter: saturate(.58) contrast(1.01) brightness(.94);
   transition: opacity 240ms ease;
 }
-.folio-cover .folio-cover-lens image { opacity: .94; }
+.folio-cover .folio-cover-lens image { opacity: .88; }
 .folio-window-wipe { animation: garden-window-refog 4600ms ease-out both; }
-[data-window-wipes] .folio-window-wipe { filter: blur(3px); }
-.folio-window-mist { stroke: #b8ccc8; opacity: .14; filter: blur(8px); }
+.folio-window-wipe.is-writing { animation: none; opacity: 1; }
+[data-window-wipes] .folio-window-wipe { filter: blur(6px); }
+.folio-window-mist { stroke: #b8ccc8; opacity: .065; filter: blur(10px); }
 .folio-window-glaze { fill: #e4ece5; opacity: .025; }
-:root[data-resolved-theme="light"] .folio-cover .folio-cover-lens { filter: saturate(.82) contrast(.99); }
-:root[data-resolved-theme="light"] .folio-window-mist { stroke: #f3f7f2; opacity: .4; }
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-lens { filter: saturate(.52) contrast(.97); }
+:root[data-resolved-theme="light"] .folio-window-mist { stroke: #f3f7f2; opacity: .16; }
+.folio-cover { touch-action: pan-y pinch-zoom; }
+.folio-cover.is-window-wiping { user-select: none; -webkit-user-select: none; }
+html.garden-cursor-on .folio-cover.is-window-wiping { cursor: grabbing !important; }
+html:has(.folio-cover.is-window-wiping) .garden-cursor { opacity: 0; }
+.folio-window-guide { margin: -12px 0 0; color: var(--g-norse-ink); opacity: .5; font: 9px/1.6 var(--sans); letter-spacing: .06em; pointer-events: none; }
+.folio-window-guide-touch { display: none; }
+@media (hover: none) {
+  .folio-window-guide-mouse { display: none; }
+  .folio-window-guide-touch { display: inline; }
+}
 @keyframes garden-window-refog {
-  0% { opacity: .3; }
-  8%, 34% { opacity: 1; }
+  0%, 28% { opacity: 1; }
   70% { opacity: .4; }
   100% { opacity: 0; }
 }
@@ -120,7 +130,11 @@
 .norse-horizon { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; visibility: hidden; mix-blend-mode: screen; transform: translate3d(calc(var(--cover-drift-x) * -.6), calc(var(--cover-drift-y) * -.6), 0); transition: opacity 1100ms ease, visibility 0s linear 1100ms; }
 .norse-horizon::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 22% 26%, rgba(141, 180, 194, .07), transparent 40%), radial-gradient(ellipse at 75% 32%, rgba(133, 188, 165, .06), transparent 35%); }
 .norse-aurora { --aurora-mint: #9ac8b5; --aurora-ice: #93b5ce; --aurora-pearl: #b1bad2; position: relative; display: block; width: 100%; height: min(740px, 100%); opacity: .88; }
-.norse-aurora-traces { opacity: .42; }
+.norse-aurora-volume { opacity: .72; }
+.norse-aurora-rays-back { opacity: .72; }
+.norse-aurora-rays-front { opacity: .94; }
+.norse-aurora-folds { opacity: .65; }
+.norse-aurora-traces { opacity: .3; }
 .norse-sky { position: absolute; left: var(--ninefold-x); top: var(--ninefold-y); width: clamp(250px, 30vw, 420px); aspect-ratio: 1; color: var(--g-norse-ink); transform: translate(-50%, -50%); pointer-events: none; }
 .norse-sky-drift { position: relative; width: 100%; height: 100%; transform: translate3d(var(--cover-drift-x), var(--cover-drift-y), 0); }
 .norse-corona { position: absolute; inset: -24%; border-radius: 50%; background: radial-gradient(ellipse at 43% 43%, rgba(167, 215, 195, .18), rgba(142, 180, 197, .07) 26%, transparent 56%), radial-gradient(ellipse at 58% 55%, rgba(155, 188, 211, .14), transparent 48%); opacity: 0; scale: .92; transition: opacity 1100ms ease, scale 1800ms ease; }
@@ -199,6 +213,11 @@
 :root[data-resolved-theme="light"] .norse-aurora-mint-peak { stop-opacity: .84; }
 :root[data-resolved-theme="light"] .norse-aurora-ice-peak { stop-opacity: .78; }
 :root[data-resolved-theme="light"] .norse-aurora-pearl-peak { stop-opacity: .68; }
+:root[data-resolved-theme="light"] .norse-aurora-volume { opacity: .56; }
+:root[data-resolved-theme="light"] .norse-aurora-rays-back { opacity: .62; }
+:root[data-resolved-theme="light"] .norse-aurora-rays-front { opacity: .88; }
+:root[data-resolved-theme="light"] .norse-aurora-folds { opacity: .66; }
+:root[data-resolved-theme="light"] .norse-aurora-ray-peak { stop-opacity: .94; }
 :root[data-resolved-theme="light"] .norse-aurora-traces { opacity: .18; }
 :root[data-resolved-theme="light"] .norse-corona { background: radial-gradient(ellipse at 43% 43%, rgba(226, 246, 235, .64), rgba(219, 235, 239, .22) 28%, transparent 57%), radial-gradient(ellipse at 60% 57%, rgba(235, 228, 210, .36), transparent 48%); }
 :root[data-resolved-theme="light"] .folio-cover.is-norse-awake .folio-wordmark-main { text-shadow: 0 0 28px rgba(238, 248, 239, .22), 0 12px 34px rgba(42, 56, 44, .09); }

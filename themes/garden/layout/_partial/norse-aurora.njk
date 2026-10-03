@@ -27,6 +27,33 @@
         <stop offset=".63" stop-color="var(--aurora-ice)" stop-opacity=".9"/>
         <stop offset="1" stop-color="var(--aurora-ice)" stop-opacity="0"/>
       </linearGradient>
+      <linearGradient id="norse-aurora-volume" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="var(--aurora-ice)" stop-opacity="0"/>
+        <stop offset=".32" stop-color="var(--aurora-ice)" stop-opacity=".03"/>
+        <stop offset=".72" stop-color="var(--aurora-mint)" stop-opacity=".24"/>
+        <stop offset="1" stop-color="var(--aurora-pearl)" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="norse-aurora-ray-mint" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="var(--aurora-ice)" stop-opacity="0"/>
+        <stop offset=".27" stop-color="var(--aurora-ice)" stop-opacity=".04"/>
+        <stop offset=".63" stop-color="var(--aurora-mint)" stop-opacity=".42"/>
+        <stop class="norse-aurora-ray-peak" offset=".87" stop-color="var(--aurora-mint)" stop-opacity=".86"/>
+        <stop offset="1" stop-color="var(--aurora-ice)" stop-opacity=".12"/>
+      </linearGradient>
+      <linearGradient id="norse-aurora-ray-ice" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="var(--aurora-pearl)" stop-opacity="0"/>
+        <stop offset=".24" stop-color="var(--aurora-ice)" stop-opacity=".03"/>
+        <stop offset=".66" stop-color="var(--aurora-ice)" stop-opacity=".36"/>
+        <stop class="norse-aurora-ray-peak" offset=".89" stop-color="var(--aurora-ice)" stop-opacity=".74"/>
+        <stop offset="1" stop-color="var(--aurora-mint)" stop-opacity=".09"/>
+      </linearGradient>
+      <linearGradient id="norse-aurora-ray-pearl" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="var(--aurora-ice)" stop-opacity="0"/>
+        <stop offset=".38" stop-color="var(--aurora-pearl)" stop-opacity=".03"/>
+        <stop offset=".7" stop-color="var(--aurora-pearl)" stop-opacity=".3"/>
+        <stop class="norse-aurora-ray-peak" offset=".88" stop-color="var(--aurora-pearl)" stop-opacity=".58"/>
+        <stop offset="1" stop-color="var(--aurora-pearl)" stop-opacity=".07"/>
+      </linearGradient>
       <linearGradient id="norse-aurora-fade">
         <stop stop-color="white" stop-opacity="0"/><stop offset=".2" stop-color="white"/>
         <stop offset=".8" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/>
@@ -34,12 +61,21 @@
       <mask id="norse-aurora-mist"><rect width="1440" height="700" fill="url(#norse-aurora-fade)"/></mask>
       <filter id="norse-aurora-soft" x="-10%" y="-55%" width="120%" height="210%"><feGaussianBlur stdDeviation="13"/></filter>
       <filter id="norse-aurora-edge-soft" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter>
+      <filter id="norse-aurora-volume-soft" x="-10%" y="-35%" width="120%" height="170%"><feGaussianBlur stdDeviation="22"/></filter>
+      <filter id="norse-aurora-ray-back-soft" x="-10%" y="-15%" width="120%" height="130%"><feGaussianBlur stdDeviation="6 12"/></filter>
+      <filter id="norse-aurora-ray-front-soft" x="-10%" y="-15%" width="120%" height="130%"><feGaussianBlur stdDeviation="3.4 7"/></filter>
     </defs>
-    <g mask="url(#norse-aurora-mist)" filter="url(#norse-aurora-soft)">
+    <g class="norse-aurora-volume" mask="url(#norse-aurora-mist)" fill="url(#norse-aurora-volume)" filter="url(#norse-aurora-volume-soft)">
+      <path data-aurora-veil="0" d="M-220 44C180 24 338 170 740 128S1200 6 1660 28L1660 214C1200 218 1142 347 740 331S180 222-220 222Z"/>
+      <path data-aurora-veil="1" d="M-220 154C180 184 510 158 900 88S1300 115 1660 139L1660 315C1300 310 1290 296 900 294S180 374-220 330Z" opacity=".62"/>
+    </g>
+    <g class="norse-aurora-rays norse-aurora-rays-back" data-aurora-rays="back" mask="url(#norse-aurora-mist)" filter="url(#norse-aurora-ray-back-soft)"></g>
+    <g class="norse-aurora-folds" mask="url(#norse-aurora-mist)" filter="url(#norse-aurora-soft)">
       <path data-aurora-layer="0" fill="url(#norse-aurora-mint)" d="M-220 183C180 164 338 312 740 267S1200 145 1660 168L1660 188C1200 205 1142 340 740 335S180 194-220 203Z"/>
       <path data-aurora-layer="1" fill="url(#norse-aurora-ice)" d="M-220 294C180 324 510 298 900 228S1300 255 1660 279L1660 295C1300 293 1290 276 900 274S180 354-220 310Z" opacity=".82"/>
       <path data-aurora-layer="2" fill="url(#norse-aurora-pearl)" d="M-220 168C230 149 520 250 860 272S1320 261 1660 213L1660 225C1320 279 1200 322 860 300S230 169-220 180Z" opacity=".62"/>
     </g>
+    <g class="norse-aurora-rays norse-aurora-rays-front" data-aurora-rays="front" mask="url(#norse-aurora-mist)" filter="url(#norse-aurora-ray-front-soft)"></g>
     <g class="norse-aurora-traces" mask="url(#norse-aurora-mist)" fill="none" stroke="url(#norse-aurora-edge)" stroke-width="1.4" filter="url(#norse-aurora-edge-soft)">
       <path data-aurora-edge="0" d="M-220 196C180 182 338 329 740 302S1200 173 1660 180"/>
       <path data-aurora-edge="1" d="M-220 304C180 341 510 319 900 254S1300 279 1660 289" opacity=".65"/>

@@ -1340,7 +1340,10 @@
     var pointerX = 0;
     var pointerY = 0;
     var pageActive = true;
-    var touchWiping = false;
+    var gesture = null;
+    var holdTimer = 0;
+    var strokeSerial = 0;
+    var guide = photo.querySelector('[data-window-guide]');
     var strokes = [];
     var currentStroke = null;
     var photoWidth = 0;
@@ -1356,12 +1359,15 @@
     function hideLens() {
       window.cancelAnimationFrame(frame);
       window.clearTimeout(expiryTimer);
+      window.clearTimeout(holdTimer);
       frame = expiryTimer = 0;
+      var ended = gesture;
+      gesture = null;
+      releaseCapture(ended);
       strokes.forEach(removeStroke);
       strokes = [];
       currentStroke = null;
-      touchWiping = false;
-      photo.classList.remove('is-lens-active');
+      photo.classList.remove('is-lens-active', 'is-window-wiping');
     }
 
     function removeStroke(stroke) {
@@ -1373,6 +1379,9 @@
       window.clearTimeout(expiryTimer);
       expiryTimer = 0;
       if (!strokes.length) { photo.classList.remove('is-lens-active'); return; }
+      var earliest = Infinity;
+      strokes.forEach(function (stroke) { earliest = Math.min(earliest, stroke.expires); });
+      if (earliest === Infinity) return;
       expiryTimer = window.setTimeout(function () {
         expiryTimer = 0;
         var now = performance.now();
@@ -1383,20 +1392,20 @@
           return false;
         });
         scheduleExpiry();
-      }, Math.max(1, strokes[0].expires - performance.now()));
+      }, Math.max(1, earliest - performance.now()));
     }
 
     function createStroke(x, y, brush, now) {
       var clear = document.createElementNS(svgNamespace, 'path');
       var fog = document.createElementNS(svgNamespace, 'path');
-      clear.setAttribute('class', 'folio-window-wipe');
-      fog.setAttribute('class', 'folio-window-wipe');
+      clear.setAttribute('class', 'folio-window-wipe is-writing');
+      fog.setAttribute('class', 'folio-window-wipe is-writing');
       clear.setAttribute('stroke-width', brush.toFixed(1));
-      fog.setAttribute('stroke-width', (brush + 22).toFixed(1));
+      fog.setAttribute('stroke-width', (brush + 14).toFixed(1));
       clear.style.animationDuration = fog.style.animationDuration = lifetime + 'ms';
       wipes.appendChild(clear);
       mist.appendChild(fog);
-      var stroke = { clear: clear, fog: fog, points: [[x, y]], born: now, expires: now + lifetime };
+      var stroke = { clear: clear, fog: fog, points: [[x, y]], born: now, expires: Infinity, held: true };
       strokes.push(stroke);
       // Only a few recent hand-width strokes remain; the glass never clears globally.
       if (strokes.length > 10) removeStroke(strokes.shift());
@@ -1419,10 +1428,11 @@
     function renderLens() {
       frame = 0;
       if (!canReveal()) { hideLens(); return; }
+      if (!gesture || !gesture.started) return;
       var rect = photo.getBoundingClientRect();
       var x = Math.max(0, Math.min(rect.width, pointerX - rect.left));
       var y = Math.max(0, Math.min(rect.height, pointerY - rect.top));
-      var brush = Math.max(76, Math.min(138, rect.width * .095));
+      var brush = Math.max(58, Math.min(102, rect.width * .072));
       var now = performance.now();
       if (rect.width !== photoWidth || rect.height !== photoHeight) {
         photoWidth = rect.width;
@@ -1442,51 +1452,116 @@
       var last = currentStroke ? currentStroke.points[currentStroke.points.length - 1] : null;
       var distance = last ? Math.hypot(x - last[0], y - last[1]) : Infinity;
       if (!currentStroke || now - currentStroke.born > 400 || currentStroke.points.length >= 16 || distance > brush * 2.4) {
-        currentStroke = createStroke(x, y, brush * (.97 + Math.sin(strokes.length * 1.7) * .035), now);
+        var firstX = x, firstY = y;
+        if (!gesture.rendered) {
+          var originX = Math.max(0, Math.min(rect.width, gesture.startX - rect.left));
+          var originY = Math.max(0, Math.min(rect.height, gesture.startY - rect.top));
+          if (Math.hypot(x - originX, y - originY) <= brush * 2.4) { firstX = originX; firstY = originY; }
+        }
+        currentStroke = createStroke(firstX, firstY, brush * (.96 + Math.sin(strokeSerial++ * 1.7) * .045), now);
+        if (firstX !== x || firstY !== y) currentStroke.points.push([x, y]);
       } else if (distance >= 5) {
         currentStroke.points.push([x, y]);
       }
       var path = strokePath(currentStroke.points);
       currentStroke.clear.setAttribute('d', path);
       currentStroke.fog.setAttribute('d', path);
+      gesture.rendered = true;
       photo.classList.add('is-lens-active');
     }
 
     function moveLens(event) {
       if (!canReveal()) { hideLens(); return; }
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      if (gesture.type !== 'touch' && !(event.buttons & gesture.buttonMask)) { finishWipe(false); return; }
+      var distance = Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY);
+      if (!gesture.armed) {
+        if (distance > 10) finishWipe(false);
+        return;
+      }
+      if (!gesture.started && distance < 8) return;
+      var bounds = photo.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        finishWipe(false);
+        return;
+      }
+      gesture.started = true;
+      photo.classList.add('is-window-wiping');
       pointerX = event.clientX;
       pointerY = event.clientY;
       if (!frame) frame = window.requestAnimationFrame(renderLens);
     }
 
-    photo.addEventListener('pointerenter', function (event) {
-      if (finePointer.matches && event.pointerType !== 'touch') moveLens(event);
-    }, { passive: true });
-    photo.addEventListener('pointermove', function (event) {
-      if ((finePointer.matches && event.pointerType !== 'touch') || touchWiping) moveLens(event);
-    }, { passive: true });
-    function finishWipe() {
-      window.cancelAnimationFrame(frame);
-      // A quick tap can lift before its first frame; still leave a small clear patch.
-      if (frame && touchWiping) renderLens();
-      frame = 0;
-      currentStroke = null;
-      touchWiping = false;
+    function releaseCapture(ended) {
+      if (!ended || !photo.releasePointerCapture) return;
+      try { if (photo.hasPointerCapture(ended.pointerId)) photo.releasePointerCapture(ended.pointerId); } catch (_) {}
     }
-    photo.addEventListener('pointerleave', finishWipe, { passive: true });
-    photo.addEventListener('pointercancel', function () {
-      touchWiping = false;
-      finishWipe();
-    }, { passive: true });
-    photo.addEventListener('pointerup', function (event) {
-      if (event.pointerType === 'touch' || !finePointer.matches) finishWipe();
-    }, { passive: true });
+
+    function capturePointer() {
+      if (!gesture || !photo.setPointerCapture) return;
+      try { photo.setPointerCapture(gesture.pointerId); } catch (_) {}
+    }
+
+    function finishWipe(flush) {
+      window.cancelAnimationFrame(frame);
+      if (flush && frame && gesture && gesture.started) renderLens();
+      frame = 0;
+      window.clearTimeout(holdTimer);
+      var ended = gesture;
+      gesture = null;
+      releaseCapture(ended);
+      currentStroke = null;
+      var now = performance.now();
+      strokes.forEach(function (stroke) {
+        if (!stroke.held) return;
+        stroke.held = false;
+        stroke.expires = now + lifetime;
+        stroke.clear.classList.remove('is-writing');
+        stroke.fog.classList.remove('is-writing');
+      });
+      photo.classList.remove('is-window-wiping');
+      scheduleExpiry();
+    }
+
+    function interactiveTarget(target) {
+      return target.closest && target.closest('a, button, input, textarea, select, [contenteditable], [data-ninefold], .folio-cover-notes');
+    }
+    photo.addEventListener('pointermove', moveLens, { passive: true });
+    photo.addEventListener('pointerleave', function () { finishWipe(false); }, { passive: true });
+    photo.addEventListener('pointercancel', function () { finishWipe(false); }, { passive: true });
+    photo.addEventListener('lostpointercapture', function () { if (gesture) finishWipe(false); }, { passive: true });
     photo.addEventListener('pointerdown', function (event) {
-      if ((finePointer.matches && event.pointerType !== 'touch') || !canReveal()) return;
-      touchWiping = true;
-      moveLens(event);
+      if (gesture || !canReveal() || interactiveTarget(event.target) || (event.button !== 0 && event.button !== 1)) return;
+      var touch = event.pointerType === 'touch';
+      gesture = { pointerId: event.pointerId, type: event.pointerType, buttonMask: event.button === 1 ? 4 : 1,
+        startX: event.clientX, startY: event.clientY, armed: !touch, started: false, rendered: false };
+      if (touch) {
+        holdTimer = window.setTimeout(function () {
+          if (!gesture || !canReveal()) { hideLens(); return; }
+          gesture.armed = true;
+          capturePointer();
+        }, 350);
+      } else {
+        // Middle-button wiping must not start the browser's automatic scrolling.
+        if (event.button === 1) event.preventDefault();
+        capturePointer();
+      }
+    });
+    photo.addEventListener('auxclick', function (event) {
+      if (event.button === 1 && canReveal() && !interactiveTarget(event.target)) event.preventDefault();
+    });
+    photo.addEventListener('contextmenu', function (event) {
+      if (gesture && gesture.type === 'touch' && gesture.armed) event.preventDefault();
+    });
+    window.addEventListener('pointerup', function (event) {
+      if (gesture && gesture.pointerId === event.pointerId) finishWipe(true);
     }, { passive: true });
-    function syncLens() { if (!canReveal()) hideLens(); }
+    window.addEventListener('blur', function () { finishWipe(false); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') hideLens(); });
+    function syncLens() {
+      if (!canReveal()) hideLens();
+      if (guide) guide.hidden = gardenMotionIsLite() || (motion && motion.isEconomy());
+    }
     if (motion) motion.subscribe(syncLens);
     document.addEventListener('visibilitychange', syncLens);
     reduceMotion.addEventListener('change', syncLens);
@@ -1494,6 +1569,7 @@
     window.addEventListener('scroll', hideLens, { passive: true });
     window.addEventListener('pagehide', function () { pageActive = false; hideLens(); });
     window.addEventListener('pageshow', function () { pageActive = true; });
+    syncLens();
   }
 
   function setupHeroFog() {

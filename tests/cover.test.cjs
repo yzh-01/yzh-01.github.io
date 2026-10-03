@@ -9,7 +9,9 @@ function fixture(t, options = {}) {
   const dom = new JSDOM(`<section class="folio-cover" data-motion-section>
     <div data-norse-drift></div>
     <svg><path data-aurora-layer="0"/><path data-aurora-layer="1"/>
-      <path data-aurora-edge="0"/><path data-aurora-edge="1"/></svg>
+      <path data-aurora-edge="0"/><path data-aurora-edge="1"/>
+      <path data-aurora-veil="0"/><path data-aurora-veil="1"/>
+      <g data-aurora-rays="back"></g><g data-aurora-rays="front"></g></svg>
     <button data-norse-awaken hidden aria-pressed="false"><span data-norse-action></span></button>
     <aside data-home-quote-card><blockquote data-home-quote></blockquote>
       <strong data-home-quote-author></strong><cite data-home-quote-work></cite>
@@ -122,6 +124,8 @@ test('reduced motion and missing viewport observation still expose manual contro
   assert.equal(button.getAttribute('aria-pressed'), 'true');
   const layer = f.cover.querySelector('[data-aurora-layer]');
   assert.match(layer.getAttribute('d'), /^M.+Z$/);
+  assert.match(f.cover.querySelector('[data-aurora-veil]').getAttribute('d'), /^M.+Z$/);
+  assert.ok(f.cover.querySelector('[data-aurora-rays="front"]').children.length > 0);
   assert.equal(f.loops[0].active, false);
   button.click();
   assert.equal(f.cover.classList.contains('is-norse-awake'), false);
@@ -132,25 +136,36 @@ test('the aurora switch starts and stops drawing, including an already queued pa
   const f = fixture(t); f.visible(true);
   const loop = f.loops[0], layer = f.cover.querySelector('[data-aurora-layer]');
   const edge = f.cover.querySelector('[data-aurora-edge]');
+  const veil = f.cover.querySelector('[data-aurora-veil]');
+  const rays = f.cover.querySelector('[data-aurora-rays="front"]');
   const button = f.window.document.querySelector('[data-norse-awaken]');
   assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
   loop.render(50, 50); assert.equal(layer.getAttribute('d'), null); assert.equal(edge.getAttribute('d'), null);
+  assert.equal(veil.getAttribute('d'), null); assert.equal(rays.children.length, 0);
   button.click();
   const first = layer.getAttribute('d');
   const firstEdge = edge.getAttribute('d');
+  const firstVeil = veil.getAttribute('d'), firstRay = rays.firstElementChild.getAttribute('d');
+  const rayCount = rays.children.length;
+  assert.ok(rayCount > 0);
   assert.equal(loop.options.fps, 20); assert.equal(loop.active, true);
   loop.render(50, 50); assert.notEqual(layer.getAttribute('d'), first);
   assert.notEqual(edge.getAttribute('d'), firstEdge);
+  assert.notEqual(veil.getAttribute('d'), firstVeil);
+  assert.notEqual(rays.firstElementChild.getAttribute('d'), firstRay);
   button.click();
   const last = layer.getAttribute('d');
   const lastEdge = edge.getAttribute('d');
+  const lastVeil = veil.getAttribute('d'), lastRay = rays.firstElementChild.getAttribute('d');
   assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
   loop.render(100, 50); assert.equal(layer.getAttribute('d'), last);
   assert.equal(edge.getAttribute('d'), lastEdge);
+  assert.equal(veil.getAttribute('d'), lastVeil);
+  assert.equal(rays.firstElementChild.getAttribute('d'), lastRay);
   assert.equal(button.getAttribute('aria-pressed'), 'false');
   assert.equal(f.cover.classList.contains('is-norse-awake'), false);
   assert.equal(button.querySelector('[data-norse-action]').textContent, '点亮极光');
-  button.click(); assert.equal(loop.active, true);
+  button.click(); assert.equal(loop.active, true); assert.equal(rays.children.length, rayCount);
 });
 
 test('an illuminated aurora pauses offscreen, while scrolling and in quiet or economy modes', t => {
@@ -179,6 +194,12 @@ test('the switch reveals a static aurora when the shared motion controller is un
   assert.equal(f.cover.classList.contains('is-norse-awake'), true);
   assert.match(layer.getAttribute('d'), /^M.+Z$/);
   assert.match(f.cover.querySelector('[data-aurora-edge]').getAttribute('d'), /^M.+C/);
+  const rays = [...f.cover.querySelectorAll('[data-aurora-rays] path')];
+  assert.ok(rays.length > 0);
+  for (const ray of rays) {
+    assert.match(ray.getAttribute('d'), /^M.+Z$/);
+    assert.doesNotMatch(ray.getAttribute('d'), /NaN|Infinity/);
+  }
   const still = layer.getAttribute('d'); f.advance(2000);
   assert.equal(layer.getAttribute('d'), still);
   assert.equal(f.frames.size, 0); assert.equal(f.loops.length, 0);
