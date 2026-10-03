@@ -1,3 +1,46 @@
+{% if is_home() %}
+<footer class="g-footer garden-end" id="garden-end" data-motion-section aria-labelledby="garden-end-title">
+  <div class="garden-end-inner">
+    <div class="garden-end-chapter" aria-hidden="true"><span><i></i> 05 / LAST LIGHT</span><b></b><span>THE ROOTS REMEMBER</span></div>
+    <div class="garden-end-main">
+      <div class="garden-end-note">
+        <p class="garden-end-kicker">A GARDEN, NEVER FINISHED</p>
+        <h2 id="garden-end-title">故事未完，<br><em>花园仍在生长。</em></h2>
+        <p class="garden-end-copy">{{ config.subtitle }}</p>
+      </div>
+      <nav class="garden-end-nav" aria-label="页尾导航">
+        <div class="garden-end-links">
+          <h3>继续阅读</h3>
+          <a href="{{ url_for('archives/') }}">文章归档 <span aria-hidden="true">↗</span></a>
+          <a href="{{ url_for('garden-log/') }}">花园日志 <span aria-hidden="true">↗</span></a>
+          <a href="{{ url_for('about/') }}">关于我 <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="garden-end-links">
+          <h3>保持连接</h3>
+          <a href="{{ url_for('atom.xml') }}">RSS 订阅 <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/yzh-01" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+          <a href="{{ url_for('search/') }}">站内搜索 <span aria-hidden="true">↗</span></a>
+        </div>
+      </nav>
+      <a class="garden-end-return" href="#hello">
+        <svg class="garden-end-orbit" viewBox="0 0 140 140" fill="none" aria-hidden="true">
+          <circle class="garden-end-orbit-track" cx="70" cy="70" r="44"/>
+          <path class="garden-end-orbit-arc" d="M19 77A52 52 0 0 1 98 26M121 62A52 52 0 0 1 42 114"/>
+          <path class="garden-end-orbit-axis" d="M70 9v12m0 98v12M9 70h12m98 0h12"/>
+          <path class="garden-end-orbit-arrow" d="M70 88V51m-12 12 12-12 12 12"/>
+          <g class="garden-end-orbit-points"><circle cx="70" cy="26" r="2"/><circle cx="109" cy="90" r="1.5"/><circle cx="39" cy="101" r="1.5"/></g>
+        </svg>
+        <span>回到故事的开头</span>
+        <small>BACK TO THE BEGINNING</small>
+      </a>
+    </div>
+    <div class="garden-end-baseline">
+      <p><span class="g-footer-author">{{ config.author }}</span><span>&copy; {{ moment().format('YYYY') }}</span><span class="garden-end-motto">THE GARDEN CONTINUES.</span></p>
+      <a href="{{ url_for('sitemap.xml') }}">站点地图 <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+</footer>
+{% else %}
 <footer class="g-footer">
   <div class="g-footer-inner">
     <span>&copy; {{ moment().format('YYYY') }} <span class="g-footer-author">{{ config.author }}</span></span>
@@ -11,3 +54,4 @@
     </div>
   </div>
 </footer>
+{% endif %}

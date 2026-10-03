@@ -138,19 +138,6 @@
 .is-home .g-nav-links a.active::before { content: ">"; margin-right: 5px; color: var(--moss-bright); }
 .is-home .g-scroll-track { display: none; }
 
-.is-home .g-footer {
-  margin-top: 0;
-  color: var(--dim);
-  background: var(--void);
-  border-top: 4px solid var(--bone);
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.is-home .g-footer-inner { width: var(--page); max-width: none; padding: 14px 0; }
-.is-home .g-footer-author, .is-home .g-footer a { color: var(--bone); }
-
 /* Hero — an off-axis title suspended in the clearing after rain. */
 .folio-cover {
   position: relative;
