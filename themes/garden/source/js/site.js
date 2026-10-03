@@ -1330,13 +1330,23 @@
   function setupHomeWindow() {
     var photo = document.querySelector('[data-home-window]');
     var lens = photo ? photo.querySelector('[data-home-lens]') : null;
-    if (!photo || !lens) return;
+    var wipes = lens ? lens.querySelector('[data-window-wipes]') : null;
+    var mist = lens ? lens.querySelector('[data-window-mist]') : null;
+    if (!photo || !lens || !wipes || !mist) return;
+    var images = Array.prototype.slice.call(lens.querySelectorAll('image'));
 
     var frame = 0;
-    var touchTimer = 0;
+    var expiryTimer = 0;
     var pointerX = 0;
     var pointerY = 0;
     var pageActive = true;
+    var touchWiping = false;
+    var strokes = [];
+    var currentStroke = null;
+    var photoWidth = 0;
+    var photoHeight = 0;
+    var lifetime = 4600;
+    var svgNamespace = 'http://www.w3.org/2000/svg';
 
     function canReveal() {
       return pageActive && !document.hidden && !gardenMotionIsLite() &&
@@ -1345,9 +1355,65 @@
 
     function hideLens() {
       window.cancelAnimationFrame(frame);
-      window.clearTimeout(touchTimer);
-      frame = touchTimer = 0;
+      window.clearTimeout(expiryTimer);
+      frame = expiryTimer = 0;
+      strokes.forEach(removeStroke);
+      strokes = [];
+      currentStroke = null;
+      touchWiping = false;
       photo.classList.remove('is-lens-active');
+    }
+
+    function removeStroke(stroke) {
+      stroke.clear.remove();
+      stroke.fog.remove();
+    }
+
+    function scheduleExpiry() {
+      window.clearTimeout(expiryTimer);
+      expiryTimer = 0;
+      if (!strokes.length) { photo.classList.remove('is-lens-active'); return; }
+      expiryTimer = window.setTimeout(function () {
+        expiryTimer = 0;
+        var now = performance.now();
+        strokes = strokes.filter(function (stroke) {
+          if (now < stroke.expires) return true;
+          removeStroke(stroke);
+          if (currentStroke === stroke) currentStroke = null;
+          return false;
+        });
+        scheduleExpiry();
+      }, Math.max(1, strokes[0].expires - performance.now()));
+    }
+
+    function createStroke(x, y, brush, now) {
+      var clear = document.createElementNS(svgNamespace, 'path');
+      var fog = document.createElementNS(svgNamespace, 'path');
+      clear.setAttribute('class', 'folio-window-wipe');
+      fog.setAttribute('class', 'folio-window-wipe');
+      clear.setAttribute('stroke-width', brush.toFixed(1));
+      fog.setAttribute('stroke-width', (brush + 22).toFixed(1));
+      clear.style.animationDuration = fog.style.animationDuration = lifetime + 'ms';
+      wipes.appendChild(clear);
+      mist.appendChild(fog);
+      var stroke = { clear: clear, fog: fog, points: [[x, y]], born: now, expires: now + lifetime };
+      strokes.push(stroke);
+      // Only a few recent hand-width strokes remain; the glass never clears globally.
+      if (strokes.length > 10) removeStroke(strokes.shift());
+      scheduleExpiry();
+      return stroke;
+    }
+
+    function strokePath(points) {
+      var path = 'M' + points[0][0].toFixed(1) + ' ' + points[0][1].toFixed(1);
+      if (points.length === 1) return path + 'l.1 .1';
+      for (var i = 1; i < points.length - 1; i += 1) {
+        var point = points[i], next = points[i + 1];
+        path += 'Q' + point[0].toFixed(1) + ' ' + point[1].toFixed(1) + ' ' +
+          ((point[0] + next[0]) / 2).toFixed(1) + ' ' + ((point[1] + next[1]) / 2).toFixed(1);
+      }
+      var last = points[points.length - 1];
+      return path + 'L' + last[0].toFixed(1) + ' ' + last[1].toFixed(1);
     }
 
     function renderLens() {
@@ -1356,31 +1422,33 @@
       var rect = photo.getBoundingClientRect();
       var x = Math.max(0, Math.min(rect.width, pointerX - rect.left));
       var y = Math.max(0, Math.min(rect.height, pointerY - rect.top));
-      var radius = Math.max(100, Math.min(220, rect.width * .15));
-      var sourceX = -Math.min(60, rect.width * .08);
-      var sourceY = rect.height + 40;
-      var dx = x - sourceX;
-      var dy = y - sourceY;
-      var distance = Math.sqrt(dx * dx + dy * dy);
-      var halfAngle = Math.max(4, Math.min(24, Math.atan2(radius * .65, distance) * 180 / Math.PI));
-      var angle = Math.atan2(dy, dx) * 180 / Math.PI + 90 - halfAngle;
-
-      function setPixels(name, value) { lens.style.setProperty('--spot-' + name, value.toFixed(1) + 'px'); }
-      function setDegrees(name, value) { lens.style.setProperty('--spot-' + name, value.toFixed(2) + 'deg'); }
-      setPixels('x', x);
-      setPixels('y', y);
-      setPixels('radius-x', radius);
-      setPixels('radius-y', radius * .72);
-      setPixels('source-x', sourceX);
-      setPixels('source-y', sourceY);
-      setPixels('range-start', distance * .15);
-      setPixels('range-middle', Math.max(0, distance - radius * .35));
-      setPixels('range-end', distance + radius);
-      setDegrees('angle', angle);
-      setDegrees('edge', halfAngle * .28);
-      setDegrees('middle', halfAngle);
-      setDegrees('inner-edge', halfAngle * 1.72);
-      setDegrees('spread', halfAngle * 2);
+      var brush = Math.max(76, Math.min(138, rect.width * .095));
+      var now = performance.now();
+      if (rect.width !== photoWidth || rect.height !== photoHeight) {
+        photoWidth = rect.width;
+        photoHeight = rect.height;
+        lens.setAttribute('viewBox', '0 0 ' + rect.width.toFixed(1) + ' ' + rect.height.toFixed(1));
+        // The cats sit right of centre in the original photos; keep them in portrait crops.
+        var scale = Math.max(rect.width / 1600, rect.height / 900);
+        var imageWidth = 1600 * scale, imageHeight = 900 * scale;
+        var align = rect.width <= 768 ? .68 : .5;
+        images.forEach(function (image) {
+          image.setAttribute('width', imageWidth.toFixed(1));
+          image.setAttribute('height', imageHeight.toFixed(1));
+          image.setAttribute('x', ((rect.width - imageWidth) * align).toFixed(1));
+          image.setAttribute('y', ((rect.height - imageHeight) * .5).toFixed(1));
+        });
+      }
+      var last = currentStroke ? currentStroke.points[currentStroke.points.length - 1] : null;
+      var distance = last ? Math.hypot(x - last[0], y - last[1]) : Infinity;
+      if (!currentStroke || now - currentStroke.born > 400 || currentStroke.points.length >= 16 || distance > brush * 2.4) {
+        currentStroke = createStroke(x, y, brush * (.97 + Math.sin(strokes.length * 1.7) * .035), now);
+      } else if (distance >= 5) {
+        currentStroke.points.push([x, y]);
+      }
+      var path = strokePath(currentStroke.points);
+      currentStroke.clear.setAttribute('d', path);
+      currentStroke.fog.setAttribute('d', path);
       photo.classList.add('is-lens-active');
     }
 
@@ -1395,18 +1463,28 @@
       if (finePointer.matches && event.pointerType !== 'touch') moveLens(event);
     }, { passive: true });
     photo.addEventListener('pointermove', function (event) {
-      if (finePointer.matches && event.pointerType !== 'touch') moveLens(event);
+      if ((finePointer.matches && event.pointerType !== 'touch') || touchWiping) moveLens(event);
     }, { passive: true });
-    photo.addEventListener('pointerleave', function (event) {
-      // Touch emits pointerleave as soon as the finger lifts; keep its brief reveal.
-      if (event.pointerType !== 'touch') hideLens();
+    function finishWipe() {
+      window.cancelAnimationFrame(frame);
+      // A quick tap can lift before its first frame; still leave a small clear patch.
+      if (frame && touchWiping) renderLens();
+      frame = 0;
+      currentStroke = null;
+      touchWiping = false;
+    }
+    photo.addEventListener('pointerleave', finishWipe, { passive: true });
+    photo.addEventListener('pointercancel', function () {
+      touchWiping = false;
+      finishWipe();
     }, { passive: true });
-    photo.addEventListener('pointercancel', hideLens, { passive: true });
+    photo.addEventListener('pointerup', function (event) {
+      if (event.pointerType === 'touch' || !finePointer.matches) finishWipe();
+    }, { passive: true });
     photo.addEventListener('pointerdown', function (event) {
       if ((finePointer.matches && event.pointerType !== 'touch') || !canReveal()) return;
+      touchWiping = true;
       moveLens(event);
-      window.clearTimeout(touchTimer);
-      touchTimer = window.setTimeout(hideLens, 1200);
     }, { passive: true });
     function syncLens() { if (!canReveal()) hideLens(); }
     if (motion) motion.subscribe(syncLens);
@@ -1912,7 +1990,7 @@
     if (!layer || gardenMotionIsLite()) return;
     document.addEventListener('pointerdown', function (event) {
       if (event.button !== 0) return;
-      if (event.target.closest && event.target.closest('[data-ash-canvas]')) return;
+      if (event.target.closest && event.target.closest('[data-ash-canvas], [data-home-window]')) return;
       var ripple = document.createElement('span');
       ripple.className = 'garden-ripple';
       ripple.textContent = '[+]';

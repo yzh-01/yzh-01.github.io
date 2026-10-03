@@ -8,7 +8,8 @@ const scripts = path.join(__dirname, '../themes/garden/source/js');
 function fixture(t, options = {}) {
   const dom = new JSDOM(`<section class="folio-cover" data-motion-section>
     <div data-norse-drift></div>
-    <svg><path data-aurora-layer="0"/><path data-aurora-layer="1"/></svg>
+    <svg><path data-aurora-layer="0"/><path data-aurora-layer="1"/>
+      <path data-aurora-edge="0"/><path data-aurora-edge="1"/></svg>
     <button data-norse-awaken hidden aria-pressed="false"><span data-norse-action></span></button>
     <aside data-home-quote-card><blockquote data-home-quote></blockquote>
       <strong data-home-quote-author></strong><cite data-home-quote-work></cite>
@@ -130,17 +131,22 @@ test('reduced motion and missing viewport observation still expose manual contro
 test('the aurora switch starts and stops drawing, including an already queued paint', t => {
   const f = fixture(t); f.visible(true);
   const loop = f.loops[0], layer = f.cover.querySelector('[data-aurora-layer]');
+  const edge = f.cover.querySelector('[data-aurora-edge]');
   const button = f.window.document.querySelector('[data-norse-awaken]');
   assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
-  loop.render(50, 50); assert.equal(layer.getAttribute('d'), null);
+  loop.render(50, 50); assert.equal(layer.getAttribute('d'), null); assert.equal(edge.getAttribute('d'), null);
   button.click();
   const first = layer.getAttribute('d');
+  const firstEdge = edge.getAttribute('d');
   assert.equal(loop.options.fps, 20); assert.equal(loop.active, true);
   loop.render(50, 50); assert.notEqual(layer.getAttribute('d'), first);
+  assert.notEqual(edge.getAttribute('d'), firstEdge);
   button.click();
   const last = layer.getAttribute('d');
+  const lastEdge = edge.getAttribute('d');
   assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
   loop.render(100, 50); assert.equal(layer.getAttribute('d'), last);
+  assert.equal(edge.getAttribute('d'), lastEdge);
   assert.equal(button.getAttribute('aria-pressed'), 'false');
   assert.equal(f.cover.classList.contains('is-norse-awake'), false);
   assert.equal(button.querySelector('[data-norse-action]').textContent, '点亮极光');
@@ -172,6 +178,7 @@ test('the switch reveals a static aurora when the shared motion controller is un
   assert.equal(button.hidden, false); button.click();
   assert.equal(f.cover.classList.contains('is-norse-awake'), true);
   assert.match(layer.getAttribute('d'), /^M.+Z$/);
+  assert.match(f.cover.querySelector('[data-aurora-edge]').getAttribute('d'), /^M.+C/);
   const still = layer.getAttribute('d'); f.advance(2000);
   assert.equal(layer.getAttribute('d'), still);
   assert.equal(f.frames.size, 0); assert.equal(f.loops.length, 0);

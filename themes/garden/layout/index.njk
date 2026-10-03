@@ -197,10 +197,19 @@
   </div>
 
   <section class="folio-cover" id="hello" data-home-window data-motion-section aria-labelledby="folio-title">
-    <div class="folio-cover-lens" data-home-lens aria-hidden="true">
-      <img class="folio-photo-light" src="{{ url_for('images/garden-bg-light-cat.jpg') }}" width="1600" height="900" alt="">
-      <img class="folio-photo-dark" src="{{ url_for('images/garden-bg-dark-cat.jpg') }}" width="1600" height="900" alt="">
-    </div>
+    <svg class="folio-cover-lens" data-home-lens viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <defs>
+        <mask id="folio-window-clear" x="0" y="0" width="100%" height="100%" maskUnits="userSpaceOnUse" style="mask-type: alpha">
+          <g data-window-wipes fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"/>
+        </mask>
+      </defs>
+      <g class="folio-window-mist" data-window-mist fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <g mask="url(#folio-window-clear)">
+        <image class="folio-photo-light" href="{{ url_for('images/garden-bg-light-cat.jpg') }}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+        <image class="folio-photo-dark" href="{{ url_for('images/garden-bg-dark-cat.jpg') }}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+        <rect class="folio-window-glaze" width="100%" height="100%"/>
+      </g>
+    </svg>
     <div class="folio-cover-shade" aria-hidden="true"></div>
     {{ partial('_partial/norse-aurora.njk') }}
 

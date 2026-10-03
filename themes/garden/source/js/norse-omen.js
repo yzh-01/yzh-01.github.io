@@ -14,6 +14,12 @@
   var frame = 0;
   var x = 0, y = 0, targetX = 0, targetY = 0, last = 0;
   var aurora = Array.prototype.slice.call(cover.querySelectorAll('[data-aurora-layer]'));
+  var auroraEdges = Array.prototype.slice.call(cover.querySelectorAll('[data-aurora-edge]'));
+  var auroraProfiles = [
+    { height: 225, wave: 4.4, rise: 55, offset: -.5, tilt: -24, width: 68, speed: 1 },
+    { height: 286, wave: 3.5, rise: 34, offset: 1.6, tilt: 54, width: 46, speed: -.7 },
+    { height: 245, wave: 2.8, rise: 40, offset: -1.6, tilt: -46, width: 28, speed: .55 }
+  ];
   var phase = 0;
   var skyLoop;
   var awake = button.getAttribute('aria-pressed') === 'true';
@@ -32,17 +38,23 @@
   }
 
   function paintAurora(now, elapsed) {
-    phase += elapsed * .00016;
+    phase += elapsed * .0001;
     aurora.forEach(function (layer, index) {
-      var top = [], bottom = [];
-      for (var i = 0; i < 7; i += 1) {
-        var position = -.15 + i * 1.3 / 6;
-        var height = 128 + index * 40 + Math.sin(position * 5.2 + phase + index * .85) * 58 +
-          Math.sin(position * 9 - phase * .6) * 17;
-        top.push([position * 1440, height]);
-        bottom.push([position * 1440, height + 168 + index * 16 + Math.cos(position * 4 + phase) * 26]);
+      var top = [], bottom = [], edge = [];
+      var profile = auroraProfiles[index % auroraProfiles.length];
+      for (var i = 0; i < 11; i += 1) {
+        var position = -.16 + i * 1.32 / 10;
+        var height = profile.height + profile.tilt * (position - .5) +
+          Math.sin(position * profile.wave + profile.offset + phase * profile.speed) * profile.rise +
+          Math.sin(position * 7.2 - phase * .4 + index) * 8;
+        var taper = Math.sin(Math.max(0, Math.min(1, position)) * Math.PI);
+        var width = profile.width * (.28 + .72 * Math.pow(taper, .85));
+        top.push([position * 1440, height - width * .5]);
+        bottom.push([position * 1440, height + width * .5]);
+        edge.push([position * 1440, height + width * .12]);
       }
       layer.setAttribute('d', curve(top, true) + curve(bottom.reverse(), false) + 'Z');
+      if (auroraEdges[index]) auroraEdges[index].setAttribute('d', curve(edge, true));
     });
   }
 
