@@ -102,26 +102,48 @@
 .folio-cover.is-norse-awake .norse-horizon { opacity: 1; }
 .folio-cover.is-norse-awake .norse-corona { opacity: 1; scale: 1.12; }
 .folio-cover.is-norse-awake .norse-realms { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
-/* Notes share a baseline and a single soft divider, without floating panels. */
-.folio-cover-notes { position: relative; z-index: 5; display: grid; grid-template-columns: 1fr 1.25fr; gap: 80px; width: var(--cover-width); margin: 0 auto; padding: 28px 0 58px; border-top: 1px solid var(--line); }
-.folio-cover .folio-cover-copy { position: static; width: auto; transform: none; pointer-events: auto; }
-.folio-cover .folio-cover-role { margin: 0 0 7px; color: var(--bone); font: 15px/1.8 var(--sans); letter-spacing: .1em; }
-.folio-cover-description { margin: 0; color: var(--dim); font: 12px/1.9 var(--sans); }
+/* A compact signal-and-echo composition continues the cover's orbital field. */
+.folio-cover-notes { position: relative; z-index: 5; display: grid; grid-template-columns: 224px minmax(0, 1fr); align-items: center; gap: 28px; width: var(--cover-width); margin: 0 auto; padding: 30px 0 48px; border-top: 1px solid var(--line); }
+.folio-cover .folio-cover-copy { position: static; min-width: 0; width: auto; transform: none; pointer-events: auto; }
+.folio-cover .folio-cover-role { margin: 0 0 18px; color: var(--dim); font: 400 clamp(16px, 1.35vw, 20px)/1.65 var(--mono); letter-spacing: .025em; }
+.folio-cover .folio-cover-role em { color: var(--bone); border-bottom-color: color-mix(in srgb, var(--g-norse-ink) 55%, transparent); }
+.folio-cover .folio-cover-terminal { color: var(--dim); font-size: 9px; line-height: 1.9; }
+.folio-cover .folio-cover-terminal b { color: var(--g-norse-ink); font-weight: 400; }
 .folio .norse-path { margin-top: 14px; color: var(--g-norse-ink); font-size: 10px; }
-.folio-cover .folio-cover-fragment { position: relative; inset: auto; width: auto; min-width: 0; min-height: 170px; perspective: none; }
-.folio-cover .folio-cover-fragment::before, .folio-cover .folio-cover-fragment::after,
+.folio-cover .folio-cover-fragment { position: relative; inset: auto; width: auto; min-width: 0; min-height: 210px; padding-right: 164px; perspective: none; }
+.folio-cover .folio-cover-fragment::before { display: block; inset: 43px 9px auto auto; z-index: 1; width: 130px; color: color-mix(in srgb, var(--g-norse-ink) 40%, transparent); font: 500 74px/1 var(--tall); letter-spacing: -.035em; text-align: center; pointer-events: none; }
+.folio-cover .folio-cover-fragment::after,
 .folio-cover .folio-quote-film::before, .folio-cover .folio-quote-film::after,
-.folio-cover .folio-cover-fragment blockquote::before, .folio-cover .folio-cover-fragment blockquote span::after { display: none; }
-.folio-cover .folio-quote-film { min-height: 0; padding: 0 0 38px; transform: none; }
-.folio-cover .folio-quote-head { padding: 0; font: 9px/1.5 var(--mono); letter-spacing: .1em; }
-.folio-cover .folio-quote-head b { font-weight: 400; }
-.folio-cover .folio-quote-head b::before { content: none; }
-.folio-cover .folio-cover-fragment blockquote { max-width: none; min-height: 58px; margin: 15px 0 14px; padding: 0; border: 0; background: transparent; color: var(--bone); font: 400 19px/1.7 var(--quote); letter-spacing: .025em; text-shadow: none; }
-.folio-cover .folio-quote-meta { flex-wrap: wrap; gap: 5px 10px; }
-.folio-cover .folio-quote-meta strong { font-size: 11px; }
-.folio-cover .folio-quote-meta cite { font-size: 9px; white-space: normal; line-height: 1.7; }
-.folio-cover .folio-quote-rail { right: 0; bottom: -4px; }
-.folio-cover .folio-quote-next { min-height: 44px; padding-left: 12px; font-size: 9px; }
+.folio-cover .folio-cover-fragment blockquote span::after { display: none; }
+.folio-cover .folio-quote-orbit { position: absolute; z-index: 0; width: 164px; height: 164px; right: -8px; top: 7px; color: var(--g-norse-ink); pointer-events: none; }
+.folio-quote-orbit-track { stroke: currentColor; stroke-width: .8; opacity: .25; stroke-dasharray: 1 6; }
+.folio-quote-orbit-inner { stroke: currentColor; stroke-width: .65; opacity: .16; }
+.folio-quote-orbit-arc { stroke: currentColor; stroke-width: 1; opacity: .48; }
+.folio-quote-orbit-axis { stroke: currentColor; stroke-width: .8; opacity: .35; }
+.folio-quote-orbit-point { fill: currentColor; opacity: .7; }
+.folio-quote-orbit-wave { stroke: currentColor; stroke-width: 1; opacity: .58; }
+.folio-cover .folio-quote-film { min-height: 0; padding: 0 0 0 34px; transform: none; }
+.folio-cover .folio-quote-head { gap: 12px; padding: 0; border: 0; font: 9px/1.5 var(--mono); letter-spacing: .16em; }
+.folio-cover .folio-quote-head > span { flex-wrap: wrap; gap: 5px 13px; min-width: 0; }
+.folio-cover .folio-quote-head b { display: inline-flex; align-items: center; gap: 10px; color: var(--g-norse-ink); font-weight: 400; }
+.folio-cover .folio-quote-head b::before { content: ""; width: 24px; height: 12px; flex: 0 0 auto; border: 0; border-radius: 0; background: linear-gradient(currentColor, currentColor) 0 5px / 2px 3px, linear-gradient(currentColor, currentColor) 5px 2px / 2px 9px, linear-gradient(currentColor, currentColor) 10px 0 / 2px 12px, linear-gradient(currentColor, currentColor) 15px 3px / 2px 7px, linear-gradient(currentColor, currentColor) 20px 5px / 2px 3px; background-repeat: no-repeat; opacity: .8; }
+.folio-cover .folio-quote-head i { font: 10px/1.5 var(--sans); letter-spacing: .13em; }
+.folio-cover .folio-quote-head i::before { content: none; }
+.folio-cover .folio-quote-index { position: absolute; right: 0; top: 182px; width: 148px; color: var(--dim); font: 9px/1.5 var(--mono); letter-spacing: .08em; text-align: center; font-variant-numeric: tabular-nums; }
+.folio-cover .folio-cover-fragment blockquote { max-width: none; min-height: 72px; margin: 18px 0 17px; padding: 0; border: 0; background: transparent; color: var(--bone); font: 400 20px/1.78 var(--quote); letter-spacing: .025em; overflow-wrap: anywhere; text-shadow: none; }
+.folio-cover .folio-cover-fragment blockquote::before { display: block; content: "“"; left: -41px; top: -15px; width: auto; height: auto; background: none; color: var(--g-norse-ink); font: 500 77px/1 var(--serif); opacity: .52; }
+.folio-cover .folio-quote-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 1px; border-top: 1px solid var(--line); }
+.folio-cover .folio-quote-meta { flex: 1; flex-wrap: wrap; gap: 4px 10px; }
+.folio-cover .folio-quote-meta strong { font: 400 11px/1.7 var(--sans); }
+.folio-cover .folio-quote-meta strong::before { content: "— "; color: var(--g-norse-ink); }
+.folio-cover .folio-quote-meta cite { overflow: visible; font-size: 9px; white-space: normal; line-height: 1.7; overflow-wrap: anywhere; }
+.folio-cover .folio-quote-rail { position: static; flex-shrink: 0; }
+.folio-cover .folio-quote-next { gap: 14px; min-height: 44px; padding: 0 0 0 12px; font-size: 9px; letter-spacing: .08em; }
+.folio-cover .folio-quote-next b { color: var(--g-norse-ink); font-size: 16px; }
+@media (hover: hover) {
+  .folio-cover .folio-quote-orbit { transition: opacity 300ms ease; }
+  .folio-cover .folio-cover-fragment:hover .folio-quote-orbit { opacity: .8; }
+}
 .folio-cover .folio-cover-fragment.is-changing blockquote span,
 .folio-cover .folio-cover-fragment.is-changing .folio-quote-meta { filter: none; clip-path: none; transform: translateY(3px); }
 .folio-cover-rootline { position: relative; z-index: 2; display: block; height: 48px; width: 1px; margin: -26px auto 0; background: linear-gradient(var(--g-norse-ink), transparent); opacity: .45; }
@@ -153,7 +175,13 @@ html.garden-lite-motion .is-home .g-nav { transition: none; }
 @media (max-width: 1023px) {
   .folio-cover { --cover-width: calc(100% - 64px); }
   .is-home .g-nav-inner { width: calc(100% - 64px); }
-  .folio-cover-notes { gap: 40px; }
+  .folio-cover-notes { grid-template-columns: 210px minmax(0, 1fr); gap: 20px; }
+  .folio-cover .folio-cover-fragment { padding-right: 0; }
+  .folio-cover .folio-quote-orbit { width: 128px; height: 128px; top: 4px; opacity: .2; }
+  .folio-cover .folio-cover-fragment::before { display: none; }
+  .folio-cover .folio-quote-head { padding-right: 72px; }
+  .folio-cover .folio-quote-index { top: 0; width: auto; }
+  .folio-cover .folio-cover-fragment blockquote { font-size: 19px; }
 }
 @media (max-width: 768px) {
   .folio-cover { --cover-width: calc(100% - 48px); min-height: 100svh; }
@@ -170,13 +198,15 @@ html.garden-lite-motion .is-home .g-nav { transition: none; }
   .norse-sky { width: 238px; }
   .norse-aurora { height: 480px; }
   .norse-read, .norse-awaken { font-size: 10px; }
-  .folio-cover-notes { grid-template-columns: 1fr; gap: 25px; padding: 24px 0 60px; }
-  .folio-cover .folio-cover-role { font-size: 14px; margin-bottom: 4px; }
-  .folio-cover-description { font-size: 11px; }
+  .folio-cover-notes { grid-template-columns: 1fr; gap: 16px; padding: 24px 0 48px; }
+  .folio-cover .folio-cover-role { font-size: 16px; margin-bottom: 16px; }
   .folio .norse-path { margin-top: 3px; }
-  .folio-cover .folio-cover-fragment { min-height: 172px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .folio-cover .folio-cover-fragment { min-height: 172px; padding-top: 0; border-top: 0; }
+  .folio-cover .folio-quote-film { padding-left: 20px; }
   .folio-cover .folio-cover-fragment blockquote { font-size: 17px; line-height: 1.8; min-height: 62px; }
+  .folio-cover .folio-cover-fragment blockquote::before { left: -24px; top: -9px; font-size: 49px; }
   .folio-cover .folio-quote-head { font-size: 8px; }
+  .folio-cover .folio-quote-head i { font-size: 8px; }
   .folio-cover .folio-quote-meta cite { font-size: 8px; }
   .folio-cover-rootline { height: 32px; }
   .is-home .garden-hud-scroll { display: none; }

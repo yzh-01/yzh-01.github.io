@@ -294,25 +294,43 @@
 
     <div class="folio-cover-notes">
       <div class="folio-cover-copy">
-        <p class="folio-cover-role">{{ config.author }} 的数字花园</p>
-        <p class="folio-cover-description">技术、生活，以及沿途拾起的灵感。</p>
+        <p class="folio-cover-role" aria-label="FIELD STRING CORRUPTED">
+          <span data-scramble aria-hidden="true">譁?蟄励′螟ｱ繧上ｌ縺溘</span><br>
+          <em data-scramble aria-hidden="true">縺薙％縺九ｉ // 0x7F</em>
+        </p>
+        <div class="folio-cover-terminal">
+          <b>&gt; SOLITUDE: ACCEPTED</b><br>
+          MOOD: CLOUDY<br>
+          NOISE_FILTER: ON<br>
+          <span>[ THE WORLD IS LOUD. I AM NOT. ]</span>
+        </div>
         <a class="norse-path" href="#the-end">循根而下，抵达世界树 <span aria-hidden="true">↘</span></a>
       </div>
 
       <aside class="folio-cover-fragment" data-home-quote-card data-quote-number="01" aria-label="随机思想摘录">
+        <svg class="folio-quote-orbit" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+          <circle class="folio-quote-orbit-track" cx="100" cy="100" r="82"/>
+          <circle class="folio-quote-orbit-inner" cx="100" cy="100" r="64"/>
+          <path class="folio-quote-orbit-arc" d="M23 72a82 82 0 0 1 150-20M126 178a82 82 0 0 1-103-50"/>
+          <path class="folio-quote-orbit-axis" d="M4 100h24m144 0h24M100 4v24m0 144v24M36 36l9 9m110 110 9 9M36 164l9-9m110-110 9-9"/>
+          <circle class="folio-quote-orbit-point" cx="174" cy="65" r="3"/>
+          <path class="folio-quote-orbit-wave" d="M70 133h8l3-5 4 10 4-16 5 21 5-15 4 9 4-4h17"/>
+        </svg>
+        <output class="folio-quote-index" data-home-quote-index>01 / {{ site.data.home_quotes.length }}</output>
         <div class="folio-quote-film">
           <header class="folio-quote-head">
-            <span><b>林间拾语</b></span>
-            <output data-home-quote-index>01 / 120</output>
+            <span><b>RECEIVED VOICE</b><i>林间拾语</i></span>
           </header>
           <blockquote><span data-home-quote data-quote-copy="“{{ site.data.home_quotes[0].text }}”">“{{ site.data.home_quotes[0].text }}”</span></blockquote>
-          <footer class="folio-quote-meta">
-            <strong data-home-quote-author>{{ site.data.home_quotes[0].author }}</strong>
-            <cite data-home-quote-work>{{ site.data.home_quotes[0].work }}</cite>
-          </footer>
-        </div>
-        <div class="folio-quote-rail">
-          <button class="folio-quote-next" type="button" data-home-quote-next aria-label="换一条思想摘录"><span>换一则</span><b aria-hidden="true">→</b></button>
+          <div class="folio-quote-bottom">
+            <footer class="folio-quote-meta">
+              <strong data-home-quote-author>{{ site.data.home_quotes[0].author }}</strong>
+              <cite data-home-quote-work>{{ site.data.home_quotes[0].work }}</cite>
+            </footer>
+            <div class="folio-quote-rail">
+              <button class="folio-quote-next" type="button" data-home-quote-next aria-label="换一条思想摘录"><span>换一则</span><b aria-hidden="true">→</b></button>
+            </div>
+          </div>
         </div>
         <div data-home-quote-pool hidden>
           {%- for item in site.data.home_quotes %}
