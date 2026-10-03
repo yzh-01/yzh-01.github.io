@@ -16,6 +16,8 @@
   var aurora = Array.prototype.slice.call(cover.querySelectorAll('[data-aurora-layer]'));
   var phase = 0;
   var skyLoop;
+  var awake = button.getAttribute('aria-pressed') === 'true';
+  var auroraPainted = false;
 
   function curve(points, move) {
     var path = (move ? 'M' : 'L') + points[0].map(function (v) { return v.toFixed(1); }).join(' ');
@@ -35,10 +37,10 @@
       var top = [], bottom = [];
       for (var i = 0; i < 7; i += 1) {
         var position = -.15 + i * 1.3 / 6;
-        var height = 174 + index * 38 + Math.sin(position * 5.2 + phase + index * .85) * 67 +
+        var height = 128 + index * 40 + Math.sin(position * 5.2 + phase + index * .85) * 58 +
           Math.sin(position * 9 - phase * .6) * 17;
         top.push([position * 1440, height]);
-        bottom.push([position * 1440, height + 75 + index * 14 + Math.cos(position * 4 + phase) * 20]);
+        bottom.push([position * 1440, height + 168 + index * 16 + Math.cos(position * 4 + phase) * 26]);
       }
       layer.setAttribute('d', curve(top, true) + curve(bottom.reverse(), false) + 'Z');
     });
@@ -48,6 +50,9 @@
     return visible && !suspended && !document.hidden && !reduced.matches &&
       !root.classList.contains('garden-booting') && !root.classList.contains('garden-lite-motion') &&
       (!motion || (motion.canAnimate() && !motion.isEconomy()));
+  }
+  function auroraAllowed() {
+    return awake && allowed() && (!motion || !motion.isScrolling());
   }
   function stop() {
     window.cancelAnimationFrame(frame);
@@ -59,13 +64,15 @@
   }
   function refresh() {
     cover.dataset.norsePaused = String(!allowed());
+    // The static curtain also works without the shared clock and in quiet modes.
+    if (awake && !auroraPainted) { paintAurora(0, 0); auroraPainted = true; }
     if (!entered && visible && !suspended && !document.hidden && !root.classList.contains('garden-booting')) {
       entered = true;
       if (allowed()) cover.classList.add('is-cover-entered');
     }
     if (!allowed()) stop();
     if (skyLoop) {
-      if (allowed()) skyLoop.start();
+      if (auroraAllowed()) skyLoop.start();
       else skyLoop.stop();
     }
   }
@@ -86,10 +93,11 @@
   }
   button.hidden = false;
   button.addEventListener('click', function () {
-    var awake = button.getAttribute('aria-pressed') !== 'true';
+    awake = !awake;
     button.setAttribute('aria-pressed', String(awake));
     cover.classList.toggle('is-norse-awake', awake);
     button.querySelector('[data-norse-action]').textContent = awake ? '收起极光' : '点亮极光';
+    refresh();
   });
   cover.addEventListener('pointermove', function (event) {
     if (!allowed() || !fine.matches || event.pointerType === 'touch') return;
@@ -111,10 +119,11 @@
   if (motion) motion.subscribe(refresh);
   else new MutationObserver(refresh).observe(root, { attributes: true, attributeFilter: ['class'] });
   if (aurora.length && motion && motion.createLoop) {
-    paintAurora(0, 0);
-    skyLoop = motion.createLoop(paintAurora, {
+    skyLoop = motion.createLoop(function (now, elapsed) {
+      if (auroraAllowed()) paintAurora(now, elapsed);
+    }, {
       fps: 20,
-      enabled: function () { return allowed() && !motion.isScrolling(); }
+      enabled: auroraAllowed
     });
   }
   window.addEventListener('pagehide', function () { suspended = true; refresh(); });

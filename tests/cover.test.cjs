@@ -25,7 +25,7 @@ function fixture(t, options = {}) {
   const fine = new window.EventTarget(); fine.matches = true;
   window.matchMedia = query => query.includes('reduced-motion') ? reduced : fine;
   const frames = new Map(), timers = new Map(), subscribers = [], loops = [];
-  let serial = 0, now = 0, hidden = false, economy = false, visible = true, observe;
+  let serial = 0, now = 0, hidden = false, economy = false, scrolling = false, visible = true, observe;
   Object.defineProperty(window.document, 'hidden', { get: () => hidden });
   window.requestAnimationFrame = fn => { frames.set(++serial, fn); return serial; };
   window.cancelAnimationFrame = id => frames.delete(id);
@@ -35,11 +35,11 @@ function fixture(t, options = {}) {
     constructor(callback) { observe = callback; }
     observe() {}
   };
-  window.GardenMotion = {
+  if (!options.noMotion) window.GardenMotion = {
     canAnimate: () => !hidden && !reduced.matches && !root.classList.contains('garden-lite-motion'),
     isEconomy: () => economy,
     isVisible: () => visible,
-    isScrolling: () => false,
+    isScrolling: () => scrolling,
     subscribe: fn => subscribers.push(fn),
     createLoop(render, options) {
       const loop = { render, options, active: false }; loops.push(loop);
@@ -62,6 +62,7 @@ function fixture(t, options = {}) {
     visible(value) { visible = value; if (observe) observe([{ isIntersecting: value }]); notify(); },
     hidden(value) { hidden = value; window.document.dispatchEvent(new window.Event('visibilitychange')); notify(); },
     economy(value) { economy = value; notify(); },
+    scrolling(value) { scrolling = value; notify(); },
     move() { cover.dispatchEvent(new window.MouseEvent('pointermove', { clientX: 900, clientY: 100 })); },
     loadQuotes() {
       const source = fs.readFileSync(path.join(scripts, 'site.js'), 'utf8');
@@ -118,19 +119,63 @@ test('reduced motion and missing viewport observation still expose manual contro
   const button = f.window.document.querySelector('[data-norse-awaken]');
   assert.equal(button.hidden, false); button.click();
   assert.equal(button.getAttribute('aria-pressed'), 'true');
+  const layer = f.cover.querySelector('[data-aurora-layer]');
+  assert.match(layer.getAttribute('d'), /^M.+Z$/);
+  assert.equal(f.loops[0].active, false);
+  button.click();
+  assert.equal(f.cover.classList.contains('is-norse-awake'), false);
+  assert.equal(button.querySelector('[data-norse-action]').textContent, '点亮极光');
 });
 
-test('aurora uses the shared clock, stops offscreen and remains still in reduced motion', t => {
+test('the aurora switch starts and stops drawing, including an already queued paint', t => {
   const f = fixture(t); f.visible(true);
   const loop = f.loops[0], layer = f.cover.querySelector('[data-aurora-layer]');
+  const button = f.window.document.querySelector('[data-norse-awaken]');
+  assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
+  loop.render(50, 50); assert.equal(layer.getAttribute('d'), null);
+  button.click();
   const first = layer.getAttribute('d');
   assert.equal(loop.options.fps, 20); assert.equal(loop.active, true);
   loop.render(50, 50); assert.notEqual(layer.getAttribute('d'), first);
+  button.click();
+  const last = layer.getAttribute('d');
+  assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
+  loop.render(100, 50); assert.equal(layer.getAttribute('d'), last);
+  assert.equal(button.getAttribute('aria-pressed'), 'false');
+  assert.equal(f.cover.classList.contains('is-norse-awake'), false);
+  assert.equal(button.querySelector('[data-norse-action]').textContent, '点亮极光');
+  button.click(); assert.equal(loop.active, true);
+});
+
+test('an illuminated aurora pauses offscreen, while scrolling and in quiet or economy modes', t => {
+  const f = fixture(t); f.visible(true);
+  f.window.document.querySelector('[data-norse-awaken]').click();
+  const loop = f.loops[0], layer = f.cover.querySelector('[data-aurora-layer]');
   f.visible(false); assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
   f.visible(true); assert.equal(loop.active, true);
+  f.scrolling(true); assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
+  f.scrolling(false); assert.equal(loop.active, true);
+  f.economy(true); assert.equal(loop.active, false);
+  f.economy(false); assert.equal(loop.active, true);
+  f.hidden(true); assert.equal(loop.active, false);
+  f.hidden(false); assert.equal(loop.active, true);
   f.reduced.matches = true; f.reduced.dispatchEvent(new f.window.Event('change'));
   assert.equal(loop.active, false); assert.equal(loop.options.enabled(), false);
+  assert.equal(f.cover.classList.contains('is-norse-awake'), true);
   assert.doesNotMatch(layer.getAttribute('d'), /NaN|Infinity/);
+});
+
+test('the switch reveals a static aurora when the shared motion controller is unavailable', t => {
+  const f = fixture(t, { noMotion: true, noObserver: true });
+  const button = f.window.document.querySelector('[data-norse-awaken]');
+  const layer = f.cover.querySelector('[data-aurora-layer]');
+  assert.equal(button.hidden, false); button.click();
+  assert.equal(f.cover.classList.contains('is-norse-awake'), true);
+  assert.match(layer.getAttribute('d'), /^M.+Z$/);
+  const still = layer.getAttribute('d'); f.advance(2000);
+  assert.equal(layer.getAttribute('d'), still);
+  assert.equal(f.frames.size, 0); assert.equal(f.loops.length, 0);
+  button.click(); assert.equal(f.cover.classList.contains('is-norse-awake'), false);
 });
 
 test('quotes stop rotating in quiet mode or while being read, and next remains available', t => {

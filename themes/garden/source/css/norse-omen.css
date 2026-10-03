@@ -11,7 +11,51 @@
   background: linear-gradient(180deg, rgba(9, 11, 10, .18), transparent 65%, rgba(9, 11, 10, .36));
 }
 .folio-cover::before, .folio-cover::after { display: none; }
-.folio-cover .folio-cover-lens { pointer-events: none; }
+/* A tapered searchlight reveals the photograph through the fog. */
+.folio-cover .folio-cover-lens {
+  --spot-x: 50%;
+  --spot-y: 50%;
+  --spot-radius-x: 200px;
+  --spot-radius-y: 145px;
+  --spot-source-x: -60px;
+  --spot-source-y: 100%;
+  --spot-angle: 45deg;
+  --spot-edge: 2deg;
+  --spot-middle: 7deg;
+  --spot-inner-edge: 12deg;
+  --spot-spread: 14deg;
+  --spot-range-start: 160px;
+  --spot-range-middle: 700px;
+  --spot-range-end: 1000px;
+  --spot-tint: 199, 231, 196;
+  pointer-events: none;
+  clip-path: none;
+  -webkit-mask-image:
+    radial-gradient(ellipse var(--spot-radius-x) var(--spot-radius-y) at var(--spot-x) var(--spot-y), #fff 0%, rgba(255, 255, 255, .96) 35%, rgba(255, 255, 255, .7) 62%, rgba(255, 255, 255, .25) 82%, transparent 100%),
+    conic-gradient(from var(--spot-angle) at var(--spot-source-x) var(--spot-source-y), transparent 0deg, rgba(255, 255, 255, .32) var(--spot-edge), rgba(255, 255, 255, .48) var(--spot-middle), rgba(255, 255, 255, .32) var(--spot-inner-edge), transparent var(--spot-spread), transparent 360deg),
+    radial-gradient(circle at var(--spot-source-x) var(--spot-source-y), transparent 0, #fff var(--spot-range-start), #fff var(--spot-range-middle), transparent var(--spot-range-end));
+  mask-image:
+    radial-gradient(ellipse var(--spot-radius-x) var(--spot-radius-y) at var(--spot-x) var(--spot-y), #fff 0%, rgba(255, 255, 255, .96) 35%, rgba(255, 255, 255, .7) 62%, rgba(255, 255, 255, .25) 82%, transparent 100%),
+    conic-gradient(from var(--spot-angle) at var(--spot-source-x) var(--spot-source-y), transparent 0deg, rgba(255, 255, 255, .32) var(--spot-edge), rgba(255, 255, 255, .48) var(--spot-middle), rgba(255, 255, 255, .32) var(--spot-inner-edge), transparent var(--spot-spread), transparent 360deg),
+    radial-gradient(circle at var(--spot-source-x) var(--spot-source-y), transparent 0, #fff var(--spot-range-start), #fff var(--spot-range-middle), transparent var(--spot-range-end));
+  -webkit-mask-composite: source-over, source-in;
+  mask-composite: add, intersect;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition: opacity 240ms ease;
+}
+.folio-cover .folio-cover-lens img { opacity: .86; }
+.folio-cover .folio-cover-lens::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse var(--spot-radius-x) var(--spot-radius-y) at var(--spot-x) var(--spot-y), rgba(var(--spot-tint), .16), transparent 85%), rgba(var(--spot-tint), .065);
+}
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-lens { --spot-tint: 229, 248, 213; }
+:root[data-resolved-theme="light"] .folio-cover .folio-cover-lens img { opacity: .8; }
+@supports not (mask-image: conic-gradient(#fff, transparent)) {
+  .folio-cover .folio-cover-lens { clip-path: ellipse(var(--spot-radius-x) var(--spot-radius-y) at var(--spot-x) var(--spot-y)); }
+}
 .folio-cover-shade {
   background: radial-gradient(ellipse at 55% 38%, transparent, rgba(6, 12, 9, .28) 68%),
     linear-gradient(180deg, rgba(9, 11, 10, .3), transparent 35%, rgba(9, 11, 10, .32));
@@ -72,8 +116,12 @@
 }
 .folio-cover .folio-wordmark-layer { position: relative; inset: auto; }
 .folio-cover .folio-wordmark-main { -webkit-mask-image: none; mask-image: none; }
-.folio-cover .folio-wordmark-disc { transition: box-shadow 1800ms ease; }
-.folio-cover.is-norse-awake .folio-wordmark-disc { box-shadow: 0 0 0 1px rgba(190, 216, 191, .16), 0 0 38px rgba(143, 187, 153, .35); }
+.folio-cover .folio-wordmark-disc { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-norse-ink) 12%, transparent); transition: box-shadow 1100ms ease; }
+.folio-cover .folio-wordmark-main { transition: text-shadow 1100ms ease; }
+.folio-cover .folio-wordmark-ray { transition: opacity 1100ms ease, transform 1400ms ease; }
+.folio-cover.is-norse-awake .folio-wordmark-main { text-shadow: 0 0 28px color-mix(in srgb, var(--g-norse-ink) 22%, transparent), 0 12px 34px color-mix(in srgb, var(--void) 40%, transparent); }
+.folio-cover.is-norse-awake .folio-wordmark-disc { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-norse-ink) 42%, transparent), 0 0 28px color-mix(in srgb, var(--g-norse-ink) 58%, transparent), 0 0 76px color-mix(in srgb, var(--g-norse-ink) 26%, transparent); }
+.folio-cover.is-norse-awake .folio-wordmark-ray { opacity: .58; transform: scaleX(1); }
 .norse-invocation { display: flex; flex-direction: column; align-items: center; margin-top: 20px; gap: 26px; color: var(--g-norse-ink); }
 .norse-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 30px; pointer-events: auto; }
 .norse-read, .norse-awaken, .norse-path { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; font: 11px/1.5 var(--sans); letter-spacing: .08em; }
@@ -90,19 +138,21 @@
   .norse-awaken:hover { color: var(--bone); }
 }
 /* The corona belongs to the O; the aurora is light in the existing fog field. */
-.norse-horizon { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: .65; transform: translate3d(calc(var(--cover-drift-x) * -.6), calc(var(--cover-drift-y) * -.6), 0); transition: opacity 1800ms ease; }
-.norse-aurora { display: block; width: 100%; height: min(740px, 100%); color: #a1c3a5; }
+.norse-horizon { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; visibility: hidden; transform: translate3d(calc(var(--cover-drift-x) * -.6), calc(var(--cover-drift-y) * -.6), 0); transition: opacity 1100ms ease, visibility 0s linear 1100ms; }
+.norse-horizon::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 28% 30%, rgba(106, 158, 111, .14), transparent 40%), radial-gradient(ellipse at 73% 35%, rgba(141, 187, 153, .12), transparent 35%); }
+.norse-aurora { position: relative; display: block; width: 100%; height: min(740px, 100%); color: #a1cba3; }
 .norse-sky { position: absolute; left: var(--ninefold-x); top: var(--ninefold-y); width: clamp(250px, 30vw, 420px); aspect-ratio: 1; color: var(--g-norse-ink); transform: translate(-50%, -50%); pointer-events: none; }
 .norse-sky-drift { position: relative; width: 100%; height: 100%; transform: translate3d(var(--cover-drift-x), var(--cover-drift-y), 0); }
-.norse-corona { position: absolute; inset: -18%; border-radius: 50%; background: radial-gradient(circle, transparent 0 13%, var(--g-norse-glow) 18%, rgba(167, 201, 173, .045) 33%, transparent 62%); opacity: .7; transition: opacity 1800ms ease, scale 2200ms ease; }
+.norse-corona { position: absolute; inset: -18%; border-radius: 50%; background: radial-gradient(circle, transparent 0 13%, color-mix(in srgb, var(--g-norse-ink) 44%, transparent) 18%, color-mix(in srgb, var(--g-norse-ink) 12%, transparent) 31%, transparent 59%); opacity: 0; scale: .92; transition: opacity 1100ms ease, scale 1800ms ease; }
 .norse-orbit { position: relative; display: block; width: 100%; height: 100%; }
-.norse-realms { opacity: .55; transition: opacity 1800ms ease; }
-.norse-realms circle { opacity: .4; transform-box: fill-box; transform-origin: center; animation: norse-realm-breathe 9s ease-in-out infinite; animation-delay: calc(var(--n) * -.9s); }
+.norse-realms { opacity: .2; transition: opacity 1100ms ease; }
+.norse-realms circle { opacity: .4; transform-box: fill-box; transform-origin: center; animation: norse-realm-breathe 12s ease-in-out infinite; animation-delay: calc(var(--n) * -1.2s); animation-play-state: paused; }
 .folio-cover .folio-oath-seal { opacity: 0; width: clamp(160px, 16vw, 228px); }
 .folio-cover .folio-oath-seal::before, .folio-cover .folio-oath-seal::after, .folio-cover .folio-valknut { display: none; }
-.folio-cover.is-norse-awake .norse-horizon { opacity: 1; }
-.folio-cover.is-norse-awake .norse-corona { opacity: 1; scale: 1.12; }
+.folio-cover.is-norse-awake .norse-horizon { opacity: 1; visibility: visible; transition-delay: 0s; }
+.folio-cover.is-norse-awake .norse-corona { opacity: 1; scale: 1.08; }
 .folio-cover.is-norse-awake .norse-realms { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+.folio-cover.is-norse-awake .norse-realms circle { animation-play-state: running; }
 /* A compact signal-and-echo composition continues the cover's orbital field. */
 .folio-cover-notes { position: relative; z-index: 5; display: grid; grid-template-columns: 224px minmax(0, 1fr); align-items: center; gap: 28px; width: var(--cover-width); margin: 0 auto; padding: 30px 0 48px; border-top: 1px solid var(--line); }
 .folio-cover .folio-cover-copy { position: static; min-width: 0; width: auto; transform: none; pointer-events: auto; }
@@ -164,7 +214,9 @@
 :root[data-resolved-theme="light"] .folio-cover-shade { background: radial-gradient(ellipse at 55% 38%, transparent, rgba(213, 223, 208, .34) 70%); }
 :root[data-resolved-theme="light"] .is-home .g-nav:not(.scrolled) { background: transparent; border-color: transparent; box-shadow: none; }
 :root[data-resolved-theme="light"] .norse-horizon { mix-blend-mode: multiply; }
-:root[data-resolved-theme="light"] .norse-aurora { color: #51745d; }
+:root[data-resolved-theme="light"] .norse-aurora { color: #47734c; }
+:root[data-resolved-theme="light"] .folio-cover .folio-wordmark-disc { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-norse-ink) 12%, transparent); }
+:root[data-resolved-theme="light"] .folio-cover.is-norse-awake .folio-wordmark-disc { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g-norse-ink) 42%, transparent), 0 0 28px color-mix(in srgb, var(--g-norse-ink) 44%, transparent), 0 0 76px color-mix(in srgb, var(--g-norse-ink) 20%, transparent); }
 :root[data-resolved-theme="light"] .folio-cover .folio-oath-seal { opacity: 0; }
 /* Stop all cover motion when hidden, quiet or on the economy setting. */
 .folio-cover[data-norse-paused="true"] *, html.garden-page-hidden .folio-cover *, html.garden-overrun .folio-cover * { animation-play-state: paused !important; }
