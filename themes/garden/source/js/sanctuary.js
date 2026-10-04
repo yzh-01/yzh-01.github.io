@@ -10,6 +10,10 @@
   var title = root.querySelector('[data-root-title]');
   var story = root.querySelector('[data-root-story]');
   var hint = root.querySelector('[data-root-hint]');
+  var guidance = root.querySelector('[data-root-guidance]');
+  var guide = root.querySelector('[data-root-guide]');
+  var awakenLabel = root.querySelector('[data-root-awaken-label]');
+  var motionHelp = root.querySelector('[data-root-motion-help]');
   var status = root.querySelector('[data-root-status]');
   var hotspots = root.querySelector('[data-root-hotspots]');
   var controls = root.querySelector('[data-root-controls]');
@@ -161,23 +165,24 @@
       var returning = trail.index === echoTarget.dataset.rootRealm && echoAge > 1.03;
       var back = smooth((echoAge - 1.03) / .67);
       var opacity = returning ? Math.sin(back * Math.PI) * .95 : Math.sin(travel * Math.PI) * .55;
-      trail.node.style.strokeDasharray = (returning ? trail.length * .22 : trail.length).toFixed(2) + ' ' + trail.length.toFixed(2);
-      trail.node.style.strokeDashoffset = (returning ? -trail.length * (1 - back) : trail.length * (1 - travel)).toFixed(2);
+      var segment = trail.length * (returning ? .22 : .34);
+      trail.node.style.strokeDasharray = segment.toFixed(2) + ' ' + (trail.length + segment).toFixed(2);
+      trail.node.style.strokeDashoffset = (returning ? -trail.length * (1 - back) : segment - (trail.length + segment) * travel).toFixed(2);
       trail.node.style.opacity = Math.max(0, opacity).toFixed(3);
       trail.node.classList.toggle('is-returning', returning);
     });
     sigils.concat(realms).forEach(function (node) {
       var i = Number(node.dataset.rootSigil || node.dataset.rootRealm);
-      var response = Math.max(0, 1 - Math.abs(echoAge - (.82 + i * .035)) / .45);
+      var response = smooth(1 - Math.abs(echoAge - (.82 + i * .035)) / .45);
       var chosen = (node.dataset.rootSigil || node.dataset.rootRealm) === echoTarget.dataset.rootRealm;
       if (chosen && echoCommitted) response = Math.max(response, 1 - smooth((echoAge - 2.9) / .9));
       node.classList.toggle('is-echoing', response > 0);
       node.style.setProperty('--echo-sigil-light', response.toFixed(3));
     });
     if (echoAnswer) {
-      var arrive = smooth((echoAge - 1.55) / .45), fade = 1 - smooth((echoAge - 3.1) / .7);
+      var arrive = smooth((echoAge - 1.7) / .45), fade = 1 - smooth((echoAge - 3.1) / .7);
       echoAnswer.style.opacity = echoCommitted ? (arrive * fade).toFixed(3) : '0';
-      echoAnswer.style.transform = 'translate(-50%, ' + ((1 - arrive) * 8).toFixed(2) + 'px)';
+      echoAnswer.style.transform = 'translate(-50%, ' + ((1 - arrive) * 6).toFixed(2) + 'px) scale(' + (.96 + arrive * .04).toFixed(3) + ')';
     }
   }
   function paint(now, elapsed) {
@@ -233,11 +238,14 @@
   function updateControl() {
     var blocked = Boolean(restricted());
     var held = still || blocked;
+    var quiet = reduced.matches || document.documentElement.classList.contains('garden-lite-motion');
     root.dataset.still = String(held);
+    if (awakenLabel) awakenLabel.textContent = awake ? '轻触收起' : '轻触唤醒';
+    if (motionHelp) motionHelp.textContent = blocked ? (quiet ? '已遵循减弱动态设置' : '当前光幕已暂停') : held ? '已定格 · 点击继续' : '流动中 · 点击定格';
     if (stillButton) {
       stillButton.disabled = blocked;
       stillButton.setAttribute('aria-pressed', String(held));
-      var description = blocked ? (reduced.matches || document.documentElement.classList.contains('garden-lite-motion') ?
+      var description = blocked ? (quiet ?
         '已遵循减弱动态设置，光幕保持静止' : '当前动效策略已暂停光幕') :
         held ? '恢复极光、雾气与光屑的流动' : '定格当前的极光、雾气与光屑';
       stillButton.setAttribute('aria-label', description);
@@ -253,11 +261,12 @@
         '呼唤' + (Object.keys(remembered).length < realms.length ? '一处尚未探索的世界' : '下一界的回声'));
     }
     if (echoAction) echoAction.textContent = calling ? (held ? 'HELD' : 'CALLING') : 'ECHO';
-    if (echoPrompt) echoPrompt.textContent = calling ? (held ? 'RESUME DRIFT' : 'LISTEN TO THE MIST') :
-      Object.keys(remembered).length < realms.length ? 'CALL AN UNSEEN WORLD' : 'REVISIT THE NINE';
-    if (hint) hint.textContent = !awake ? 'TOUCH THE SIGN · FOLLOW THE LIGHT' :
-      held ? (calling ? 'A MOMENT HELD · DRIFT TO HEAR THE ANSWER' : 'A MOMENT HELD · ECHO CAN STILL DISCOVER') :
-      calling ? 'ONE CALL · NINE LIGHTS LISTEN' : lastEcho ? lastEcho.dataset.realmRune + ' ANSWERS · ' + progressText() : 'TRACE A RUNE · LIGHT IN MOTION';
+    if (echoPrompt) echoPrompt.textContent = calling ? (held ? '切回 DRIFT 继续' : '等待光线返回') :
+      Object.keys(remembered).length < realms.length ? '寻找尚未读过的世界' : '再次寻访九界';
+    if (hint) hint.textContent = !awake ? '点击中央印记，唤醒九界回声。' :
+      calling ? (held ? '回声已定格，切回 DRIFT 继续接收回应。' : '回声正在寻访九界，等待光线带回答案。') :
+      lastEcho ? lastEcho.dataset.realmName + '回应了你 · 本次已探索 ' + Object.keys(remembered).length + ' / 9 界。' :
+      held ? '光幕已静止；ECHO 仍可直接查看新世界。' : '点击 ECHO 寻找未读世界，也可直接选择下方符文。';
   }
   function policy() {
     var running = canAnimate();
@@ -381,7 +390,12 @@
     resizeObserver.observe(stage);
   } else window.addEventListener('resize', placeSigilButtons, { passive: true });
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && awake) { event.preventDefault(); setAwake(false); }
+    if (event.key !== 'Escape') return;
+    if (guide && guide.open) {
+      event.preventDefault();
+      guide.open = false;
+      guide.querySelector('summary').focus();
+    } else if (awake) { event.preventDefault(); setAwake(false); }
   });
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
@@ -398,5 +412,6 @@
   window.addEventListener('pageshow', function () { suspended = false; policy(); });
   setAwake(false);
   awaken.disabled = false;
+  if (guidance) guidance.hidden = false;
   root.dataset.ready = 'true';
 })();

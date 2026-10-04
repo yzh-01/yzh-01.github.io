@@ -15,7 +15,8 @@ function fixture(t,{reduced=false,fine=true,visible=true,noObserver=false,noMoti
     <circle data-root-mote cx="400" cy="240"/>`;
   const dom=new JSDOM(`<section data-root-sanctuary data-awake="false">
     <div data-root-clearing><svg class="ash-root-art" aria-hidden="true">${atmosphere}${threads}<g data-root-echo-wave></g><g data-root-echo-trails></g></svg><button type="button" data-root-awaken disabled aria-pressed="false" aria-label="唤醒印记">印记</button><div data-root-hotspots hidden>${hotspotMarkup}</div><div data-root-echo-field aria-hidden="true"><b></b><div data-root-echo-answer><span data-root-echo-mark></span><span data-root-echo-name></span></div></div></div>
-    <p data-root-hint>静态印记</p>
+    <div data-root-guidance hidden><p data-root-hint>静态印记</p><details data-root-guide><summary>玩法说明</summary><p>点击中央印记，唤醒九界回声。</p></details></div>
+    <small data-root-motion-help></small>
     <div data-root-controls hidden><button type="button" data-root-echo><span data-root-echo-action>ECHO</span><small data-root-echo-prompt>CALL A WORLD</small></button><button type="button" data-root-still aria-pressed="false"><span data-root-still-label>DRIFT</span></button></div>
     <div data-root-reading hidden><span data-root-label></span><h3 data-root-title></h3><p data-root-story></p>${realmMarkup}</div>
     <p data-root-status role="status" aria-live="polite"></p>
@@ -100,7 +101,8 @@ test('enhancement enables the inscription without starting motion or exposing do
   assert.equal(f.root.dataset.ready,'true');assert.equal(f.awaken.disabled,false);
   assert.equal(f.root.dataset.awake,'false');assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
   assert.equal(f.query('[data-root-reading]').hidden,true);assert.equal(f.query('[data-root-controls]').hidden,true);
-  assert.equal(f.query('[data-root-hint]').textContent,'TOUCH THE SIGN · FOLLOW THE LIGHT');
+  assert.equal(f.query('[data-root-guidance]').hidden,false);assert.equal(f.query('[data-root-guide]').open,false);
+  assert.equal(f.query('[data-root-hint]').textContent,'点击中央印记，唤醒九界回声。');
   assert.deepEqual(selectedRealms(f),[]);assert.deepEqual(pose(f),before);
 });
 test('awakening reveals one readable realm; selecting all nine updates matching sigils and threads',t=>{
@@ -133,13 +135,15 @@ test('STILL holds the complete current pose and resumes from it without a time j
   f.query('[data-root-still]').click();const held=pose(f),before=coordinates(f);
   assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.still,'true');
   assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');assert.equal(f.query('[data-root-echo]').getAttribute('aria-disabled'),'true');
-  assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/恢复/);assert.match(f.query('[data-root-hint]').textContent,/A MOMENT HELD/);
+  assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/恢复/);assert.match(f.query('[data-root-hint]').textContent,/回声已定格/);
+  assert.equal(f.query('[data-root-motion-help]').textContent,'已定格 · 点击继续');
   f.pointer(950,300);f.advance(60000);assert.deepEqual(pose(f),held);assert.equal(f.root.dataset.echo,'true');
   f.sigilButton(5).click();assert.deepEqual(selectedRealms(f),['5']);
   f.query('[data-root-still]').click();assert.deepEqual(coordinates(f),before);f.advance(50);
   const after=coordinates(f);assert.ok(after.some((value,index)=>value!==before[index]));
   assert.ok(after.every((value,index)=>Math.abs(value-before[index])<2),'Resuming jumps to wall-clock time');
-  assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.still,'false');assert.match(f.query('[data-root-hint]').textContent,/LIGHT IN MOTION/);
+  assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.still,'false');assert.match(f.query('[data-root-hint]').textContent,/寻找未读世界/);
+  assert.equal(f.query('[data-root-motion-help]').textContent,'流动中 · 点击定格');
   f.advance(4000);assert.equal(f.root.dataset.echo,'false');
 });
 test('pointer light eases toward the latest target and returns gradually on leave',t=>{
@@ -233,7 +237,9 @@ test('ECHO draws a call and a return before revealing an unseen world and its pr
   assert.ok([...f.root.querySelectorAll('.ash-echo-trail')].some(path=>parseFloat(path.style.opacity)>.3),'No visible light routes');
   f.advance(300);assert.ok(f.root.querySelectorAll('[data-root-sigil].is-echoing').length>0);
   f.advance(500);assert.equal(f.query('.ash-echo-trail.is-returning').getAttribute('d'),f.query('[data-root-thread="1"]').getAttribute('d'));
-  f.advance(450);assert.deepEqual(selectedRealms(f),['1']);assert.equal(f.root.dataset.echoPhase,'answered');
+  f.advance(350);assert.deepEqual(selectedRealms(f),['1']);assert.equal(f.root.dataset.echoPhase,'answered');
+  assert.ok(Number(f.query('[data-root-echo-answer]').style.opacity)<.01,'Answer appears before its fade-in begins');
+  f.advance(100);assert.ok(Number(f.query('[data-root-echo-answer]').style.opacity)>0);
   assert.equal(f.root.dataset.remembered,'2');assert.equal(f.query('[data-root-echo-name]').textContent,'符文 1');assert.equal(f.query('[data-root-echo-mark]').textContent,'ᛟ');
   assert.equal(f.query('[data-root-label]').textContent,'符文 1 · II / IX REMEMBERED');assert.match(f.query('[data-root-status]').textContent,/回声来自九界 1/);
   assert.equal(f.query('[data-root-echo]').disabled,false);f.advance(2500);assert.equal(f.root.dataset.echo,'false');
@@ -246,7 +252,7 @@ test('repeat calls discover every unseen world, then revisit without adding node
     assert.equal(heard.has(selected),false,'An already read world was repeated');heard.add(selected);
     assert.equal(f.root.querySelectorAll('*').length,nodes);assert.equal(f.timers.length,0);
   }
-  assert.equal(heard.size,9);assert.equal(f.root.dataset.remembered,'9');assert.equal(f.query('[data-root-echo-prompt]').textContent,'REVISIT THE NINE');
+  assert.equal(heard.size,9);assert.equal(f.root.dataset.remembered,'9');assert.equal(f.query('[data-root-echo-prompt]').textContent,'再次寻访九界');
   const last=selectedRealms(f)[0];f.query('[data-root-echo]').click();f.advance(2000);assert.notEqual(selectedRealms(f)[0],last);assert.equal(f.root.dataset.remembered,'9');
 });
 test('rapid repeated calls do not starve the answer and explicit selection cancels a pending response',t=>{
@@ -284,4 +290,13 @@ test('fallback scheduling uses one loop, freezes exactly, and observes quiet pol
   f.query('[data-root-still]').click();const held=pose(f);f.advance(2000);assert.deepEqual(pose(f),held);assert.equal(f.pending,0);
   f.query('[data-root-still]').click();assert.equal(f.pending,1);f.advance(50);assert.notDeepEqual(pose(f),held);
   f.w.document.documentElement.classList.add('garden-lite-motion');await new Promise(setImmediate);assert.equal(f.pending,0);assert.equal(f.root.dataset.still,'true');
+});
+test('Escape dismisses help before the scene and returns focus to its disclosure',t=>{
+  const f=fixture(t),guide=f.query('[data-root-guide]'),summary=guide.querySelector('summary');
+  summary.click();assert.equal(guide.open,true);f.escape();assert.equal(guide.open,false);
+  assert.equal(f.w.document.activeElement,summary);assert.equal(f.root.dataset.awake,'false');
+  f.awaken.click();f.query('[data-root-echo]').click();f.advance(500);
+  summary.click();f.escape();assert.equal(guide.open,false);assert.equal(f.root.dataset.awake,'true');
+  f.advance(1300);assert.deepEqual(selectedRealms(f),['1']);
+  f.escape();assert.equal(f.root.dataset.awake,'false');assert.equal(f.pending,0);
 });
