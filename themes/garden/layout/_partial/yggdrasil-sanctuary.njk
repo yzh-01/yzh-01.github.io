@@ -12,14 +12,22 @@
 <section class="ash-sanctuary" id="the-end" data-root-sanctuary data-awake="false" data-motion="paused" data-motion-section aria-labelledby="ash-title">
   <header class="ash-heading">
     <p class="ash-eyebrow"><span>THE LAST LIGHT</span><span>IX / WORLDS IN THE MIST</span></p>
-    <h2 id="ash-title">长夜，仍有回声<span>。</span></h2>
-    <p class="ash-intro">光从远处而来，古老的名字在雾里浮现。</p>
+    <h2 id="ash-title" lang="non">Níu man ek heima<span aria-hidden="true">.</span></h2>
+    <p class="ash-intro" lang="non">Ask veit ek standa, heitir Yggdrasill.</p>
   </header>
   <div class="ash-clearing" data-root-clearing>
     {{ partial('_partial/root-sky-art.njk') }}
     <div class="ash-ground-mist" aria-hidden="true"></div>
+    <div class="ash-echo-field" data-root-echo-field aria-hidden="true"><b></b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ash-sigil-hotspots" data-root-hotspots hidden>
+      {% for realm in root_realms %}<button class="ash-field-sigil" type="button" data-root-sigil-button="{{ loop.index0 }}" aria-label="寻访{{ realm.name }}" aria-pressed="false" title="{{ realm.label }}"><span>{{ realm.label }}</span></button>{% endfor %}
+    </div>
     <button class="ash-heart" data-root-awaken type="button" aria-pressed="false" aria-label="唤醒印记" aria-controls="ash-root-reading" aria-describedby="ash-root-hint" disabled></button>
-    <p class="ash-clearing-note" id="ash-root-hint" data-root-hint>余光落在雾里，九界的名字静候回声。</p>
+    <p class="ash-clearing-note" id="ash-root-hint" data-root-hint>IX WORLDS · ONE REMEMBERED LIGHT</p>
+    <div class="ash-field-controls" data-root-controls hidden>
+      <button type="button" data-root-echo aria-label="释放一束光屑" title="释放光屑"><span>ECHO</span><b aria-hidden="true">↗</b></button>
+      <button type="button" data-root-still aria-pressed="false" aria-label="静止光幕" title="切换光幕动态"><i aria-hidden="true"></i><span data-root-still-label>DRIFT</span></button>
+    </div>
   </div>
   <div class="ash-root-reading" id="ash-root-reading" data-root-reading hidden>
     <div class="ash-realm-path" role="group" aria-label="寻访九界铭文">
