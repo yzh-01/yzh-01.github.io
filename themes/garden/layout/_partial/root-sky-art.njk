@@ -1,0 +1,132 @@
+{# A transparent field of aurora, mist and nine remembered lights. #}
+<svg class="ash-root-art" viewBox="0 0 1200 440" fill="none" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="root-aurora-mint" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-ice)" stop-opacity="0"/>
+      <stop offset=".26" stop-color="var(--root-ice)" stop-opacity=".05"/>
+      <stop offset=".58" stop-color="var(--root-mint)" stop-opacity=".42"/>
+      <stop offset=".8" stop-color="var(--root-mint)" stop-opacity=".16"/>
+      <stop offset="1" stop-color="var(--root-pearl)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-ice" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-pearl)" stop-opacity="0"/>
+      <stop offset=".32" stop-color="var(--root-ice)" stop-opacity=".07"/>
+      <stop offset=".65" stop-color="var(--root-ice)" stop-opacity=".34"/>
+      <stop offset=".85" stop-color="var(--root-mint)" stop-opacity=".11"/>
+      <stop offset="1" stop-color="var(--root-mint)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-pearl" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-ice)" stop-opacity="0"/>
+      <stop offset=".34" stop-color="var(--root-pearl)" stop-opacity=".04"/>
+      <stop offset=".6" stop-color="var(--root-pearl)" stop-opacity=".26"/>
+      <stop offset=".82" stop-color="var(--root-ice)" stop-opacity=".12"/>
+      <stop offset="1" stop-color="var(--root-ice)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-volume" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-ice)" stop-opacity="0"/>
+      <stop offset=".33" stop-color="var(--root-ice)" stop-opacity=".07"/>
+      <stop offset=".66" stop-color="var(--root-mint)" stop-opacity=".21"/>
+      <stop offset="1" stop-color="var(--root-pearl)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-ray-mint" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-ice)" stop-opacity="0"/>
+      <stop offset=".24" stop-color="var(--root-mint)" stop-opacity=".05"/>
+      <stop offset=".63" stop-color="var(--root-mint)" stop-opacity=".45"/>
+      <stop offset=".83" stop-color="var(--root-mint)" stop-opacity=".67"/>
+      <stop offset="1" stop-color="var(--root-ice)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-ray-ice" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-pearl)" stop-opacity="0"/>
+      <stop offset=".3" stop-color="var(--root-ice)" stop-opacity=".06"/>
+      <stop offset=".62" stop-color="var(--root-ice)" stop-opacity=".36"/>
+      <stop offset=".84" stop-color="var(--root-ice)" stop-opacity=".6"/>
+      <stop offset="1" stop-color="var(--root-mint)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-ray-pearl" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-ice)" stop-opacity="0"/>
+      <stop offset=".28" stop-color="var(--root-pearl)" stop-opacity=".03"/>
+      <stop offset=".65" stop-color="var(--root-pearl)" stop-opacity=".31"/>
+      <stop offset=".86" stop-color="var(--root-pearl)" stop-opacity=".49"/>
+      <stop offset="1" stop-color="var(--root-pearl)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-fade">
+      <stop stop-color="white" stop-opacity="0"/><stop offset=".18" stop-color="white"/>
+      <stop offset=".82" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="root-aurora-mist" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="var(--root-ice)" stop-opacity="0"/>
+      <stop offset=".42" stop-color="var(--root-pearl)" stop-opacity=".08"/>
+      <stop offset=".65" stop-color="var(--root-mint)" stop-opacity=".14"/>
+      <stop offset="1" stop-color="var(--root-ice)" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="root-aurora-feather"><rect width="1200" height="440" fill="url(#root-aurora-fade)"/></mask>
+    <filter id="root-aurora-volume-soft" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="15"/></filter>
+    <filter id="root-aurora-curtain-soft" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="7 9"/></filter>
+    <filter id="root-aurora-rays-soft" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation="2.4 5"/></filter>
+    <filter id="root-aurora-mist-soft" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+
+  <g class="ash-sky-volume" mask="url(#root-aurora-feather)" fill="url(#root-aurora-volume)" filter="url(#root-aurora-volume-soft)">
+    <path d="M48 58C218 27 367 110 559 86S877 33 1156 73L1156 239C905 220 817 266 590 241S217 233 48 210Z"/>
+    <path d="M66 104C259 123 408 60 611 90S896 160 1140 108L1140 250C946 274 814 229 614 215S274 260 66 236Z" opacity=".72"/>
+    <path d="M104 43C305 46 450 61 619 104S902 72 1114 61L1114 204C909 189 798 244 619 214S339 183 104 176Z" opacity=".52"/>
+  </g>
+
+  <g class="ash-sky-curtain" mask="url(#root-aurora-feather)" filter="url(#root-aurora-curtain-soft)">
+    <path fill="url(#root-aurora-mint)" d="M72 70C232 46 379 110 560 93S894 50 1136 90L1136 207C904 174 799 242 573 220S230 176 72 194Z"/>
+    <path fill="url(#root-aurora-ice)" d="M90 132C264 151 428 86 599 113S852 156 1120 125L1120 231C935 250 804 198 616 198S275 224 90 211Z" opacity=".86"/>
+    <path fill="url(#root-aurora-pearl)" d="M126 62C282 48 422 78 610 128S919 91 1096 79L1096 197C928 180 810 224 620 211S322 156 126 174Z" opacity=".76"/>
+  </g>
+
+  {%- set ray_ends = [223,219,214,209,202,194,183,171,156,145,140,144,151,159,168,180,193,204,210,208,199,187,170,151,138,131,136,146,162,178,196,213,226,235,239,234,222,207,190,174,161,157,164,178] -%}
+  {%- set ray_heights = [142,164,125,180,153,193,169,150,177,138,186] -%}
+  {%- set ray_widths = [8,13,18,11,16,9,14,19,10] -%}
+  {%- set ray_shifts = [-8,-3,4,8,3,-5,-7,1,6,3,-4] -%}
+  {%- set ray_opacity = [0.38,0.52,0.42,0.64,0.46,0.55,0.35,0.58,0.43] -%}
+  {%- set ray_tones = ['mint','ice','mint','pearl','ice'] -%}
+  <g class="ash-sky-rays" mask="url(#root-aurora-feather)" filter="url(#root-aurora-rays-soft)">
+    {% for i in range(44) -%}
+    {%- set x = 122 + i * 22 + ray_shifts[i % 11] -%}
+    {%- set y = ray_ends[i] -%}
+    {%- set h = ray_heights[i % 11] -%}
+    {%- set w = ray_widths[i % 9] -%}
+    <path fill="url(#root-aurora-ray-{{ ray_tones[i % 5] }})" opacity="{{ ray_opacity[i % 9] }}" style="--depth:{{ i % 3 }}" d="M{{ x - w * 0.6 }} {{ y - h }}C{{ x - 27 }} {{ y - h * 0.64 }} {{ x + 16 }} {{ y - h * 0.33 }} {{ x + w * 0.82 }} {{ y }}C{{ x + w * 0.2 }} {{ y + 6 }} {{ x - w * 0.65 }} {{ y + 4 }} {{ x - w }} {{ y - 3 }}C{{ x - 11 }} {{ y - h * 0.32 }} {{ x - 35 }} {{ y - h * 0.67 }} {{ x - w * 0.6 }} {{ y - h }}Z"/>
+    {%- endfor %}
+  </g>
+
+  <g class="ash-sky-mist" mask="url(#root-aurora-feather)" fill="url(#root-aurora-mist)" filter="url(#root-aurora-mist-soft)">
+    <path d="M55 218C253 203 414 244 603 231S917 198 1145 223L1145 269C924 254 798 280 601 267S235 241 55 256Z"/>
+    <path d="M94 306C308 287 453 323 645 299S951 318 1113 292L1113 340C935 348 811 329 649 344S304 328 94 350Z" opacity=".64"/>
+  </g>
+
+  <g class="ash-sky-inscription" stroke="var(--root-light)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M600 191L574 237H626Z"/>
+    <path d="M586 207L560 253H612Z"/>
+    <path d="M614 207L588 253H640Z"/>
+    <path d="M597 222L600 217L603 222" stroke="var(--root-warm)" opacity=".8"/>
+  </g>
+
+  <g stroke="var(--root-light)" stroke-width="1.15" stroke-linecap="round">
+    <path class="ash-root-thread" data-root-thread="0" d="M600 224C515 195 429 274 359 252S243 286 160 310"/>
+    <path class="ash-root-thread" data-root-thread="1" d="M600 224C531 256 472 230 420 249S344 311 285 289"/>
+    <path class="ash-root-thread" data-root-thread="2" d="M600 224C516 243 547 295 475 311S435 320 400 345"/>
+    <path class="ash-root-thread" data-root-thread="3" d="M600 224C557 218 526 258 544 278S528 316 500 309"/>
+    <path class="ash-root-thread" data-root-thread="4" d="M600 224C641 267 558 284 591 317S604 344 600 365"/>
+    <path class="ash-root-thread" data-root-thread="5" d="M600 224C634 224 638 257 674 264S733 280 710 302"/>
+    <path class="ash-root-thread" data-root-thread="6" d="M600 224C658 204 714 286 752 292S811 319 810 350"/>
+    <path class="ash-root-thread" data-root-thread="7" d="M600 224C681 256 733 230 789 256S877 284 925 293"/>
+    <path class="ash-root-thread" data-root-thread="8" d="M600 224C700 192 773 278 852 263S961 295 1040 329"/>
+  </g>
+
+  <g class="ash-sky-sigils" stroke="var(--root-light)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round" opacity=".28">
+    <path class="ash-sky-sigil" data-root-sigil="0" transform="translate(160 310)" d="M0-10V10M0-6L7 0L0 6M0 0L-6-5"/>
+    <path class="ash-sky-sigil" data-root-sigil="1" transform="translate(285 289)" d="M-6 10V-9L0-2L6-9V10"/>
+    <path class="ash-sky-sigil" data-root-sigil="2" transform="translate(400 345)" d="M0-9L7 0L0 9L-7 0ZM0-9V9"/>
+    <path class="ash-sky-sigil" data-root-sigil="3" transform="translate(500 309)" d="M-4-10V10M-4-7L6-1L-4 5"/>
+    <path class="ash-sky-sigil" data-root-sigil="4" transform="translate(600 365)" d="M0-10V10M0 0L-7-6M0 0L7-6M-7-6V-10M7-6V-10"/>
+    <path class="ash-sky-sigil" data-root-sigil="5" transform="translate(710 302)" d="M-6-9L6 9V-9L-6 9Z"/>
+    <path class="ash-sky-sigil" data-root-sigil="6" transform="translate(810 350)" d="M0-10V10M-4-10H4M-4 10H4"/>
+    <path class="ash-sky-sigil" data-root-sigil="7" transform="translate(925 293)" d="M5-10L-6 0L5 10M-6 0H3"/>
+    <path class="ash-sky-sigil" data-root-sigil="8" transform="translate(1040 329)" d="M-6-9V9L6-9V9M-6 0H6"/>
+  </g>
+</svg>

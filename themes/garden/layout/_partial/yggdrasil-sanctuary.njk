@@ -1,36 +1,32 @@
-<section class="ash-sanctuary" id="the-end" data-ash-sanctuary data-folio-outro data-motion-section aria-labelledby="ash-title">
+{%- set root_realms = [
+  { name: '阿斯加德', label: 'ÁSGARÐR', mark: 'ᛟ', story: '神明的居所。金色根脉穿过寒雾，通向高处的殿堂。' },
+  { name: '米德加尔德', label: 'MIÐGARÐR', mark: 'ᛗ', story: '人间的庭院。再漫长的夜，也有人为归途留一盏灯。' },
+  { name: '华纳海姆', label: 'VANAHEIMR', mark: 'ᛜ', story: '华纳神族的故乡。丰饶与生长，藏在雨后的苔色里。' },
+  { name: '约顿海姆', label: 'JÖTUNHEIMR', mark: 'ᚦ', story: '巨人的旷野。古老山石沉默着，记得世界最初的回声。' },
+  { name: '亚尔夫海姆', label: 'ÁLFHEIMR', mark: 'ᛉ', story: '光之精灵的国度。一片叶缘，也能收藏微小而明亮的光。' },
+  { name: '斯瓦塔尔夫海姆', label: 'SVARTÁLFAHEIMR', mark: 'ᛞ', story: '深处的匠作之境。炉火与巧手，把故事锻进金属的纹理。' },
+  { name: '尼福尔海姆', label: 'NIFLHEIMR', mark: 'ᛁ', story: '雾与寒霜的世界。泉水从寂静中涌出，沿树根缓缓流淌。' },
+  { name: '穆斯贝尔海姆', label: 'MÚSPELLSHEIMR', mark: 'ᚲ', story: '火焰的国度。寒夜中的一线暖色，仍记得最初的炽热。' },
+  { name: '赫尔海姆', label: 'HELHEIMR', mark: 'ᛇ', story: '长夜深处的归所。世界树记得每一个曾经走过的名字。' }
+] -%}
+<section class="ash-sanctuary" id="the-end" data-root-sanctuary data-awake="false" data-motion="paused" data-motion-section aria-labelledby="ash-title">
   <header class="ash-heading">
-    <div class="ash-chapter"><span><b aria-hidden="true">&gt;</b> THE LIVING ARCHIVE</span><i></i><span>04 / THE NINE WORLDS</span></div>
-    <div class="ash-heading-row">
-      <div><p class="ash-eyebrow">AT THE ROOTS OF THE WORLD</p><h2 id="ash-title">YGGDRASIL<span>.</span></h2></div>
-      <p class="ash-intro"><span>一方遗迹，九界的回声。</span>在世界树的根系间，留一盏灯。</p>
-    </div>
+    <p class="ash-eyebrow"><span>THE LAST LIGHT</span><span>IX / WORLDS IN THE MIST</span></p>
+    <h2 id="ash-title">长夜，仍有回声<span>。</span></h2>
+    <p class="ash-intro">光从远处而来，古老的名字在雾里浮现。</p>
   </header>
-  <div class="ash-exhibit" data-ash-exhibit data-exploring="false">
-    <div class="ash-landscape" id="ash-model-stage" data-ash-landscape data-awake="false" data-model-state="idle" data-world-module="{{ url_for('js/sanctuary-world.js') }}?v={{ theme.asset_version }}">
-      <img class="ash-model-poster" src="{{ url_for('images/yggdrasil-diorama.webp') }}?v={{ theme.asset_version }}" alt="方形遗迹底座上的世界树，九界符文石围绕树根，泉水映着暖光，断桥、石阶和乌鸦隐在寒夜中。" width="1400" height="1000" loading="lazy" decoding="async">
-      <canvas class="ash-model-canvas" data-ash-canvas tabindex="-1" role="img" aria-hidden="true" aria-label="可旋转的世界树与九界微缩景观" aria-describedby="ash-model-help ash-input-help"></canvas>
-    </div>
-    <div class="ash-controls" data-ash-controls hidden>
-      <p class="ash-input-note" id="ash-input-help"><i aria-hidden="true"></i><span class="ash-desktop-help"><b data-ash-mode-label>滚轮浏览页面</b><span data-ash-mode-help>拖动旋转 · Shift + 滚轮缩放</span></span><span class="ash-touch-help"><b>双指缩放模型</b><span>横拖旋转 · 纵滑浏览页面</span></span></p>
-      <div class="ash-actions">
-        <button class="ash-explore" data-ash-explore type="button" aria-pressed="false" aria-controls="ash-model-stage"><span data-ash-explore-label>探索模型</span><span aria-hidden="true">↗</span></button>
-        <div class="ash-zoom-controls" role="group" aria-label="模型视角">
-          <button data-ash-action="zoom-out" type="button" aria-label="缩小模型" title="缩小模型">−</button>
-          <output data-ash-zoom aria-label="模型缩放比例">100%</output>
-          <button data-ash-action="zoom-in" type="button" aria-label="放大模型" title="放大模型">+</button>
-          <button data-ash-action="reset" type="button" aria-label="复位模型视角" title="复位模型视角（R）">↺</button>
-        </div>
-        <button data-ash-action="rain" type="button" aria-pressed="true" title="切换细雨与静夜">细雨</button>
-        <button data-ash-action="next" type="button" title="依次寻访九界（N）">下一界 <span aria-hidden="true">↗</span></button>
-      </div>
-    </div>
-    <div class="ash-discovery">
-      <div><span data-ash-discovery-label>THE NINE WORLDS</span><strong data-ash-discovery-title>万物，于此相连。</strong></div>
-      <p data-ash-discovery-body>九块符文石守着树根，一泓泉水映着长夜。</p>
-      <span class="ash-discovery-count" data-ash-count hidden>寻访 0 / 9</span>
-    </div>
+  <div class="ash-clearing" data-root-clearing>
+    {{ partial('_partial/root-sky-art.njk') }}
+    <div class="ash-ground-mist" aria-hidden="true"></div>
+    <button class="ash-heart" data-root-awaken type="button" aria-pressed="false" aria-label="唤醒印记" aria-controls="ash-root-reading" aria-describedby="ash-root-hint" disabled></button>
+    <p class="ash-clearing-note" id="ash-root-hint" data-root-hint>余光落在雾里，九界的名字静候回声。</p>
   </div>
-  <p class="sr-only" id="ash-model-help">滚轮默认滚动页面。点击探索模型后，边框亮起，模型内滚轮用于缩放；按 Esc、移出边框或点击外部退出。也可按住 Shift 配合滚轮缩放。鼠标拖拽旋转，右键拖拽平移。手机横向拖动旋转，双指缩放，纵向滑动浏览页面。键盘方向键旋转，加减键缩放，空格唤醒九界，R 键复位，N 键寻访下一界，数字一至九直达各界，W 键切换细雨，L 键切换木屋暖灯。轻触树心唤醒九界，符文石显现各界故事，泉水泛起涟漪，木屋切换暖灯。</p>
-  <p class="sr-only" data-ash-status role="status" aria-live="polite">世界树的根系相连，九界静候微光。</p>
+  <div class="ash-root-reading" id="ash-root-reading" data-root-reading hidden>
+    <div class="ash-realm-path" role="group" aria-label="寻访九界铭文">
+      {% for realm in root_realms %}<button type="button" data-root-realm="{{ loop.index0 }}" data-realm-name="{{ realm.name }}" data-realm-rune="{{ realm.label }}" data-realm-story="{{ realm.story }}" aria-label="寻访{{ realm.name }}" aria-pressed="false" title="{{ realm.name }}"><span aria-hidden="true">{{ realm.mark }}</span></button>{% endfor %}
+    </div>
+    <div class="ash-root-story"><span data-root-label></span><h3 data-root-title></h3><p data-root-story></p></div>
+  </div>
+  <p class="sr-only" data-root-status role="status" aria-live="polite">余光在雾中静候回声。</p>
+  <footer class="ash-colophon"><span>THE GARDEN CONTINUES.</span><a href="#hello">回到故事的开头 <span aria-hidden="true">↑</span></a></footer>
 </section>

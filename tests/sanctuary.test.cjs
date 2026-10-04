@@ -3,137 +3,194 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {JSDOM}=require('jsdom');
-// Replace only the import transport; the lifecycle and error handling run as shipped.
-const code=fs.readFileSync(path.join(__dirname,'../themes/garden/source/js/sanctuary.js'),'utf8')
-  .replace('import(scene.dataset.worldModule)','window.importWorld(scene.dataset.worldModule)');
-function fixture(t,{fail=false,throwOnCreate=false,noObserver=false}={}) {
-  const dom=new JSDOM(`<section data-ash-sanctuary>
-    <div data-ash-exhibit data-exploring="false">
-      <div data-ash-landscape data-model-state="idle" data-world-module="/js/sanctuary-world.js?v=test"><img class="ash-model-poster" alt="世界树的静态微缩景观"><canvas data-ash-canvas aria-hidden="true" tabindex="-1"></canvas></div>
-      <div data-ash-controls hidden>
-        <b data-ash-mode-label></b><span data-ash-mode-help></span>
-        <button data-ash-explore aria-pressed="false"><span data-ash-explore-label>探索模型</span></button>
-        <button data-ash-action="zoom-in">+</button><output data-ash-zoom>100%</output><button data-ash-action="zoom-out">−</button>
-        <button data-ash-action="reset">复位</button><button data-ash-action="next">下一界</button><button data-ash-action="rain" aria-pressed="true">细雨</button>
-      </div>
-      <span data-ash-discovery-label></span><strong data-ash-discovery-title></strong><p data-ash-discovery-body></p><span data-ash-count hidden>寻访 0 / 9</span>
-    </div><p data-ash-status></p>
-  </section>`,{url:'https://garden.test',runScripts:'outside-only'});
+const code=fs.readFileSync(path.join(__dirname,'../themes/garden/source/js/sanctuary.js'),'utf8');
+
+function fixture(t,{reduced=false,fine=true,visible=true,noObserver=false,noMotion=false}={}) {
+  const realmMarkup=Array.from({length:9},(_,index)=>`<button type="button" data-root-realm="${index}" aria-pressed="false" data-realm-name="九界 ${index}" data-realm-rune="符文 ${index}" data-realm-story="第 ${index} 界的故事。">九界 ${index}</button>`).join('');
+  const threads=Array.from({length:9},(_,index)=>`<path data-root-thread="${index}"></path><circle data-root-sigil="${index}"></circle>`).join('');
+  const dom=new JSDOM(`<section data-root-sanctuary data-awake="false">
+    <div data-root-clearing><svg aria-hidden="true">${threads}</svg><button type="button" data-root-awaken disabled aria-pressed="false" aria-label="唤醒印记">印记</button></div>
+    <p data-root-hint>静态印记</p>
+    <div data-root-reading hidden><span data-root-label></span><h3 data-root-title></h3><p data-root-story></p>${realmMarkup}</div>
+    <p data-root-status role="status" aria-live="polite"></p>
+  </section>`,{url:'https://garden.test/',runScripts:'outside-only'});
   const w=dom.window;t.after(()=>w.close());
-  let resolve,reject,creates=0,destroys=0,callbacks;
-  const imports=[],states=[],observers=[],commands=[];
-  const deferred=new Promise((yes,no)=>{resolve=yes;reject=no;});
-  w.importWorld=src=>{imports.push(src);return deferred;};
-  if(!noObserver) w.IntersectionObserver=class {
-    constructor(fn,options){this.fn=fn;this.options=options;this.disconnected=false;observers.push(this);}
-    observe(){} disconnect(){this.disconnected=true;}
+  Object.defineProperty(w,'innerHeight',{value:900,configurable:true});
+  let hidden=false;
+  Object.defineProperty(w.document,'hidden',{get:()=>hidden,configurable:true});
+  const media=new Map();
+  w.matchMedia=query=>{
+    if(!media.has(query)) {
+      const listeners=new Set();
+      media.set(query,{matches:query.includes('reduced-motion')?reduced:fine,
+        addEventListener:(name,callback)=>listeners.add(callback),removeEventListener:(name,callback)=>listeners.delete(callback),
+        change(value){this.matches=value;listeners.forEach(callback=>callback({matches:value}));}});
+    }
+    return media.get(query);
   };
-  const model={setActive:value=>{states.push(value);if(!value)callbacks?.onExplore(false);},destroy:()=>destroys++,
-    setExploring:value=>{commands.push(['explore',value]);callbacks.onExplore(value);},
-    zoomBy:factor=>{commands.push(['zoom',factor]);callbacks.onViewChange(Math.round(factor*100));},
-    reset:()=>{commands.push(['reset']);callbacks.onViewChange(100);callbacks.onExplore(false);},
-    nextRealm:()=>commands.push(['next']),setRain:value=>{commands.push(['rain',value]);callbacks.onWeather(value);}};
-  const module={createSanctuary:(host,options)=>{
-    creates++;if(throwOnCreate)throw new Error('WebGL unavailable');callbacks=options;options.onReady();return model;
-  }};
+  const root=w.document.querySelector('[data-root-sanctuary]');
+  const stage=root.querySelector('[data-root-clearing]');
+  stage.getBoundingClientRect=()=>({left:100,top:visible?100:1000,width:1000,height:600,right:1100,bottom:visible?700:1600});
+  const observers=[];
+  if(!noObserver) w.IntersectionObserver=class {
+    constructor(callback){this.callback=callback;observers.push(this);}
+    observe(target){this.target=target;}
+  };
+  const motionState={allowed:true,economy:false};
+  const subscribers=[];
+  if(!noMotion) w.GardenMotion={canAnimate:()=>motionState.allowed,isEconomy:()=>motionState.economy,subscribe:callback=>subscribers.push(callback)};
+  const frames=new Map();let nextFrame=0,requested=0,cancelled=0;
+  w.requestAnimationFrame=callback=>{requested++;frames.set(++nextFrame,callback);return nextFrame;};
+  w.cancelAnimationFrame=id=>{if(frames.delete(id))cancelled++;};
+  const mutations=[];
+  const NativeMutationObserver=w.MutationObserver;
+  w.MutationObserver=class extends NativeMutationObserver {
+    observe(target,options){mutations.push({attributes:options.attributes,attributeFilter:Array.from(options.attributeFilter||[])});super.observe(target,options);}
+  };
   w.eval(code);
-  const scene=w.document.querySelector('[data-ash-landscape]');
-  return {w,scene,states,imports,observers,commands,query:selector=>w.document.querySelector(selector),
-    near:()=>observers[0].fn([{isIntersecting:true}]),
-    visible:value=>observers[1].fn([{isIntersecting:value}]),
-    finish:async()=>{if(fail)reject(new Error('offline'));else resolve(module);await new Promise(yes=>setImmediate(yes));},
-    get creates(){return creates;},get destroys(){return destroys;},get callbacks(){return callbacks;},
-    transition:(name,persisted)=>w.dispatchEvent(new w.PageTransitionEvent(name,{persisted}))};
+  const awaken=root.querySelector('[data-root-awaken]');
+  return {w,root,stage,awaken,mutations,query:selector=>root.querySelector(selector),
+    get requested(){return requested;},get cancelled(){return cancelled;},get pending(){return frames.size;},
+    realm:index=>root.querySelector(`[data-root-realm="${index}"]`),
+    pointer:(x,y)=>stage.dispatchEvent(new w.MouseEvent('pointermove',{clientX:x,clientY:y,bubbles:true})),
+    leave:()=>stage.dispatchEvent(new w.MouseEvent('pointerleave')),
+    flush(){const queued=[...frames.values()];frames.clear();queued.forEach(callback=>callback(100));},
+    visible(value){visible=value;observers.forEach(observer=>observer.callback([{target:observer.target,isIntersecting:value}]));},
+    hidden(value){hidden=value;w.document.dispatchEvent(new w.Event('visibilitychange'));},
+    reduced:value=>media.get('(prefers-reduced-motion: reduce)').change(value),
+    fine:value=>media.get('(hover: hover) and (pointer: fine)').change(value),
+    motion(value){Object.assign(motionState,value);subscribers.forEach(callback=>callback());},
+    transition:name=>w.dispatchEvent(new w.PageTransitionEvent(name,{persisted:true})),
+    escape:()=>w.document.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',cancelable:true}))};
 }
+function selectedRealms(f) {return [...f.root.querySelectorAll('[data-root-realm][aria-pressed="true"]')].map(button=>button.dataset.rootRealm);}
+function selectedThreads(f) {return [...f.root.querySelectorAll('[data-root-thread].is-selected')].map(thread=>thread.dataset.rootThread);}
+function selectedSigils(f) {return [...f.root.querySelectorAll('[data-root-sigil].is-selected')].map(sigil=>sigil.dataset.rootSigil);}
 
-test('first screen keeps the optional renderer unloaded and the static poster accessible',t=>{
-  const f=fixture(t);assert.equal(f.imports.length,0);assert.equal(f.creates,0);
-  assert.equal(f.scene.dataset.modelState,'idle');assert.equal(f.scene.querySelector('canvas').tabIndex,-1);
-  assert.ok(f.scene.querySelector('img').alt.includes('世界树'));
-  assert.equal(f.query('[data-ash-controls]').hidden,true);
-  assert.equal(f.query('[data-ash-count]').hidden,true);
+test('initial enhancement enables the native sigil button without starting motion or revealing stories',t=>{
+  const f=fixture(t);
+  assert.equal(f.root.dataset.ready,'true');assert.equal(f.awaken.disabled,false);
+  assert.equal(f.root.dataset.awake,'false');assert.equal(f.root.dataset.motion,'paused');
+  assert.equal(f.awaken.getAttribute('aria-pressed'),'false');assert.equal(f.awaken.getAttribute('aria-label'),'唤醒印记');
+  assert.equal(f.query('[data-root-reading]').hidden,true);
+  assert.equal(f.query('[data-root-hint]').textContent,'轻触印记 · 让九界显影');
+  assert.equal(f.query('[data-root-status]').textContent,'余光收起，九界静候下一次相逢。');
+  assert.deepEqual(selectedRealms(f),[]);assert.deepEqual(selectedSigils(f),[]);assert.equal(f.requested,0);
 });
-test('preloading and entering the viewport share one import; leaving stops and returning resumes',async t=>{
-  const f=fixture(t);f.near();f.visible(true);await f.finish();
-  assert.equal(f.imports.length,1);assert.equal(f.creates,1);assert.equal(f.scene.dataset.modelState,'ready');
-  assert.equal(f.scene.querySelector('canvas').tabIndex,0);assert.equal(f.scene.querySelector('canvas').hasAttribute('aria-hidden'),false);
-  assert.equal(f.query('[data-ash-controls]').hidden,false);assert.equal(f.scene.querySelector('img').getAttribute('aria-hidden'),'true');
-  assert.equal(f.query('[data-ash-count]').hidden,false);
-  f.visible(false);f.visible(true);assert.deepEqual(f.states,[true,false,true]);assert.equal(f.imports.length,1);
+test('a sigil click reveals the first realm and exposes its readable story',t=>{
+  const f=fixture(t);f.awaken.click();
+  assert.equal(f.root.dataset.awake,'true');assert.equal(f.root.dataset.motion,'running');
+  assert.equal(f.awaken.getAttribute('aria-pressed'),'true');assert.equal(f.awaken.getAttribute('aria-label'),'收起余光');
+  assert.equal(f.query('[data-root-reading]').hidden,false);
+  assert.equal(f.query('[data-root-label]').textContent,'符文 0 / 九界 0');
+  assert.equal(f.query('[data-root-title]').textContent,'九界 0');
+  assert.equal(f.query('[data-root-story]').textContent,'第 0 界的故事。');
+  assert.equal(f.query('[data-root-hint]').textContent,'九界已显影 · 再次轻触收起');
+  assert.match(f.query('[data-root-status]').textContent,/九界 0.*第 0 界/);
+  assert.deepEqual(selectedRealms(f),['0']);assert.deepEqual(selectedThreads(f),['0']);assert.deepEqual(selectedSigils(f),['0']);assert.equal(f.requested,0);
 });
-test('a failed module request preserves the poster and removes unusable keyboard targets',async t=>{
-  const f=fixture(t,{fail:true});f.visible(true);await f.finish();
-  assert.equal(f.creates,0);assert.equal(f.scene.dataset.modelState,'fallback');
-  assert.equal(f.scene.querySelector('canvas').tabIndex,-1);assert.ok(f.scene.querySelector('img'));
-  assert.equal(f.query('[data-ash-controls]').hidden,true);assert.equal(f.scene.querySelector('img').hasAttribute('aria-hidden'),false);
-  assert.equal(f.query('[data-ash-count]').hidden,true);
-  f.visible(false);f.visible(true);assert.equal(f.imports.length,1);
+test('realm selection updates the story and leaves one selected button, thread and sigil',t=>{
+  const f=fixture(t);f.awaken.click();
+  for(const index of [4,8,3]) {
+    f.realm(index).click();
+    assert.deepEqual(selectedRealms(f),[String(index)]);assert.deepEqual(selectedThreads(f),[String(index)]);assert.deepEqual(selectedSigils(f),[String(index)]);
+    assert.equal(f.query('[data-root-title]').textContent,`九界 ${index}`);
+    assert.equal(f.query('[data-root-story]').textContent,`第 ${index} 界的故事。`);
+  }
+  f.realm(3).dataset.realmStory='<img src="missing" onerror="alert(1)">';f.realm(3).click();
+  assert.equal(f.query('[data-root-story]').textContent,'<img src="missing" onerror="alert(1)">');
+  assert.equal(f.query('[data-root-story]').children.length,0);
 });
-test('an unavailable WebGL context falls back without breaking the rest of the page',async t=>{
-  const f=fixture(t,{throwOnCreate:true});f.visible(true);await f.finish();
-  assert.equal(f.scene.dataset.modelState,'fallback');assert.match(f.w.document.querySelector('[data-ash-status]').textContent,/静态/);
+test('sleeping and waking preserve the chosen story and prevent dormant realm changes',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(6).click();f.awaken.click();
+  assert.equal(f.root.dataset.awake,'false');assert.equal(f.root.dataset.motion,'paused');
+  assert.equal(f.query('[data-root-reading]').hidden,true);
+  assert.equal(f.awaken.getAttribute('aria-label'),'唤醒印记');
+  assert.equal(f.query('[data-root-hint]').textContent,'轻触印记 · 让九界显影');
+  assert.equal(f.query('[data-root-status]').textContent,'余光收起，九界静候下一次相逢。');
+  f.realm(1).click();assert.deepEqual(selectedRealms(f),['6']);
+  f.awaken.click();assert.deepEqual(selectedRealms(f),['6']);assert.deepEqual(selectedThreads(f),['6']);assert.deepEqual(selectedSigils(f),['6']);
+  assert.equal(f.query('[data-root-story]').textContent,'第 6 界的故事。');
+  assert.equal(f.query('[data-root-reading]').hidden,false);
 });
-test('context restoration restores focus access, and awakening announces the new state',async t=>{
-  const f=fixture(t);f.visible(true);await f.finish();
-  f.callbacks.onFallback();assert.equal(f.scene.dataset.modelState,'fallback');
-  assert.equal(f.query('[data-ash-controls]').hidden,true);
-  f.callbacks.onReady();assert.equal(f.scene.dataset.modelState,'ready');assert.equal(f.scene.querySelector('canvas').tabIndex,0);
-  assert.equal(f.query('[data-ash-controls]').hidden,false);
-  f.callbacks.onAwake(true);assert.match(f.w.document.querySelector('[data-ash-status]').textContent,/已点亮/);
+test('Escape closes the afterglow, cancels pending light and retains the current realm',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(2).click();f.pointer(900,300);assert.equal(f.pending,1);
+  const nativeButton=f.w.document.activeElement;f.escape();
+  assert.equal(f.root.dataset.awake,'false');assert.equal(f.query('[data-root-reading]').hidden,true);
+  assert.equal(f.pending,0);assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'50%');
+  assert.deepEqual(selectedRealms(f),['2']);assert.equal(f.w.document.activeElement,nativeButton);
 });
-test('back-forward cache pauses and resumes the retained model, while final navigation disposes it',async t=>{
-  const f=fixture(t);f.visible(true);await f.finish();
-  f.transition('pagehide',true);assert.equal(f.states.at(-1),false);assert.equal(f.destroys,0);
-  f.transition('pageshow',true);assert.equal(f.states.at(-1),true);
-  f.transition('pagehide',false);assert.equal(f.destroys,1);assert.ok(f.observers.every(o=>o.disconnected));
+test('Escape returns focus from a hidden realm button to the sigil button',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(4).click();f.realm(4).focus();
+  assert.equal(f.w.document.activeElement,f.realm(4));f.escape();
+  assert.equal(f.query('[data-root-reading]').hidden,true);
+  assert.equal(f.w.document.activeElement,f.awaken);assert.deepEqual(selectedRealms(f),['4']);
 });
-test('a navigation during loading does not mount an abandoned renderer',async t=>{
-  const f=fixture(t);f.near();f.transition('pagehide',false);await f.finish();assert.equal(f.creates,0);
+test('pointer input coalesces to one frame and never schedules a continuous loop',t=>{
+  const f=fixture(t);f.pointer(600,400);assert.equal(f.requested,0);
+  f.awaken.click();f.pointer(400,250);f.pointer(800,460);f.pointer(700,400);
+  assert.equal(f.requested,1);assert.equal(f.pending,1);f.flush();
+  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'60.00%');
+  assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'50.00%');
+  assert.equal(f.pending,0);assert.equal(f.requested,1);
 });
-test('browsers without IntersectionObserver still mount and pause the scene during navigation',async t=>{
-  const f=fixture(t,{noObserver:true});await f.finish();assert.equal(f.scene.dataset.modelState,'ready');assert.deepEqual(f.states,[true]);
-  f.transition('pagehide',true);assert.equal(f.states.at(-1),false);assert.equal(f.destroys,0);
-  f.transition('pageshow',true);assert.equal(f.states.at(-1),true);
-  f.transition('pagehide',false);assert.equal(f.destroys,1);
+test('the light stays within the clearing and leaving resets it without another frame',t=>{
+  const f=fixture(t);f.awaken.click();f.pointer(-200,-300);f.flush();
+  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'10.00%');assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'10.00%');
+  f.pointer(1600,1200);f.flush();
+  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'90.00%');assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'90.00%');
+  f.pointer(700,400);const requested=f.requested;f.leave();
+  assert.equal(f.pending,0);assert.equal(f.requested,requested);
+  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'50%');assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'52%');
 });
-
-test('exploration explicitly changes the border state and wheel guidance, with several ways to return to page browsing',async t=>{
-  const f=fixture(t);f.visible(true);await f.finish();
-  const button=f.query('[data-ash-explore]'),exhibit=f.query('[data-ash-exhibit]');
-  assert.match(f.query('[data-ash-mode-label]').textContent,/滚轮浏览页面/);
-  button.click();assert.equal(exhibit.dataset.exploring,'true');assert.equal(button.getAttribute('aria-pressed'),'true');
-  assert.match(f.query('[data-ash-mode-label]').textContent,/模型内滚轮缩放/);
-  f.w.document.dispatchEvent(new f.w.KeyboardEvent('keydown',{key:'Escape'}));assert.equal(exhibit.dataset.exploring,'false');
-  button.click();exhibit.dispatchEvent(new f.w.MouseEvent('pointerleave'));assert.equal(exhibit.dataset.exploring,'false');
-  button.click();f.w.document.body.dispatchEvent(new f.w.MouseEvent('pointerdown',{bubbles:true}));assert.equal(exhibit.dataset.exploring,'false');
-  button.click();f.visible(false);assert.equal(exhibit.dataset.exploring,'false');
-  assert.equal(button.getAttribute('aria-pressed'),'false');
+test('offscreen clearing pauses animation and discards pending pointer updates',t=>{
+  const f=fixture(t);f.awaken.click();f.pointer(700,400);f.visible(false);
+  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);assert.equal(f.cancelled,1);
+  f.pointer(800,500);assert.equal(f.requested,1);f.visible(true);
+  assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.awake,'true');
+  assert.equal(f.requested,1);f.pointer(800,500);assert.equal(f.pending,1);
 });
-
-test('view controls delegate to the model and report scale; reset releases exploration',async t=>{
-  const f=fixture(t);f.visible(true);await f.finish();
-  f.query('[data-ash-action="zoom-in"]').click();assert.deepEqual(f.commands.at(-1),['zoom',1.15]);assert.equal(f.query('[data-ash-zoom]').value,'115%');
-  f.query('[data-ash-action="zoom-out"]').click();assert.deepEqual(f.commands.at(-1),['zoom',1/1.15]);
-  f.query('[data-ash-explore]').click();f.query('[data-ash-action="reset"]').click();
-  assert.equal(f.query('[data-ash-zoom]').value,'100%');assert.equal(f.query('[data-ash-exhibit]').dataset.exploring,'false');
-  f.query('[data-ash-action="next"]').click();assert.deepEqual(f.commands.at(-1),['next']);
+test('a hidden document pauses light while preserving the active story for return',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(5).click();f.pointer(700,400);f.hidden(true);
+  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);f.pointer(900,300);assert.equal(f.requested,1);
+  f.hidden(false);assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['5']);assert.equal(f.pending,0);
 });
-
-test('discoveries show individual stories and cumulative progress, with matching screen-reader feedback',async t=>{
-  const f=fixture(t);f.visible(true);await f.finish();
-  f.callbacks.onRealm({label:'ÁSGARÐR',name:'阿斯加德',story:'神明的居所。',visited:1,total:9});
-  assert.equal(f.query('[data-ash-discovery-title]').textContent,'阿斯加德');assert.equal(f.query('[data-ash-count]').textContent,'寻访 1 / 9');
-  assert.match(f.query('[data-ash-status]').textContent,/阿斯加德.*1 \/ 9/);
-  f.callbacks.onRealm({label:'HELHEIMR',name:'赫尔海姆',story:'长夜深处的归所。',visited:9,total:9});
-  assert.match(f.query('[data-ash-status]').textContent,/九界已相连/);
+test('reduced motion keeps all button interactions usable without scheduling pointer light',t=>{
+  const f=fixture(t,{reduced:true});f.awaken.click();f.realm(7).click();f.pointer(700,400);
+  assert.equal(f.root.dataset.motion,'paused');assert.deepEqual(selectedRealms(f),['7']);assert.equal(f.requested,0);
+  f.reduced(false);assert.equal(f.root.dataset.motion,'running');f.pointer(800,300);assert.equal(f.pending,1);
+  f.reduced(true);assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
 });
-
-test('weather and miniature details provide feedback, and context restoration preserves the latest story',async t=>{
-  const f=fixture(t);f.visible(true);await f.finish();
-  const rain=f.query('[data-ash-action="rain"]');rain.click();assert.deepEqual(f.commands.at(-1),['rain',false]);assert.equal(rain.getAttribute('aria-pressed'),'false');
-  rain.click();assert.deepEqual(f.commands.at(-1),['rain',true]);assert.equal(rain.getAttribute('aria-pressed'),'true');
-  f.callbacks.onInteract({label:'URÐARBRUNNR',title:'乌尔德之泉',story:'泉水接住一段回声。'});
-  assert.match(f.query('[data-ash-status]').textContent,/乌尔德之泉/);
-  f.query('[data-ash-explore]').click();f.callbacks.onFallback();assert.equal(f.query('[data-ash-exhibit]').dataset.exploring,'false');
-  f.callbacks.onReady();assert.equal(f.query('[data-ash-discovery-title]').textContent,'乌尔德之泉');
+test('quiet and economy policies cancel queued light and keep deliberate awakening available',t=>{
+  const f=fixture(t);f.awaken.click();f.pointer(700,400);f.motion({economy:true});
+  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);f.realm(8).click();assert.deepEqual(selectedRealms(f),['8']);
+  f.pointer(800,500);assert.equal(f.requested,1);f.motion({economy:false,allowed:false});assert.equal(f.root.dataset.motion,'paused');
+  f.motion({allowed:true});assert.equal(f.root.dataset.motion,'running');f.pointer(700,400);assert.equal(f.pending,1);
+  f.w.document.documentElement.classList.add('garden-lite-motion');f.motion({});
+  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
+});
+test('coarse pointers use the native controls without light scheduling',t=>{
+  const f=fixture(t,{fine:false});f.awaken.click();f.realm(4).click();f.pointer(700,400);
+  assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['4']);assert.equal(f.requested,0);
+  f.fine(true);f.pointer(700,400);assert.equal(f.pending,1);f.fine(false);
+  assert.equal(f.pending,0);assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'50%');
+});
+test('page transitions cancel queued light and resume policy without changing the story',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(3).click();f.pointer(700,400);f.transition('pagehide');
+  assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'paused');f.pointer(800,500);assert.equal(f.requested,1);
+  f.transition('pageshow');assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['3']);assert.equal(f.pending,0);
+});
+test('without shared motion the quiet class is observed, and theme changes do not schedule light',async t=>{
+  const f=fixture(t,{noMotion:true});f.awaken.click();f.pointer(700,400);f.flush();
+  assert.deepEqual(f.mutations,[{attributes:true,attributeFilter:['class']}]);
+  f.w.document.documentElement.dataset.resolvedTheme='light';await new Promise(setImmediate);
+  assert.equal(f.requested,1);assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'running');
+  f.w.document.documentElement.classList.add('garden-lite-motion');await new Promise(setImmediate);
+  assert.equal(f.root.dataset.motion,'paused');f.pointer(800,500);assert.equal(f.requested,1);
+});
+test('the shared motion path adds no theme observer, and browsers without viewport observation keep controls usable',async t=>{
+  const f=fixture(t,{noObserver:true});f.awaken.click();f.realm(1).click();
+  assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['1']);assert.deepEqual(f.mutations,[]);
+  f.w.document.documentElement.dataset.resolvedTheme='light';await new Promise(setImmediate);
+  assert.equal(f.requested,0);assert.equal(f.pending,0);assert.equal(f.root.dataset.awake,'true');
 });

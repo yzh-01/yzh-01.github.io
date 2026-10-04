@@ -138,6 +138,29 @@
 .is-home .g-nav-links a.active::before { content: ">"; margin-right: 5px; color: var(--moss-bright); }
 .is-home .g-scroll-track { display: none; }
 
+.is-home .g-footer {
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+  color: var(--g-text-soft);
+  background: transparent;
+  border: 0;
+  font-family: var(--g-font-mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.is-home .g-footer-inner { width: min(1160px, calc(100% - 112px)); max-width: none; padding: 24px 0 0; border-top: 1px solid var(--g-accent-border); }
+.is-home .g-footer-author, .is-home .g-footer a { color: var(--g-text-soft); }
+.is-home .g-footer-author { font: 600 12px/1.5 var(--g-font-mono); }
+.is-home .g-footer .links { flex-wrap: wrap; }
+.is-home .g-footer a { display: inline-flex; align-items: center; min-height: 40px; }
+@media (max-width: 768px) {
+  .is-home .g-footer { padding-bottom: 88px; }
+  .is-home .g-footer-inner { width: calc(100% - 48px); }
+  .is-home .g-footer .links { gap: 8px 16px; justify-content: center; }
+}
+
 /* Hero — an off-axis title suspended in the clearing after rain. */
 .folio-cover {
   position: relative;
