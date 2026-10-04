@@ -53,6 +53,13 @@
       <stop stop-color="white" stop-opacity="0"/><stop offset=".18" stop-color="white"/>
       <stop offset=".82" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/>
     </linearGradient>
+    <linearGradient id="root-echo-spectrum">
+      <stop stop-color="var(--root-mint)" stop-opacity="0"/>
+      <stop offset=".27" stop-color="var(--root-mint)" stop-opacity=".7"/>
+      <stop offset=".5" stop-color="var(--root-warm)"/>
+      <stop offset=".73" stop-color="var(--root-ice)" stop-opacity=".7"/>
+      <stop offset="1" stop-color="var(--root-ice)" stop-opacity="0"/>
+    </linearGradient>
     <linearGradient id="root-aurora-mist" x1="0" y1="0" x2="0" y2="1">
       <stop stop-color="var(--root-ice)" stop-opacity="0"/>
       <stop offset=".42" stop-color="var(--root-pearl)" stop-opacity=".08"/>
@@ -103,6 +110,10 @@
     {% for i in range(12) %}<circle data-root-mote cx="{{ 192 + (i * 173) % 826 }}" cy="{{ 142 + (i * 47) % 182 }}" r="{{ 0.65 + (i % 3) * 0.15 }}" opacity=".24"/>{% endfor %}
   </g>
 
+  <g class="ash-echo-wave" data-root-echo-wave stroke="url(#root-echo-spectrum)" stroke-linecap="round">
+    <path d="M80 238C242 167 411 280 600 224S960 193 1120 250"/>
+    <path d="M110 246C306 210 408 266 600 231S901 207 1090 259" opacity=".35"/>
+  </g>
   <g class="ash-sky-inscription" stroke="var(--root-light)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round">
     <path d="M600 191L574 237H626Z"/>
     <path d="M586 207L560 253H612Z"/>
@@ -122,6 +133,7 @@
     <path class="ash-root-thread" data-root-thread="8" d="M600 224C700 192 773 278 852 263S961 295 1040 329"/>
   </g>
 
+  <g class="ash-echo-trails" data-root-echo-trails fill="none" stroke-linecap="round"></g>
   <g class="ash-sky-sigils" stroke="var(--root-light)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round" opacity=".28">
     <path class="ash-sky-sigil" data-root-sigil="0" transform="translate(160 310)" d="M0-10V10M0-6L7 0L0 6M0 0L-6-5"/>
     <path class="ash-sky-sigil" data-root-sigil="1" transform="translate(285 289)" d="M-6 10V-9L0-2L6-9V10"/>

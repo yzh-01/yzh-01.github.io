@@ -15,6 +15,13 @@
   var controls = root.querySelector('[data-root-controls]');
   var echo = root.querySelector('[data-root-echo]');
   var echoField = root.querySelector('[data-root-echo-field]');
+  var echoAction = root.querySelector('[data-root-echo-action]');
+  var echoPrompt = root.querySelector('[data-root-echo-prompt]');
+  var echoWave = root.querySelector('[data-root-echo-wave]');
+  var echoTrails = root.querySelector('[data-root-echo-trails]');
+  var echoAnswer = root.querySelector('[data-root-echo-answer]');
+  var echoMark = root.querySelector('[data-root-echo-mark]');
+  var echoName = root.querySelector('[data-root-echo-name]');
   var stillButton = root.querySelector('[data-root-still]');
   var realms = Array.prototype.slice.call(root.querySelectorAll('[data-root-realm]'));
   var sigilButtons = Array.prototype.slice.call(root.querySelectorAll('[data-root-sigil-button]'));
@@ -25,9 +32,10 @@
   var motion = window.GardenMotion;
   var awake = false, selected = null, suspended = false, still = false;
   var time = 0, lightX = 50, lightY = 52, targetX = 50, targetY = 52;
-  var echoAge = -1, echoSeed = 0, sparks = [], sky = [];
+  var echoAge = -1, echoTarget = null, echoCommitted = false, lastEcho = null, sky = [], trails = [];
+  var remembered = Object.create(null);
+  var numerals = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
   var bloom = echoField && echoField.querySelector('b');
-  var sparkNodes = echoField ? Array.prototype.slice.call(echoField.querySelectorAll('i')) : [];
   var motes = Array.prototype.slice.call(root.querySelectorAll('[data-root-mote]')).map(function (node) {
     return { node: node, x: Number(node.getAttribute('cx')), y: Number(node.getAttribute('cy')) };
   });
@@ -57,6 +65,15 @@
   collectSky('.ash-sky-curtain path', 1, 0);
   collectSky('.ash-sky-rays path', 1, .2);
   collectSky('.ash-sky-mist path', .35, 2.8);
+  // Reuse the nine existing routes. No nodes or timers accumulate on repeat calls.
+  if (echoTrails) threads.forEach(function (thread, index) {
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', thread.getAttribute('d'));
+    path.setAttribute('class', 'ash-echo-trail');
+    echoTrails.appendChild(path);
+    var length = typeof thread.getTotalLength === 'function' ? thread.getTotalLength() : 400;
+    trails.push({ node: path, length: length || 400, index: thread.dataset.rootThread, delay: .08 + index * .035 });
+  });
 
   function restricted() {
     return reduced.matches || document.documentElement.classList.contains('garden-lite-motion') ||
@@ -71,42 +88,97 @@
     targetX = 50;
     targetY = 52;
   }
+  function progressText() { return numerals[Object.keys(remembered).length] + ' / IX REMEMBERED'; }
+  function smooth(value) { value = Math.max(0, Math.min(1, value)); return value * value * (3 - 2 * value); }
   function clearEcho() {
     echoAge = -1;
+    echoTarget = null;
+    echoCommitted = false;
     root.dataset.echo = 'false';
+    root.dataset.echoPhase = 'idle';
+    stage.style.setProperty('--root-echo-energy', '0');
     if (bloom) bloom.style.opacity = '0';
-    sparkNodes.forEach(function (spark) { spark.style.opacity = '0'; });
+    if (echoWave) echoWave.style.opacity = '0';
+    if (echoAnswer) echoAnswer.style.opacity = '0';
+    trails.forEach(function (trail) { trail.node.style.opacity = '0'; });
+    sigils.concat(realms, sigilButtons).forEach(function (node) { node.classList.remove('is-echoing', 'is-answering'); });
   }
-  function pulse(x, y) {
-    if (!echoField || !canAnimate()) return;
+  function nextRealm() {
+    var start = selected ? realms.indexOf(selected) : -1;
+    for (var i = 1; i <= realms.length; i++) {
+      var candidate = realms[(start + i) % realms.length];
+      if (!remembered[candidate.dataset.rootRealm]) return candidate;
+    }
+    return realms[(start + 1) % realms.length];
+  }
+  function commitEcho() {
+    if (!echoTarget || echoCommitted) return;
+    echoCommitted = true;
+    selectRealm(echoTarget, true);
+    root.dataset.echoPhase = 'answered';
+    if (echoMark) echoMark.textContent = echoTarget.dataset.realmMark || '';
+    if (echoName) echoName.textContent = echoTarget.dataset.realmRune;
+    sigilButtons.forEach(function (button) { button.classList.toggle('is-answering', button.dataset.rootSigilButton === echoTarget.dataset.rootRealm); });
+    updateControl();
+  }
+  function callEcho() {
+    if (!awake || !realms.length || (echoAge >= 0 && !echoCommitted)) return;
     clearEcho();
+    echoTarget = nextRealm();
+    // Discovery is still useful without animation: always return a readable world.
+    if (!canAnimate()) {
+      commitEcho();
+      clearEcho();
+      updateControl();
+      return;
+    }
     echoAge = 0;
-    echoSeed++;
-    stage.style.setProperty('--root-echo-x', Math.max(0, Math.min(100, x)).toFixed(2) + '%');
-    stage.style.setProperty('--root-echo-y', Math.max(0, Math.min(100, y)).toFixed(2) + '%');
-    sparks = sparkNodes.map(function (node, index) {
-      var seed = index * 2.39996 + echoSeed * 1.618;
-      return { node: node, delay: index * .055, life: 2.3 + .35 * Math.sin(seed),
-        drift: Math.sin(seed) * 42, lift: 48 + (1 + Math.cos(seed * 1.7)) * 28, bend: Math.cos(seed) * 18 };
-    });
+    lastEcho = null;
     root.dataset.echo = 'true';
+    root.dataset.echoPhase = 'calling';
+    if (status) status.textContent = '回声穿过雾气，正在寻找尚未探索的世界。';
+    paintEcho(0);
+    updateControl();
   }
   function paintEcho(elapsed) {
     if (echoAge < 0) return;
     echoAge += elapsed;
-    if (echoAge > 3.1) { clearEcho(); return; }
-    var glow = Math.min(1, echoAge / 2.8);
+    if (echoAge >= 1.7) commitEcho();
+    if (echoAge >= 3.8) { clearEcho(); updateControl(); return; }
+    var outward = smooth(echoAge / 1.45);
+    var energy = (1 - smooth((echoAge - .45) / 1.4)) * (.3 + .7 * smooth(echoAge / .25));
+    stage.style.setProperty('--root-echo-energy', energy.toFixed(3));
     if (bloom) {
-      bloom.style.opacity = (Math.pow(Math.sin(glow * Math.PI), 2) * .5).toFixed(3);
-      bloom.style.transform = 'translate(-50%, calc(-55% - ' + (glow * 35).toFixed(2) + 'px)) scale(' + (.65 + glow * .75).toFixed(3) + ', ' + (.85 + glow * .3).toFixed(3) + ')';
+      bloom.style.opacity = (energy * .85).toFixed(3);
+      bloom.style.transform = 'translate(-50%, -50%) scale(' + (.25 + outward * 1.4).toFixed(3) + ', ' + (.55 + outward * .6).toFixed(3) + ')';
     }
-    sparks.forEach(function (spark) {
-      var age = Math.max(0, Math.min(1, (echoAge - spark.delay) / spark.life));
-      var x = spark.drift * age + Math.sin(age * Math.PI * 1.4) * spark.bend;
-      var y = -spark.lift * age * (.7 + .3 * age);
-      spark.node.style.opacity = (Math.pow(Math.sin(age * Math.PI), 1.5) * .8).toFixed(3);
-      spark.node.style.transform = 'translate(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px)';
+    if (echoWave) {
+      echoWave.style.opacity = (energy * .8).toFixed(3);
+      echoWave.setAttribute('transform', 'translate(600 224) scale(' + (.15 + outward * 1.25).toFixed(3) + ' ' + (.7 + outward * .8).toFixed(3) + ') translate(-600 -224)');
+    }
+    trails.forEach(function (trail) {
+      var travel = smooth((echoAge - trail.delay) / .82);
+      var returning = trail.index === echoTarget.dataset.rootRealm && echoAge > 1.03;
+      var back = smooth((echoAge - 1.03) / .67);
+      var opacity = returning ? Math.sin(back * Math.PI) * .95 : Math.sin(travel * Math.PI) * .55;
+      trail.node.style.strokeDasharray = (returning ? trail.length * .22 : trail.length).toFixed(2) + ' ' + trail.length.toFixed(2);
+      trail.node.style.strokeDashoffset = (returning ? -trail.length * (1 - back) : trail.length * (1 - travel)).toFixed(2);
+      trail.node.style.opacity = Math.max(0, opacity).toFixed(3);
+      trail.node.classList.toggle('is-returning', returning);
     });
+    sigils.concat(realms).forEach(function (node) {
+      var i = Number(node.dataset.rootSigil || node.dataset.rootRealm);
+      var response = Math.max(0, 1 - Math.abs(echoAge - (.82 + i * .035)) / .45);
+      var chosen = (node.dataset.rootSigil || node.dataset.rootRealm) === echoTarget.dataset.rootRealm;
+      if (chosen && echoCommitted) response = Math.max(response, 1 - smooth((echoAge - 2.9) / .9));
+      node.classList.toggle('is-echoing', response > 0);
+      node.style.setProperty('--echo-sigil-light', response.toFixed(3));
+    });
+    if (echoAnswer) {
+      var arrive = smooth((echoAge - 1.55) / .45), fade = 1 - smooth((echoAge - 3.1) / .7);
+      echoAnswer.style.opacity = echoCommitted ? (arrive * fade).toFixed(3) : '0';
+      echoAnswer.style.transform = 'translate(-50%, ' + ((1 - arrive) * 8).toFixed(2) + 'px)';
+    }
   }
   function paint(now, elapsed) {
     if (!canAnimate()) return;
@@ -171,8 +243,21 @@
       stillButton.setAttribute('aria-label', description);
       stillButton.title = description;
     }
+    var calling = echoAge >= 0 && !echoCommitted;
+    if (echo) {
+      // Keep keyboard focus while the call is busy; callEcho guards repeat input.
+      echo.disabled = !awake;
+      echo.setAttribute('aria-disabled', String(calling));
+      echo.setAttribute('aria-busy', String(calling));
+      echo.setAttribute('aria-label', calling ? (held ? '回声已暂停，恢复动态以接收回应' : '回声正在寻找下一界') :
+        '呼唤' + (Object.keys(remembered).length < realms.length ? '一处尚未探索的世界' : '下一界的回声'));
+    }
+    if (echoAction) echoAction.textContent = calling ? (held ? 'HELD' : 'CALLING') : 'ECHO';
+    if (echoPrompt) echoPrompt.textContent = calling ? (held ? 'RESUME DRIFT' : 'LISTEN TO THE MIST') :
+      Object.keys(remembered).length < realms.length ? 'CALL AN UNSEEN WORLD' : 'REVISIT THE NINE';
     if (hint) hint.textContent = !awake ? 'TOUCH THE SIGN · FOLLOW THE LIGHT' :
-      held ? 'TRACE A RUNE · A MOMENT HELD' : 'TRACE A RUNE · LIGHT IN MOTION';
+      held ? (calling ? 'A MOMENT HELD · DRIFT TO HEAR THE ANSWER' : 'A MOMENT HELD · ECHO CAN STILL DISCOVER') :
+      calling ? 'ONE CALL · NINE LIGHTS LISTEN' : lastEcho ? lastEcho.dataset.realmRune + ' ANSWERS · ' + progressText() : 'TRACE A RUNE · LIGHT IN MOTION';
   }
   function policy() {
     var running = canAnimate();
@@ -180,8 +265,8 @@
     if (running) loop.start();
     else loop.stop();
     // A user pause holds the complete current pose, including an echo in flight.
-    if (!awake || restricted()) clearEcho();
-    if (echo) echo.disabled = !running;
+    if (!awake) clearEcho();
+    else if (restricted() && echoAge >= 0) { commitEcho(); clearEcho(); }
     if (!fine.matches) resetLight();
     updateControl();
   }
@@ -215,17 +300,26 @@
   function announceReading() {
     if (status && selected) status.textContent = '微光相连，' + selected.dataset.realmName + '。' + selected.dataset.realmStory;
   }
-  function selectRealm(realm) {
+  function selectRealm(realm, fromEcho) {
+    if (!fromEcho) clearEcho();
+    lastEcho = fromEcho ? realm : null;
     selected = realm;
     var index = realm.dataset.rootRealm;
-    realms.forEach(function (item) { item.setAttribute('aria-pressed', item === realm ? 'true' : 'false'); });
+    remembered[index] = true;
+    root.dataset.remembered = String(Object.keys(remembered).length);
+    realms.forEach(function (item) {
+      item.setAttribute('aria-pressed', item === realm ? 'true' : 'false');
+      item.classList.toggle('is-remembered', Boolean(remembered[item.dataset.rootRealm]));
+    });
     sigilButtons.forEach(function (button) { button.setAttribute('aria-pressed', button.dataset.rootSigilButton === index ? 'true' : 'false'); });
     threads.forEach(function (thread) { thread.classList.toggle('is-selected', thread.dataset.rootThread === index); });
     sigils.forEach(function (sigil) { sigil.classList.toggle('is-selected', sigil.dataset.rootSigil === index); });
-    if (label) label.textContent = realm.dataset.realmRune + ' / ' + realm.dataset.realmName;
+    if (label) label.textContent = realm.dataset.realmRune + ' · ' + progressText();
     if (title) title.textContent = realm.dataset.realmName;
     if (story) story.textContent = realm.dataset.realmStory;
     announceReading();
+    if (fromEcho && status) status.textContent = '回声来自' + realm.dataset.realmName + '。' + realm.dataset.realmStory + ' 已探索九界中的 ' + Object.keys(remembered).length + ' 界。';
+    updateControl();
   }
   function setAwake(value) {
     awake = Boolean(value);
@@ -273,12 +367,7 @@
     still = !still;
     policy();
   });
-  if (echo) echo.addEventListener('click', function () { pulse(50, 52); });
-  stage.addEventListener('click', function (event) {
-    if (event.target.closest('button, [data-root-controls]')) return;
-    var rect = stage.getBoundingClientRect();
-    if (rect.width && rect.height) pulse((event.clientX - rect.left) / rect.width * 100, (event.clientY - rect.top) / rect.height * 100);
-  });
+  if (echo) echo.addEventListener('click', callEcho);
   stage.addEventListener('pointermove', function (event) {
     if (!pointerAllowed()) return;
     var rect = stage.getBoundingClientRect();

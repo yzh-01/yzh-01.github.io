@@ -6,17 +6,17 @@ const {JSDOM}=require('jsdom');
 const code=fs.readFileSync(path.join(__dirname,'../themes/garden/source/js/sanctuary.js'),'utf8');
 
 function fixture(t,{reduced=false,fine=true,visible=true,noObserver=false,noMotion=false,noGeometry=false}={}) {
-  const realmMarkup=Array.from({length:9},(_,index)=>`<button type="button" data-root-realm="${index}" aria-pressed="false" data-realm-name="九界 ${index}" data-realm-rune="符文 ${index}" data-realm-story="第 ${index} 界的故事。">九界 ${index}</button>`).join('');
+  const realmMarkup=Array.from({length:9},(_,index)=>`<button type="button" data-root-realm="${index}" aria-pressed="false" data-realm-name="九界 ${index}" data-realm-rune="符文 ${index}" data-realm-mark="ᛟ" data-realm-story="第 ${index} 界的故事。">九界 ${index}</button>`).join('');
   const hotspotMarkup=Array.from({length:9},(_,index)=>`<button type="button" data-root-sigil-button="${index}" aria-pressed="false"></button>`).join('');
-  const threads=Array.from({length:9},(_,index)=>`<path data-root-thread="${index}"></path><circle data-root-sigil="${index}"></circle>`).join('');
+  const threads=Array.from({length:9},(_,index)=>`<path data-root-thread="${index}" d="M600 224C540 230 490 300 ${160+index*100} 320"></path><circle data-root-sigil="${index}"></circle>`).join('');
   const atmosphere=`<g class="ash-sky-curtain"><path d="M72 70C232 46 379 110 560 93S894 50 1136 90L1136 207C904 174 799 242 573 220S230 176 72 194Z"/></g>
     <g class="ash-sky-rays"><path opacity=".5" d="M200 40C180 100 225 160 212 220L195 222Z"/></g>
     <g class="ash-sky-mist"><path d="M55 218C253 203 414 244 603 231L603 267Z"/></g>
     <circle data-root-mote cx="400" cy="240"/>`;
   const dom=new JSDOM(`<section data-root-sanctuary data-awake="false">
-    <div data-root-clearing><svg class="ash-root-art" aria-hidden="true">${atmosphere}${threads}</svg><button type="button" data-root-awaken disabled aria-pressed="false" aria-label="唤醒印记">印记</button><div data-root-hotspots hidden>${hotspotMarkup}</div><div data-root-echo-field aria-hidden="true"><b></b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    <div data-root-clearing><svg class="ash-root-art" aria-hidden="true">${atmosphere}${threads}<g data-root-echo-wave></g><g data-root-echo-trails></g></svg><button type="button" data-root-awaken disabled aria-pressed="false" aria-label="唤醒印记">印记</button><div data-root-hotspots hidden>${hotspotMarkup}</div><div data-root-echo-field aria-hidden="true"><b></b><div data-root-echo-answer><span data-root-echo-mark></span><span data-root-echo-name></span></div></div></div>
     <p data-root-hint>静态印记</p>
-    <div data-root-controls hidden><button type="button" data-root-echo>ECHO</button><button type="button" data-root-still aria-pressed="false"><span data-root-still-label>DRIFT</span></button></div>
+    <div data-root-controls hidden><button type="button" data-root-echo><span data-root-echo-action>ECHO</span><small data-root-echo-prompt>CALL A WORLD</small></button><button type="button" data-root-still aria-pressed="false"><span data-root-still-label>DRIFT</span></button></div>
     <div data-root-reading hidden><span data-root-label></span><h3 data-root-title></h3><p data-root-story></p>${realmMarkup}</div>
     <p data-root-status role="status" aria-live="polite"></p>
   </section>`,{url:'https://garden.test/',runScripts:'outside-only'});
@@ -88,8 +88,8 @@ function selectedThreads(f) {return [...f.root.querySelectorAll('[data-root-thre
 function selectedSigils(f) {return [...f.root.querySelectorAll('[data-root-sigil].is-selected')].map(sigil=>sigil.dataset.rootSigil);}
 
 function pose(f) {
-  return [...f.root.querySelectorAll('.ash-root-art path,[data-root-mote],[data-root-echo-field]>*')]
-    .map(node=>[node.getAttribute('d'),node.getAttribute('opacity'),node.getAttribute('cx'),node.getAttribute('cy'),node.getAttribute('style')])
+  return [...f.root.querySelectorAll('.ash-root-art path,[data-root-mote],[data-root-echo-field]>*,[data-root-echo-wave]')]
+    .map(node=>[node.getAttribute('d'),node.getAttribute('opacity'),node.getAttribute('cx'),node.getAttribute('cy'),node.getAttribute('style'),node.getAttribute('transform')])
     .concat([f.stage.getAttribute('style')]);
 }
 function coordinates(f) {return f.query('.ash-sky-curtain path').getAttribute('d').match(/-?\d*\.?\d+/g).map(Number);}
@@ -112,7 +112,7 @@ test('awakening reveals one readable realm; selecting all nine updates matching 
     f.realm(index).click();
     assert.deepEqual(selectedRealms(f),[String(index)]);assert.deepEqual(selectedThreads(f),[String(index)]);assert.deepEqual(selectedSigils(f),[String(index)]);
     assert.equal(f.sigilButton(index).getAttribute('aria-pressed'),'true');
-    assert.equal(f.query('[data-root-label]').textContent,`符文 ${index} / 九界 ${index}`);
+    assert.match(f.query('[data-root-label]').textContent,new RegExp(`^符文 ${index} · [IVX]+ / IX REMEMBERED$`));assert.equal(f.root.dataset.remembered,String(index+1));
     assert.equal(f.query('[data-root-title]').textContent,`九界 ${index}`);assert.equal(f.query('[data-root-story]').textContent,`第 ${index} 界的故事。`);
   }
   f.realm(3).dataset.realmStory='<img src="missing" onerror="alert(1)">';f.realm(3).click();
@@ -132,7 +132,7 @@ test('STILL holds the complete current pose and resumes from it without a time j
   const f=fixture(t);f.awaken.click();f.advance(1600);f.query('[data-root-echo]').click();f.advance(700);
   f.query('[data-root-still]').click();const held=pose(f),before=coordinates(f);
   assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.still,'true');
-  assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');assert.equal(f.query('[data-root-echo]').disabled,true);
+  assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');assert.equal(f.query('[data-root-echo]').getAttribute('aria-disabled'),'true');
   assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/恢复/);assert.match(f.query('[data-root-hint]').textContent,/A MOMENT HELD/);
   f.pointer(950,300);f.advance(60000);assert.deepEqual(pose(f),held);assert.equal(f.root.dataset.echo,'true');
   f.sigilButton(5).click();assert.deepEqual(selectedRealms(f),['5']);
@@ -172,7 +172,7 @@ test('reduced motion reports STILL honestly and keeps stories available without 
   const f=fixture(t,{reduced:true});f.awaken.click();f.realm(7).click();const before=pose(f);f.pointer(700,400);f.advance(2000);
   assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.still,'true');assert.equal(f.pending,0);assert.deepEqual(pose(f),before);
   assert.equal(f.query('[data-root-still]').disabled,true);assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');
-  assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/减弱动态/);assert.equal(f.query('[data-root-echo]').disabled,true);assert.deepEqual(selectedRealms(f),['7']);
+  assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/减弱动态/);assert.equal(f.query('[data-root-echo]').disabled,false);assert.deepEqual(selectedRealms(f),['7']);
   f.reduced(false);assert.equal(f.root.dataset.motion,'running');assert.equal(f.query('[data-root-still]').disabled,false);
   f.query('[data-root-still]').click();f.reduced(true);f.reduced(false);assert.equal(f.root.dataset.motion,'paused','System changes discard a deliberate pause');
 });
@@ -224,14 +224,53 @@ test('missing SVG geometry and viewport observation leave the native realm contr
   assert.equal([...f.root.querySelectorAll('[data-root-sigil-button]')].every(button=>button.hidden),true);
   assert.deepEqual(selectedRealms(f),['3']);assert.equal(f.query('[data-root-reading]').hidden,false);assert.equal(f.root.dataset.motion,'running');
 });
-test('echoes follow curved, varied paths and reuse a bounded set of nodes without timers',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(6).click();const nodes=f.root.querySelectorAll('*').length;
-  f.query('[data-root-echo]').click();f.advance(800);const first=f.query('[data-root-echo-field] i').getAttribute('style');
-  assert.match(first,/translate/);assert.equal(f.root.dataset.echo,'true');assert.equal(f.timers.length,0);
-  f.query('[data-root-echo]').click();f.advance(800);assert.notEqual(f.query('[data-root-echo-field] i').getAttribute('style'),first);
-  f.stage.dispatchEvent(new f.w.MouseEvent('click',{clientX:850,clientY:280,bubbles:true}));
-  assert.equal(f.stage.style.getPropertyValue('--root-echo-x'),'75.00%');assert.equal(f.stage.style.getPropertyValue('--root-echo-y'),'30.00%');
-  assert.deepEqual(selectedRealms(f),['6']);assert.equal(f.root.querySelectorAll('*').length,nodes);f.advance(4000);assert.equal(f.root.dataset.echo,'false');
+test('ECHO draws a call and a return before revealing an unseen world and its progress',t=>{
+  const f=fixture(t);f.awaken.click();f.query('[data-root-echo]').click();
+  assert.equal(f.root.dataset.echoPhase,'calling');assert.equal(f.query('[data-root-echo]').getAttribute('aria-busy'),'true');
+  assert.equal(f.query('[data-root-echo-action]').textContent,'CALLING');assert.deepEqual(selectedRealms(f),['0']);
+  f.advance(550);
+  assert.ok(parseFloat(f.query('[data-root-echo-field] b').style.opacity)>.5,'Call is too faint');
+  assert.ok([...f.root.querySelectorAll('.ash-echo-trail')].some(path=>parseFloat(path.style.opacity)>.3),'No visible light routes');
+  f.advance(300);assert.ok(f.root.querySelectorAll('[data-root-sigil].is-echoing').length>0);
+  f.advance(500);assert.equal(f.query('.ash-echo-trail.is-returning').getAttribute('d'),f.query('[data-root-thread="1"]').getAttribute('d'));
+  f.advance(450);assert.deepEqual(selectedRealms(f),['1']);assert.equal(f.root.dataset.echoPhase,'answered');
+  assert.equal(f.root.dataset.remembered,'2');assert.equal(f.query('[data-root-echo-name]').textContent,'符文 1');assert.equal(f.query('[data-root-echo-mark]').textContent,'ᛟ');
+  assert.equal(f.query('[data-root-label]').textContent,'符文 1 · II / IX REMEMBERED');assert.match(f.query('[data-root-status]').textContent,/回声来自九界 1/);
+  assert.equal(f.query('[data-root-echo]').disabled,false);f.advance(2500);assert.equal(f.root.dataset.echo,'false');
+  assert.deepEqual(selectedRealms(f),['1']);assert.equal(f.realm(0).classList.contains('is-remembered'),true);assert.equal(f.realm(1).classList.contains('is-remembered'),true);
+});
+test('repeat calls discover every unseen world, then revisit without adding nodes or timers',t=>{
+  const f=fixture(t);f.awaken.click();const nodes=f.root.querySelectorAll('*').length,heard=new Set(['0']);
+  for(let i=0;i<8;i++){
+    f.query('[data-root-echo]').click();f.advance(2000);const selected=selectedRealms(f)[0];
+    assert.equal(heard.has(selected),false,'An already read world was repeated');heard.add(selected);
+    assert.equal(f.root.querySelectorAll('*').length,nodes);assert.equal(f.timers.length,0);
+  }
+  assert.equal(heard.size,9);assert.equal(f.root.dataset.remembered,'9');assert.equal(f.query('[data-root-echo-prompt]').textContent,'REVISIT THE NINE');
+  const last=selectedRealms(f)[0];f.query('[data-root-echo]').click();f.advance(2000);assert.notEqual(selectedRealms(f)[0],last);assert.equal(f.root.dataset.remembered,'9');
+});
+test('rapid repeated calls do not starve the answer and explicit selection cancels a pending response',t=>{
+  const f=fixture(t);f.awaken.click();f.query('[data-root-echo]').focus();f.query('[data-root-echo]').click();f.advance(500);
+  assert.equal(f.w.document.activeElement,f.query('[data-root-echo]'));assert.equal(f.query('[data-root-echo]').disabled,false);
+  for(let i=0;i<10;i++)f.query('[data-root-echo]').click();
+  f.advance(1300);assert.deepEqual(selectedRealms(f),['1']);
+  f.query('[data-root-echo]').click();f.advance(700);f.sigilButton(6).click();f.advance(5000);
+  assert.deepEqual(selectedRealms(f),['6']);assert.equal(f.root.dataset.echo,'false');assert.equal(f.query('[data-root-echo]').getAttribute('aria-busy'),'false');assert.equal(f.root.querySelectorAll('.is-echoing,.is-answering').length,0);
+});
+test('STILL and reduced motion retain discovery with immediate results and no effect frames',t=>{
+  for(const reduced of [false,true]){
+    const f=fixture(t,{reduced});f.awaken.click();if(!reduced)f.query('[data-root-still]').click();
+    const before=coordinates(f);f.query('[data-root-echo]').click();f.advance(4000);
+    assert.deepEqual(selectedRealms(f),['1']);assert.equal(f.root.dataset.remembered,'2');assert.equal(f.root.dataset.echo,'false');
+    assert.equal(f.pending,0);assert.deepEqual(coordinates(f),before);assert.equal(f.query('[data-root-echo]').disabled,false);
+  }
+});
+test('a paused call resumes its pending answer, while closing cancels without marking an unseen world',t=>{
+  const f=fixture(t);f.awaken.click();f.query('[data-root-echo]').click();f.advance(600);f.query('[data-root-still]').click();
+  const held=pose(f);f.advance(10000);assert.deepEqual(pose(f),held);assert.deepEqual(selectedRealms(f),['0']);
+  assert.equal(f.query('[data-root-echo-action]').textContent,'HELD');f.query('[data-root-still]').click();f.advance(1200);assert.deepEqual(selectedRealms(f),['1']);
+  f.query('[data-root-echo]').click();f.advance(300);f.awaken.click();f.advance(10000);f.awaken.click();
+  assert.deepEqual(selectedRealms(f),['1']);assert.equal(f.root.dataset.remembered,'2');assert.equal(f.root.dataset.echo,'false');
 });
 test('native control clicks do not emit stage echoes and restrictions clear any active echo',t=>{
   const f=fixture(t);f.stage.click();assert.equal(f.root.dataset.echo,'false');f.awaken.click();f.sigilButton(4).click();assert.equal(f.root.dataset.echo,'false');

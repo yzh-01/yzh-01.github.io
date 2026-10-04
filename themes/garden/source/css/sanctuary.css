@@ -6,7 +6,7 @@
   --root-ink: #8c9b8e; --root-light: #a4bfad; --root-warm: #c5ae89;
   --root-mint: #9ac8b5; --root-ice: #93b5ce; --root-pearl: #b1bad2;
   --root-light-x: 50%; --root-light-y: 52%; --root-mist-shift: 0%;
-  --root-echo-x: 50%; --root-echo-y: 51%;
+  --root-echo-energy: 0;
   position: relative; z-index: 2; width: min(var(--page), 1160px);
   margin: 0 auto; padding: 64px 0 36px; color: var(--bone); scroll-margin-top: 80px;
 }
@@ -35,13 +35,18 @@
 .ash-sanctuary[data-awake="true"] .ash-root-thread { opacity: .16; }
 .ash-sanctuary[data-awake="true"] .ash-root-thread.is-selected { opacity: .55; stroke-width: 1.2; }
 .ash-sanctuary[data-awake="true"] .ash-root-thread.is-pointed { stroke: var(--bone); opacity: .75; }
-.ash-sanctuary[data-awake="true"] .ash-sky-volume { opacity: .7; }
-.ash-sanctuary[data-awake="true"] .ash-sky-curtain { opacity: .86; }
+.ash-sanctuary[data-awake="true"] .ash-sky-volume { opacity: calc(.7 + var(--root-echo-energy) * .3); }
+.ash-sanctuary[data-awake="true"] .ash-sky-curtain { opacity: calc(.86 + var(--root-echo-energy) * .14); }
 .ash-sanctuary[data-awake="true"] .ash-sky-rays { opacity: .74; }
+.ash-sanctuary[data-echo="true"] .ash-sky-volume, .ash-sanctuary[data-echo="true"] .ash-sky-curtain { transition: none; }
 .ash-sanctuary[data-awake="true"] .ash-sky-inscription { stroke: var(--root-warm); opacity: .95; }
 .ash-sanctuary[data-awake="true"] .ash-sky-sigil { opacity: .44; }
 .ash-sanctuary[data-awake="true"] .ash-sky-sigil.is-selected { opacity: 1; }
 .ash-sanctuary[data-awake="true"] .ash-sky-sigil.is-pointed { opacity: .95; }
+.ash-sanctuary[data-awake="true"] .ash-sky-sigil.is-echoing { stroke: var(--root-warm); stroke-width: 1.65; opacity: calc(.5 + var(--echo-sigil-light) * .5); filter: drop-shadow(0 0 4px var(--root-warm)); transition: none; }
+.ash-echo-wave { opacity: 0; stroke-width: 1.35; }
+.ash-echo-trail { opacity: 0; stroke: var(--root-light); stroke-width: 1.3; }
+.ash-echo-trail.is-returning { stroke: var(--root-warm); stroke-width: 2; }
 .ash-sanctuary[data-awake="true"] .ash-clearing::before { opacity: 1; }
 .ash-heart { position: absolute; top: 50.9%; left: 50%; width: 86px; height: 82px; padding: 0; border: 0; background: transparent; transform: translate(-50%, -50%); cursor: pointer; }
 .ash-heart::before { content: ""; position: absolute; inset: -20px; opacity: .4; background: radial-gradient(ellipse, color-mix(in srgb, var(--root-warm) 10%, transparent), transparent 66%); transition: opacity .8s ease; }
@@ -55,11 +60,22 @@
 .ash-field-sigil[hidden] { display: none; }
 .ash-field-sigil > span { position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translate(-50%, 3px); opacity: 0; color: var(--bone); white-space: nowrap; font: 8px/1.5 var(--mono); letter-spacing: .1em; transition: opacity .25s, transform .25s; pointer-events: none; }
 .ash-field-sigil:hover > span, .ash-field-sigil:focus-visible > span { opacity: 1; transform: translate(-50%, 0); }
-.ash-field-controls { position: absolute; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 18px; }
+.ash-field-sigil.is-answering > span { color: var(--root-warm); opacity: 1; transform: translate(-50%, 0); }
+.ash-field-controls { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; gap: 18px; pointer-events: none; }
 .ash-field-controls button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 5px; border: 0; color: var(--dim); background: transparent; cursor: pointer; font: 9px/1 var(--mono); letter-spacing: .12em; }
+.ash-field-controls button { pointer-events: auto; }
 .ash-field-controls b { font-size: 12px; font-weight: 400; color: var(--root-warm); }
 .ash-field-controls button:hover, .ash-field-controls button[aria-pressed="true"] { color: var(--bone); }
 .ash-field-controls button:disabled { opacity: .4; cursor: default; }
+.ash-field-controls .ash-echo-call { gap: 12px; min-height: 48px; padding: 0 12px 0 0; color: var(--bone); text-align: left; }
+.ash-echo-call > svg { width: 22px; height: 28px; flex: none; color: var(--root-warm); }
+.ash-echo-call > span { display: grid; gap: 6px; min-width: 135px; }
+.ash-echo-call [data-root-echo-action] { font-size: 11px; letter-spacing: .19em; }
+.ash-echo-call small { color: var(--dim); font: 8px/1.4 var(--mono); letter-spacing: .08em; }
+.ash-echo-call > b { transition: transform .3s ease; }
+.ash-echo-call:hover > b { transform: translate(2px, -2px); }
+.ash-field-controls .ash-echo-call[aria-busy="true"] { opacity: 1; color: var(--root-warm); cursor: progress; }
+.ash-echo-call[aria-busy="true"] > svg { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--root-warm) 60%, transparent)); }
 .ash-field-controls .ash-motion-toggle { gap: 12px; }
 .ash-motion-mark { flex: none; width: 20px; height: 16px; color: var(--root-light); }
 .ash-motion-mark path { transition: opacity .3s ease; }
@@ -75,16 +91,19 @@
 .ash-sanctuary[data-still="true"] .ash-motion-pause { opacity: 1; }
 .ash-sanctuary[data-still="true"] .ash-motion-mark { color: var(--root-warm); }
 .ash-echo-field { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-.ash-echo-field > b { position: absolute; left: var(--root-echo-x); top: var(--root-echo-y); width: 100px; height: 160px; transform: translate(-50%, -70%); opacity: 0; filter: blur(12px); background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--root-mint) 40%, transparent) 72%, transparent); }
-.ash-echo-field > i { position: absolute; left: var(--root-echo-x); top: var(--root-echo-y); width: 2px; height: 3px; border-radius: 50%; opacity: 0; background: var(--root-warm); box-shadow: 0 0 6px color-mix(in srgb, var(--root-warm) 30%, transparent); }
-.ash-echo-field > i:nth-of-type(3n) { width: 1px; height: 2px; background: var(--root-light); }
-.ash-clearing-note { position: absolute; bottom: 6px; left: 0; width: 100%; margin: 0; color: var(--dim); text-align: center; font: 9px/1.8 var(--mono); letter-spacing: .08em; pointer-events: none; }
+.ash-echo-field > b { position: absolute; left: 50%; top: 50.9%; width: 76%; height: 65%; transform: translate(-50%, -50%); opacity: 0; background: radial-gradient(ellipse at 50% 52%, color-mix(in srgb, var(--root-warm) 22%, transparent), color-mix(in srgb, var(--root-mint) 16%, transparent) 28%, transparent 65%); }
+.ash-echo-answer { position: absolute; left: 50%; top: 9%; display: grid; justify-items: center; gap: 13px; width: 90%; transform: translate(-50%, 8px); opacity: 0; color: var(--root-warm); text-align: center; }
+.ash-echo-answer [data-root-echo-mark] { font: 54px/1 Georgia, serif; text-shadow: 0 0 26px color-mix(in srgb, var(--root-warm) 30%, transparent); }
+.ash-echo-answer [data-root-echo-name] { color: var(--bone); font: 10px/1.6 var(--mono); letter-spacing: .2em; }
+.ash-clearing-note { position: absolute; bottom: 10px; left: 24%; width: 52%; margin: 0; color: var(--dim); text-align: center; font: 9px/1.8 var(--mono); letter-spacing: .08em; pointer-events: none; }
 .ash-root-reading[hidden] { display: none; }
 .ash-realm-path { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; padding-top: 14px; }
 .ash-realm-path button { position: relative; display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0; border: 0; color: var(--dim); background: transparent; font: 20px/1 Georgia, serif; cursor: pointer; transition: color .25s ease; }
 .ash-realm-path button::after { content: ""; position: absolute; bottom: 4px; width: 3px; height: 3px; background: var(--root-warm); border-radius: 50%; opacity: 0; }
 .ash-realm-path button[aria-pressed="true"] { color: var(--root-warm); }
+.ash-realm-path button.is-remembered::after { opacity: .35; }
 .ash-realm-path button[aria-pressed="true"]::after { opacity: 1; }
+.ash-realm-path button.is-echoing { color: var(--root-warm); text-shadow: 0 0 12px color-mix(in srgb, var(--root-warm) 55%, transparent); }
 .ash-root-story { min-height: 104px; padding: 18px 12px 14px; text-align: center; }
 .ash-root-story > span { color: var(--dim); font: 8px/1.5 var(--mono); letter-spacing: .12em; }
 .ash-root-story h3 { margin: 8px 0 6px; color: var(--bone); font: 400 17px/1.5 var(--quote); letter-spacing: .07em; }
@@ -99,8 +118,8 @@
 :root[data-resolved-theme="light"] .ash-sky-volume { opacity: .34; }
 :root[data-resolved-theme="light"] .ash-sky-curtain { opacity: .4; }
 :root[data-resolved-theme="light"] .ash-sky-rays { opacity: .35; }
-:root[data-resolved-theme="light"] .ash-sanctuary[data-awake="true"] .ash-sky-volume { opacity: .8; }
-:root[data-resolved-theme="light"] .ash-sanctuary[data-awake="true"] .ash-sky-curtain { opacity: .96; }
+:root[data-resolved-theme="light"] .ash-sanctuary[data-awake="true"] .ash-sky-volume { opacity: calc(.8 + var(--root-echo-energy) * .2); }
+:root[data-resolved-theme="light"] .ash-sanctuary[data-awake="true"] .ash-sky-curtain { opacity: calc(.96 + var(--root-echo-energy) * .04); }
 :root[data-resolved-theme="light"] .ash-sanctuary[data-awake="true"] .ash-sky-rays { opacity: .9; }
 html.garden-lite-motion .ash-sanctuary *, html.garden-lite-motion .ash-sanctuary *::before, html.garden-lite-motion .ash-sanctuary *::after { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) { .ash-sanctuary *, .ash-sanctuary *::before, .ash-sanctuary *::after { animation: none !important; transition: none !important; } }
@@ -110,11 +129,24 @@ html.garden-lite-motion .ash-sanctuary *, html.garden-lite-motion .ash-sanctuary
   .ash-eyebrow { margin-bottom: 18px; font-size: 7px; letter-spacing: .08em; }
   .ash-heading h2 { font-size: clamp(32px, 8vw, 42px); }
   .ash-intro { max-width: 300px; font-size: 12px; }
-  .ash-clearing { height: 300px; margin-top: 12px; }
+  .ash-clearing { height: 340px; margin-top: 12px; }
   .ash-root-art { width: 720px; }
-  .ash-clearing-note { bottom: 42px; font-size: 8px; letter-spacing: .02em; }
-  .ash-field-controls { right: 50%; transform: translateX(50%); gap: 24px; }
+  .ash-clearing-note { bottom: 57px; left: 0; width: 100%; font-size: 8px; letter-spacing: .02em; }
+  .ash-field-controls { gap: 8px; }
   .ash-field-controls button { min-height: 44px; }
+  .ash-field-controls .ash-echo-call { gap: 8px; padding-right: 0; }
+  .ash-echo-call > span { min-width: 0; }
+  .ash-echo-call > svg { width: 16px; }
+  .ash-echo-call > b { display: none; }
+  .ash-echo-call [data-root-echo-action] { font-size: 10px; }
+  .ash-echo-call small { max-width: 112px; font-size: 8px; letter-spacing: 0; }
+  .ash-field-controls .ash-motion-toggle { gap: 8px; padding-right: 0; }
+  .ash-motion-options { gap: 12px; }
+  .ash-motion-options::after { width: calc((100% - 12px) / 2); }
+  .ash-sanctuary[data-still="true"] .ash-motion-options::after { transform: translateX(calc(100% + 12px)); }
+  .ash-echo-answer { top: 7%; gap: 9px; }
+  .ash-echo-answer [data-root-echo-mark] { font-size: 38px; }
+  .ash-echo-answer [data-root-echo-name] { font-size: 8px; letter-spacing: .12em; }
   .ash-realm-path { gap: 2px; }
   .ash-realm-path button { min-width: 28px; flex: 1 0 28px; max-width: 44px; }
   .ash-root-story { padding-left: 0; padding-right: 0; }

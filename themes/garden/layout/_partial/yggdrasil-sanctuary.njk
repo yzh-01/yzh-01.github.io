@@ -18,14 +18,17 @@
   <div class="ash-clearing" data-root-clearing>
     {{ partial('_partial/root-sky-art.njk') }}
     <div class="ash-ground-mist" aria-hidden="true"></div>
-    <div class="ash-echo-field" data-root-echo-field aria-hidden="true"><b></b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ash-echo-field" data-root-echo-field aria-hidden="true"><b></b><div class="ash-echo-answer" data-root-echo-answer><span data-root-echo-mark></span><span data-root-echo-name></span></div></div>
     <div class="ash-sigil-hotspots" data-root-hotspots hidden>
       {% for realm in root_realms %}<button class="ash-field-sigil" type="button" data-root-sigil-button="{{ loop.index0 }}" aria-label="寻访{{ realm.name }}" aria-pressed="false" title="{{ realm.label }}"><span>{{ realm.label }}</span></button>{% endfor %}
     </div>
     <button class="ash-heart" data-root-awaken type="button" aria-pressed="false" aria-label="唤醒印记" aria-controls="ash-root-reading" aria-describedby="ash-root-hint" disabled></button>
     <p class="ash-clearing-note" id="ash-root-hint" data-root-hint>IX WORLDS · ONE REMEMBERED LIGHT</p>
     <div class="ash-field-controls" data-root-controls hidden>
-      <button type="button" data-root-echo aria-label="释放一束光屑" title="释放光屑"><span>ECHO</span><b aria-hidden="true">↗</b></button>
+      <button class="ash-echo-call" type="button" data-root-echo aria-label="呼唤一处尚未探索的世界" aria-controls="ash-root-reading" title="让回声寻找下一界，点亮符文并显现它的故事">
+        <svg viewBox="0 0 24 28" fill="none" stroke="currentColor" aria-hidden="true" focusable="false"><path d="M12 4L18 14L12 24L6 14Z"/><path d="M6 4L1 14L6 24M18 4L23 14L18 24" opacity=".45"/></svg>
+        <span><span data-root-echo-action>ECHO</span><small data-root-echo-prompt>CALL A WORLD</small></span><b aria-hidden="true">↗</b>
+      </button>
       <button class="ash-motion-toggle" type="button" data-root-still aria-pressed="false" aria-label="定格当前的极光、雾气与光屑" title="定格当前的极光、雾气与光屑">
         <svg class="ash-motion-mark" viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path class="ash-motion-wave" d="M1 5C4 0 6 10 10 5S16 0 19 5M1 11C4 6 6 16 10 11S16 6 19 11"/><path class="ash-motion-pause" d="M7 3V13M13 3V13"/></svg>
         <span class="ash-motion-options" aria-hidden="true"><span data-root-drift-label>DRIFT</span><span data-root-still-label>STILL</span></span>
@@ -34,7 +37,7 @@
   </div>
   <div class="ash-root-reading" id="ash-root-reading" data-root-reading hidden>
     <div class="ash-realm-path" role="group" aria-label="寻访九界铭文">
-      {% for realm in root_realms %}<button type="button" data-root-realm="{{ loop.index0 }}" data-realm-name="{{ realm.name }}" data-realm-rune="{{ realm.label }}" data-realm-story="{{ realm.story }}" aria-label="寻访{{ realm.name }}" aria-pressed="false" title="{{ realm.name }}"><span aria-hidden="true">{{ realm.mark }}</span></button>{% endfor %}
+      {% for realm in root_realms %}<button type="button" data-root-realm="{{ loop.index0 }}" data-realm-name="{{ realm.name }}" data-realm-rune="{{ realm.label }}" data-realm-mark="{{ realm.mark }}" data-realm-story="{{ realm.story }}" aria-label="寻访{{ realm.name }}" aria-pressed="false" title="{{ realm.name }}"><span aria-hidden="true">{{ realm.mark }}</span></button>{% endfor %}
     </div>
     <div class="ash-root-story"><span data-root-label></span><h3 data-root-title></h3><p data-root-story></p></div>
   </div>
