@@ -16,7 +16,6 @@
   var echo = root.querySelector('[data-root-echo]');
   var echoField = root.querySelector('[data-root-echo-field]');
   var stillButton = root.querySelector('[data-root-still]');
-  var stillLabel = root.querySelector('[data-root-still-label]');
   var realms = Array.prototype.slice.call(root.querySelectorAll('[data-root-realm]'));
   var sigilButtons = Array.prototype.slice.call(root.querySelectorAll('[data-root-sigil-button]'));
   var threads = Array.prototype.slice.call(root.querySelectorAll('[data-root-thread]'));
@@ -24,45 +23,167 @@
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   var motion = window.GardenMotion;
-  var awake = false, selected = null, suspended = false, still = false, frame = 0, echoTimer = 0;
-  var lightX = 50, lightY = 52;
+  var awake = false, selected = null, suspended = false, still = false;
+  var time = 0, lightX = 50, lightY = 52, targetX = 50, targetY = 52;
+  var echoAge = -1, echoSeed = 0, sparks = [], sky = [];
+  var bloom = echoField && echoField.querySelector('b');
+  var sparkNodes = echoField ? Array.prototype.slice.call(echoField.querySelectorAll('i')) : [];
+  var motes = Array.prototype.slice.call(root.querySelectorAll('[data-root-mote]')).map(function (node) {
+    return { node: node, x: Number(node.getAttribute('cx')), y: Number(node.getAttribute('cy')) };
+  });
   var bounds = stage.getBoundingClientRect();
   var visible = bounds.bottom > 0 && bounds.top < window.innerHeight;
 
+  // These atmosphere paths use absolute, paired M/C/S/L coordinates. Deform
+  // their control points together so folds travel through the light itself.
+  function collectSky(selector, strength, depth) {
+    root.querySelectorAll(selector).forEach(function (node, index) {
+      var tokens = node.getAttribute('d').match(/[A-Z]|-?\d*\.?\d+(?:e[-+]?\d+)?/gi);
+      var points = [];
+      var layer = depth + (selector.indexOf('rays') === -1 ? index * .8 : 0);
+      for (var i = 0; i < tokens.length; i++) {
+        if (/^[A-Z]$/i.test(tokens[i])) continue;
+        var at = i, x = Number(tokens[i]), y = Number(tokens[++i]);
+        var fold = x * .008 + layer, ripple = x * .017 + layer, shear = x * .004 + layer;
+        points.push({ at: at, x: x, y: y, height: Math.max(.3, Math.min(1, y / 230)),
+          fold: fold, ripple: ripple, shear: shear,
+          foldBase: Math.sin(fold), rippleBase: Math.sin(ripple), shearBase: Math.sin(shear) });
+      }
+      sky.push({ node: node, tokens: tokens, points: points, strength: strength,
+        opacity: Number(node.getAttribute('opacity') || 1), ray: selector.indexOf('rays') !== -1 });
+    });
+  }
+  collectSky('.ash-sky-volume path', .6, .8);
+  collectSky('.ash-sky-curtain path', 1, 0);
+  collectSky('.ash-sky-rays path', 1, .2);
+  collectSky('.ash-sky-mist path', .35, 2.8);
+
+  function restricted() {
+    return reduced.matches || document.documentElement.classList.contains('garden-lite-motion') ||
+      document.documentElement.classList.contains('garden-overrun') ||
+      (!document.hidden && motion && motion.canAnimate && !motion.canAnimate());
+  }
   function canAnimate() {
-    return awake && !still && visible && !suspended && !document.hidden && !reduced.matches &&
-      !document.documentElement.classList.contains('garden-lite-motion') &&
-      (!motion || ((!motion.canAnimate || motion.canAnimate()) && (!motion.isEconomy || !motion.isEconomy())));
+    return awake && !still && visible && !suspended && !document.hidden && !restricted();
   }
   function pointerAllowed() { return fine.matches && canAnimate(); }
   function resetLight() {
-    if (frame) window.cancelAnimationFrame(frame);
-    frame = 0;
-    stage.style.setProperty('--root-light-x', '50%');
-    stage.style.setProperty('--root-light-y', '52%');
-    stage.style.setProperty('--root-sway-x', '0px');
-    stage.style.setProperty('--root-sway-y', '0px');
+    targetX = 50;
+    targetY = 52;
   }
   function clearEcho() {
-    if (echoTimer) window.clearTimeout(echoTimer);
-    echoTimer = 0;
+    echoAge = -1;
     root.dataset.echo = 'false';
+    if (bloom) bloom.style.opacity = '0';
+    sparkNodes.forEach(function (spark) { spark.style.opacity = '0'; });
   }
   function pulse(x, y) {
     if (!echoField || !canAnimate()) return;
     clearEcho();
+    echoAge = 0;
+    echoSeed++;
     stage.style.setProperty('--root-echo-x', Math.max(0, Math.min(100, x)).toFixed(2) + '%');
     stage.style.setProperty('--root-echo-y', Math.max(0, Math.min(100, y)).toFixed(2) + '%');
-    void echoField.offsetWidth;
+    sparks = sparkNodes.map(function (node, index) {
+      var seed = index * 2.39996 + echoSeed * 1.618;
+      return { node: node, delay: index * .055, life: 2.3 + .35 * Math.sin(seed),
+        drift: Math.sin(seed) * 42, lift: 48 + (1 + Math.cos(seed * 1.7)) * 28, bend: Math.cos(seed) * 18 };
+    });
     root.dataset.echo = 'true';
-    echoTimer = window.setTimeout(clearEcho, 1900);
+  }
+  function paintEcho(elapsed) {
+    if (echoAge < 0) return;
+    echoAge += elapsed;
+    if (echoAge > 3.1) { clearEcho(); return; }
+    var glow = Math.min(1, echoAge / 2.8);
+    if (bloom) {
+      bloom.style.opacity = (Math.pow(Math.sin(glow * Math.PI), 2) * .5).toFixed(3);
+      bloom.style.transform = 'translate(-50%, calc(-55% - ' + (glow * 35).toFixed(2) + 'px)) scale(' + (.65 + glow * .75).toFixed(3) + ', ' + (.85 + glow * .3).toFixed(3) + ')';
+    }
+    sparks.forEach(function (spark) {
+      var age = Math.max(0, Math.min(1, (echoAge - spark.delay) / spark.life));
+      var x = spark.drift * age + Math.sin(age * Math.PI * 1.4) * spark.bend;
+      var y = -spark.lift * age * (.7 + .3 * age);
+      spark.node.style.opacity = (Math.pow(Math.sin(age * Math.PI), 1.5) * .8).toFixed(3);
+      spark.node.style.transform = 'translate(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px)';
+    });
+  }
+  function paint(now, elapsed) {
+    if (!canAnimate()) return;
+    var seconds = Math.min(100, elapsed) / 1000;
+    time += seconds;
+    var ease = 1 - Math.exp(-seconds / .75);
+    lightX += (targetX - lightX) * ease;
+    lightY += (targetY - lightY) * ease;
+    stage.style.setProperty('--root-light-x', lightX.toFixed(2) + '%');
+    stage.style.setProperty('--root-light-y', lightY.toFixed(2) + '%');
+    stage.style.setProperty('--root-mist-shift', (Math.sin(time * .19) * 12).toFixed(2) + '%');
+    sky.forEach(function (path) {
+      path.points.forEach(function (point) {
+        var fold = Math.sin(point.fold - time * .48) - point.foldBase;
+        var ripple = Math.sin(point.ripple + time * .31) - point.rippleBase;
+        var shear = Math.sin(point.shear + time * .27) - point.shearBase;
+        var x = point.x + (shear * 24 + (lightX - 50) * .3 * point.height) * path.strength;
+        var y = point.y + (fold * 25 + ripple * 8 + (lightY - 52) * .16) * path.strength * point.height;
+        path.tokens[point.at] = x.toFixed(2);
+        path.tokens[point.at + 1] = y.toFixed(2);
+      });
+      path.node.setAttribute('d', path.tokens.join(' '));
+      if (path.ray) {
+        var flow = .78 + .22 * Math.sin(path.points[0].x * .012 - time * .6);
+        path.node.setAttribute('opacity', (path.opacity * flow).toFixed(3));
+      }
+    });
+    motes.forEach(function (mote, index) {
+      var phase = time * .27 + index * 2.39996;
+      mote.node.setAttribute('cx', (mote.x + Math.sin(phase) * 18).toFixed(2));
+      mote.node.setAttribute('cy', (mote.y + Math.cos(phase * .8) * 13).toFixed(2));
+      mote.node.setAttribute('opacity', (.08 + Math.pow(.5 + .5 * Math.sin(time * .65 + index * 1.7), 2) * .4).toFixed(3));
+    });
+    threads.forEach(function (thread, index) { thread.style.strokeDashoffset = (-time * (6 + index * .25)).toFixed(2); });
+    paintEcho(seconds);
+  }
+  var loop = motion && motion.createLoop ? motion.createLoop(paint, {
+    fps: function () { return motion.isEconomy && motion.isEconomy() ? 18 : 30; }, enabled: canAnimate
+  }) : (function () {
+    var frame = 0, last = 0;
+    function tick(now) {
+      frame = 0;
+      if (!canAnimate()) { last = 0; return; }
+      if (!last || now - last >= 1000 / 30) { paint(now, last ? now - last : 1000 / 30); last = now; }
+      frame = window.requestAnimationFrame(tick);
+    }
+    return {
+      start: function () { if (!frame) frame = window.requestAnimationFrame(tick); },
+      stop: function () { window.cancelAnimationFrame(frame); frame = last = 0; }
+    };
+  })();
+  function updateControl() {
+    var blocked = Boolean(restricted());
+    var held = still || blocked;
+    root.dataset.still = String(held);
+    if (stillButton) {
+      stillButton.disabled = blocked;
+      stillButton.setAttribute('aria-pressed', String(held));
+      var description = blocked ? (reduced.matches || document.documentElement.classList.contains('garden-lite-motion') ?
+        '已遵循减弱动态设置，光幕保持静止' : '当前动效策略已暂停光幕') :
+        held ? '恢复极光、雾气与光屑的流动' : '定格当前的极光、雾气与光屑';
+      stillButton.setAttribute('aria-label', description);
+      stillButton.title = description;
+    }
+    if (hint) hint.textContent = !awake ? 'TOUCH THE SIGN · FOLLOW THE LIGHT' :
+      held ? 'TRACE A RUNE · A MOMENT HELD' : 'TRACE A RUNE · LIGHT IN MOTION';
   }
   function policy() {
     var running = canAnimate();
     root.dataset.motion = running ? 'running' : 'paused';
-    if (!running) clearEcho();
+    if (running) loop.start();
+    else loop.stop();
+    // A user pause holds the complete current pose, including an echo in flight.
+    if (!awake || restricted()) clearEcho();
     if (echo) echo.disabled = !running;
-    if (!pointerAllowed()) resetLight();
+    if (!fine.matches) resetLight();
+    updateControl();
   }
   function pointRealm(index) {
     threads.forEach(function (thread) { thread.classList.toggle('is-pointed', awake && thread.dataset.rootThread === index); });
@@ -117,7 +238,6 @@
     }
     if (controls) controls.hidden = !awake;
     if (hotspots) hotspots.hidden = !awake;
-    if (hint) hint.textContent = awake ? 'TRACE A RUNE · TOUCH AGAIN TO REST' : 'TOUCH THE SIGN · FOLLOW THE LIGHT';
     if (awake) {
       placeSigilButtons();
       if (!selected) {
@@ -151,10 +271,6 @@
   if (stillButton) stillButton.addEventListener('click', function () {
     if (!awake) return;
     still = !still;
-    root.dataset.still = String(still);
-    stillButton.setAttribute('aria-pressed', String(still));
-    stillButton.setAttribute('aria-label', still ? '恢复动态' : '静止光幕');
-    if (stillLabel) stillLabel.textContent = still ? 'STILL' : 'DRIFT';
     policy();
   });
   if (echo) echo.addEventListener('click', function () { pulse(50, 52); });
@@ -167,17 +283,8 @@
     if (!pointerAllowed()) return;
     var rect = stage.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    lightX = Math.max(10, Math.min(90, (event.clientX - rect.left) / rect.width * 100));
-    lightY = Math.max(10, Math.min(90, (event.clientY - rect.top) / rect.height * 100));
-    if (frame) return;
-    frame = window.requestAnimationFrame(function () {
-      frame = 0;
-      if (!pointerAllowed()) return;
-      stage.style.setProperty('--root-light-x', lightX.toFixed(2) + '%');
-      stage.style.setProperty('--root-light-y', lightY.toFixed(2) + '%');
-      stage.style.setProperty('--root-sway-x', ((lightX - 50) * 0.3).toFixed(2) + 'px');
-      stage.style.setProperty('--root-sway-y', ((lightY - 50) * 0.15).toFixed(2) + 'px');
-    });
+    targetX = Math.max(10, Math.min(90, (event.clientX - rect.left) / rect.width * 100));
+    targetY = Math.max(10, Math.min(90, (event.clientY - rect.top) / rect.height * 100));
   }, { passive: true });
   stage.addEventListener('pointerleave', resetLight);
   if ('ResizeObserver' in window) {
@@ -201,13 +308,6 @@
   window.addEventListener('pagehide', function () { suspended = true; policy(); });
   window.addEventListener('pageshow', function () { suspended = false; policy(); });
   setAwake(false);
-  resetLight();
-  root.dataset.still = 'false';
-  if (stillButton) {
-    stillButton.setAttribute('aria-pressed', 'false');
-    stillButton.setAttribute('aria-label', '静止光幕');
-  }
-  if (stillLabel) stillLabel.textContent = 'DRIFT';
   awaken.disabled = false;
   root.dataset.ready = 'true';
 })();

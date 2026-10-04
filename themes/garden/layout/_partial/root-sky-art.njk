@@ -90,13 +90,17 @@
     {%- set y = ray_ends[i] -%}
     {%- set h = ray_heights[i % 11] -%}
     {%- set w = ray_widths[i % 9] -%}
-    <path fill="url(#root-aurora-ray-{{ ray_tones[i % 5] }})" opacity="{{ ray_opacity[i % 9] }}" style="--depth:{{ i % 3 }}" d="M{{ x - w * 0.6 }} {{ y - h }}C{{ x - 27 }} {{ y - h * 0.64 }} {{ x + 16 }} {{ y - h * 0.33 }} {{ x + w * 0.82 }} {{ y }}C{{ x + w * 0.2 }} {{ y + 6 }} {{ x - w * 0.65 }} {{ y + 4 }} {{ x - w }} {{ y - 3 }}C{{ x - 11 }} {{ y - h * 0.32 }} {{ x - 35 }} {{ y - h * 0.67 }} {{ x - w * 0.6 }} {{ y - h }}Z"/>
+    <path fill="url(#root-aurora-ray-{{ ray_tones[i % 5] }})" opacity="{{ ray_opacity[i % 9] }}" d="M{{ x - w * 0.6 }} {{ y - h }}C{{ x - 27 }} {{ y - h * 0.64 }} {{ x + 16 }} {{ y - h * 0.33 }} {{ x + w * 0.82 }} {{ y }}C{{ x + w * 0.2 }} {{ y + 6 }} {{ x - w * 0.65 }} {{ y + 4 }} {{ x - w }} {{ y - 3 }}C{{ x - 11 }} {{ y - h * 0.32 }} {{ x - 35 }} {{ y - h * 0.67 }} {{ x - w * 0.6 }} {{ y - h }}Z"/>
     {%- endfor %}
   </g>
 
   <g class="ash-sky-mist" mask="url(#root-aurora-feather)" fill="url(#root-aurora-mist)" filter="url(#root-aurora-mist-soft)">
     <path d="M55 218C253 203 414 244 603 231S917 198 1145 223L1145 269C924 254 798 280 601 267S235 241 55 256Z"/>
     <path d="M94 306C308 287 453 323 645 299S951 318 1113 292L1113 340C935 348 811 329 649 344S304 328 94 350Z" opacity=".64"/>
+  </g>
+
+  <g class="ash-sky-motes" fill="var(--root-warm)" mask="url(#root-aurora-feather)">
+    {% for i in range(12) %}<circle data-root-mote cx="{{ 192 + (i * 173) % 826 }}" cy="{{ 142 + (i * 47) % 182 }}" r="{{ 0.65 + (i % 3) * 0.15 }}" opacity=".24"/>{% endfor %}
   </g>
 
   <g class="ash-sky-inscription" stroke="var(--root-light)" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round">

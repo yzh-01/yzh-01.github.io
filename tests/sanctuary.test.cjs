@@ -9,8 +9,12 @@ function fixture(t,{reduced=false,fine=true,visible=true,noObserver=false,noMoti
   const realmMarkup=Array.from({length:9},(_,index)=>`<button type="button" data-root-realm="${index}" aria-pressed="false" data-realm-name="九界 ${index}" data-realm-rune="符文 ${index}" data-realm-story="第 ${index} 界的故事。">九界 ${index}</button>`).join('');
   const hotspotMarkup=Array.from({length:9},(_,index)=>`<button type="button" data-root-sigil-button="${index}" aria-pressed="false"></button>`).join('');
   const threads=Array.from({length:9},(_,index)=>`<path data-root-thread="${index}"></path><circle data-root-sigil="${index}"></circle>`).join('');
+  const atmosphere=`<g class="ash-sky-curtain"><path d="M72 70C232 46 379 110 560 93S894 50 1136 90L1136 207C904 174 799 242 573 220S230 176 72 194Z"/></g>
+    <g class="ash-sky-rays"><path opacity=".5" d="M200 40C180 100 225 160 212 220L195 222Z"/></g>
+    <g class="ash-sky-mist"><path d="M55 218C253 203 414 244 603 231L603 267Z"/></g>
+    <circle data-root-mote cx="400" cy="240"/>`;
   const dom=new JSDOM(`<section data-root-sanctuary data-awake="false">
-    <div data-root-clearing><svg class="ash-root-art" aria-hidden="true">${threads}</svg><button type="button" data-root-awaken disabled aria-pressed="false" aria-label="唤醒印记">印记</button><div data-root-hotspots hidden>${hotspotMarkup}</div><div data-root-echo-field aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    <div data-root-clearing><svg class="ash-root-art" aria-hidden="true">${atmosphere}${threads}</svg><button type="button" data-root-awaken disabled aria-pressed="false" aria-label="唤醒印记">印记</button><div data-root-hotspots hidden>${hotspotMarkup}</div><div data-root-echo-field aria-hidden="true"><b></b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
     <p data-root-hint>静态印记</p>
     <div data-root-controls hidden><button type="button" data-root-echo>ECHO</button><button type="button" data-root-still aria-pressed="false"><span data-root-still-label>DRIFT</span></button></div>
     <div data-root-reading hidden><span data-root-label></span><h3 data-root-title></h3><p data-root-story></p>${realmMarkup}</div>
@@ -46,7 +50,9 @@ function fixture(t,{reduced=false,fine=true,visible=true,noObserver=false,noMoti
   };
   const motionState={allowed:true,economy:false};
   const subscribers=[];
-  if(!noMotion) w.GardenMotion={canAnimate:()=>motionState.allowed,isEconomy:()=>motionState.economy,subscribe:callback=>subscribers.push(callback)};
+  const loops=[];let now=0;
+  if(!noMotion) w.GardenMotion={canAnimate:()=>motionState.allowed,isEconomy:()=>motionState.economy,subscribe:callback=>subscribers.push(callback),
+    createLoop(render,options){const loop={render,options,active:false};loops.push(loop);return {start(){loop.active=true;},stop(){loop.active=false;}};}};
   const frames=new Map();let nextFrame=0,requested=0,cancelled=0;
   w.requestAnimationFrame=callback=>{requested++;frames.set(++nextFrame,callback);return nextFrame;};
   w.cancelAnimationFrame=id=>{if(frames.delete(id))cancelled++;};
@@ -61,14 +67,14 @@ function fixture(t,{reduced=false,fine=true,visible=true,noObserver=false,noMoti
   w.eval(code);
   const awaken=root.querySelector('[data-root-awaken]');
   return {w,root,stage,awaken,mutations,query:selector=>root.querySelector(selector),
-    get requested(){return requested;},get cancelled(){return cancelled;},get pending(){return frames.size;},get timers(){return [...timers.values()];},
+    get requested(){return requested;},get cancelled(){return cancelled;},get pending(){return frames.size+loops.filter(loop=>loop.active).length;},get fps(){return loops[0].options.fps();},get timers(){return [...timers.values()];},
     realm:index=>root.querySelector(`[data-root-realm="${index}"]`),
     sigilButton:index=>root.querySelector(`[data-root-sigil-button="${index}"]`),
     place(index,x,y){positions[index]={x,y};resizeObservers.forEach(observer=>observer.callback([{target:observer.target}]));},
     expire(){const queued=[...timers.values()];timers.clear();queued.forEach(timer=>timer.callback());},
     pointer:(x,y)=>stage.dispatchEvent(new w.MouseEvent('pointermove',{clientX:x,clientY:y,bubbles:true})),
     leave:()=>stage.dispatchEvent(new w.MouseEvent('pointerleave')),
-    flush(){const queued=[...frames.values()];frames.clear();queued.forEach(callback=>callback(100));},
+    advance(ms=100){for(let elapsed=0;elapsed<ms;elapsed+=50){now+=50;loops.forEach(loop=>{if(loop.active&&loop.options.enabled())loop.render(now,50);});const queued=[...frames.values()];frames.clear();queued.forEach(callback=>callback(now));}},
     visible(value){visible=value;observers.forEach(observer=>observer.callback([{target:observer.target,isIntersecting:value}]));},
     hidden(value){hidden=value;w.document.dispatchEvent(new w.Event('visibilitychange'));},
     reduced:value=>media.get('(prefers-reduced-motion: reduce)').change(value),
@@ -81,206 +87,162 @@ function selectedRealms(f) {return [...f.root.querySelectorAll('[data-root-realm
 function selectedThreads(f) {return [...f.root.querySelectorAll('[data-root-thread].is-selected')].map(thread=>thread.dataset.rootThread);}
 function selectedSigils(f) {return [...f.root.querySelectorAll('[data-root-sigil].is-selected')].map(sigil=>sigil.dataset.rootSigil);}
 
-test('initial enhancement enables the native sigil button without starting motion or revealing stories',t=>{
-  const f=fixture(t);
+function pose(f) {
+  return [...f.root.querySelectorAll('.ash-root-art path,[data-root-mote],[data-root-echo-field]>*')]
+    .map(node=>[node.getAttribute('d'),node.getAttribute('opacity'),node.getAttribute('cx'),node.getAttribute('cy'),node.getAttribute('style')])
+    .concat([f.stage.getAttribute('style')]);
+}
+function coordinates(f) {return f.query('.ash-sky-curtain path').getAttribute('d').match(/-?\d*\.?\d+/g).map(Number);}
+function light(f) {return parseFloat(f.stage.style.getPropertyValue('--root-light-x'));}
+
+test('enhancement enables the inscription without starting motion or exposing dormant controls',t=>{
+  const f=fixture(t),before=pose(f);f.advance(1000);
   assert.equal(f.root.dataset.ready,'true');assert.equal(f.awaken.disabled,false);
-  assert.equal(f.root.dataset.awake,'false');assert.equal(f.root.dataset.motion,'paused');
-  assert.equal(f.awaken.getAttribute('aria-pressed'),'false');assert.equal(f.awaken.getAttribute('aria-label'),'唤醒印记');
-  assert.equal(f.query('[data-root-reading]').hidden,true);
+  assert.equal(f.root.dataset.awake,'false');assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
+  assert.equal(f.query('[data-root-reading]').hidden,true);assert.equal(f.query('[data-root-controls]').hidden,true);
   assert.equal(f.query('[data-root-hint]').textContent,'TOUCH THE SIGN · FOLLOW THE LIGHT');
-  assert.equal(f.query('[data-root-status]').textContent,'余光收起，九界静候下一次相逢。');
-  assert.deepEqual(selectedRealms(f),[]);assert.deepEqual(selectedSigils(f),[]);assert.equal(f.requested,0);
+  assert.deepEqual(selectedRealms(f),[]);assert.deepEqual(pose(f),before);
 });
-test('a sigil click reveals the first realm and exposes its readable story',t=>{
+test('awakening reveals one readable realm; selecting all nine updates matching sigils and threads',t=>{
   const f=fixture(t);f.awaken.click();
-  assert.equal(f.root.dataset.awake,'true');assert.equal(f.root.dataset.motion,'running');
-  assert.equal(f.awaken.getAttribute('aria-pressed'),'true');assert.equal(f.awaken.getAttribute('aria-label'),'收起余光');
-  assert.equal(f.query('[data-root-reading]').hidden,false);
-  assert.equal(f.query('[data-root-label]').textContent,'符文 0 / 九界 0');
-  assert.equal(f.query('[data-root-title]').textContent,'九界 0');
-  assert.equal(f.query('[data-root-story]').textContent,'第 0 界的故事。');
-  assert.equal(f.query('[data-root-hint]').textContent,'TRACE A RUNE · TOUCH AGAIN TO REST');
-  assert.match(f.query('[data-root-status]').textContent,/九界 0.*第 0 界/);
-  assert.deepEqual(selectedRealms(f),['0']);assert.deepEqual(selectedThreads(f),['0']);assert.deepEqual(selectedSigils(f),['0']);assert.equal(f.requested,0);
-});
-test('realm selection updates the story and leaves one selected button, thread and sigil',t=>{
-  const f=fixture(t);f.awaken.click();
-  for(const index of [4,8,3]) {
+  assert.equal(f.root.dataset.awake,'true');assert.equal(f.root.dataset.motion,'running');assert.equal(f.pending,1);
+  assert.equal(f.awaken.getAttribute('aria-pressed'),'true');assert.equal(f.query('[data-root-reading]').hidden,false);
+  assert.deepEqual(selectedRealms(f),['0']);
+  for(let index=0;index<9;index++){
     f.realm(index).click();
     assert.deepEqual(selectedRealms(f),[String(index)]);assert.deepEqual(selectedThreads(f),[String(index)]);assert.deepEqual(selectedSigils(f),[String(index)]);
-    assert.equal(f.query('[data-root-title]').textContent,`九界 ${index}`);
-    assert.equal(f.query('[data-root-story]').textContent,`第 ${index} 界的故事。`);
+    assert.equal(f.sigilButton(index).getAttribute('aria-pressed'),'true');
+    assert.equal(f.query('[data-root-label]').textContent,`符文 ${index} / 九界 ${index}`);
+    assert.equal(f.query('[data-root-title]').textContent,`九界 ${index}`);assert.equal(f.query('[data-root-story]').textContent,`第 ${index} 界的故事。`);
   }
   f.realm(3).dataset.realmStory='<img src="missing" onerror="alert(1)">';f.realm(3).click();
-  assert.equal(f.query('[data-root-story]').textContent,'<img src="missing" onerror="alert(1)">');
-  assert.equal(f.query('[data-root-story]').children.length,0);
+  assert.equal(f.query('[data-root-story]').textContent,'<img src="missing" onerror="alert(1)">');assert.equal(f.query('[data-root-story]').children.length,0);
 });
-test('sleeping and waking preserve the chosen story and prevent dormant realm changes',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(6).click();f.awaken.click();
-  assert.equal(f.root.dataset.awake,'false');assert.equal(f.root.dataset.motion,'paused');
-  assert.equal(f.query('[data-root-reading]').hidden,true);
-  assert.equal(f.awaken.getAttribute('aria-label'),'唤醒印记');
-  assert.equal(f.query('[data-root-hint]').textContent,'TOUCH THE SIGN · FOLLOW THE LIGHT');
-  assert.equal(f.query('[data-root-status]').textContent,'余光收起，九界静候下一次相逢。');
-  f.realm(1).click();assert.deepEqual(selectedRealms(f),['6']);
-  f.awaken.click();assert.deepEqual(selectedRealms(f),['6']);assert.deepEqual(selectedThreads(f),['6']);assert.deepEqual(selectedSigils(f),['6']);
-  assert.equal(f.query('[data-root-story]').textContent,'第 6 界的故事。');
-  assert.equal(f.query('[data-root-reading]').hidden,false);
+test('DRIFT visibly deforms the curtain without pointer input instead of translating a rigid layer',t=>{
+  const f=fixture(t);f.awaken.click();const before=coordinates(f);f.advance(2000);const after=coordinates(f);
+  const changes=after.map((value,index)=>value-before[index]);
+  assert.ok(changes.some(delta=>Math.abs(delta)>10),'No visible movement over two seconds');
+  const vertical=changes.filter((_,index)=>index%2===1);
+  assert.ok(Math.max(...vertical)-Math.min(...vertical)>10,'All points translate together');
+  assert.ok(after.every(Number.isFinite));assert.notEqual(f.query('[data-root-mote]').getAttribute('cx'),'400');
+  assert.notEqual(f.query('[data-root-thread="0"]').style.strokeDashoffset,'');
+  assert.equal(f.requested,0,'Effect bypasses the shared scheduler');assert.equal(f.pending,1);
 });
-test('Escape closes the afterglow, cancels pending light and retains the current realm',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(2).click();f.pointer(900,300);assert.equal(f.pending,1);
-  const nativeButton=f.w.document.activeElement;f.escape();
-  assert.equal(f.root.dataset.awake,'false');assert.equal(f.query('[data-root-reading]').hidden,true);
-  assert.equal(f.pending,0);assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'50%');
-  assert.deepEqual(selectedRealms(f),['2']);assert.equal(f.w.document.activeElement,nativeButton);
+test('STILL holds the complete current pose and resumes from it without a time jump',t=>{
+  const f=fixture(t);f.awaken.click();f.advance(1600);f.query('[data-root-echo]').click();f.advance(700);
+  f.query('[data-root-still]').click();const held=pose(f),before=coordinates(f);
+  assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.still,'true');
+  assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');assert.equal(f.query('[data-root-echo]').disabled,true);
+  assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/恢复/);assert.match(f.query('[data-root-hint]').textContent,/A MOMENT HELD/);
+  f.pointer(950,300);f.advance(60000);assert.deepEqual(pose(f),held);assert.equal(f.root.dataset.echo,'true');
+  f.sigilButton(5).click();assert.deepEqual(selectedRealms(f),['5']);
+  f.query('[data-root-still]').click();assert.deepEqual(coordinates(f),before);f.advance(50);
+  const after=coordinates(f);assert.ok(after.some((value,index)=>value!==before[index]));
+  assert.ok(after.every((value,index)=>Math.abs(value-before[index])<2),'Resuming jumps to wall-clock time');
+  assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.still,'false');assert.match(f.query('[data-root-hint]').textContent,/LIGHT IN MOTION/);
+  f.advance(4000);assert.equal(f.root.dataset.echo,'false');
 });
-test('Escape returns focus from a hidden realm button to the sigil button',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(4).click();f.realm(4).focus();
-  assert.equal(f.w.document.activeElement,f.realm(4));f.escape();
-  assert.equal(f.query('[data-root-reading]').hidden,true);
-  assert.equal(f.w.document.activeElement,f.awaken);assert.deepEqual(selectedRealms(f),['4']);
+test('pointer light eases toward the latest target and returns gradually on leave',t=>{
+  const f=fixture(t);f.awaken.click();f.advance(100);assert.equal(light(f),50);
+  f.pointer(400,250);f.pointer(800,460);f.pointer(1100,700);assert.equal(light(f),50);
+  f.advance(100);const first=light(f);assert.ok(first>50&&first<65,'Pointer snaps to its target');
+  f.advance(1000);assert.ok(light(f)>first&&light(f)<90);
+  const before=light(f);f.leave();assert.equal(light(f),before);f.advance(100);
+  assert.ok(light(f)<before&&light(f)>50,'Leaving snaps to the center');
+  f.pointer(-200,-300);f.advance(8000);assert.ok(light(f)>=10&&light(f)<11);
+  f.pointer(1600,1200);f.advance(8000);assert.ok(light(f)<=90&&light(f)>89);assert.equal(f.pending,1);assert.equal(f.requested,0);
 });
-test('pointer input coalesces to one frame and never schedules a continuous loop',t=>{
-  const f=fixture(t);f.pointer(600,400);assert.equal(f.requested,0);
-  f.awaken.click();f.pointer(400,250);f.pointer(800,460);f.pointer(700,400);
-  assert.equal(f.requested,1);assert.equal(f.pending,1);f.flush();
-  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'60.00%');
-  assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'50.00%');
-  assert.equal(f.pending,0);assert.equal(f.requested,1);
-});
-test('the light stays within the clearing and leaving resets it without another frame',t=>{
-  const f=fixture(t);f.awaken.click();f.pointer(-200,-300);f.flush();
-  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'10.00%');assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'10.00%');
-  f.pointer(1600,1200);f.flush();
-  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'90.00%');assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'90.00%');
-  f.pointer(700,400);const requested=f.requested;f.leave();
-  assert.equal(f.pending,0);assert.equal(f.requested,requested);
-  assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'50%');assert.equal(f.stage.style.getPropertyValue('--root-light-y'),'52%');
-});
-test('offscreen clearing pauses animation and discards pending pointer updates',t=>{
-  const f=fixture(t);f.awaken.click();f.pointer(700,400);f.visible(false);
-  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);assert.equal(f.cancelled,1);
-  f.pointer(800,500);assert.equal(f.requested,1);f.visible(true);
-  assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.awake,'true');
-  assert.equal(f.requested,1);f.pointer(800,500);assert.equal(f.pending,1);
-});
-test('a hidden document pauses light while preserving the active story for return',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(5).click();f.pointer(700,400);f.hidden(true);
-  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);f.pointer(900,300);assert.equal(f.requested,1);
-  f.hidden(false);assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['5']);assert.equal(f.pending,0);
-});
-test('reduced motion keeps all button interactions usable without scheduling pointer light',t=>{
-  const f=fixture(t,{reduced:true});f.awaken.click();f.realm(7).click();f.pointer(700,400);
-  assert.equal(f.root.dataset.motion,'paused');assert.deepEqual(selectedRealms(f),['7']);assert.equal(f.requested,0);
-  f.reduced(false);assert.equal(f.root.dataset.motion,'running');f.pointer(800,300);assert.equal(f.pending,1);
-  f.reduced(true);assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
-});
-test('quiet and economy policies cancel queued light and keep deliberate awakening available',t=>{
-  const f=fixture(t);f.awaken.click();f.pointer(700,400);f.motion({economy:true});
-  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);f.realm(8).click();assert.deepEqual(selectedRealms(f),['8']);
-  f.pointer(800,500);assert.equal(f.requested,1);f.motion({economy:false,allowed:false});assert.equal(f.root.dataset.motion,'paused');
-  f.motion({allowed:true});assert.equal(f.root.dataset.motion,'running');f.pointer(700,400);assert.equal(f.pending,1);
-  f.w.document.documentElement.classList.add('garden-lite-motion');f.motion({});
-  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
-});
-test('coarse pointers use the native controls without light scheduling',t=>{
-  const f=fixture(t,{fine:false});f.awaken.click();f.realm(4).click();f.pointer(700,400);
-  assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['4']);assert.equal(f.requested,0);
-  f.fine(true);f.pointer(700,400);assert.equal(f.pending,1);f.fine(false);
-  assert.equal(f.pending,0);assert.equal(f.stage.style.getPropertyValue('--root-light-x'),'50%');
-});
-test('page transitions cancel queued light and resume policy without changing the story',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(3).click();f.pointer(700,400);f.transition('pagehide');
-  assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'paused');f.pointer(800,500);assert.equal(f.requested,1);
-  f.transition('pageshow');assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['3']);assert.equal(f.pending,0);
-});
-test('without shared motion the quiet class is observed, and theme changes do not schedule light',async t=>{
-  const f=fixture(t,{noMotion:true});f.awaken.click();f.pointer(700,400);f.flush();
-  assert.deepEqual(f.mutations,[{attributes:true,attributeFilter:['class']}]);
-  f.w.document.documentElement.dataset.resolvedTheme='light';await new Promise(setImmediate);
-  assert.equal(f.requested,1);assert.equal(f.pending,0);assert.equal(f.root.dataset.motion,'running');
-  f.w.document.documentElement.classList.add('garden-lite-motion');await new Promise(setImmediate);
-  assert.equal(f.root.dataset.motion,'paused');f.pointer(800,500);assert.equal(f.requested,1);
-});
-test('the shared motion path adds no theme observer, and browsers without viewport observation keep controls usable',async t=>{
-  const f=fixture(t,{noObserver:true});f.awaken.click();f.realm(1).click();
-  assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['1']);assert.deepEqual(f.mutations,[]);
-  f.w.document.documentElement.dataset.resolvedTheme='light';await new Promise(setImmediate);
-  assert.equal(f.requested,0);assert.equal(f.pending,0);assert.equal(f.root.dataset.awake,'true');
-});
-test('screen-positioned sigils choose the same realm and pressed state as the reading controls',t=>{
-  const f=fixture(t);
-  assert.equal(f.query('[data-root-hotspots]').hidden,true);assert.equal(f.query('[data-root-controls]').hidden,true);
-  f.awaken.click();
-  assert.equal(f.query('[data-root-hotspots]').hidden,false);assert.equal(f.query('[data-root-controls]').hidden,false);
-  assert.equal(f.sigilButton(4).hidden,false);assert.equal(f.sigilButton(4).style.left,'470px');assert.equal(f.sigilButton(4).style.top,'240px');
-  f.sigilButton(4).click();
-  assert.deepEqual(selectedRealms(f),['4']);assert.deepEqual(selectedThreads(f),['4']);assert.deepEqual(selectedSigils(f),['4']);
-  assert.equal(f.sigilButton(4).getAttribute('aria-pressed'),'true');assert.equal(f.sigilButton(0).getAttribute('aria-pressed'),'false');
-  f.realm(7).click();
-  assert.equal(f.sigilButton(4).getAttribute('aria-pressed'),'false');assert.equal(f.sigilButton(7).getAttribute('aria-pressed'),'true');
-  f.awaken.click();assert.equal(f.query('[data-root-hotspots]').hidden,true);assert.equal(f.query('[data-root-controls]').hidden,true);
-});
-test('hover and focus preview a light without changing the selected realm or story',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(2).click();
-  f.sigilButton(5).dispatchEvent(new f.w.MouseEvent('pointerenter'));
-  assert.equal(f.query('[data-root-thread="5"]').classList.contains('is-pointed'),true);assert.equal(f.query('[data-root-sigil="5"]').classList.contains('is-pointed'),true);
-  assert.deepEqual(selectedRealms(f),['2']);assert.equal(f.query('[data-root-title]').textContent,'九界 2');
-  f.sigilButton(5).dispatchEvent(new f.w.MouseEvent('pointerleave'));
-  assert.equal(f.root.querySelectorAll('[data-root-thread].is-pointed').length,0);
-  f.realm(8).focus();assert.equal(f.query('[data-root-thread="8"]').classList.contains('is-pointed'),true);
-  f.realm(8).blur();assert.equal(f.root.querySelectorAll('.is-pointed').length,0);assert.deepEqual(selectedRealms(f),['2']);
-});
-test('resizing hides clipped sigil targets and moves their focus to the matching reading control',t=>{
-  const f=fixture(t);f.awaken.click();f.sigilButton(6).focus();
-  f.place(6,995,260);assert.equal(f.sigilButton(6).hidden,true);assert.equal(f.w.document.activeElement,f.realm(6));
-  f.place(6,700,599);assert.equal(f.sigilButton(6).hidden,true);
-  f.place(6,700,300);assert.equal(f.sigilButton(6).hidden,false);assert.equal(f.sigilButton(6).style.left,'700px');
-  assert.equal(f.requested,0);
-});
-test('missing SVG screen geometry leaves realm controls usable and hides unpositioned sigil buttons',t=>{
-  const f=fixture(t,{noGeometry:true});f.awaken.click();f.realm(3).click();
-  assert.equal([...f.root.querySelectorAll('[data-root-sigil-button]')].every(button=>button.hidden),true);
-  assert.deepEqual(selectedRealms(f),['3']);assert.equal(f.query('[data-root-reading]').hidden,false);assert.equal(f.requested,0);
-});
-test('still mode freezes queued pointer light and echo while realm reading remains available',t=>{
-  const f=fixture(t);f.awaken.click();f.query('[data-root-echo]').click();f.pointer(900,450);
-  assert.equal(f.root.dataset.echo,'true');assert.equal(f.timers.length,1);assert.equal(f.pending,1);
-  f.query('[data-root-still]').click();
-  assert.equal(f.root.dataset.still,'true');assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);assert.equal(f.pending,0);
-  assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');assert.equal(f.query('[data-root-still]').getAttribute('aria-label'),'恢复动态');assert.equal(f.query('[data-root-still-label]').textContent,'STILL');
-  assert.equal(f.query('[data-root-echo]').disabled,true);f.sigilButton(5).click();assert.deepEqual(selectedRealms(f),['5']);
-  f.query('[data-root-still]').click();assert.equal(f.root.dataset.motion,'running');assert.equal(f.query('[data-root-still-label]').textContent,'DRIFT');assert.equal(f.query('[data-root-still]').getAttribute('aria-label'),'静止光幕');assert.equal(f.query('[data-root-echo]').disabled,false);assert.equal(f.pending,0);
-});
-test('one-shot echo restarts without adding nodes or changing the selected realm',t=>{
-  const f=fixture(t);f.awaken.click();f.realm(6).click();const nodes=f.root.querySelectorAll('*').length;
-  f.query('[data-root-echo]').click();assert.equal(f.root.dataset.echo,'true');assert.equal(f.timers.length,1);assert.equal(f.timers[0].delay,1900);
-  assert.equal(f.stage.style.getPropertyValue('--root-echo-x'),'50.00%');assert.equal(f.stage.style.getPropertyValue('--root-echo-y'),'52.00%');
-  f.stage.dispatchEvent(new f.w.MouseEvent('click',{clientX:850,clientY:280,bubbles:true}));
-  assert.equal(f.stage.style.getPropertyValue('--root-echo-x'),'75.00%');assert.equal(f.stage.style.getPropertyValue('--root-echo-y'),'30.00%');assert.equal(f.timers.length,1);assert.equal(f.requested,0);
-  assert.deepEqual(selectedRealms(f),['6']);assert.equal(f.root.querySelectorAll('*').length,nodes);assert.equal(f.root.dataset.awake,'true');
-  f.expire();assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
-});
-test('native control clicks do not emit accidental stage echoes',t=>{
-  const f=fixture(t);f.awaken.click();assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
-  f.sigilButton(4).click();assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);assert.deepEqual(selectedRealms(f),['4']);
-});
-test('paused and reduced policies suppress and clear echoes across lifecycle changes',t=>{
-  const f=fixture(t);f.stage.click();assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
-  f.awaken.click();f.query('[data-root-echo]').click();f.visible(false);assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
-  f.stage.click();assert.equal(f.timers.length,0);f.visible(true);f.query('[data-root-echo]').click();f.reduced(true);assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
-  f.stage.click();assert.equal(f.timers.length,0);f.reduced(false);f.query('[data-root-echo]').click();f.hidden(true);assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
-  f.hidden(false);f.query('[data-root-echo]').click();f.transition('pagehide');assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);f.transition('pageshow');assert.equal(f.root.dataset.motion,'running');assert.equal(f.timers.length,0);
-});
-test('Escape restores focus from either extra control group and removes previews and pulses',t=>{
-  const f=fixture(t);
-  for(const button of [f.sigilButton(7),f.query('[data-root-echo]'),f.query('[data-root-still]')]) {
-    f.awaken.click();f.query('[data-root-echo]').click();button.focus();f.escape();
-    assert.equal(f.w.document.activeElement,f.awaken);assert.equal(f.query('[data-root-controls]').hidden,true);assert.equal(f.query('[data-root-hotspots]').hidden,true);assert.equal(f.root.querySelectorAll('.is-pointed').length,0);assert.equal(f.root.dataset.echo,'false');assert.equal(f.timers.length,0);
+test('offscreen, hidden and page-cache states suspend the clock and preserve the story and pose',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(5).click();f.advance(1000);
+  for(const [pause,resume] of [[()=>f.visible(false),()=>f.visible(true)],[()=>f.hidden(true),()=>f.hidden(false)],[()=>f.transition('pagehide'),()=>f.transition('pageshow')]]){
+    pause();const held=pose(f);assert.equal(f.root.dataset.motion,'paused');assert.equal(f.pending,0);
+    f.pointer(900,300);f.advance(6000);assert.deepEqual(pose(f),held);
+    resume();assert.equal(f.root.dataset.motion,'running');assert.deepEqual(pose(f),held);assert.deepEqual(selectedRealms(f),['5']);
+    f.advance(50);assert.notDeepEqual(pose(f),held);
   }
 });
-test('pointer parallax is coalesced with the existing light frame and reset by motion policy',t=>{
-  const f=fixture(t);f.awaken.click();f.pointer(1100,700);f.flush();
-  assert.equal(f.stage.style.getPropertyValue('--root-sway-x'),'12.00px');assert.equal(f.stage.style.getPropertyValue('--root-sway-y'),'6.00px');assert.equal(f.requested,1);assert.equal(f.pending,0);
-  f.visible(false);assert.equal(f.stage.style.getPropertyValue('--root-sway-x'),'0px');assert.equal(f.stage.style.getPropertyValue('--root-sway-y'),'0px');
+test('economy retains genuine drift at a lower frame rate and STILL also works there',t=>{
+  const f=fixture(t);f.awaken.click();const full=f.fps;f.motion({economy:true});
+  assert.ok(f.fps<full&&f.fps>=15);assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.still,'false');
+  const before=pose(f);f.advance(1000);assert.notDeepEqual(pose(f),before);
+  f.query('[data-root-still]').click();const held=pose(f);f.advance(1000);assert.deepEqual(pose(f),held);
+  f.motion({economy:false});assert.equal(f.root.dataset.motion,'paused');assert.equal(f.fps,full);
+});
+test('reduced motion reports STILL honestly and keeps stories available without scheduling animation',t=>{
+  const f=fixture(t,{reduced:true});f.awaken.click();f.realm(7).click();const before=pose(f);f.pointer(700,400);f.advance(2000);
+  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.still,'true');assert.equal(f.pending,0);assert.deepEqual(pose(f),before);
+  assert.equal(f.query('[data-root-still]').disabled,true);assert.equal(f.query('[data-root-still]').getAttribute('aria-pressed'),'true');
+  assert.match(f.query('[data-root-still]').getAttribute('aria-label'),/减弱动态/);assert.equal(f.query('[data-root-echo]').disabled,true);assert.deepEqual(selectedRealms(f),['7']);
+  f.reduced(false);assert.equal(f.root.dataset.motion,'running');assert.equal(f.query('[data-root-still]').disabled,false);
+  f.query('[data-root-still]').click();f.reduced(true);f.reduced(false);assert.equal(f.root.dataset.motion,'paused','System changes discard a deliberate pause');
+});
+test('quiet and global performance restrictions stop all frames and update the visible control state',t=>{
+  const f=fixture(t);f.awaken.click();f.advance(300);f.motion({allowed:false});const held=pose(f);
+  assert.equal(f.root.dataset.motion,'paused');assert.equal(f.root.dataset.still,'true');assert.equal(f.pending,0);f.advance(1000);assert.deepEqual(pose(f),held);
+  f.motion({allowed:true});assert.equal(f.root.dataset.motion,'running');assert.equal(f.root.dataset.still,'false');
+  f.w.document.documentElement.classList.add('garden-lite-motion');f.motion({});assert.equal(f.root.dataset.motion,'paused');assert.equal(f.query('[data-root-still]').disabled,true);
+  f.realm(8).click();assert.deepEqual(selectedRealms(f),['8']);
+});
+test('coarse pointers keep the animated atmosphere and native controls without mouse parallax',t=>{
+  const f=fixture(t,{fine:false});f.awaken.click();f.realm(4).click();f.pointer(900,400);f.advance(500);
+  assert.equal(light(f),50);assert.equal(f.root.dataset.motion,'running');assert.deepEqual(selectedRealms(f),['4']);
+  f.query('[data-root-echo]').click();f.advance(500);assert.equal(f.root.dataset.echo,'true');
+  f.fine(true);f.pointer(900,400);f.advance(200);assert.ok(light(f)>50);f.fine(false);const before=light(f);f.advance(200);assert.ok(light(f)<before);
+});
+test('closing rests the clock, clears echoes and preserves the chosen story for reopening',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(6).click();f.advance(600);f.query('[data-root-echo]').click();f.awaken.click();
+  assert.equal(f.root.dataset.awake,'false');assert.equal(f.pending,0);assert.equal(f.root.dataset.echo,'false');
+  assert.equal(f.query('[data-root-reading]').hidden,true);f.realm(1).click();assert.deepEqual(selectedRealms(f),['6']);
+  const held=pose(f);f.advance(3000);assert.deepEqual(pose(f),held);
+  f.awaken.click();assert.deepEqual(selectedRealms(f),['6']);assert.equal(f.query('[data-root-story]').textContent,'第 6 界的故事。');
+});
+test('Escape restores focus from hidden control groups and stops all effect work',t=>{
+  const f=fixture(t);
+  for(const button of [f.realm(4),f.sigilButton(7),f.query('[data-root-echo]'),f.query('[data-root-still]')]){
+    f.awaken.click();f.query('[data-root-echo]').click();button.focus();f.escape();
+    assert.equal(f.w.document.activeElement,f.awaken);assert.equal(f.query('[data-root-reading]').hidden,true);
+    assert.equal(f.query('[data-root-controls]').hidden,true);assert.equal(f.query('[data-root-hotspots]').hidden,true);
+    assert.equal(f.root.querySelectorAll('.is-pointed').length,0);assert.equal(f.root.dataset.echo,'false');assert.equal(f.pending,0);
+  }
+});
+test('field sigils are aligned, select the same realm, and hover previews leave the story intact',t=>{
+  const f=fixture(t);f.awaken.click();assert.equal(f.query('[data-root-hotspots]').hidden,false);
+  assert.equal(f.sigilButton(4).style.left,'470px');assert.equal(f.sigilButton(4).style.top,'240px');f.sigilButton(4).click();
+  assert.deepEqual(selectedRealms(f),['4']);assert.deepEqual(selectedThreads(f),['4']);assert.deepEqual(selectedSigils(f),['4']);
+  f.sigilButton(5).dispatchEvent(new f.w.MouseEvent('pointerenter'));assert.equal(f.query('[data-root-thread="5"]').classList.contains('is-pointed'),true);
+  assert.deepEqual(selectedRealms(f),['4']);assert.equal(f.query('[data-root-title]').textContent,'九界 4');
+  f.sigilButton(5).dispatchEvent(new f.w.MouseEvent('pointerleave'));assert.equal(f.root.querySelectorAll('.is-pointed').length,0);
+  f.realm(8).focus();assert.equal(f.query('[data-root-sigil="8"]').classList.contains('is-pointed'),true);f.realm(8).blur();assert.equal(f.root.querySelectorAll('.is-pointed').length,0);
+});
+test('resize hides clipped sigil targets and restores their focus to the corresponding reading control',t=>{
+  const f=fixture(t);f.awaken.click();f.sigilButton(6).focus();f.place(6,995,260);
+  assert.equal(f.sigilButton(6).hidden,true);assert.equal(f.w.document.activeElement,f.realm(6));
+  f.place(6,700,599);assert.equal(f.sigilButton(6).hidden,true);f.place(6,700,300);assert.equal(f.sigilButton(6).hidden,false);assert.equal(f.sigilButton(6).style.left,'700px');
+});
+test('missing SVG geometry and viewport observation leave the native realm controls usable',t=>{
+  const f=fixture(t,{noGeometry:true,noObserver:true});f.awaken.click();f.realm(3).click();
+  assert.equal([...f.root.querySelectorAll('[data-root-sigil-button]')].every(button=>button.hidden),true);
+  assert.deepEqual(selectedRealms(f),['3']);assert.equal(f.query('[data-root-reading]').hidden,false);assert.equal(f.root.dataset.motion,'running');
+});
+test('echoes follow curved, varied paths and reuse a bounded set of nodes without timers',t=>{
+  const f=fixture(t);f.awaken.click();f.realm(6).click();const nodes=f.root.querySelectorAll('*').length;
+  f.query('[data-root-echo]').click();f.advance(800);const first=f.query('[data-root-echo-field] i').getAttribute('style');
+  assert.match(first,/translate/);assert.equal(f.root.dataset.echo,'true');assert.equal(f.timers.length,0);
+  f.query('[data-root-echo]').click();f.advance(800);assert.notEqual(f.query('[data-root-echo-field] i').getAttribute('style'),first);
+  f.stage.dispatchEvent(new f.w.MouseEvent('click',{clientX:850,clientY:280,bubbles:true}));
+  assert.equal(f.stage.style.getPropertyValue('--root-echo-x'),'75.00%');assert.equal(f.stage.style.getPropertyValue('--root-echo-y'),'30.00%');
+  assert.deepEqual(selectedRealms(f),['6']);assert.equal(f.root.querySelectorAll('*').length,nodes);f.advance(4000);assert.equal(f.root.dataset.echo,'false');
+});
+test('native control clicks do not emit stage echoes and restrictions clear any active echo',t=>{
+  const f=fixture(t);f.stage.click();assert.equal(f.root.dataset.echo,'false');f.awaken.click();f.sigilButton(4).click();assert.equal(f.root.dataset.echo,'false');
+  f.query('[data-root-echo]').click();f.advance(400);f.reduced(true);assert.equal(f.root.dataset.echo,'false');
+  f.stage.click();assert.equal(f.root.dataset.echo,'false');assert.equal(f.pending,0);
+});
+test('fallback scheduling uses one loop, freezes exactly, and observes quiet policy without a theme observer',async t=>{
+  const f=fixture(t,{noMotion:true});f.awaken.click();f.advance(1000);assert.equal(f.pending,1);
+  assert.deepEqual(f.mutations,[{attributes:true,attributeFilter:['class']}]);
+  f.w.document.documentElement.dataset.resolvedTheme='light';await new Promise(setImmediate);assert.equal(f.pending,1);
+  f.query('[data-root-still]').click();const held=pose(f);f.advance(2000);assert.deepEqual(pose(f),held);assert.equal(f.pending,0);
+  f.query('[data-root-still]').click();assert.equal(f.pending,1);f.advance(50);assert.notDeepEqual(pose(f),held);
+  f.w.document.documentElement.classList.add('garden-lite-motion');await new Promise(setImmediate);assert.equal(f.pending,0);assert.equal(f.root.dataset.still,'true');
 });

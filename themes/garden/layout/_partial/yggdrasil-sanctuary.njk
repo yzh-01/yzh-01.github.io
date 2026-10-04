@@ -26,7 +26,10 @@
     <p class="ash-clearing-note" id="ash-root-hint" data-root-hint>IX WORLDS · ONE REMEMBERED LIGHT</p>
     <div class="ash-field-controls" data-root-controls hidden>
       <button type="button" data-root-echo aria-label="释放一束光屑" title="释放光屑"><span>ECHO</span><b aria-hidden="true">↗</b></button>
-      <button type="button" data-root-still aria-pressed="false" aria-label="静止光幕" title="切换光幕动态"><i aria-hidden="true"></i><span data-root-still-label>DRIFT</span></button>
+      <button class="ash-motion-toggle" type="button" data-root-still aria-pressed="false" aria-label="定格当前的极光、雾气与光屑" title="定格当前的极光、雾气与光屑">
+        <svg class="ash-motion-mark" viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" focusable="false"><path class="ash-motion-wave" d="M1 5C4 0 6 10 10 5S16 0 19 5M1 11C4 6 6 16 10 11S16 6 19 11"/><path class="ash-motion-pause" d="M7 3V13M13 3V13"/></svg>
+        <span class="ash-motion-options" aria-hidden="true"><span data-root-drift-label>DRIFT</span><span data-root-still-label>STILL</span></span>
+      </button>
     </div>
   </div>
   <div class="ash-root-reading" id="ash-root-reading" data-root-reading hidden>

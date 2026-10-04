@@ -5,7 +5,7 @@
 .ash-sanctuary {
   --root-ink: #8c9b8e; --root-light: #a4bfad; --root-warm: #c5ae89;
   --root-mint: #9ac8b5; --root-ice: #93b5ce; --root-pearl: #b1bad2;
-  --root-light-x: 50%; --root-light-y: 52%; --root-sway-x: 0px; --root-sway-y: 0px;
+  --root-light-x: 50%; --root-light-y: 52%; --root-mist-shift: 0%;
   --root-echo-x: 50%; --root-echo-y: 51%;
   position: relative; z-index: 2; width: min(var(--page), 1160px);
   margin: 0 auto; padding: 64px 0 36px; color: var(--bone); scroll-margin-top: 80px;
@@ -23,17 +23,18 @@
 .ash-sky-volume { opacity: .24; transition: opacity 1.2s ease; }
 .ash-sky-curtain { opacity: .3; transition: opacity 1.2s ease; }
 .ash-sky-rays { opacity: .25; transition: opacity 1.2s ease; }
-.ash-sky-volume, .ash-sky-curtain, .ash-sky-rays { transform: translate(var(--root-sway-x), var(--root-sway-y)); }
+.ash-sky-motes { opacity: 0; transition: opacity 1.5s ease; }
+.ash-sanctuary[data-awake="true"] .ash-sky-motes { opacity: 1; }
 .ash-sky-inscription { stroke: var(--root-ink); opacity: .6; transition: opacity .8s ease, stroke .8s ease; }
 .ash-sky-sigil { stroke: var(--root-light); opacity: 0; transition: opacity 1s ease, stroke .5s ease; }
 .ash-sky-sigils { opacity: 1; }
 .ash-sky-sigil.is-selected { stroke: var(--root-warm); }
 .ash-sky-sigil.is-pointed { stroke: var(--bone); }
-.ash-root-thread { fill: none; stroke: var(--root-light); stroke-width: .8; stroke-linecap: round; opacity: 0; stroke-dasharray: 2 20 1 32; transition: opacity .8s ease, stroke .4s ease; }
+.ash-root-thread { fill: none; stroke: var(--root-light); stroke-width: .8; stroke-linecap: round; opacity: 0; stroke-dasharray: 1 25 1 40; transition: opacity .8s ease, stroke .4s ease; }
 .ash-root-thread.is-selected { stroke: var(--root-warm); }
-.ash-sanctuary[data-awake="true"] .ash-root-thread { opacity: .22; animation: ash-root-flow 18s linear infinite; }
-.ash-sanctuary[data-awake="true"] .ash-root-thread.is-selected { opacity: .65; stroke-width: 1.2; }
-.ash-sanctuary[data-awake="true"] .ash-root-thread.is-pointed { stroke: var(--bone); opacity: .8; animation-duration: 8s; }
+.ash-sanctuary[data-awake="true"] .ash-root-thread { opacity: .16; }
+.ash-sanctuary[data-awake="true"] .ash-root-thread.is-selected { opacity: .55; stroke-width: 1.2; }
+.ash-sanctuary[data-awake="true"] .ash-root-thread.is-pointed { stroke: var(--bone); opacity: .75; }
 .ash-sanctuary[data-awake="true"] .ash-sky-volume { opacity: .7; }
 .ash-sanctuary[data-awake="true"] .ash-sky-curtain { opacity: .86; }
 .ash-sanctuary[data-awake="true"] .ash-sky-rays { opacity: .74; }
@@ -41,13 +42,12 @@
 .ash-sanctuary[data-awake="true"] .ash-sky-sigil { opacity: .44; }
 .ash-sanctuary[data-awake="true"] .ash-sky-sigil.is-selected { opacity: 1; }
 .ash-sanctuary[data-awake="true"] .ash-sky-sigil.is-pointed { opacity: .95; }
-.ash-sanctuary[data-awake="true"] .ash-sky-curtain, .ash-sanctuary[data-awake="true"] .ash-sky-rays { animation: ash-sky-breathe 18s ease-in-out infinite alternate; transform-origin: center; }
 .ash-sanctuary[data-awake="true"] .ash-clearing::before { opacity: 1; }
 .ash-heart { position: absolute; top: 50.9%; left: 50%; width: 86px; height: 82px; padding: 0; border: 0; background: transparent; transform: translate(-50%, -50%); cursor: pointer; }
 .ash-heart::before { content: ""; position: absolute; inset: -20px; opacity: .4; background: radial-gradient(ellipse, color-mix(in srgb, var(--root-warm) 10%, transparent), transparent 66%); transition: opacity .8s ease; }
 .ash-heart[aria-pressed="true"]::before { opacity: 1; }
-.ash-ground-mist { position: absolute; left: -15%; right: -15%; top: 50%; height: 36%; pointer-events: none; opacity: .4; filter: blur(18px); background: radial-gradient(ellipse 44% 30% at 30% 55%, color-mix(in srgb, var(--root-ice) 10%, transparent), transparent 85%), radial-gradient(ellipse 40% 28% at 68% 70%, color-mix(in srgb, var(--root-mint) 8%, transparent), transparent 90%); transition: opacity 1.2s ease; }
-.ash-sanctuary[data-awake="true"] .ash-ground-mist { opacity: .9; animation: ash-mist-drift 26s ease-in-out infinite alternate; }
+.ash-ground-mist { position: absolute; left: -15%; right: -15%; top: 50%; height: 36%; pointer-events: none; opacity: .4; filter: blur(18px); background: radial-gradient(ellipse 44% 30% at calc(30% + var(--root-mist-shift)) 55%, color-mix(in srgb, var(--root-ice) 10%, transparent), transparent 85%), radial-gradient(ellipse 40% 28% at calc(68% - var(--root-mist-shift)) 70%, color-mix(in srgb, var(--root-mint) 8%, transparent), transparent 90%); transition: opacity 1.2s ease; }
+.ash-sanctuary[data-awake="true"] .ash-ground-mist { opacity: .9; }
 .ash-sanctuary:not([data-ready="true"]) .ash-heart { visibility: hidden; }
 .ash-sigil-hotspots { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .ash-sigil-hotspots[hidden], .ash-field-controls[hidden] { display: none; }
@@ -55,26 +55,29 @@
 .ash-field-sigil[hidden] { display: none; }
 .ash-field-sigil > span { position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translate(-50%, 3px); opacity: 0; color: var(--bone); white-space: nowrap; font: 8px/1.5 var(--mono); letter-spacing: .1em; transition: opacity .25s, transform .25s; pointer-events: none; }
 .ash-field-sigil:hover > span, .ash-field-sigil:focus-visible > span { opacity: 1; transform: translate(-50%, 0); }
-.ash-field-controls { position: absolute; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 14px; }
+.ash-field-controls { position: absolute; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 18px; }
 .ash-field-controls button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 5px; border: 0; color: var(--dim); background: transparent; cursor: pointer; font: 9px/1 var(--mono); letter-spacing: .12em; }
 .ash-field-controls b { font-size: 12px; font-weight: 400; color: var(--root-warm); }
-.ash-field-controls i { width: 3px; height: 3px; background: var(--root-light); box-shadow: 0 0 6px color-mix(in srgb, var(--root-light) 40%, transparent); }
-.ash-field-controls button[aria-pressed="true"] i { background: var(--dim); box-shadow: none; }
 .ash-field-controls button:hover, .ash-field-controls button[aria-pressed="true"] { color: var(--bone); }
 .ash-field-controls button:disabled { opacity: .4; cursor: default; }
+.ash-field-controls .ash-motion-toggle { gap: 12px; }
+.ash-motion-mark { flex: none; width: 20px; height: 16px; color: var(--root-light); }
+.ash-motion-mark path { transition: opacity .3s ease; }
+.ash-motion-pause { opacity: 0; }
+.ash-motion-options { position: relative; display: flex; align-items: center; gap: 16px; height: 30px; }
+.ash-motion-options > span { opacity: .5; transition: color .3s ease, opacity .3s ease; }
+.ash-motion-options::after { content: ""; position: absolute; bottom: 0; left: 0; width: calc((100% - 16px) / 2); height: 1px; background: var(--root-light); transition: transform .35s cubic-bezier(.2,.7,.2,1), background .35s; }
+.ash-motion-options [data-root-drift-label] { color: var(--bone); opacity: 1; }
+.ash-sanctuary[data-still="true"] .ash-motion-options [data-root-drift-label] { color: var(--dim); opacity: .5; }
+.ash-sanctuary[data-still="true"] .ash-motion-options [data-root-still-label] { color: var(--bone); opacity: 1; }
+.ash-sanctuary[data-still="true"] .ash-motion-options::after { transform: translateX(calc(100% + 16px)); background: var(--root-warm); }
+.ash-sanctuary[data-still="true"] .ash-motion-wave { opacity: 0; }
+.ash-sanctuary[data-still="true"] .ash-motion-pause { opacity: 1; }
+.ash-sanctuary[data-still="true"] .ash-motion-mark { color: var(--root-warm); }
 .ash-echo-field { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
 .ash-echo-field > b { position: absolute; left: var(--root-echo-x); top: var(--root-echo-y); width: 100px; height: 160px; transform: translate(-50%, -70%); opacity: 0; filter: blur(12px); background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--root-mint) 40%, transparent) 72%, transparent); }
-.ash-echo-field > i { position: absolute; left: var(--root-echo-x); top: var(--root-echo-y); width: 1px; height: 7px; opacity: 0; background: linear-gradient(transparent, var(--root-warm)); }
-.ash-echo-field > i:nth-of-type(1) { --spark-x: -62px; --spark-y: -98px; --spark-delay: 0ms; }
-.ash-echo-field > i:nth-of-type(2) { --spark-x: -35px; --spark-y: -144px; --spark-delay: 80ms; }
-.ash-echo-field > i:nth-of-type(3) { --spark-x: -10px; --spark-y: -116px; --spark-delay: 180ms; }
-.ash-echo-field > i:nth-of-type(4) { --spark-x: 18px; --spark-y: -157px; --spark-delay: 50ms; }
-.ash-echo-field > i:nth-of-type(5) { --spark-x: 55px; --spark-y: -123px; --spark-delay: 130ms; }
-.ash-echo-field > i:nth-of-type(6) { --spark-x: 84px; --spark-y: -85px; --spark-delay: 230ms; }
-.ash-echo-field > i:nth-of-type(7) { --spark-x: -68px; --spark-y: 24px; --spark-delay: 110ms; }
-.ash-echo-field > i:nth-of-type(8) { --spark-x: 65px; --spark-y: 16px; --spark-delay: 210ms; }
-.ash-sanctuary[data-echo="true"] .ash-echo-field > b { animation: ash-echo-bloom 1.8s ease-out both; }
-.ash-sanctuary[data-echo="true"] .ash-echo-field > i { animation: ash-echo-spark 1.55s ease-out var(--spark-delay) both; }
+.ash-echo-field > i { position: absolute; left: var(--root-echo-x); top: var(--root-echo-y); width: 2px; height: 3px; border-radius: 50%; opacity: 0; background: var(--root-warm); box-shadow: 0 0 6px color-mix(in srgb, var(--root-warm) 30%, transparent); }
+.ash-echo-field > i:nth-of-type(3n) { width: 1px; height: 2px; background: var(--root-light); }
 .ash-clearing-note { position: absolute; bottom: 6px; left: 0; width: 100%; margin: 0; color: var(--dim); text-align: center; font: 9px/1.8 var(--mono); letter-spacing: .08em; pointer-events: none; }
 .ash-root-reading[hidden] { display: none; }
 .ash-realm-path { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; padding-top: 14px; }
@@ -89,12 +92,6 @@
 .ash-colophon { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 12px; margin-top: 28px; border-top: 1px solid var(--line); color: var(--dim); font: 8px/1.6 var(--mono); letter-spacing: .1em; }
 .ash-colophon a { display: flex; align-items: center; gap: 18px; min-height: 44px; color: var(--bone); }
 .ash-heart:focus-visible, .ash-realm-path button:focus-visible, .ash-field-sigil:focus-visible, .ash-field-controls button:focus-visible, .ash-colophon a:focus-visible { outline: 1px solid var(--moss-bright); outline-offset: 4px; }
-.ash-sanctuary[data-motion="paused"] * { animation-play-state: paused !important; }
-@keyframes ash-root-flow { to { stroke-dashoffset: -144; } }
-@keyframes ash-sky-breathe { from { transform: translate(var(--root-sway-x), var(--root-sway-y)) scaleY(1); } to { transform: translate(var(--root-sway-x), calc(var(--root-sway-y) - 8px)) scaleY(1.04); } }
-@keyframes ash-mist-drift { to { transform: translateX(3%) translateY(-5px); } }
-@keyframes ash-echo-bloom { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.45, .6); } 25% { opacity: .8; } 100% { opacity: 0; transform: translate(-50%, -90%) scale(1.5, 1.2); } }
-@keyframes ash-echo-spark { 0% { opacity: 0; transform: translate(0, 0); } 12% { opacity: .9; } 100% { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)); } }
 @media (hover: hover) { .ash-heart:hover::before { opacity: 1; } .ash-realm-path button:hover, .ash-colophon a:hover { color: var(--bone); } }
 :root[data-resolved-theme="light"] .folio { --g-ash-rule: rgba(59, 83, 52, .18); }
 :root[data-resolved-theme="light"] .ash-sanctuary { --root-ink: #536455; --root-light: #487157; --root-warm: #80603d; --root-mint: #5e8e82; --root-ice: #7c92a5; --root-pearl: #a194aa; }
