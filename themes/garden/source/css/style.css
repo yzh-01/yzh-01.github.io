@@ -337,7 +337,7 @@ html.theme-switching .site-backdrop {
   inset: -18px;
   background-image:
     linear-gradient(180deg, rgba(42,58,46,.18), rgba(42,58,46,.32)),
-    url("/images/garden-bg-light-cat.jpg");
+    url("/images/winteromen-northern-garden.webp");
   background-position: center, 60% 54%;
   background-size: cover;
   filter: blur(4px) saturate(.72) brightness(.88) contrast(1);
@@ -351,7 +351,7 @@ html.theme-switching .site-backdrop {
 :root[data-theme="dark"] .site-backdrop::after {
   background-image:
     linear-gradient(rgba(13,18,15,.2), rgba(13,18,15,.4)),
-    url("/images/garden-bg-dark-cat.jpg");
+    url("/images/winteromen-northern-garden.webp");
   background-position: center, 60% 54%;
   filter: blur(4px) saturate(.72) brightness(.96) contrast(1);
 }
@@ -360,7 +360,7 @@ html.theme-switching .site-backdrop {
   :root:not([data-theme]) .site-backdrop::after {
     background-image:
       linear-gradient(rgba(13,18,15,.2), rgba(13,18,15,.4)),
-      url("/images/garden-bg-dark-cat.jpg");
+      url("/images/winteromen-northern-garden.webp");
     background-position: center, 60% 54%;
     filter: blur(4px) saturate(.72) brightness(.96) contrast(1);
   }
@@ -4938,12 +4938,12 @@ body.is-inner .site-backdrop {
 }
 body.is-inner .site-backdrop::before {
   inset: 0;
-  opacity: .3;
-  background-image: url("/images/garden-bg-light-cat.jpg");
-  background-position: 58% 54%;
+  opacity: .24;
+  background-image: url("/images/winteromen-northern-garden.webp");
+  background-position: 50% 52%;
   background-size: cover;
   background-repeat: no-repeat;
-  filter: grayscale(.9) saturate(.46) contrast(.9) brightness(1.08);
+  filter: grayscale(.18) saturate(.55) contrast(.8) brightness(1.16);
   transform: scale(1.018);
   transform-origin: center;
   animation: os-inner-breathe 24s cubic-bezier(.45, 0, .55, 1) infinite alternate;
@@ -4959,9 +4959,10 @@ body.is-inner .site-backdrop::after {
   filter: none;
 }
 :root[data-resolved-theme="dark"] body.is-inner .site-backdrop::before {
-  opacity: .48;
-  background-image: url("/images/garden-bg-dark-cat.jpg");
-  filter: grayscale(.72) sepia(.08) hue-rotate(68deg) saturate(.58) contrast(1.15) brightness(.42);
+  opacity: .44;
+  background-image: url("/images/winteromen-northern-garden.webp");
+  background-position: 50% 52%;
+  filter: saturate(.66) contrast(.94) brightness(.65);
 }
 :root[data-resolved-theme="dark"] body.is-inner .site-backdrop::after {
   background:
@@ -5228,7 +5229,7 @@ body.is-inner .garden-theme-options button:hover, body.is-inner .garden-theme-op
 /* Desktop reading audit: readable utility text without changing the home or mobile layout. */
 @media (min-width: 1024px) {
   body.is-inner { --os-dim: var(--os-soft); }
-  body.is-inner .site-backdrop::before { opacity: .14; }
+  body.is-inner .site-backdrop::before { opacity: .18; }
   body.is-inner .g-nav-links a { font-size: 11px; line-height: 1.5; letter-spacing: .08em; }
   body.is-inner .g-nav-links a:not(.g-nav-search) { padding-block: 12px; }
   body.is-inner .g-nav-links a::after { bottom: 4px; }
@@ -5301,7 +5302,7 @@ body.is-inner .garden-theme-options button:hover, body.is-inner .garden-theme-op
 }
 
 @media (max-width: 768px) {
-  body.is-inner .site-backdrop::before { background-position: 50% center; transform: scale(1.025); }
+  body.is-inner .site-backdrop::before, :root[data-resolved-theme="dark"] body.is-inner .site-backdrop::before { background-position: 54% 50%; transform: scale(1.025); }
   body.is-inner .site-backdrop::after { background: linear-gradient(180deg, color-mix(in srgb, var(--os-bg) 12%, transparent), transparent 30%, color-mix(in srgb, var(--os-bg) 54%, transparent)); }
   body.is-inner .g-nav-inner { min-height: 54px; padding-inline: 18px; }
   body.is-inner .g-nav-links { gap: 15px; }
