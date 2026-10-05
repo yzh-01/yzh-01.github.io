@@ -16,9 +16,11 @@
     <p class="ash-intro" lang="non">Ask veit ek standa, heitir Yggdrasill.</p>
   </header>
   <div class="ash-clearing" data-root-clearing>
-    {{ partial('_partial/root-sky-art.njk') }}
-    <div class="ash-ground-mist" aria-hidden="true"></div>
-    <div class="ash-echo-field" data-root-echo-field aria-hidden="true"><b></b><div class="ash-echo-answer" data-root-echo-answer><span data-root-echo-mark></span><span data-root-echo-name></span></div></div>
+    <div class="ash-atmosphere" aria-hidden="true">
+      {{ partial('_partial/root-sky-art.njk') }}
+      <div class="ash-ground-mist"></div>
+      <div class="ash-echo-field" data-root-echo-field><b></b><div class="ash-echo-answer" data-root-echo-answer><span data-root-echo-mark></span><span data-root-echo-name></span></div></div>
+    </div>
     <div class="ash-sigil-hotspots" data-root-hotspots hidden>
       {% for realm in root_realms %}<button class="ash-field-sigil" type="button" data-root-sigil-button="{{ loop.index0 }}" aria-label="寻访{{ realm.name }}" aria-pressed="false" title="{{ realm.label }}"><span>{{ realm.label }}</span></button>{% endfor %}
     </div>

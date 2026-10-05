@@ -422,6 +422,7 @@
     </div>
   </section>
 
+  <div class="folio-afterword">
   {%- if latest_posts.length %}
   <section class="folio-articles" id="articles" aria-labelledby="folio-articles-title" data-field-motion data-motion-section>
     <svg class="folio-articles-traces" viewBox="0 0 1440 820" preserveAspectRatio="none" aria-hidden="true">
@@ -489,11 +490,11 @@
         </ol>
       </div>
     </div>
-    <p class="folio-articles-baseline" aria-hidden="true">RECENT_LOG &lt;</p>
   </section>
   {%- endif %}
 
   {{ partial('_partial/yggdrasil-sanctuary.njk') }}
+  </div>
 
 </div>
 {% endblock %}
